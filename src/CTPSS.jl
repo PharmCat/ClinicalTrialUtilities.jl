@@ -1,4 +1,4 @@
-module TrialSize
+module CTPSS
 using Distributions
 
     function OneSampleMean(m0, m1, sd; alpha=0.05, beta=0.8)
