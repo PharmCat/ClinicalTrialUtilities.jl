@@ -1,5 +1,10 @@
+# Clinical Trial Power and Sample Size calculation
+# Author: Vladimir Arnautov aka PharmCat
+# Copyright © 2019 Vladimir Arnautov aka PharmCat
+# Calculation based on Chow S, Shao J, Wang H. 2008. Sample Size Calculations in Clinical Research. 2nd Ed. Chapman & Hall/CRC Biostatistics Series.
+# OwensQ function rewrited from https://github.com/Detlew/PowerTOST by Detlew Labes, Helmut Schuetz, Benjamin Lang
+# Licence: GNU Affero General Public License v3.0
 
-#OwensQOwen PowerTost
 # ----------------------------------------------------------------------------
 # Owen's Q-function
 # Calculates Owen's Q-function via repeated integration by parts
@@ -8,6 +13,8 @@
 # "A Special Case of a Bivariate Non-central t-Distribution"
 # Biometrika Vol. 52, pp.437-446.
 # Port from PowerTOST - dlabes Mar 2012
+
+#OwensQOwen
 function OwensQo(nu,t,delta,b;a=0)
     if nu < 1 return false end
     if a != 0 return false end
@@ -21,9 +28,7 @@ function OwensQo(nu,t,delta,b;a=0)
     #some code abs L vector H vector M vector
     av = Array{Float64}(undef, nu)
 
-    println("hhh")
     for i = 1:length(av)
-        #println(i)
         if i==1||i==2 av[i] = 1 else av[i] = 1/((i-2)*av[i-1]) end
     end
 
@@ -65,8 +70,8 @@ function OwensQo(nu,t,delta,b;a=0)
             end
         end
 
-        qv = pnorm(b) - 2*OwensT(b,A-delta/b)-
-                        2*OwensT(delta*sB, (delta*A*B-b)/B/delta)+
+        qv = pnorm(b) - 2*OwensT(b,A-delta/b) -
+                        2*OwensT(delta*sB, (delta*A*B-b)/B/delta) +
                         2*OwensT(delta*sB, A) - (delta>=0) + 2*sumt
 
     else
@@ -77,34 +82,20 @@ function OwensQo(nu,t,delta,b;a=0)
         end
         qv = pnorm(-delta)+sqrt(2*π)*sumt
     end
-
-
-
-
 end #OwensQo
 
 #-------------------------------------------------------------------------------
-#                        DEPRECATED
-#OT_integrand
-function OwensTint(x, h)
-    return exp(-0.5*h^2*(1+x^2))/(1+x^2)/2/π
+# functions bellow used in OwensQ in CTPSS.jl
+#PowerTost OwensQ #37 and impl b for #52-54
+function ifun1(x, nu, t, delta; b=0)
+    return OwensTint2(b+x/(1-x), nu, t, delta)/(1-y)^2
 end
-#OwensT_old
-function OwensTo(h, a)
-    return quadgk(x -> OwensTint(x, h),0, a)[1]
-end
-#-------------------------------------------------------------------------------
-
-
 #.Q.integrand
 function OwensTint2(x, nu, t, delta)
     Qconst = -(nu/2-1)*log(2)-lgamma(nu/2)
     return sign(x)^(nu-1)*pnorm(t*x/sqrt(nu)-delta)*exp((nu-1)*log(abs(x))-0.5*x^2+Qconst)
 end
-#PowerTost OwensQ #37 and impl b for #52-54
-function ifun1(x, nu, t, delta; b=0)
-    return OwensTint2(b+x/(1-x), nu, t, delta)/(1-y)^2
-end
+#-------------------------------------------------------------------------------
 
 # ----------------------------------------------------------------------------
 # Owen's T-function according to algorithm AS76 and remarks AS R65, AS R80
@@ -118,3 +109,15 @@ end
 function OwensT(h,a)
     #not implemented
 end
+
+#-------------------------------------------------------------------------------
+#                        DEPRECATED
+#OT_integrand
+function OwensTint(x, h)
+    return exp(-0.5*h^2*(1+x^2))/(1+x^2)/2/π
+end
+#OwensT_old
+function OwensTo(h, a)
+    return quadgk(x -> OwensTint(x, h),0, a)[1]
+end
+#-------------------------------------------------------------------------------

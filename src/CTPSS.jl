@@ -1,10 +1,18 @@
+# Clinical Trial Power and Sample Size calculation
+# Version: 0.0.1
+# Author: Vladimir Arnautov aka PharmCat
+# Copyright © 2019 Vladimir Arnautov aka PharmCat
+# Calculation based on Chow S, Shao J, Wang H. 2008. Sample Size Calculations in Clinical Research. 2nd Ed. Chapman & Hall/CRC Biostatistics Series.
+# OwensQ function rewrited from https://github.com/Detlew/PowerTOST by Detlew Labes, Helmut Schuetz, Benjamin Lang
+# Licence: GNU Affero General Public License v3.0
+
 module CTPSS
 __precompile__(true)
 using Distributions
-using Rmath
+using Rmath #should be rewrited
 using QuadGK
 #using SpecialFunctions
-import SpecialFunctions.gamma
+import SpecialFunctions.lgamma
 include("OwensQ.jl")
 
 export sampleSize
@@ -133,15 +141,15 @@ export OwensQ
         OR=p1*(1-p0)/p0/(1-p1)
         return (1/k/p1/(1-p1)+1/p0/(1-p0))*((quantile(ZDIST, 1-alpha)+quantile(ZDIST, 1 - beta))/(log(OR)-diff))^2
     end
-
+#-------------------------------------------------------------------------------
     function OwensQ(nu, t, delta, a, b)
         if a==b return(0) end
 
         if nu < 29 && abs(delta) > 37.62
             if isinf(b)
-                return quadgk(x -> ifun1(x, nu, t, delta), 0, 1)[1]
+                return quadgk(x -> ifun1(x, nu, t, delta), 0, 1)[1] #ifun1 described in OwensQ.jl
             else
-                return OwensQo(nu,t,delta,0,b) #not impl
+                return OwensQo(nu,t,delta,0,b) #described in OwensQ.jl
             end
         else
             if isinf(b)
