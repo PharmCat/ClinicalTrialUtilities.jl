@@ -1,5 +1,5 @@
 # Clinical Trial Power and Sample Size calculation
-# Version: 0.0.1
+# Version: 0.1.1
 # Author: Vladimir Arnautov aka PharmCat
 # Copyright © 2019 Vladimir Arnautov aka PharmCat
 # Calculation based on Chow S, Shao J, Wang H. 2008. Sample Size Calculations in Clinical Research. 2nd Ed. Chapman & Hall/CRC Biostatistics Series.
@@ -29,37 +29,47 @@ export OwensQ
         if param == "mean"
             if group == "one"
                 if type == "ea"
-                    OneSampleMeanEquality(a, b, sd, alpha=alpha, beta=beta)
+                    return OneSampleMeanEquality(a, b, sd, alpha=alpha, beta=beta)
                 elseif type == "ei"
-                    OneSampleMeanEquivalence(a, b, sd, diff, alpha=alpha, beta=beta)
+                    return OneSampleMeanEquivalence(a, b, sd, diff, alpha=alpha, beta=beta)
                 elseif type == "ns"
-                    OneSampleMeanNS(a, b, sd, diff, alpha=alpha, beta=beta)
+                    return OneSampleMeanNS(a, b, sd, diff, alpha=alpha, beta=beta)
                 else return false end
             elseif group == "two"
                 if type == "ea"
-                    TwoSampleMeanEquality(m0, m1, sd, alpha=alpha, beta=beta, k=k)
+                    return TwoSampleMeanEquality(m0, m1, sd, alpha=alpha, beta=beta, k=k)
                 elseif type == "ei"
-                    TwoSampleMeanEquivalence(m0, m1, sd, diff, alpha=alpha, beta=beta, k=k)
+                    return TwoSampleMeanEquivalence(m0, m1, sd, diff, alpha=alpha, beta=beta, k=k)
                 elseif type == "ns"
-                    TwoSampleMeanNS(m0, m1, sd, diff, alpha=alpha, beta=beta, k=k)
+                    return TwoSampleMeanNS(m0, m1, sd, diff, alpha=alpha, beta=beta, k=k)
                 else return false end
             else return false end
         elseif param == "prop"
+            if 1 > a < 0 || 1 > b < 0 return false end
             if group == "one"
                 if type == "ea"
+                    return OneProportionEquality(a, b; alpha=alpha, beta=beta)
                 elseif type == "ei"
+                    return OneProportionEquivalence(a, b, diff; alpha=alpha, beta=beta)
                 elseif type == "ns"
+                    return OneProportionNS(a, b, diff; alpha=alpha, beta=beta)
                 else return false end
             elseif group == "two"
                 if type == "ea"
+                    return TwoProportionEquality(a, b; alpha=alpha, beta=beta, k=k)
                 elseif type == "ei"
+                    return TwoProportionEquivalence(a, b, diff; alpha=alpha, beta=beta, k=k)
                 elseif type == "ns"
+                    return TwoProportionNS(a, b, diff; alpha=alpha, beta=beta, k=k)
                 else return false end
             else return false end
         elseif param == "or"
             if type == "ea"
+                return OREquality(a, b; alpha=alpha, beta=beta, k=k)
             elseif type == "ei"
+                 return OREquivalence(a, b, diff; alpha=alpha, beta=beta, k=k, logdiff=true)
             elseif type == "ns"
+                return ORNS(a, b, diff; alpha=alpha, beta=beta, k=k, logdiff=true)
             else return false end
         else return false end
     end
@@ -73,11 +83,9 @@ export OwensQ
     function OneSampleMeanEquality(m0, m1, sd; alpha=0.05, beta=0.2)
         return ((quantile(ZDIST, 1-alpha/2) + quantile(ZDIST, 1-beta))*sd/(m1-m0))^2
     end
-
     function OneSampleMeanEquivalence(m0, m1, sd, diff; alpha=0.05, beta=0.2)
         return (sd*(quantile(ZDIST, 1-alpha) + quantile(ZDIST, 1 - beta/2))/(diff-abs(m1-m0)))^2
     end
-
     function OneSampleMeanNS(m0, m1, sd, diff; alpha=0.05, beta=0.2) #Non-inferiority / Superiority
         return (sd*(quantile(ZDIST, 1-alpha) + quantile(ZDIST, 1 - beta))/(m1 - m0 - diff))^2
     end
@@ -86,16 +94,13 @@ export OwensQ
     function TwoSampleMeanEquality(m0, m1, sd; alpha=0.05, beta=0.2, k=1)
         return (1+1/k)*((quantile(ZDIST, 1-alpha/2) + quantile(ZDIST, 1-beta))*sd/(m0-m1))^2
     end
-
     function TwoSampleMeanEquivalence(m0, m1, sd, diff; alpha=0.05, beta=0.2, k=1)
         return (1+1/k)*(sd*(quantile(ZDIST, 1-alpha) + quantile(ZDIST, 1 - beta/2))/(abs(m0-m1)-diff))^2
     end
-
     function TwoSampleMeanNS(m0, m1, sd, diff; alpha=0.05, beta=0.2, k=1) #Non-inferiority / Superiority
 
         return (1+1/k)*(sd*(quantile(ZDIST, 1-alpha) + quantile(ZDIST, 1 - beta))/(m0 - m1 - diff))^2
     end
-
     #Compare Proportion
     #One Sample
 
@@ -142,7 +147,7 @@ export OwensQ
         return (1/k/p1/(1-p1)+1/p0/(1-p0))*((quantile(ZDIST, 1-alpha)+quantile(ZDIST, 1 - beta))/(log(OR)-diff))^2
     end
 #-------------------------------------------------------------------------------
-    function OwensQ(nu, t, delta, a, b)
+    function owensQ(nu, t, delta, a, b)
         if a==b return(0) end
 
         if nu < 29 && abs(delta) > 37.62
