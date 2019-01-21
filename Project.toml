@@ -1,6 +1,6 @@
-authors = ["Владимир "]
+authors = ["Vladimir Arnautov"]
 name = "CTPSS"
 uuid = "4cdf3260-1b45-11e9-0662-47586550f979"
-version = "0.1.0"
+version = "0.1.1"
 
 [deps]
