@@ -8,9 +8,10 @@ SpecialFunctions
 Rmath
 
 Install:
-
+```
 using Pkg
 Pkg.add("git://github.com/PharmCat/CTPSS.git")
+```
 
 Functions:
 
@@ -22,18 +23,18 @@ using CTPSS
 sampleSize(param="mean|prop|or", type="ea|ei|ns", group="one|two", alpha=0.05, beta=0.2, diff=1, sd=2, a=1, b=2, k=1)
 
 param (Parameter type):
-mean - Means
-prop - Proportions
-or - Odd Ratio
+- mean - Means
+- prop - Proportions
+- or - Odd Ratio
 
 type (Hypothesis type):
-ea - Equality
-ei - Equivalencens
-ns - Non-Inferiority / Superiority
+- ea - Equality
+- ei - Equivalencens
+- ns - Non-Inferiority / Superiority
 
 group (Group num):
-one - one sample
-two - Two sample
+- one - one sample
+- two - Two sample
 
 alpha - Alpha (o < alpha < 1)
 beta - Beta (o < beta < 1); power = 1 - beta
