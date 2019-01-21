@@ -1,4 +1,5 @@
 # CTPSS
+ Clinical Trial Power and Sample Size calculation
 
 Alpha version
 
