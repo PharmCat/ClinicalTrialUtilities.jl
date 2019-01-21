@@ -3,13 +3,13 @@
 
 Alpha version
 
-Author: Vladimir Arnautov
+Author: Vladimir Arnautov aka PharmCat
 
 ### Dependencies:
 
- - Distributions 
- - QuadGK 
- - SpecialFunctions 
+ - Distributions
+ - QuadGK
+ - SpecialFunctions
  - Rmath
 
 ### Install:
@@ -54,11 +54,10 @@ sampleSize(param="mean|prop|or", type="ea|ei|ns", group="one|two", alpha=0.05, b
 
 ### ToDo:
 
- - powerEst () 
- - owensQ(nu, t, delta, a, b) 
+ - powerEst ()
+ - owensQ(nu, t, delta, a, b)
  - knownDesign () from PowerTost
- -  sampleSizeBE () 
- - powerBE () 
- - cvfromci () 
+ -  sampleSizeBE ()
+ - powerBE ()
+ - cvfromci ()
  - Simulations.
-

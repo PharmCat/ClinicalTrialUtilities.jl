@@ -9,7 +9,7 @@
 # Owen's Q-function
 # Calculates Owen's Q-function via repeated integration by parts
 # formulas as given in
-# Owen, D B (1965)
+# Owen, D B (1965) 
 # "A Special Case of a Bivariate Non-central t-Distribution"
 # Biometrika Vol. 52, pp.437-446.
 # Port from PowerTOST - dlabes Mar 2012

@@ -4,7 +4,7 @@
 # Copyright © 2019 Vladimir Arnautov aka PharmCat
 # Calculation based on Chow S, Shao J, Wang H. 2008. Sample Size Calculations in Clinical Research. 2nd Ed. Chapman & Hall/CRC Biostatistics Series.
 # OwensQ function rewrited from https://github.com/Detlew/PowerTOST by Detlew Labes, Helmut Schuetz, Benjamin Lang
-# Licence: GNU Affero General Public License v3.0
+# Licence: GNU Affero General Public License v3.0  
 
 module CTPSS
 __precompile__(true)
@@ -107,40 +107,31 @@ export OwensQ
     function OneProportionEquality(p0, p1; alpha=0.05, beta=0.2)
         return p1*(1-p1)*((quantile(ZDIST, 1-alpha/2)+quantile(ZDIST, 1 - beta))/(p1-p0))^2
     end
-
     function OneProportionEquivalence(p0, p1, diff; alpha=0.05, beta=0.2)
         return p1*(1-p1)*((quantile(ZDIST, 1-alpha)+quantile(ZDIST, 1 - beta/2))/(abs(p1-p0)-diff))^2
     end
-
     function OneProportionNS(p0, p1, diff; alpha=0.05, beta=0.2)
         return p1*(1-p1)*((quantile(ZDIST, 1-alpha)+quantile(ZDIST, 1 - beta))/(p1-p0-diff))^2
     end
-
     #Two Sample
-
     function TwoProportionEquality(p0, p1; alpha=0.05, beta=0.2, k=1)
         return (p1*(1-p1)/k+p0*(1-p0))*((quantile(ZDIST, 1-alpha/2)+quantile(ZDIST, 1 - beta))/(p1-p0))^2
     end
-
     function TwoProportionEquivalence(p0, p1, diff; alpha=0.05, beta=0.2, k=1)
         return (p1*(1-p1)/k+p0*(1-p0))*((quantile(ZDIST, 1-alpha)+quantile(ZDIST, 1 - beta/2))/(abs(p1-p0)-diff))^2
     end
-
     function TwoProportionNS(p0, p1, diff; alpha=0.05, beta=0.2, k=1)
         return (p1*(1-p1)/k+p0*(1-p0))*((quantile(ZDIST, 1-alpha)+quantile(ZDIST, 1 - beta))/(p1-p0-diff))^2
     end
-
     function OREquality(p0, p1; alpha=0.05, beta=0.2, k=1)
         OR=p1*(1-p0)/p0/(1-p1)
         return (1/k/p1/(1-p1)+1/p0/(1-p0))*((quantile(ZDIST, 1-alpha/2)+quantile(ZDIST, 1 - beta))/log(OR))^2
     end
-
     function OREquivalence(p0, p1, diff; alpha=0.05, beta=0.2, k=1, logdiff=true)
         if !logdiff diff=log(diff) end
         OR=p1*(1-p0)/p0/(1-p1)
         return (1/k/p1/(1-p1)+1/p0/(1-p0))*((quantile(ZDIST, 1-alpha)+quantile(ZDIST, 1 - beta/2))/(log(OR)-diff))^2
     end
-
     function ORNS(p0, p1, diff; alpha=0.05, beta=0.2, k=1, logdiff=true)
         if !logdiff diff=log(diff) end
         OR=p1*(1-p0)/p0/(1-p1)
