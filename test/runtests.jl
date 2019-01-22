@@ -7,6 +7,7 @@ using Test
     #end
 
     @testset "Test" begin
+        ceil(sampleSize(param="mean", type="ea", group="one", alpha=0.05, beta=0.2, sd=1, a=1.5, b=2, k=1)) 
 
         #@test ceil(sampleSize(param="mean", type="ea", group="one", alpha=0.05, beta=0.2, sd=1, a=1.5, b=2, k=1)) == 32
 
