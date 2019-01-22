@@ -1,6 +1,6 @@
 
 using Test
-using CTPSS
+import CTPSS.sampleSize
 
 
     @testset "Test" begin
