@@ -36,7 +36,7 @@ export ParamSet
 
     function sampleSizeParam(x::ParamSet)
         return sampleSize(param=x.param, type=x.type, group=x.group, alpha=x.alpha, beta=x.beta, sd=x.sd, a=x.a, b=x.b, k=x.k)
-    end
+    end 
 
     function sampleSize(;param="mean", type="ea", group="one", alpha=0.05, beta=0.2, diff=0, sd=0, a=0, b=0, k=1)
 
