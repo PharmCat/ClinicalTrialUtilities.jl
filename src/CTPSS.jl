@@ -18,6 +18,7 @@ include("OwensQ.jl")
 export sampleSize
 export OwensQ
 export ParamSet
+export sampleSizeParam
 
     const ZDIST = Normal()
 
