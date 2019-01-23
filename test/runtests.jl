@@ -1,6 +1,6 @@
 
 using Test
-import CTPSS.sampleSize
+#import CTPSS.sampleSize
 
     #@testset "Test" begin
         #vals = CTPSS.ParamSet("mean","ea","one",0.05,0.2,1.0,1.5,2,1)
