@@ -5,6 +5,7 @@ version = "0.1.2"
 
 [deps]
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
+Rmath = "79098fc4-a85e-5d69-aa6a-4863f24498fa"
 
 [extras]
 Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"

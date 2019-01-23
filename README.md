@@ -5,7 +5,7 @@ Alpha version
 
 Author: Vladimir Arnautov
 
-[![Build Status](https://travis-ci.com/PharmCat/CTPSS.svg?branch=master)](https://travis-ci.com/PharmCat/CTPSS)
+[![Build Status](https://travis-ci.com/PharmCat/CTPSS.svg?branch=master)](https://travis-ci.com/PharmCat/CTPSS) [![Build status](https://ci.appveyor.com/api/projects/status/c7x06t501eqjvd6s?svg=true)](https://ci.appveyor.com/project/PharmCat/ctpss)
 ### Dependencies:
 
  - Distributions
