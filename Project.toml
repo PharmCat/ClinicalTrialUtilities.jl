@@ -1,7 +1,7 @@
 authors = ["PharmCat"]
 name = "CTPSS"
 uuid = "4cdf3260-1b45-11e9-0662-47586550f979"
-version = "0.1.2"
+version = "0.1.3"
 
 [deps]
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
