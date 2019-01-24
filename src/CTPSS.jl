@@ -17,6 +17,7 @@ include("PowerTOST.jl")
 
 export sampleSize
 export owensQ
+export powerTOST
 export ParamSet
 export sampleSizeParam
 
