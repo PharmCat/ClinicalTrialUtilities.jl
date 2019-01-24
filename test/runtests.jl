@@ -1,5 +1,4 @@
 
 using Test
-import CTPSS.sampleSize
-
+using CTPSS
     #include(test.jk)
