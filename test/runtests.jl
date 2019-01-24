@@ -2,4 +2,4 @@
 using Test
 using CTPSS
 
-include(test.jl)
+include("test.jl")
