@@ -5,18 +5,18 @@
 # Calculation based on Chow S, Shao J, Wang H. 2008. Sample Size Calculations in Clinical Research. 2nd Ed. Chapman & Hall/CRC Biostatistics Series.
 # OwensQ function rewrited from https://github.com/Detlew/PowerTOST by Detlew Labes, Helmut Schuetz, Benjamin Lang
 # Licence: GNU Affero General Public License v3.0
-
-module CTPSS
 __precompile__(true)
+module CTPSS
 using Distributions
 using Rmath #should be rewrited
 using QuadGK
 #using SpecialFunctions
 import SpecialFunctions.lgamma
 include("OwensQ.jl")
+include("PowerTOST.jl")
 
 export sampleSize
-export OwensQ
+export owensQ
 export ParamSet
 export sampleSizeParam
 
@@ -45,47 +45,47 @@ export sampleSizeParam
         if param == "mean"
             if group == "one"
                 if type == "ea"
-                    return OneSampleMeanEquality(a, b, sd, alpha=alpha, beta=beta)
+                    return oneSampleMeanEquality(a, b, sd, alpha=alpha, beta=beta)
                 elseif type == "ei"
-                    return OneSampleMeanEquivalence(a, b, sd, diff, alpha=alpha, beta=beta)
+                    return oneSampleMeanEquivalence(a, b, sd, diff, alpha=alpha, beta=beta)
                 elseif type == "ns"
-                    return OneSampleMeanNS(a, b, sd, diff, alpha=alpha, beta=beta)
+                    return oneSampleMeanNS(a, b, sd, diff, alpha=alpha, beta=beta)
                 else return false end
             elseif group == "two"
                 if type == "ea"
-                    return TwoSampleMeanEquality(m0, m1, sd, alpha=alpha, beta=beta, k=k)
+                    return twoSampleMeanEquality(m0, m1, sd, alpha=alpha, beta=beta, k=k)
                 elseif type == "ei"
-                    return TwoSampleMeanEquivalence(m0, m1, sd, diff, alpha=alpha, beta=beta, k=k)
+                    return twoSampleMeanEquivalence(m0, m1, sd, diff, alpha=alpha, beta=beta, k=k)
                 elseif type == "ns"
-                    return TwoSampleMeanNS(m0, m1, sd, diff, alpha=alpha, beta=beta, k=k)
+                    return twoSampleMeanNS(m0, m1, sd, diff, alpha=alpha, beta=beta, k=k)
                 else return false end
             else return false end
         elseif param == "prop"
             if 1 > a < 0 || 1 > b < 0 return false end
             if group == "one"
                 if type == "ea"
-                    return OneProportionEquality(a, b; alpha=alpha, beta=beta)
+                    return oneProportionEquality(a, b; alpha=alpha, beta=beta)
                 elseif type == "ei"
-                    return OneProportionEquivalence(a, b, diff; alpha=alpha, beta=beta)
+                    return oneProportionEquivalence(a, b, diff; alpha=alpha, beta=beta)
                 elseif type == "ns"
-                    return OneProportionNS(a, b, diff; alpha=alpha, beta=beta)
+                    return oneProportionNS(a, b, diff; alpha=alpha, beta=beta)
                 else return false end
             elseif group == "two"
                 if type == "ea"
-                    return TwoProportionEquality(a, b; alpha=alpha, beta=beta, k=k)
+                    return twoProportionEquality(a, b; alpha=alpha, beta=beta, k=k)
                 elseif type == "ei"
-                    return TwoProportionEquivalence(a, b, diff; alpha=alpha, beta=beta, k=k)
+                    return twoProportionEquivalence(a, b, diff; alpha=alpha, beta=beta, k=k)
                 elseif type == "ns"
-                    return TwoProportionNS(a, b, diff; alpha=alpha, beta=beta, k=k)
+                    return twoProportionNS(a, b, diff; alpha=alpha, beta=beta, k=k)
                 else return false end
             else return false end
         elseif param == "or"
             if type == "ea"
-                return OREquality(a, b; alpha=alpha, beta=beta, k=k)
+                return orEquality(a, b; alpha=alpha, beta=beta, k=k)
             elseif type == "ei"
-                 return OREquivalence(a, b, diff; alpha=alpha, beta=beta, k=k, logdiff=true)
+                return orEquivalence(a, b, diff; alpha=alpha, beta=beta, k=k, logdiff=true)
             elseif type == "ns"
-                return ORNS(a, b, diff; alpha=alpha, beta=beta, k=k, logdiff=true)
+                return orNS(a, b, diff; alpha=alpha, beta=beta, k=k, logdiff=true)
             else return false end
         else return false end
     end
@@ -96,93 +96,87 @@ export sampleSizeParam
     #Compare Means
     #One Sample
     # m0 = μ0; m1 = μ
-    function OneSampleMeanEquality(m0, m1, sd; alpha=0.05, beta=0.2)
+    function oneSampleMeanEquality(m0, m1, sd; alpha=0.05, beta=0.2)
         return ((quantile(ZDIST, 1-alpha/2) + quantile(ZDIST, 1-beta))*sd/(m1-m0))^2
     end
-    function OneSampleMeanEquivalence(m0, m1, sd, diff; alpha=0.05, beta=0.2)
+    function oneSampleMeanEquivalence(m0, m1, sd, diff; alpha=0.05, beta=0.2)
         return (sd*(quantile(ZDIST, 1-alpha) + quantile(ZDIST, 1 - beta/2))/(diff-abs(m1-m0)))^2
     end
-    function OneSampleMeanNS(m0, m1, sd, diff; alpha=0.05, beta=0.2) #Non-inferiority / Superiority
+    function oneSampleMeanNS(m0, m1, sd, diff; alpha=0.05, beta=0.2) #Non-inferiority / Superiority
         return (sd*(quantile(ZDIST, 1-alpha) + quantile(ZDIST, 1 - beta))/(m1 - m0 - diff))^2
     end
     #Two Sample
     # m0 = μA - Group A; m1 = μB - Group B
-    function TwoSampleMeanEquality(m0, m1, sd; alpha=0.05, beta=0.2, k=1)
+    function twoSampleMeanEquality(m0, m1, sd; alpha=0.05, beta=0.2, k=1)
         return (1+1/k)*((quantile(ZDIST, 1-alpha/2) + quantile(ZDIST, 1-beta))*sd/(m0-m1))^2
     end
-    function TwoSampleMeanEquivalence(m0, m1, sd, diff; alpha=0.05, beta=0.2, k=1)
+    function twoSampleMeanEquivalence(m0, m1, sd, diff; alpha=0.05, beta=0.2, k=1)
         return (1+1/k)*(sd*(quantile(ZDIST, 1-alpha) + quantile(ZDIST, 1 - beta/2))/(abs(m0-m1)-diff))^2
     end
-    function TwoSampleMeanNS(m0, m1, sd, diff; alpha=0.05, beta=0.2, k=1) #Non-inferiority / Superiority
+    function twoSampleMeanNS(m0, m1, sd, diff; alpha=0.05, beta=0.2, k=1) #Non-inferiority / Superiority
 
         return (1+1/k)*(sd*(quantile(ZDIST, 1-alpha) + quantile(ZDIST, 1 - beta))/(m0 - m1 - diff))^2
     end
     #Compare Proportion
     #One Sample
 
-    function OneProportionEquality(p0, p1; alpha=0.05, beta=0.2)
+    function oneProportionEquality(p0, p1; alpha=0.05, beta=0.2)
         return p1*(1-p1)*((quantile(ZDIST, 1-alpha/2)+quantile(ZDIST, 1 - beta))/(p1-p0))^2
     end
 
-    function OneProportionEquivalence(p0, p1, diff; alpha=0.05, beta=0.2)
+    function oneProportionEquivalence(p0, p1, diff; alpha=0.05, beta=0.2)
         return p1*(1-p1)*((quantile(ZDIST, 1-alpha)+quantile(ZDIST, 1 - beta/2))/(abs(p1-p0)-diff))^2
     end
 
-    function OneProportionNS(p0, p1, diff; alpha=0.05, beta=0.2)
+    function oneProportionNS(p0, p1, diff; alpha=0.05, beta=0.2)
         return p1*(1-p1)*((quantile(ZDIST, 1-alpha)+quantile(ZDIST, 1 - beta))/(p1-p0-diff))^2
     end
 
     #Two Sample
 
-    function TwoProportionEquality(p0, p1; alpha=0.05, beta=0.2, k=1)
+    function twoProportionEquality(p0, p1; alpha=0.05, beta=0.2, k=1)
         return (p1*(1-p1)/k+p0*(1-p0))*((quantile(ZDIST, 1-alpha/2)+quantile(ZDIST, 1 - beta))/(p1-p0))^2
     end
 
-    function TwoProportionEquivalence(p0, p1, diff; alpha=0.05, beta=0.2, k=1)
+    function twoProportionEquivalence(p0, p1, diff; alpha=0.05, beta=0.2, k=1)
         return (p1*(1-p1)/k+p0*(1-p0))*((quantile(ZDIST, 1-alpha)+quantile(ZDIST, 1 - beta/2))/(abs(p1-p0)-diff))^2
     end
 
-    function TwoProportionNS(p0, p1, diff; alpha=0.05, beta=0.2, k=1)
+    function twoProportionNS(p0, p1, diff; alpha=0.05, beta=0.2, k=1)
         return (p1*(1-p1)/k+p0*(1-p0))*((quantile(ZDIST, 1-alpha)+quantile(ZDIST, 1 - beta))/(p1-p0-diff))^2
     end
 
-    function OREquality(p0, p1; alpha=0.05, beta=0.2, k=1)
+    function orEquality(p0, p1; alpha=0.05, beta=0.2, k=1)
         OR=p1*(1-p0)/p0/(1-p1)
         return (1/k/p1/(1-p1)+1/p0/(1-p0))*((quantile(ZDIST, 1-alpha/2)+quantile(ZDIST, 1 - beta))/log(OR))^2
     end
 
-    function OREquivalence(p0, p1, diff; alpha=0.05, beta=0.2, k=1, logdiff=true)
+    function orEquivalence(p0, p1, diff; alpha=0.05, beta=0.2, k=1, logdiff=true)
         if !logdiff diff=log(diff) end
         OR=p1*(1-p0)/p0/(1-p1)
         return (1/k/p1/(1-p1)+1/p0/(1-p0))*((quantile(ZDIST, 1-alpha)+quantile(ZDIST, 1 - beta/2))/(log(OR)-diff))^2
     end
 
-    function ORNS(p0, p1, diff; alpha=0.05, beta=0.2, k=1, logdiff=true)
+    function orNS(p0, p1, diff; alpha=0.05, beta=0.2, k=1, logdiff=true)
         if !logdiff diff=log(diff) end
         OR=p1*(1-p0)/p0/(1-p1)
         return (1/k/p1/(1-p1)+1/p0/(1-p0))*((quantile(ZDIST, 1-alpha)+quantile(ZDIST, 1 - beta))/(log(OR)-diff))^2
     end
+#p01=0.45
+#p10=0.05
+#alpha=0.05*2 (one side)
+#beta=0.10
+#pdisc=p10+p01
+#pdiff=p10-p01
+#(n=((qnorm(1-alpha/2)*sqrt(pdisc)+qnorm(1-beta)*sqrt(pdisc-pdiff^2))/pdiff)^2)
+#22.80907
+#CTPSS.mcnm(0.45, 0.05, alpha=0.1, beta=0.1)
+#22.80907052752994
+    function mcnm(p10, p01; alpha=0.05, beta=0.2)
+        pdisc=p10+p01
+        pdiff=p10-p01
+        return ((quantile(ZDIST, 1-alpha/2)*sqrt(pdisc)+quantile(ZDIST, 1 - beta)*sqrt(pdisc-pdiff^2))/pdiff)^2
+    end
 #-------------------------------------------------------------------------------
-    function owensQ(nu, t, delta, a, b)
-        if a==b return(0) end
-
-        if nu < 29 && abs(delta) > 37.62
-            if isinf(b)
-                return quadgk(x -> ifun1(x, nu, t, delta), 0, 1)[1] #ifun1 described in OwensQ.jl
-            else
-                return OwensQo(nu,t,delta,0,b) #described in OwensQ.jl
-            end
-        else
-            if isinf(b)
-                #45 of OwensQ
-                return cdf(NoncentralT(nu,delta),t)
-            else
-                integral = quadgk(x -> ifun1(x,nu,t,delta, b=b), 0, 1)[1]
-                #58 of OwensQ
-                return cdf(NoncentralT(nu,delta),t)-integral
-            end
-        end
-
-    end #OwensQ
 
 end # module
