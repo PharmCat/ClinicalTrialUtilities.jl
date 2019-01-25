@@ -53,11 +53,11 @@ function owensQo(nu,t,delta,b;a=0)
         if i==1||i==2 av[i] = 1 else av[i] = 1/((i-2)*av[i-1]) end
     end
 
-    if (upr-1)>0 ll = upr-1 else ll = 0 end
+    if (upr-1) > 0 ll = upr-1 else ll = 0 end
     L  = Array{Float64}(undef, ll)
     if isfinite(b)
          for i=1:length(L)
-             if (i==1) L[1] = 0.5*A*B*b*dnorm(b)*dnorm(A*b-delta)
+             if i==1 L[1] = 0.5*A*B*b*dnorm(b)*dnorm(A*b-delta)
              else L[i] = av[i+3]*b*L[i-1] end
          end
     end

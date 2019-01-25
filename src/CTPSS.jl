@@ -129,7 +129,6 @@ export sampleSizeParam
         return p1*(1-p1)*((quantile(ZDIST, 1-alpha)+quantile(ZDIST, 1 - beta))/(p1-p0-diff))^2
     end
     #Two Sample
-
     function twoProportionEquality(p0, p1; alpha=0.05, beta=0.2, k=1)
         return (p0*(1-p0)/k+p1*(1-p1))*((quantile(ZDIST, 1-alpha/2)+quantile(ZDIST, 1 - beta))/(p0-p1))^2
     end
