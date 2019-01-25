@@ -40,11 +40,19 @@ println(" ---------------------------------- ")
     @test !CTPSS.sampleSize(param="mean", type="ea", group="one", alpha=0.5, beta=0, diff=1, sd=1, a=1, b=1, k=1)
     @test !CTPSS.sampleSize(param="mean", type="ei", group="one", alpha=0.5, beta=0.2, diff=0, sd=1, a=1, b=1, k=1)
     @test !CTPSS.sampleSize(param="mean", type="ns", group="one", alpha=0.5, beta=0.2, diff=1, sd=0, a=1, b=1, k=1)
+
     @test !CTPSS.sampleSize(param="mean", type="ea", group="", alpha=0.5, beta=0.2, diff=1, sd=1, a=1, b=1, k=1)
     @test !CTPSS.sampleSize(param="mean", type="", group="one", alpha=0.5, beta=0.2, diff=1, sd=1, a=1, b=1, k=1)
+    @test !CTPSS.sampleSize(param="mean", type="", group="two", alpha=0.5, beta=0.2, diff=1, sd=1, a=1, b=1, k=1)
     @test !CTPSS.sampleSize(param="", type="", group="one", alpha=0.5, beta=0.2, diff=1, sd=1, a=1, b=1, k=1)
+    @test !CTPSS.sampleSize(param="prop", type="", group="one", alpha=0.05, beta=0.2, diff=1, a=0.5, b=0.5, k=1)
+    @test !CTPSS.sampleSize(param="prop", type="", group="two", alpha=0.05, beta=0.2, diff=1, a=0.5, b=0.5, k=1)
+    @test !CTPSS.sampleSize(param="prop", type="ea", group="", alpha=0.05, beta=0.2, diff=1, a=0.5, b=0.5, k=1)
+
     @test !CTPSS.sampleSize(param="prop", type="ea", group="one", alpha=0.05, beta=0.2, diff=1, sd=1, a=-1, b=0, k=1)
     @test !CTPSS.sampleSize(param="prop", type="ei", group="one", alpha=0.05, beta=0.2, diff=1, sd=1, a=0.4, b=2, k=1)
+
+    @test !CTPSS.sampleSize(param="or", type="", group="",  diff=1, a=0.5, b=0.5, k=1)
 end
 println(" ---------------------------------- ")
 
@@ -58,6 +66,9 @@ println(" ---------------------------------- ")
     @test round(CTPSS.owensQo(3,2,1,Inf;a=0), digits=7) ≈ 0.7436299
     @test round(CTPSS.owensQ(4,100,40,0,Inf), digits=7) ≈ 0.9584071
     @test round(CTPSS.owensQ(4,100,30,0,0.8), digits=8) ≈ 0.02702275
+
+    @test round(CTPSS.owensQ(1,1,1,0,Inf), digits=5) ≈  0.42202
+
     @test round(CTPSS.powerTOSTOwenQ(0.05,0.1,0.4,0.05,0.11,23), digits=8) ≈ 0.00147511
     @test round(CTPSS.approxPowerTOST(0.05,0.4,0.9,0.05,0.11,23), digits=12) ≈ 1.076964e-06
     @test CTPSS.approxPowerTOST(0.05,1.0,1.0,0.5,0.2,100) == 0
