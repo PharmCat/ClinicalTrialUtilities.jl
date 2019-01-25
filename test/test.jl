@@ -59,16 +59,21 @@ println(" ---------------------------------- ")
 @testset "PowerTOST Test        " begin
 
     @test round(CTPSS.tfn(1,2), digits=8) ≈  0.07846821
+    @test round(CTPSS.tfn(0.1,10), digits=8) > 0 #Not validated with PowerTOST
+    @test round(CTPSS.tfn(0.1,10E20), digits=8) > 0 #Not validated with PowerTOST
 
     @test round(CTPSS.owensTint2(1, 3, 20, 3), digits=7) ≈ 0.4839414
 
-    @test round(CTPSS.owensQo(2,1,0.5,0.2;a=0), digits=9) ≈ 0.006781741
     @test round(CTPSS.owensQo(1,2,1,1;a=0), digits=6) ≈ 0.321429
+    @test round(CTPSS.owensQo(2,1,0.5,0.2;a=0), digits=9) ≈ 0.006781741
+    @test round(CTPSS.owensQo(4,2,1,1;a=0), digits=8) ≈ 0.03739024
+    @test round(CTPSS.owensQo(7,2,1,1;a=0), digits=9) ≈ 0.001888241
     @test round(CTPSS.owensQo(3,2,1,Inf;a=0), digits=7) ≈ 0.7436299
 
     @test round(CTPSS.owensQ(4,100,40,0,Inf), digits=7) ≈ 0.9584071
-    @test round(CTPSS.owensQ(4,100,30,0,0.8), digits=8) ≈ 0.02702275
     @test round(CTPSS.owensQ(1,1,1,0,Inf), digits=5) ≈  0.42202
+    @test round(CTPSS.owensQ(4,100,30,0,0.8), digits=8) ≈ 0.02702275
+    @test round(CTPSS.owensQ(1,100,40,0,1), digits=7) ≈ 0.3718607
 
     @test round(CTPSS.powerTOSTOwenQ(0.05,0.1,0.4,0.05,0.11,23), digits=8) ≈ 0.00147511
 
