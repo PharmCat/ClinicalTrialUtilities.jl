@@ -52,8 +52,10 @@ println(" ---------------------------------- ")
 
     @test round(CTPSS.tfn(1,2), digits=8) ≈  0.07846821
     @test round(CTPSS.owensT(1,2), digits=8) ≈ 0.07846819
-    @test round(CTPSS.owensQo(2,1,0.5,0.2;a=0), digits=9) ≈ 0.006781741
     @test round(CTPSS.owensTint2(1, 3, 20, 3), digits=7) ≈ 0.4839414
+    @test round(CTPSS.owensQo(2,1,0.5,0.2;a=0), digits=9) ≈ 0.006781741
+    @test round(CTPSS.owensQo(1,2,1,1;a=0), digits=6) ≈ 0.321429
+    @test round(CTPSS.owensQo(3,2,1,Inf;a=0), digits=7) ≈ 0.7436299
     @test round(CTPSS.owensQ(4,100,40,0,Inf), digits=7) ≈ 0.9584071
     @test round(CTPSS.owensQ(4,100,30,0,0.8), digits=8) ≈ 0.02702275
     @test round(CTPSS.powerTOSTOwenQ(0.05,0.1,0.4,0.05,0.11,23), digits=8) ≈ 0.00147511
@@ -66,5 +68,16 @@ println(" ---------------------------------- ")
     @test round(CTPSS.powerTOST(alpha=0.05, logscale=false, theta1=-0.1, theta2=0.1, theta0=0, cv=0.14, n=30, design="2x2", method="nct"), digits=7) ≈ 0.7079951
     @test round(CTPSS.powerTOST(alpha=0.0000001, logscale=false, theta1=-0.1, theta2=0.1, theta0=0, cv=1, n=10000, design="2x2", method="owenq"), digits=7) ≈ 0.9380914
     @test round(CTPSS.powerTOST(alpha=0.0001, logscale=false, theta1=-0.1, theta2=0.1, theta0=0, cv=1, n=3500, design="2x2", method="owenq"), digits=7) ≈ 0.3545904
+
+    @test round(CTPSS.owensT(1,Inf), digits=8)   ≈  0.07932763
+    @test round(CTPSS.owensT(-1,Inf), digits=8)  ≈ 0.07932763
+    @test round(CTPSS.owensT(1,-Inf), digits=8)  ≈ -0.07932763
+    @test round(CTPSS.owensT(-1,-Inf), digits=8) ≈ -0.07932763
+    @test CTPSS.owensT(Inf, 1) == 0
+end
+
+@testset "PowerTOST Errors      " begin
+    @test !CTPSS.powerTOST(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=20,  method="")
+
 
 end
