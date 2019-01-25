@@ -88,6 +88,7 @@ println(" ---------------------------------- ")
     @test round(CTPSS.powerTOST(alpha=0.05, logscale=false, theta1=-0.1, theta2=0.1, theta0=0, cv=0.14, n=30, design="2x2", method="nct"), digits=7) ≈ 0.7079951
     @test round(CTPSS.powerTOST(alpha=0.0000001, logscale=false, theta1=-0.1, theta2=0.1, theta0=0, cv=1, n=10000, design="2x2", method="owenq"), digits=7) ≈ 0.9380914
     @test round(CTPSS.powerTOST(alpha=0.0001, logscale=false, theta1=-0.1, theta2=0.1, theta0=0, cv=1, n=3500, design="2x2", method="owenq"), digits=7) ≈ 0.3545904
+    @test round(CTPSS.powerTOST(alpha=0.00000005, logscale=false, theta1=-0.1, theta2=0.1, theta0=0, cv=1.5, n=20000, design="2x2", method="owenq"), digits=7) ≈ 0.8197361
 
     @test round(CTPSS.owensT(1,Inf), digits=8)   ≈  0.07932763
     @test round(CTPSS.owensT(-1,Inf), digits=8)  ≈ 0.07932763
@@ -100,6 +101,6 @@ end
 
 @testset "PowerTOST Errors      " begin
     @test !CTPSS.powerTOST(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=20,  method="")
-
+    @test !CTPSS.powerTOST(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=20, design="2x2", method="mvt")
 
 end

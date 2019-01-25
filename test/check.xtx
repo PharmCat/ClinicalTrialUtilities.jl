@@ -19,6 +19,35 @@ Inf, Inf = 0
 
                         owensT
 
+> OwensT (1, Inf)
+[1] 0.07932763
+> OwensT (-1, Inf)
+[1] 0.07932763
+
+> OwensT (-1, -Inf)
+[1] -0.07932763
+> OwensT (1, -Inf)
+[1] -0.07932763
+
+> OwensT (1, 0.5)
+[1] 0.0430647
+
+> OwensQ (nu=1,t=1,delta=1,b=Inf,a=0)
+[1] 0.42202
+
+> OwensQ (nu=1,t=100,delta=40,b=Inf,a=0)
+[1] 0.6891712
+>
+> OwensQ (nu=1,t=100,delta=40,b=1,a=0)
+[1] 0.3718607
+
+> OwensQOwen (nu=4,t=2,delta=1,b=1,a=0)
+[1] 0.03739024
+
+> OwensQOwen (nu=7,t=2,delta=1,b=1,a=0)
+[1] 0.001888241
+
+
 julia> CTPSS.owensT(1,2)
 0.07846818535354307
 > OwensT (1,2)
@@ -76,6 +105,12 @@ julia> CTPSS.owensT(11, 57)
 ---------------------------------------------------
 
                                 owensQo
+
+> OwensQOwen (nu=1,t=2,delta=1,b=1,a=0)
+[1] 0.321429
+
+> OwensQOwen (nu=3,t=2,delta=1,b=Inf,a=0)
+[1] 0.7436299
 
 > OwensQOwen (nu=2, t=1, delta=0.5, a=0, b=0.2)
 [1] 0.006781741
@@ -275,3 +310,6 @@ power.TOST(alpha=0.0001, logscale=FALSE, theta1=-0.1, theta2=0.1, theta0=0, CV=1
 [1] 0.3545904
 julia> CTPSS.powerTOST(alpha=0.0001, logscale=false, theta1=-0.1, theta2=0.1, theta0=0, cv=1, n=3500, design="2x2", method="owenq")
 0.35459037140683924
+
+> power.TOST(alpha=0.00000005, logscale=FALSE, theta1=-0.1, theta2=0.1, theta0=0, CV=1.5, n=20000, design="2x2", method="owenq")
+[1] 0.8197361
