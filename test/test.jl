@@ -59,20 +59,24 @@ println(" ---------------------------------- ")
 @testset "PowerTOST Test        " begin
 
     @test round(CTPSS.tfn(1,2), digits=8) ≈  0.07846821
-    @test round(CTPSS.owensT(1,2), digits=8) ≈ 0.07846819
+
     @test round(CTPSS.owensTint2(1, 3, 20, 3), digits=7) ≈ 0.4839414
+
     @test round(CTPSS.owensQo(2,1,0.5,0.2;a=0), digits=9) ≈ 0.006781741
     @test round(CTPSS.owensQo(1,2,1,1;a=0), digits=6) ≈ 0.321429
     @test round(CTPSS.owensQo(3,2,1,Inf;a=0), digits=7) ≈ 0.7436299
+
     @test round(CTPSS.owensQ(4,100,40,0,Inf), digits=7) ≈ 0.9584071
     @test round(CTPSS.owensQ(4,100,30,0,0.8), digits=8) ≈ 0.02702275
-
     @test round(CTPSS.owensQ(1,1,1,0,Inf), digits=5) ≈  0.42202
 
     @test round(CTPSS.powerTOSTOwenQ(0.05,0.1,0.4,0.05,0.11,23), digits=8) ≈ 0.00147511
+
     @test round(CTPSS.approxPowerTOST(0.05,0.4,0.9,0.05,0.11,23), digits=12) ≈ 1.076964e-06
-    @test CTPSS.approxPowerTOST(0.05,1.0,1.0,0.5,0.2,100) == 0
+    @test       CTPSS.approxPowerTOST(0.05,1.0,1.0,0.5,0.2,100) == 0
+
     @test round(CTPSS.approx2PowerTOST(0.05,0.1,1.0,0.5,0.2,1000), digits=7) ≈ 0.4413917
+
     @test round(CTPSS.powerTOST(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=20, design="2x2", method="owenq"), digits=7) ≈ 0.8346802
     @test round(CTPSS.powerTOST(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=10, design="2x2", method="nct"), digits=7) ≈ 0.4316618
     @test round(CTPSS.powerTOST(alpha=0.1, logscale=false, theta1=-0.1, theta2=0.1, theta0=0, cv=0.14, n=21, design="2x2", method="shifted"), digits=7) ≈ 0.6626132
@@ -84,7 +88,9 @@ println(" ---------------------------------- ")
     @test round(CTPSS.owensT(-1,Inf), digits=8)  ≈ 0.07932763
     @test round(CTPSS.owensT(1,-Inf), digits=8)  ≈ -0.07932763
     @test round(CTPSS.owensT(-1,-Inf), digits=8) ≈ -0.07932763
-    @test CTPSS.owensT(Inf, 1) == 0
+    @test round(CTPSS.owensT(1, 0.5), digits=8) ≈0.0430647
+    @test round(CTPSS.owensT(1,2), digits=8) ≈ 0.07846819
+    @test       CTPSS.owensT(Inf, 1) == 0
 end
 
 @testset "PowerTOST Errors      " begin
