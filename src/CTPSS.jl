@@ -54,11 +54,11 @@ export sampleSizeParam
                 else return false end
             elseif group == "two"
                 if type == "ea"
-                    return twoSampleMeanEquality(m0, m1, sd, alpha=alpha, beta=beta, k=k)
+                    return twoSampleMeanEquality(a, b, sd, alpha=alpha, beta=beta, k=k)
                 elseif type == "ei"
-                    return twoSampleMeanEquivalence(m0, m1, sd, diff, alpha=alpha, beta=beta, k=k)
+                    return twoSampleMeanEquivalence(a, b, sd, diff, alpha=alpha, beta=beta, k=k)
                 elseif type == "ns"
-                    return twoSampleMeanNS(m0, m1, sd, diff, alpha=alpha, beta=beta, k=k)
+                    return twoSampleMeanNS(a, b, sd, diff, alpha=alpha, beta=beta, k=k)
                 else return false end
             else return false end
         elseif param == "prop"
@@ -136,32 +136,32 @@ export sampleSizeParam
     #Two Sample
 
     function twoProportionEquality(p0, p1; alpha=0.05, beta=0.2, k=1)
-        return (p1*(1-p1)/k+p0*(1-p0))*((quantile(ZDIST, 1-alpha/2)+quantile(ZDIST, 1 - beta))/(p1-p0))^2
+        return (p0*(1-p0)/k+p1*(1-p1))*((quantile(ZDIST, 1-alpha/2)+quantile(ZDIST, 1 - beta))/(p0-p1))^2
     end
 
     function twoProportionEquivalence(p0, p1, diff; alpha=0.05, beta=0.2, k=1)
-        return (p1*(1-p1)/k+p0*(1-p0))*((quantile(ZDIST, 1-alpha)+quantile(ZDIST, 1 - beta/2))/(abs(p1-p0)-diff))^2
+        return (p0*(1-p0)/k+p1*(1-p1))*((quantile(ZDIST, 1-alpha)+quantile(ZDIST, 1 - beta/2))/(abs(p0-p1)-diff))^2
     end
 
     function twoProportionNS(p0, p1, diff; alpha=0.05, beta=0.2, k=1)
-        return (p1*(1-p1)/k+p0*(1-p0))*((quantile(ZDIST, 1-alpha)+quantile(ZDIST, 1 - beta))/(p1-p0-diff))^2
+        return (p0*(1-p0)/k+p1*(1-p1))*((quantile(ZDIST, 1-alpha)+quantile(ZDIST, 1 - beta))/(p0-p1-diff))^2
     end
 
     function orEquality(p0, p1; alpha=0.05, beta=0.2, k=1)
-        OR=p1*(1-p0)/p0/(1-p1)
-        return (1/k/p1/(1-p1)+1/p0/(1-p0))*((quantile(ZDIST, 1-alpha/2)+quantile(ZDIST, 1 - beta))/log(OR))^2
+        OR=p0*(1-p1)/p1/(1-p0)
+        return (1/k/p0/(1-p0)+1/p1/(1-p1))*((quantile(ZDIST, 1-alpha/2)+quantile(ZDIST, 1 - beta))/log(OR))^2
     end
 
     function orEquivalence(p0, p1, diff; alpha=0.05, beta=0.2, k=1, logdiff=true)
         if !logdiff diff=log(diff) end
-        OR=p1*(1-p0)/p0/(1-p1)
-        return (1/k/p1/(1-p1)+1/p0/(1-p0))*((quantile(ZDIST, 1-alpha)+quantile(ZDIST, 1 - beta/2))/(log(OR)-diff))^2
+        OR=p0*(1-p1)/p1/(1-p0)
+        return (1/k/p0/(1-p0)+1/p1/(1-p1))*((quantile(ZDIST, 1-alpha)+quantile(ZDIST, 1 - beta/2))/(log(OR)-diff))^2
     end
 
     function orNS(p0, p1, diff; alpha=0.05, beta=0.2, k=1, logdiff=true)
         if !logdiff diff=log(diff) end
-        OR=p1*(1-p0)/p0/(1-p1)
-        return (1/k/p1/(1-p1)+1/p0/(1-p0))*((quantile(ZDIST, 1-alpha)+quantile(ZDIST, 1 - beta))/(log(OR)-diff))^2
+        OR=p0*(1-p1)/p1/(1-p0)
+        return (1/k/p0/(1-p0)+1/p1/(1-p1))*((quantile(ZDIST, 1-alpha)+quantile(ZDIST, 1 - beta))/(log(OR)-diff))^2
     end
 #p01=0.45
 #p10=0.05

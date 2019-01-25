@@ -8,7 +8,7 @@ Author: Vladimir Arnautov
 [![Build Status](https://travis-ci.com/PharmCat/CTPSS.svg?branch=master)](https://travis-ci.com/PharmCat/CTPSS)
 [![Build status](https://ci.appveyor.com/api/projects/status/c7x06t501eqjvd6s?svg=true)](https://ci.appveyor.com/project/PharmCat/ctpss)
 [![codecov](https://codecov.io/gh/PharmCat/CTPSS/branch/master/graph/badge.svg)](https://codecov.io/gh/PharmCat/CTPSS)
-
+[![Coverage Status](https://coveralls.io/repos/github/PharmCat/CTPSS/badge.svg?branch=master)](https://coveralls.io/github/PharmCat/CTPSS?branch=master)
 ### Dependencies:
 
  - Distributions
