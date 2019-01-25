@@ -192,13 +192,12 @@ function tfn(x, fx)
         for i in 1:ng
             r1 = 1.0 + fxs*(0.5 + u[i])^2
             r2 = 1.0 + fxs*(0.5 - u[i])^2
-
             rt = rt + r[i]*(exp(xs*r1)/r1 + exp(xs*r2)/r2)
         end
     return rt*x2*tp
 end #tfn(x, fx)
 
-
+"""
 #-------------------------------------------------------------------------------
 #                        DEPRECATED
 #OT_integrand
@@ -210,3 +209,4 @@ function owensTo(h, a)
     return quadgk(x -> owensTint(x, h),0, a)[1]
 end
 #-------------------------------------------------------------------------------
+"""

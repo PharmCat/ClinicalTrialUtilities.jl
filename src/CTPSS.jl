@@ -62,7 +62,7 @@ export sampleSizeParam
                 else return false end
             else return false end
         elseif param == "prop"
-            if 1 > a < 0 || 1 > b < 0 return false end
+            if 1 < a || a < 0 || 1 < b || b < 0 return false end
             if group == "one"
                 if type == "ea"
                     return oneProportionEquality(a, b; alpha=alpha, beta=beta)
@@ -115,49 +115,40 @@ export sampleSizeParam
         return (1+1/k)*(sd*(quantile(ZDIST, 1-alpha) + quantile(ZDIST, 1 - beta/2))/(abs(m0-m1)-diff))^2
     end
     function twoSampleMeanNS(m0, m1, sd, diff; alpha=0.05, beta=0.2, k=1) #Non-inferiority / Superiority
-
         return (1+1/k)*(sd*(quantile(ZDIST, 1-alpha) + quantile(ZDIST, 1 - beta))/(m0 - m1 - diff))^2
     end
     #Compare Proportion
     #One Sample
-
     function oneProportionEquality(p0, p1; alpha=0.05, beta=0.2)
         return p1*(1-p1)*((quantile(ZDIST, 1-alpha/2)+quantile(ZDIST, 1 - beta))/(p1-p0))^2
     end
-
     function oneProportionEquivalence(p0, p1, diff; alpha=0.05, beta=0.2)
         return p1*(1-p1)*((quantile(ZDIST, 1-alpha)+quantile(ZDIST, 1 - beta/2))/(abs(p1-p0)-diff))^2
     end
-
     function oneProportionNS(p0, p1, diff; alpha=0.05, beta=0.2)
         return p1*(1-p1)*((quantile(ZDIST, 1-alpha)+quantile(ZDIST, 1 - beta))/(p1-p0-diff))^2
     end
-
     #Two Sample
 
     function twoProportionEquality(p0, p1; alpha=0.05, beta=0.2, k=1)
         return (p0*(1-p0)/k+p1*(1-p1))*((quantile(ZDIST, 1-alpha/2)+quantile(ZDIST, 1 - beta))/(p0-p1))^2
     end
-
     function twoProportionEquivalence(p0, p1, diff; alpha=0.05, beta=0.2, k=1)
         return (p0*(1-p0)/k+p1*(1-p1))*((quantile(ZDIST, 1-alpha)+quantile(ZDIST, 1 - beta/2))/(abs(p0-p1)-diff))^2
     end
-
     function twoProportionNS(p0, p1, diff; alpha=0.05, beta=0.2, k=1)
         return (p0*(1-p0)/k+p1*(1-p1))*((quantile(ZDIST, 1-alpha)+quantile(ZDIST, 1 - beta))/(p0-p1-diff))^2
     end
-
+    #Odd ratio Chow S, Shao J, Wang H. 2008. Sample Size Calculations in Clinical Research. 2nd Ed. Chapman & Hall/CRC Biostatistics Series.
     function orEquality(p0, p1; alpha=0.05, beta=0.2, k=1)
         OR=p0*(1-p1)/p1/(1-p0)
         return (1/k/p0/(1-p0)+1/p1/(1-p1))*((quantile(ZDIST, 1-alpha/2)+quantile(ZDIST, 1 - beta))/log(OR))^2
     end
-
     function orEquivalence(p0, p1, diff; alpha=0.05, beta=0.2, k=1, logdiff=true)
         if !logdiff diff=log(diff) end
         OR=p0*(1-p1)/p1/(1-p0)
         return (1/k/p0/(1-p0)+1/p1/(1-p1))*((quantile(ZDIST, 1-alpha)+quantile(ZDIST, 1 - beta/2))/(log(OR)-diff))^2
     end
-
     function orNS(p0, p1, diff; alpha=0.05, beta=0.2, k=1, logdiff=true)
         if !logdiff diff=log(diff) end
         OR=p0*(1-p1)/p1/(1-p0)
@@ -173,6 +164,7 @@ export sampleSizeParam
 #22.80907
 #CTPSS.mcnm(0.45, 0.05, alpha=0.1, beta=0.1)
 #22.80907052752994
+#Connor R. J. 1987. Sample size for testing differences in proportions for the paired-sample design. Biometrics 43(1):207-211. page 209.
     function mcnm(p10, p01; alpha=0.05, beta=0.2)
         pdisc=p10+p01
         pdiff=p10-p01
