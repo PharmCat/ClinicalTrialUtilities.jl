@@ -22,6 +22,8 @@ println(" ---------------------------------- ")
     @test ceil(CTPSS.sampleSize(param="or", type="ns",  alpha=0.05, beta=0.2, diff=0.2, a=0.4, b=0.25)) == 242
 
     @test ceil(CTPSS.mcnm(0.45,0.05)) == 23
+
+    @test round(sampleSize(param="mean", type="ns", group="two", alpha=0.05, beta=0.2, diff=1, sd=20, a=1, b=2), digits=12) ≈ 1236.511446403953
 end
 println(" ---------------------------------- ")
 @testset "sampleSizeParam Test  " begin
