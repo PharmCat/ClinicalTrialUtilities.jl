@@ -60,19 +60,19 @@ println(" ---------------------------------- ")
 
     @test CTPSS.oneSampleMeanEqualityP(1.5,2,1,32;alpha=0.05) ≈ 0.8074304194325561 ≈ CTPSS.ctPower(param="mean", type="ea", group="one", a=1.5, b=2, sd=1,n=32, alpha=0.05)
     @test CTPSS.oneSampleMeanEquivalenceP(2, 2, 0.1, 0.05, 35; alpha=0.05) ≈ 0.8108839754376387  ≈ CTPSS.ctPower(param="mean", type="ei", group="one", a=2, b=2, sd=0.1, diff=0.05, n=35, alpha=0.05)
-    @test CTPSS.oneSampleMeanNSP(1.5, 2, 1, -.5, 7; alpha=0.05) ≈ 0.8415707712023641
-    @test CTPSS.twoSampleMeanEqualityP(5, 10, 10, 63; alpha=0.05, k=1) ≈ 0.8013023941055788
-    @test CTPSS.twoSampleMeanEquivalenceP(5, 4, 10, 5,  108; alpha=0.05, k=1) ≈ 0.80452354556060
-    @test CTPSS.twoSampleMeanNSP(5, 5, 10, 5, 50; alpha=0.05, k=1) ≈ 0.8037819415575257
-    @test CTPSS.oneProportionEqualityP(0.3, 0.5, 50; alpha=0.05) ≈ 0.8074304194325561
-    @test CTPSS.oneProportionEquivalenceP(0.6, 0.6, 0.2, 52; alpha=0.05) ≈ 0.8060834056011101
-    @test CTPSS.oneProportionNSP(0.3, 0.5, -0.1, 18; alpha=0.05) ≈ 0.8161481827204281
-    @test CTPSS.twoProportionEqualityP(0.65, 0.85, 70; alpha=0.05, k=1) ≈ 0.8019139068528
-    @test CTPSS.twoProportionEquivalenceP(0.65, 0.85, 0.05, 136; alpha=0.05, k=1) ≈ 0.8033294052407269
-    @test CTPSS.twoProportionNSP(0.85, 0.65, -0.1, 25; alpha=0.05, k=1) ≈ 0.808599833380679
-    @test CTPSS.orEqualityP(0.4, 0.25, 156; alpha=0.05, k=1) ≈ 0.8020239054864792
-    @test CTPSS.orEquivalenceP(0.25, 0.25, 0.5, 366; alpha=0.05, k=1, logdiff=true) ≈ 0.8008593380478983
-    @test CTPSS.orNSP(0.4, 0.25, 0.2, 242; alpha=0.05, k=1, logdiff=true) ≈ 0.8007200876001626
+    @test CTPSS.oneSampleMeanNSP(1.5, 2, 1, -.5, 7; alpha=0.05) ≈ 0.8415707712023641 ≈ CTPSS.ctPower(param="mean", type="ns", group="one", a=1.5, b=2, sd=1, diff=-0.5, n=7, alpha=0.05)
+    @test CTPSS.twoSampleMeanEqualityP(5, 10, 10, 63; alpha=0.05, k=1) ≈ 0.8013023941055788 ≈ CTPSS.ctPower(param="mean", type="ea", group="two", a=5, b=10, sd=10, n=63, alpha=0.05)
+    @test CTPSS.twoSampleMeanEquivalenceP(5, 4, 10, 5,  108; alpha=0.05, k=1) ≈ 0.80452354556060  ≈ CTPSS.ctPower(param="mean", type="ei", group="two", a=5, b=4, sd=10, diff=5, n=108, alpha=0.05)
+    @test CTPSS.twoSampleMeanNSP(5, 5, 10, 5, 50; alpha=0.05, k=1) ≈ 0.8037819415575257 ≈ CTPSS.ctPower(param="mean", type="ns", group="two", a=5, b=5, sd=10, diff=5, n=50, alpha=0.05)
+    @test CTPSS.oneProportionEqualityP(0.3, 0.5, 50; alpha=0.05) ≈ 0.8074304194325561 ≈ CTPSS.ctPower(param="prop", type="ea", group="one", a=0.3, b=0.5, n=50, alpha=0.05)
+    @test CTPSS.oneProportionEquivalenceP(0.6, 0.6, 0.2, 52; alpha=0.05) ≈ 0.8060834056011101 ≈ CTPSS.ctPower(param="prop", type="ei", group="one", a=0.6, b=0.6, diff=0.2, n=52, alpha=0.05)
+    @test CTPSS.oneProportionNSP(0.3, 0.5, -0.1, 18; alpha=0.05) ≈ 0.8161481827204281 ≈ CTPSS.ctPower(param="prop", type="ns", group="one", a=0.3, b=0.5, diff=-0.1, n=18, alpha=0.05)
+    @test CTPSS.twoProportionEqualityP(0.65, 0.85, 70; alpha=0.05, k=1) ≈ 0.8019139068528 ≈ CTPSS.ctPower(param="prop", type="ea", group="two", a=0.65, b=0.85, n=70, alpha=0.05)
+    @test CTPSS.twoProportionEquivalenceP(0.65, 0.85, 0.05, 136; alpha=0.05, k=1) ≈ 0.8033294052407269  ≈ CTPSS.ctPower(param="prop", type="ei", group="two", a=0.65, b=0.85, diff=0.05, n=136, alpha=0.05)
+    @test CTPSS.twoProportionNSP(0.85, 0.65, -0.1, 25; alpha=0.05, k=1) ≈ 0.808599833380679 ≈ CTPSS.ctPower(param="prop", type="ns", group="two", a=0.85, b=0.65, diff=-0.1, n=25, alpha=0.05)
+    @test CTPSS.orEqualityP(0.4, 0.25, 156; alpha=0.05, k=1) ≈ 0.8020239054864792 ≈ CTPSS.ctPower(param="or", type="ea", a=0.4, b=0.25, n=156, alpha=0.05)
+    @test CTPSS.orEquivalenceP(0.25, 0.25, 0.5, 366; alpha=0.05, k=1, logdiff=true) ≈ 0.8008593380478983  ≈ CTPSS.ctPower(param="or", type="ei", a=0.25, b=0.25, diff=0.5, n=366, alpha=0.05)
+    @test CTPSS.orNSP(0.4, 0.25, 0.2, 242; alpha=0.05, k=1, logdiff=true) ≈ 0.8007200876001626  ≈ CTPSS.ctPower(param="or", type="ns", a=0.4, b=0.25, diff=0.2, n=242, alpha=0.05)
 
 end
 println(" ---------------------------------- ")
