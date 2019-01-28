@@ -27,17 +27,24 @@ Pkg.add("git://github.com/PharmCat/CTPSS.git")
 
 ### Functions:
 
-sampleSize (;param, type, group, alpha, beta, diff, sd, a, b, k)
+sampleSize (;param, type, group, alpha, beta, diff, sd, a, b, k) - Sample size calculation.
 
-Sample size calculation.
+ctPower(;param, type, group, alpha, n, diff, sd, a, b, k) - Clinical trial power estimation.
 
-### Usage:
+powerTOST(;alpha, logscale, theta1, theta2, theta0, cv, n, method) - Power calculation for TOST (for Bioequivalence trials).
+
+owensT(h,a) - Owen's T function
+
+owensQ(nu, t, delta, a, b) - Owen's Q function
+
+
+### Usage
+#### sampleSize
 ```
 using CTPSS
 sampleSize(param="mean|prop|or", type="ea|ei|ns", group="one|two", alpha=0.05, beta=0.2, diff=1, sd=2, a=1, b=2, k=1)
 
 ```
-
 **param (Parameter type):**
 - mean - Means (default);
 - prop - Proportions;
@@ -53,21 +60,54 @@ sampleSize(param="mean|prop|or", type="ea|ei|ns", group="one|two", alpha=0.05, b
 - two - Two sample;
 
 **alpha** - Alpha (o < alpha < 1)  (default=0.05);
+
 **beta** - Beta (o < beta < 1) (default=0.2); power = 1 - beta;
 
-**diff** - difference /equivalencens margin/non-inferiority/superiority margin;
-**sd** - Standart deviation (σ, for Means only);
+**diff** - difference / equivalence margin/non-inferiority/superiority margin;
+
+**sd** - Standard deviation (σ, for Means only);
+
 **a** - Null Hypothesis mean (μ0), Group A;
+
 **b** - True mean (μ) for one sample / Group B for two sample design;
-**k** - Na/Nb (after sample size estimation second grop size: Na = k * Nb, only for two sample design) (default=1);
 
-### Function
+**k** - Na/Nb (after sample size estimation second group size: Na = k * Nb, only for two sample design) (default=1);
 
-powerTOST(;alpha, logscale, theta1, theta2, theta0, cv, n, method)
+#### ctPower
+```
+using CTPSS
+ctPower(param="mean|prop|or", type="ea|ei|ns", group="one|two", alpha=0.05, n=30, diff=1, sd=2, a=1, b=2, k=1)
+```
 
-Power calculation for TOST (for Bioequivalence trials).
+**param (Parameter type):**
+- mean - Means (default);
+- prop - Proportions;
+- or - Odd Ratio;
 
-### Usage
+**type (Hypothesis type):**
+- ea - Equality  (default);
+- ei - Equivalence;
+- ns - Non-Inferiority / Superiority;
+
+**group (Group num):**
+- one - one sample  (default);
+- two - Two sample;
+
+**alpha** - Alpha (o < alpha < 1)  (default=0.05);
+
+**n** - Subjects number;
+
+**diff** - difference /equivalence margin/non-inferiority/superiority margin;
+
+**sd** - Standard deviation (σ, for Means only);
+
+**a** - Null Hypothesis mean (μ0), Group A;
+
+**b** - True mean (μ) for one sample / Group B for two sample design;
+
+**k** - Na/Nb (after sample size estimation second group size: Na = k * Nb, only for two sample design) (default=1);
+
+#### powerTOST
 
 ```
 using CTPSS
@@ -106,7 +146,7 @@ powerTOST(cv=0.14, n=21)
 
 ### ToDo:
 
- - powerEst ()
+ 
  - knownDesign () from PowerTost
  - sampleSizeBE ()
  - cvfromci ()

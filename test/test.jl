@@ -58,8 +58,8 @@ end
 println(" ---------------------------------- ")
 @testset "sampleSizePower       " begin
 
-    @test CTPSS.oneSampleMeanEqualityP(1.5,2,1,32;alpha=0.05) ≈ 0.8074304194325561
-    @test CTPSS.oneSampleMeanEquivalenceP(2, 2, 0.1, 0.05, 35; alpha=0.05) ≈ 0.8108839754376387
+    @test CTPSS.oneSampleMeanEqualityP(1.5,2,1,32;alpha=0.05) ≈ 0.8074304194325561 ≈ CTPSS.ctPower(param="mean", type="ea", group="one", a=1.5, b=2, sd=1,n=32, alpha=0.05)
+    @test CTPSS.oneSampleMeanEquivalenceP(2, 2, 0.1, 0.05, 35; alpha=0.05) ≈ 0.8108839754376387  ≈ CTPSS.ctPower(param="mean", type="ei", group="one", a=2, b=2, sd=0.1, diff=0.05, n=35, alpha=0.05)
     @test CTPSS.oneSampleMeanNSP(1.5, 2, 1, -.5, 7; alpha=0.05) ≈ 0.8415707712023641
     @test CTPSS.twoSampleMeanEqualityP(5, 10, 10, 63; alpha=0.05, k=1) ≈ 0.8013023941055788
     @test CTPSS.twoSampleMeanEquivalenceP(5, 4, 10, 5,  108; alpha=0.05, k=1) ≈ 0.80452354556060
