@@ -1,4 +1,33 @@
-
+CTPSS.oneSampleMeanEqualityP(1.5,2,1,32;alpha=0.05)
+0.8074304194325561
+CTPSS.oneSampleMeanEquivalenceP(2, 2, 0.1, 0.05, 35; alpha=0.05)
+0.8108839754376387
+CTPSS.oneSampleMeanNSP(1.5, 2, 1, -.5, 7; alpha=0.05)
+0.8415707712023641
+CTPSS.twoSampleMeanEqualityP(5, 10, 10, 63; alpha=0.05, k=1)
+0.8013023941055788
+CTPSS.twoSampleMeanEquivalenceP(5, 4, 10, 5,  108; alpha=0.05, k=1)
+0.80452354556060
+CTPSS.twoSampleMeanNSP(5, 5, 10, 5, 50; alpha=0.05, k=1)
+0.8037819415575257
+CTPSS.oneProportionEqualityP(0.3, 0.5, 50; alpha=0.05)
+0.8074304194325561
+CTPSS.oneProportionEquivalenceP(0.6, 0.6, 0.2, 52; alpha=0.05)
+0.8060834056011101
+CTPSS.oneProportionNSP(0.3, 0.5, -0.1, 18; alpha=0.05)
+0.8161481827204281
+CTPSS.twoProportionEqualityP(0.65, 0.85, 70; alpha=0.05, k=1)
+0.8019139068528
+CTPSS.twoProportionEquivalenceP(0.65, 0.85, 0.05, 136; alpha=0.05, k=1)
+0.8033294052407269
+CTPSS.twoProportionNSP(0.85, 0.65, -0.1, 25; alpha=0.05, k=1)
+0.808599833380679
+CTPSS.orEqualityP(0.4, 0.25, 156; alpha=0.05, k=1)
+0.8020239054864792
+CTPSS.orEquivalenceP(0.25, 0.25, 0.5, 366; alpha=0.05, k=1, logdiff=true)
+0.8008593380478983
+CTPSS.orNSP(0.4, 0.25, 0.2, 242; alpha=0.05, k=1, logdiff=true)
+0.8007200876001626
 --------------------------------------------------------------------------------
 tfn
 
@@ -23,27 +52,20 @@ Inf, Inf = 0
 [1] 0.07932763
 > OwensT (-1, Inf)
 [1] 0.07932763
-
 > OwensT (-1, -Inf)
 [1] -0.07932763
 > OwensT (1, -Inf)
 [1] -0.07932763
-
 > OwensT (1, 0.5)
 [1] 0.0430647
-
 > OwensQ (nu=1,t=1,delta=1,b=Inf,a=0)
 [1] 0.42202
-
 > OwensQ (nu=1,t=100,delta=40,b=Inf,a=0)
 [1] 0.6891712
->
 > OwensQ (nu=1,t=100,delta=40,b=1,a=0)
 [1] 0.3718607
-
 > OwensQOwen (nu=4,t=2,delta=1,b=1,a=0)
 [1] 0.03739024
-
 > OwensQOwen (nu=7,t=2,delta=1,b=1,a=0)
 [1] 0.001888241
 
@@ -108,7 +130,6 @@ julia> CTPSS.owensT(11, 57)
 
 > OwensQOwen (nu=1,t=2,delta=1,b=1,a=0)
 [1] 0.321429
-
 > OwensQOwen (nu=3,t=2,delta=1,b=Inf,a=0)
 [1] 0.7436299
 
@@ -182,19 +203,6 @@ julia> CTPSS.owensQo(9,1,0.5,0.2;a=0)
 julia> CTPSS.owensQo(9,-100,2,0.01;a=0)
 1.3303723002248448e-10
 
-
-nu = 5
-t = 1
-delta = 0.5
-a = 0
-b = 0.2
-
-nu <- 5
-t <- 1
-delta <- 0.5
-a <- 0
-b <- 0.2
-
 -------------------------------------------------------------------
 
 julia> CTPSS.owensTint2(1, 3, 20, 3)
@@ -202,9 +210,6 @@ julia> CTPSS.owensTint2(1, 3, 20, 3)
 > .Q.integrand (x=1, nu=3, t=20, delta=3)
 [1] 0.4839414
 
-nu <- 4
-t <- 100
-delta <- 40
 
 > OwensQ (nu=4, t=100, delta=40, a=0, b=Inf)
 [1] 0.9584071
@@ -230,20 +235,6 @@ julia> CTPSS.owensQ(4,100,30,0,0.8)
 [1] 0.00147511
 julia> CTPSS.powerTOSTOwenQ(0.05,0.1,0.4,0.05,0.11,23)
 0.0014751101803128774
-
-alpha <- 0.05
-ltheta1 <- 0.1
-ltheta2 <- 0.4
-diffm <- 0.05
-sem <- 0.11
-df <- 23
-
-alpha = 0.05
-ltheta1 = 0.1
-ltheta2 = 0.4
-diffm = 0.05
-sem = 0.11
-df = 23
 
 julia> CTPSS.approxPowerTOST(0.05,0.4,0.9,0.05,0.11,23)
 1.0769643498109716e-6

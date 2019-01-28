@@ -1,5 +1,4 @@
 # Clinical Trial Power and Sample Size calculation
-# Version: 0.0.1
 # Author: Vladimir Arnautov aka PharmCat
 # Copyright © 2019 Vladimir Arnautov aka PharmCat
 # Calculation based on Chow S, Shao J, Wang H. 2008. Sample Size Calculations in Clinical Research. 2nd Ed. Chapman & Hall/CRC Biostatistics Series.
@@ -8,7 +7,6 @@
 
 #This is comparison of Rmath and Distributions library approach
 """
-
 pt(x, df)
 TDIST=TDist(df)
 cdf(TDIST, x)
@@ -16,5 +14,16 @@ cdf(TDIST, x)
 pt(x,df,ncp)
 NCT=NoncentralT(df,ncp)
 cdf(NCT,x)
+
+
+qnorm(1-0.05)
+[1] 1.644854
+quantile(Normal(), 1-0.05)
+1.6448536269514717
+
+pnorm(1)
+[1] 0.8413447
+cdf(Normal(),1)
+0.841344746068543
 
 """

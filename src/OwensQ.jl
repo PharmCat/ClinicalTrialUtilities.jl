@@ -46,13 +46,11 @@ function owensQo(nu,t,delta,b;a=0)
     A = t/sqrt(nu)
     B = nu/(nu + t*t)
     upr = nu-2
-
     #some code abs L vector H vector M vector
     av = Array{Float64}(undef, nu)
     for i = 1:length(av)
         if i==1||i==2 av[i] = 1 else av[i] = 1/((i-2)*av[i-1]) end
     end
-
     if (upr-1) > 0 ll = upr-1 else ll = 0 end
     L  = Array{Float64}(undef, ll)
     if isfinite(b)
@@ -73,7 +71,6 @@ function owensQo(nu,t,delta,b;a=0)
     #pass1
     M = Array{Float64}(undef, ll)
     sB = sqrt(B)
-
     for i = 1:length(M)
         if i==1 M[1] = A*sB*dnorm(delta*sB)*(pnorm(delta*A*sB)-pnorm((delta*A*B-b)/sB)) end
         if i==2 M[2] = B*(delta*A*M[1]+A*dnorm(delta*sB)*(dnorm(delta*A*sB)-dnorm((delta*A*B-b)/sB))) end
@@ -102,8 +99,8 @@ function owensQo(nu,t,delta,b;a=0)
 end #OwensQo
 
 #-------------------------------------------------------------------------------
-# functions bellow used in OwensQ in CTPSS.jl
-#PowerTost OwensQ #37 and impl b for #52-54
+# functions bellow used in owensQ
+#PowerTost owensQ #37 and impl b for #52-54
 function ifun1(x, nu, t, delta; b=0)
     return owensTint2(b+x/(1-x), nu, t, delta)*1/(1-x)^2
 end
@@ -120,9 +117,6 @@ end
 # R port of the FORTRAN code in the References and matlab code given on
 # https://people.sc.fsu.edu/~jburkardt/m_src/asa076/asa076.html
 # by J. Burkhardt, license GNU LGPL
-#
-# no trouble with integrate()
-# arguments must be scalars!
 # rewrite from PowerTOST
 function owensT(h,a)
     #not implemented
@@ -159,7 +153,6 @@ end #OwensT(h,a)
 # R port of the matlab code given on
 # https://people.sc.fsu.edu/~jburkardt/m_src/owens/owens.html
 # by J. Burkhardt license GNU LGPL
-#
 # is called as tfn(h, a) if a<=1
 # otherwise as tfn(a*h, 1/a)
 function tfn(x, fx)

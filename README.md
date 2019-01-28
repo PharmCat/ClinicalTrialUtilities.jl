@@ -1,9 +1,12 @@
 # CTPSS
  Clinical Trial Power and Sample Size calculation
 
-Version:
+
+Version:0.1.4
 
 Author: Vladimir Arnautov
+
+&copy; Vladimir Arnautov
 
 [![Build Status](https://travis-ci.com/PharmCat/CTPSS.svg?branch=master)](https://travis-ci.com/PharmCat/CTPSS)
 [![Build status](https://ci.appveyor.com/api/projects/status/c7x06t501eqjvd6s?svg=true)](https://ci.appveyor.com/project/PharmCat/ctpss)
@@ -22,7 +25,7 @@ using Pkg
 Pkg.add("git://github.com/PharmCat/CTPSS.git")
 ```
 
-### Function
+### Functions:
 
 sampleSize (;param, type, group, alpha, beta, diff, sd, a, b, k)
 
@@ -88,7 +91,7 @@ powerTOST(alpha=0.05, logscale=true|false, theta1=0.8, theta2=1.25, theta0=0.95,
 
 **method** - calculating method: Oqen'sQ Function | NonCentral T, Shifted;
 
-###Example:
+### Examples:
 
 ```
 sampleSize(param="prop", type="ea", group="one", a=0.3, b=0.5)
