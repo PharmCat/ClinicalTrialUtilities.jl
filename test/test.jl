@@ -163,4 +163,5 @@ println(" ---------------------------------- ")
 
     n, p = beSampleN( cv=0.347)
     @test n == 52 && round(p, digits=7) == 0.8136415
+    
 end
