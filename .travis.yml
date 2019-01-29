@@ -2,14 +2,31 @@ language: julia
 os:
   - linux
   - osx
+
 julia:
+  - 0.6
+  - 0.7
   - 1.0
   - nightly
+
+matrix:
+  allow_failures:
+  - julia: nightly
+
 notifications:
   email: false
+  
 git:
   depth: 99999999
 
+before_script:
+  - export CI_NAME="Travis CI"
+  - export CI_JULIA_VERSION=$TRAVIS_JULIA_VERSION
+  - export PULL_REQUEST="$TRAVIS_PULL_REQUEST"
+  
+  script:
+- sh .test/travis.sh
+- sh .test/ci.sh
 
 after_success:
   # push coverage results to Coveralls Pkg.test("CTPSS"; coverage = true);
