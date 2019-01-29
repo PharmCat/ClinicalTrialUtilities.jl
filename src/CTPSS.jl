@@ -218,4 +218,4 @@ export sampleSizeParam
         return estn, estpower
 
     end
-end # module
+end # module end
