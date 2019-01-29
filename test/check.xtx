@@ -304,3 +304,59 @@ julia> CTPSS.powerTOST(alpha=0.0001, logscale=false, theta1=-0.1, theta2=0.1, th
 
 > power.TOST(alpha=0.00000005, logscale=FALSE, theta1=-0.1, theta2=0.1, theta0=0, CV=1.5, n=20000, design="2x2", method="owenq")
 [1] 0.8197361
+
+
+> sampleN.TOST(theta0=0.95, theta1=0.8, theta2=1.25, CV=0.2, alpha=0.05, targetpower=0.8, logscale=TRUE, design="2x2", method="owenq", robust=TRUE, print=FALSE)
+  Design alpha  CV theta0 theta1 theta2 Sample size Achieved power Target power
+1    2x2  0.05 0.2   0.95    0.8   1.25          20      0.8346802          0.8
+>
+
+> sampleN.TOST(theta0=0.95, theta1=0.8, theta2=1.25, CV=0.3, alpha=0.05, targetpower=0.8, logscale=TRUE, design="2x2", method="owenq", robust=TRUE, print=FALSE)
+  Design alpha  CV theta0 theta1 theta2 Sample size Achieved power Target power
+1    2x2  0.05 0.3   0.95    0.8   1.25          40      0.8158453          0.8
+>
+> sampleN.TOST(theta0=1, theta1=0.8, theta2=1.25, CV=0.3, alpha=0.05, targetpower=0.9, logscale=TRUE, design="2x2", method="owenq", robust=TRUE, print=FALSE)
+  Design alpha  CV theta0 theta1 theta2 Sample size Achieved power Target power
+1    2x2  0.05 0.3      1    0.8   1.25          40      0.9095603          0.9
+>
+
+> sampleN.TOST(theta0=1.05, theta1=0.8, theta2=1.25, CV=0.4, alpha=0.05, targetpower=0.85, logscale=TRUE, design="2x2", method="nct", robust=TRUE, print=FALSE)
+  Design alpha  CV theta0 theta1 theta2 Sample size Achieved power Target power
+1    2x2  0.05 0.4   1.05    0.8   1.25          74      0.8558178         0.85
+>
+
+> sampleN.TOST(theta0=1.05, theta1=0.9, theta2=1.25, CV=0.4, alpha=0.05, targetpower=0.85, logscale=TRUE, design="2x2", method="nct", robust=TRUE, print=FALSE)
+  Design alpha  CV theta0 theta1 theta2 Sample size Achieved power Target power
+1    2x2  0.05 0.4   1.05    0.9   1.25         108      0.8506248         0.85
+>
+
+> sampleN.TOST(theta0=1.05, theta1=0.8, theta2=1.2, CV=0.5, alpha=0.05, targetpower=0.8, logscale=TRUE, design="2x2", method="nct", robust=TRUE, print=FALSE)
+  Design alpha  CV theta0 theta1 theta2 Sample size Achieved power Target power
+1    2x2  0.05 0.5   1.05    0.8    1.2         158      0.8039191          0.8
+>
+
+> sampleN.TOST(theta0=1.05, theta1=0.8, theta2=1.25, CV=0.8, alpha=0.05, targetpower=0.8, logscale=TRUE, design="2x2", method="shifted", robust=TRUE, print=FALSE)
+  Design alpha  CV theta0 theta1 theta2 Sample size Achieved power Target power
+1    2x2  0.05 0.8   1.05    0.8   1.25         210      0.8012471          0.8
+>
+
+
+> sampleN.TOST(theta0=0, theta1=-0.2, theta2=0.2, CV=0.5, alpha=0.05, targetpower=0.8, logscale=FALSE, design="2x2", method="owenq", robust=TRUE, print=FALSE)
+  Design alpha  CV theta0 theta1 theta2 Sample size Achieved power Target power
+1    2x2  0.05 0.5      0   -0.2    0.2         110      0.8074124          0.8
+>
+
+> sampleN.TOST(theta0=0, theta1=-0.2, theta2=0.2, CV=2, alpha=0.05, targetpower=0.8, logscale=FALSE, design="2x2", method="owenq", robust=TRUE, print=FALSE)
+  Design alpha CV theta0 theta1 theta2 Sample size Achieved power Target power
+1    2x2  0.05  2      0   -0.2    0.2        1716      0.8005618          0.8
+>
+
+> sampleN.TOST(theta0=0, theta1=-0.2, theta2=0.2, CV=2, alpha=0.001, targetpower=0.8, logscale=FALSE, design="2x2", method="owenq", robust=TRUE, print=FALSE)
+  Design alpha CV theta0 theta1 theta2 Sample size Achieved power Target power
+1    2x2 0.001  2      0   -0.2    0.2        3828      0.8001454          0.8
+>
+
+> sampleN.TOST(theta0=0, theta1=-0.2, theta2=0.2, CV=2, alpha=0.01, targetpower=0.99, logscale=FALSE, design="2x2", method="owenq", robust=TRUE, print=FALSE)
+  Design alpha CV theta0 theta1 theta2 Sample size Achieved power Target power
+1    2x2  0.01  2      0   -0.2    0.2        4810      0.9900151         0.99
+>

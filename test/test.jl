@@ -125,3 +125,42 @@ end
     @test !CTPSS.powerTOST(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=20, design="2x2", method="mvt")
 
 end
+println(" ---------------------------------- ")
+@testset "beSampleN Test        " begin
+
+    n, p = CTPSS.beSampleN(;theta0=0.95, theta1=0.8, theta2=1.25, cv=0.2, alpha=0.05, beta=0.2, logscale=true, method="owenq")
+    @test n == 20 && round(p, digits=7) == 0.8346802
+
+    n, p = CTPSS.beSampleN(;theta0=0.95, theta1=0.8, theta2=1.25, cv=0.3, alpha=0.05, beta=0.2, logscale=true, method="owenq")
+    @test n == 40 && round(p, digits=7) == 0.8158453
+
+    n, p = CTPSS.beSampleN(;theta0=1.0, theta1=0.8, theta2=1.25, cv=0.3, alpha=0.05, beta=0.1, logscale=true, method="owenq")
+    @test n == 40 && round(p, digits=7) == 0.9095603
+
+    n, p = CTPSS.beSampleN(;theta0=1.05, theta1=0.8, theta2=1.25, cv=0.4, alpha=0.05, beta=0.15, logscale=true, method="nct")
+    @test n == 74 && round(p, digits=7) == 0.8558178
+
+    n, p = CTPSS.beSampleN(;theta0=1.05, theta1=0.9, theta2=1.25, cv=0.4, alpha=0.05, beta=0.15, logscale=true, method="nct")
+    @test n == 108 && round(p, digits=7) == 0.8506248
+
+    n, p = CTPSS.beSampleN(;theta0=1.05, theta1=0.8, theta2=1.2, cv=0.5, alpha=0.05, beta=0.2, logscale=true, method="nct")
+    @test n == 158 && round(p, digits=7) == 0.8039191
+
+    n, p = CTPSS.beSampleN(;theta0=1.05, theta1=0.8, theta2=1.25, cv=0.8, alpha=0.05, beta=0.2, logscale=true, method="shifted")
+    @test n == 210 && round(p, digits=7) == 0.8012471
+
+    n, p = CTPSS.beSampleN(;theta0=0, theta1=-0.2, theta2=0.2, cv=0.5, alpha=0.05, beta=0.2, logscale=false, method="owenq")
+    @test n == 110 && round(p, digits=7) == 0.8074124
+
+    n, p = CTPSS.beSampleN(;theta0=0, theta1=-0.2, theta2=0.2, cv=2, alpha=0.05, beta=0.2, logscale=false, method="owenq")
+    @test n == 1716 && round(p, digits=7) == 0.8005618
+
+    n, p = CTPSS.beSampleN(;theta0=0, theta1=-0.2, theta2=0.2, cv=2, alpha=0.001, beta=0.2, logscale=false, method="owenq")
+    @test n == 3828 && round(p, digits=7) == 0.8001454
+
+    n, p = CTPSS.beSampleN(;theta0=0, theta1=-0.2, theta2=0.2, cv=2, alpha=0.01, beta=0.01, logscale=false, method="owenq")
+    @test n == 4810 && round(p, digits=7) == 0.9900151
+
+    n, p = beSampleN( cv=0.347)
+    @test n == 52 && round(p, digits=7) == 0.8136415
+end

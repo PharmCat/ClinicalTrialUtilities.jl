@@ -28,6 +28,7 @@ export ctPower
 export owensQ
 export owensT
 export powerTOST
+export beSampleN
 export ParamSet
 export sampleSizeParam
 
@@ -158,4 +159,63 @@ export sampleSizeParam
         else return false end
     end #ctPower
 #-------------------------------------------------------------------------------
+
+    function beSampleN(;theta0=0.95, theta1=0.8, theta2=1.25, cv=0, alpha=0.05, beta=0.2, logscale=true, design="2x2", method="owenq", txt=true)
+        if cv <= 0 return false end
+        if alpha >= 1 || alpha <= 0 || beta >= 1 || beta <= 0 return false end
+
+        if logscale
+            if theta1 < 0 || theta2 < 0 || theta0 < 0 return false end
+            ltheta1 = log(theta1)
+            ltheta2 = log(theta2)
+            diffm   = log(theta0)
+            se      = cv2se(cv)
+        else
+            ltheta1 = theta1
+            ltheta2 = theta2
+            diffm   = theta0
+            se      = cv
+        end
+
+        #values for approximate n
+        td = (ltheta1 + ltheta2)/2
+        rd = abs((ltheta1 - ltheta2)/2)
+
+        if rd <= 0 return false end
+
+        d0 = diffm - td
+
+        n0 = twoSampleMeanEquivalence(0, d0, se, rd, alpha=alpha, beta=beta) #approximate n
+        n0 = ceil(n0/2)*2
+        tp = 1 - beta  #target power
+
+        if n0 > 5000 n0 = 5000 end
+        pow = powerTOST(;alpha=alpha, logscale=false, theta1=ltheta1, theta2=ltheta2, theta0=diffm, cv=se, n=n0, design=design, method=method)
+        np = 0
+        powp = 0
+        if pow > tp
+            while (pow > tp)
+                np = n0
+                powp = pow
+                n0 = n0 - 2
+                pow = powerTOST(;alpha=alpha, logscale=false, theta1=ltheta1, theta2=ltheta2, theta0=diffm, cv=se, n=n0, design=design, method=method)
+                if n0 < 4 return n0, pow end
+            end
+            estpower = powp
+            estn     = np
+        elseif pow < tp
+            while (pow < tp)
+                np = n0
+                powp = pow
+                n0 = n0 + 2
+                pow = powerTOST(;alpha=alpha, logscale=false, theta1=ltheta1, theta2=ltheta2, theta0=diffm, cv=se, n=n0, design=design, method=method)
+                if n0 > 10000 return n0, pow end
+            end
+            estpower = pow
+            estn     = n0
+        else return n0, pow end
+
+        return estn, estpower
+
+    end
 end # module

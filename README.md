@@ -31,7 +31,9 @@ sampleSize (;param, type, group, alpha, beta, diff, sd, a, b, k) - Sample size c
 
 ctPower(;param, type, group, alpha, n, diff, sd, a, b, k) - Clinical trial power estimation.
 
-powerTOST(;alpha, logscale, theta1, theta2, theta0, cv, n, method) - Power calculation for TOST (for Bioequivalence trials).
+powerTOST(;alpha, logscale, theta1, theta2, theta0, cv, n, method) - Power calculation for TOST (for 2X2 Bioequivalence trials).
+
+beSampleN(;theta0=0.95, theta1=0.8, theta2=1.25, cv=0, alpha=0.05, beta=0.2, logscale=true, method="owenq") - iterative sample size calculation for 2X2 Bioequivalence trials.
 
 owensT(h,a) - Owen's T function
 
@@ -39,6 +41,7 @@ owensQ(nu, t, delta, a, b) - Owen's Q function
 
 
 ### Usage
+
 #### sampleSize
 ```
 using CTPSS
@@ -117,8 +120,6 @@ powerTOST(alpha=0.05, logscale=true|false, theta1=0.8, theta2=1.25, theta0=0.95,
 
 **alpha** - Alpha (o < alpha < 1)  (default=0.05);
 
-**beta** - Beta (o < beta < 1) (default=0.2); power = 1 - beta;
-
 **theta1** - Lower Level;
 
 **theta2** - Upper level;
@@ -131,6 +132,30 @@ powerTOST(alpha=0.05, logscale=true|false, theta1=0.8, theta2=1.25, theta0=0.95,
 
 **method** - calculating method: Oqen'sQ Function | NonCentral T, Shifted;
 
+#### beSampleN
+
+Using only for 2X2 crossover study.
+
+```
+using CTPSS
+beSampleN(alpha=0.05, logscale=true|false, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.15, method="owenq|nct|shifted")
+```
+**logscale** - theta1, theta2, theta0: if true - make log transformation;
+
+**alpha** - Alpha (o < alpha < 1)  (default=0.05);
+
+**beta** - Beta (o < beta < 1) (default=0.2); power = 1 - beta;
+
+**theta1** - Lower Level;
+
+**theta2** - Upper level;
+
+**theta0** - T/R Ratio;
+
+**cv** - coefficient of variation;
+
+**method** - calculating method: Owen'sQ Function | NonCentral T | Shifted;
+
 ### Examples:
 
 ```
@@ -142,12 +167,17 @@ sampleSize(param="or", type="ea", a=0.3, b=0.5, k=2)
 powerTOST(alpha=0.1, logscale=false, theta1=-0.1, theta2=0.1, theta0=0, cv=0.14, n=21, method="shifted")
 powerTOST(alpha=0.1, logscale=false, theta1=-0.1, theta2=0.1, theta0=0, cv=0.14, n=21)
 powerTOST(cv=0.14, n=21)
+
+beSampleN(alpha=0.05,  theta1=0.8, theta2=1.25, theta0=0.95, cv=0.15, method="owenq")
+beSampleN( cv=0.20, method="nct")
+beSampleN( cv=0.40)
 ```
 
 ### ToDo:
 
- 
+
  - knownDesign () from PowerTost
- - sampleSizeBE ()
+ - implement parallel design
+ - implement replicate design
  - cvfromci ()
  - Simulations.
