@@ -21,7 +21,7 @@ Author: Vladimir Arnautov
 ### Install:
 ```
 using Pkg
-Pkg.add("git://github.com/PharmCat/ClinicalTrialUtilities.jl.git")
+Pkg.clone("https://github.com/PharmCat/ClinicalTrialUtilities.jl.git");
 ```
 
 ### Functions:
