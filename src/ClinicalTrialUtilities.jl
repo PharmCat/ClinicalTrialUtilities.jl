@@ -13,7 +13,7 @@
 # matlab code  by J. Burkhardt license GNU LGPL
 # If you want to check and get R code you can find some here: http://powerandsamplesize.com/Calculators/
 __precompile__(true)
-module CTPSS
+module ClinicalTrialUtilities
 using Distributions
 using Rmath #should be rewrited
 using QuadGK

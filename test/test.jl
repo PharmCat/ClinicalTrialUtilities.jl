@@ -72,7 +72,7 @@ println(" ---------------------------------- ")
     @test ClinicalTrialUtilities.twoProportionNSP(0.85, 0.65, -0.1, 25; alpha=0.05, k=1) ≈ 0.808599833380679 ≈ ClinicalTrialUtilities.ctPower(param="prop", type="ns", group="two", a=0.85, b=0.65, diff=-0.1, n=25, alpha=0.05)
     @test ClinicalTrialUtilities.orEqualityP(0.4, 0.25, 156; alpha=0.05, k=1) ≈ 0.8020239054864792 ≈ ClinicalTrialUtilities.ctPower(param="or", type="ea", a=0.4, b=0.25, n=156, alpha=0.05)
     @test ClinicalTrialUtilities.orEquivalenceP(0.25, 0.25, 0.5, 366; alpha=0.05, k=1, logdiff=true) ≈ 0.8008593380478983  ≈ ClinicalTrialUtilities.ctPower(param="or", type="ei", a=0.25, b=0.25, diff=0.5, n=366, alpha=0.05)
-    @test ClinicalTrialUtilities.orNSP(0.4, 0.25, 0.2, 242; alpha=0.05, k=1, logdiff=true) ≈ 0.8007200876001626  ≈ ClinicalTrialUtilities.ctPower(param="or", type="ns", a=0.4, b=0.25, diff=0.2, n=242, alpha=0.05)
+    @test ClinicalTrialUtilities.orNSP(0.4, 0.25, 0.2, 242; alpha=0.05, k=1, logdiff=true) ≈ 0.8007200876001626  ≈ ctPower(param="or", type="ns", a=0.4, b=0.25, diff=0.2, n=242, alpha=0.05)
 
 end
 println(" ---------------------------------- ")
@@ -94,7 +94,7 @@ println(" ---------------------------------- ")
     @test round(ClinicalTrialUtilities.owensQ(4,100,40,0,Inf), digits=7) ≈ 0.9584071
     @test round(ClinicalTrialUtilities.owensQ(1,1,1,0,Inf), digits=5) ≈  0.42202
     @test round(ClinicalTrialUtilities.owensQ(4,100,30,0,0.8), digits=8) ≈ 0.02702275
-    @test round(ClinicalTrialUtilities.owensQ(1,100,40,0,1), digits=7) ≈ 0.3718607
+    @test round(owensQ(1,100,40,0,1), digits=7) ≈ 0.3718607
 
     @test round(ClinicalTrialUtilities.powerTOSTOwenQ(0.05,0.1,0.4,0.05,0.11,23), digits=8) ≈ 0.00147511
 
@@ -117,7 +117,7 @@ println(" ---------------------------------- ")
     @test round(ClinicalTrialUtilities.owensT(-1,-Inf), digits=8) ≈ -0.07932763
     @test round(ClinicalTrialUtilities.owensT(1, 0.5), digits=8) ≈0.0430647
     @test round(ClinicalTrialUtilities.owensT(1,2), digits=8) ≈ 0.07846819
-    @test       ClinicalTrialUtilities.owensT(Inf, 1) == 0
+    @test       owensT(Inf, 1) == 0
 end
 
 @testset "PowerTOST Errors      " begin
