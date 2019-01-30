@@ -1,16 +1,16 @@
 # Clinical Trial Power and Sample Size calculation
 # Version: 0.1.4
 # Author: Vladimir Arnautov aka PharmCat
-# Copyright © 2019 Vladimir Arnautov aka PharmCat
+# Copyright © 2019 Vladimir Arnautov aka PharmCat (mail@pharmcat.net)
 # OwensQ/PowerTOST functions rewrited from https://github.com/Detlew/PowerTOST by Detlew Labes, Helmut Schuetz, Benjamin Lang
 # Licence: GNU Affero General Public License v3.0
 # Reference:
 # Calculation based on Chow S, Shao J, Wang H. 2008. Sample Size Calculations in Clinical Research. 2nd Ed. Chapman & Hall/CRC Biostatistics Series.
 # Connor R. J. 1987. Sample size for testing differences in proportions for the paired-sample design. Biometrics 43(1):207-211. page 209.
 # Owen, D B (1965) "A Special Case of a Bivariate Non-central t-Distribution" Biometrika Vol. 52, pp.437-446.
-# FORTRAN code in the References and matlab code given on https://people.sc.fsu.edu/~jburkardt/m_src/asa076/asa076.html by J. Burkhardt, license GNU LGPL
+# FORTRAN code by J. Burkhardt, license GNU LGPL
 # D.B. Owen "Tables for computing bivariate normal Probabilities" The Annals of Mathematical Statistics, Vol. 27 (4) Dec. 1956, pp. 1075-1090
-# matlab code given on https://people.sc.fsu.edu/~jburkardt/m_src/owens/owens.html by J. Burkhardt license GNU LGPL
+# matlab code  by J. Burkhardt license GNU LGPL
 # If you want to check and get R code you can find some here: http://powerandsamplesize.com/Calculators/
 __precompile__(true)
 module CTPSS
@@ -22,6 +22,7 @@ import SpecialFunctions.lgamma
 include("OwensQ.jl")
 include("PowerTOST.jl")
 include("PowerSampleSize.jl")
+include("Info.jl")
 
 export sampleSize
 export ctPower
@@ -102,7 +103,6 @@ export sampleSizeParam
             else return false end
         else return false end
     end #sampleSize
-
     #clinical trial power main function
     function ctPower(;param="mean", type="ea", group="one", alpha=0.05, diff=0, sd=0, a=0, b=0, n=0, k=1)
         if alpha >= 1 || alpha <= 0  return false end
@@ -159,7 +159,6 @@ export sampleSizeParam
         else return false end
     end #ctPower
 #-------------------------------------------------------------------------------
-
     function beSampleN(;theta0=0.95, theta1=0.8, theta2=1.25, cv=0, alpha=0.05, beta=0.2, logscale=true, design="2x2", method="owenq", txt=true)
         if cv <= 0 return false end
         if alpha >= 1 || alpha <= 0 || beta >= 1 || beta <= 0 return false end
@@ -176,7 +175,6 @@ export sampleSizeParam
             diffm   = theta0
             se      = cv
         end
-
         #values for approximate n
         td = (ltheta1 + ltheta2)/2
         rd = abs((ltheta1 - ltheta2)/2)
@@ -214,8 +212,6 @@ export sampleSizeParam
             estpower = pow
             estn     = n0
         else return n0, pow end
-
         return estn, estpower
-
     end
 end # module end

@@ -1,5 +1,5 @@
-authors = ["PharmCat"]
-name = "CTPSS"
+authors = ["Vladimir Arnautov (mail@pharmcat.net)"]
+name = "ClinicalTrialUtilities"
 uuid = "ece08a5e-c1b8-52d4-90ab-17ca167e16ba"
 version = "0.1.5"
 

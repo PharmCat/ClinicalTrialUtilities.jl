@@ -1,6 +1,6 @@
 # Clinical Trial Power and Sample Size calculation
 # Author: Vladimir Arnautov aka PharmCat
-# Copyright © 2019 Vladimir Arnautov aka PharmCat
+# Copyright © 2019 Vladimir Arnautov aka PharmCat (mail@pharmcat.net)
 # Calculation based on Chow S, Shao J, Wang H. 2008. Sample Size Calculations in Clinical Research. 2nd Ed. Chapman & Hall/CRC Biostatistics Series.
 # OwensQ function rewrited from https://github.com/Detlew/PowerTOST by Detlew Labes, Helmut Schuetz, Benjamin Lang
 # Licence: GNU Affero General Public License v3.0
@@ -67,7 +67,7 @@ function orNS(p0, p1, diff; alpha=0.05, beta=0.2, k=1, logdiff=true)
     return (1/k/p0/(1-p0)+1/p1/(1-p1))*((quantile(ZDIST, 1-alpha)+quantile(ZDIST, 1 - beta))/(log(OR)-diff))^2
 end
 
-#CTPSS.mcnm(0.45, 0.05, alpha=0.1, beta=0.1)
+#ClinicalTrialUtilities.mcnm(0.45, 0.05, alpha=0.1, beta=0.1)
 #22.80907052752994
 #Connor R. J. 1987. Sample size for testing differences in proportions for the paired-sample design. Biometrics 43(1):207-211. page 209.
 function mcnm(p10, p01; alpha=0.05, beta=0.2)

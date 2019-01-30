@@ -1,4 +1,4 @@
-# CTPSS
+# ClinicalTrialUtilities
  Clinical Trial Power and Sample Size calculation
 
 
@@ -8,10 +8,10 @@ Author: Vladimir Arnautov
 
 2019 &copy; Vladimir Arnautov
 
-[![Build Status](https://travis-ci.com/PharmCat/CTPSS.svg?branch=master)](https://travis-ci.com/PharmCat/CTPSS)
-[![Build status](https://ci.appveyor.com/api/projects/status/c7x06t501eqjvd6s?svg=true)](https://ci.appveyor.com/project/PharmCat/ctpss)
-[![codecov](https://codecov.io/gh/PharmCat/CTPSS/branch/master/graph/badge.svg)](https://codecov.io/gh/PharmCat/CTPSS)
-[![Coverage Status](https://coveralls.io/repos/github/PharmCat/CTPSS/badge.svg?branch=master)](https://coveralls.io/github/PharmCat/CTPSS?branch=master)
+[![Build Status](https://travis-ci.com/PharmCat/ClinicalTrialUtilities.svg?branch=master)](https://travis-ci.com/PharmCat/ClinicalTrialUtilities)
+[![Build status](https://ci.appveyor.com/api/projects/status/c7x06t501eqjvd6s?svg=true)](https://ci.appveyor.com/project/PharmCat/ClinicalTrialUtilities)
+[![codecov](https://codecov.io/gh/PharmCat/ClinicalTrialUtilities/branch/master/graph/badge.svg)](https://codecov.io/gh/PharmCat/ClinicalTrialUtilities)
+[![Coverage Status](https://coveralls.io/repos/github/PharmCat/ClinicalTrialUtilities/badge.svg?branch=master)](https://coveralls.io/github/PharmCat/ClinicalTrialUtilities?branch=master)
 ### Dependencies:
 
  - Distributions
@@ -22,7 +22,7 @@ Author: Vladimir Arnautov
 ### Install:
 ```
 using Pkg
-Pkg.add("git://github.com/PharmCat/CTPSS.git")
+Pkg.add("git://github.com/PharmCat/ClinicalTrialUtilities.git")
 ```
 
 ### Functions:
@@ -44,7 +44,7 @@ owensQ(nu, t, delta, a, b) - Owen's Q function
 
 #### sampleSize
 ```
-using CTPSS
+using ClinicalTrialUtilities
 sampleSize(param="mean|prop|or", type="ea|ei|ns", group="one|two", alpha=0.05, beta=0.2, diff=1, sd=2, a=1, b=2, k=1)
 
 ```
@@ -78,7 +78,7 @@ sampleSize(param="mean|prop|or", type="ea|ei|ns", group="one|two", alpha=0.05, b
 
 #### ctPower
 ```
-using CTPSS
+using ClinicalTrialUtilities
 ctPower(param="mean|prop|or", type="ea|ei|ns", group="one|two", alpha=0.05, n=30, diff=1, sd=2, a=1, b=2, k=1)
 ```
 
@@ -113,7 +113,7 @@ ctPower(param="mean|prop|or", type="ea|ei|ns", group="one|two", alpha=0.05, n=30
 #### powerTOST
 
 ```
-using CTPSS
+using ClinicalTrialUtilities
 powerTOST(alpha=0.05, logscale=true|false, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.15, n=36, method="owenq|nct|shifted")
 ```
 **logscale** - theta1, theta2, theta0: if true - make log transformation;
@@ -137,7 +137,7 @@ powerTOST(alpha=0.05, logscale=true|false, theta1=0.8, theta2=1.25, theta0=0.95,
 Using only for 2X2 crossover study.
 
 ```
-using CTPSS
+using ClinicalTrialUtilities
 beSampleN(alpha=0.05, logscale=true|false, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.15, method="owenq|nct|shifted")
 ```
 **logscale** - theta1, theta2, theta0: if true - make log transformation;

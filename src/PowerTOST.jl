@@ -1,3 +1,5 @@
+# Copyright © 2019 Vladimir Arnautov aka PharmCat (mail@pharmcat.net)
+
 
 function powerTOST(;alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0, n=0, design="2x2", method="owenq")
 
