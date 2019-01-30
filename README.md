@@ -1,17 +1,16 @@
 # ClinicalTrialUtilities
  Clinical Trial Power and Sample Size calculation
 
-
 Version:0.1.5
 
 Author: Vladimir Arnautov
 
 2019 &copy; Vladimir Arnautov
 
-[![Build Status](https://travis-ci.com/PharmCat/ClinicalTrialUtilities.svg?branch=master)](https://travis-ci.com/PharmCat/ClinicalTrialUtilities)
-[![Build status](https://ci.appveyor.com/api/projects/status/c7x06t501eqjvd6s?svg=true)](https://ci.appveyor.com/project/PharmCat/ClinicalTrialUtilities)
-[![codecov](https://codecov.io/gh/PharmCat/ClinicalTrialUtilities/branch/master/graph/badge.svg)](https://codecov.io/gh/PharmCat/ClinicalTrialUtilities)
-[![Coverage Status](https://coveralls.io/repos/github/PharmCat/ClinicalTrialUtilities/badge.svg?branch=master)](https://coveralls.io/github/PharmCat/ClinicalTrialUtilities?branch=master)
+[![Build Status](https://travis-ci.com/PharmCat/ClinicalTrialUtilities.jl.svg?branch=master)](https://travis-ci.com/PharmCat/ClinicalTrialUtilities.jl)
+[![Build status](https://ci.appveyor.com/api/projects/status/c7x06t501eqjvd6s?svg=true)](https://ci.appveyor.com/project/PharmCat/ClinicalTrialUtilities.jl)
+[![codecov](https://codecov.io/gh/PharmCat/ClinicalTrialUtilities.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/PharmCat/ClinicalTrialUtilities.jl)
+[![Coverage Status](https://coveralls.io/repos/github/PharmCat/ClinicalTrialUtilities.jl/badge.svg?branch=master)](https://coveralls.io/github/PharmCat/ClinicalTrialUtilities.jl?branch=master)
 ### Dependencies:
 
  - Distributions
