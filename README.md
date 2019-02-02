@@ -21,9 +21,13 @@ Author: Vladimir Arnautov
 ### Install:
 ```
 using Pkg
+Pkg.add("ClinicalTrialUtilities");
+```
+or
+```
+using Pkg
 Pkg.clone("https://github.com/PharmCat/ClinicalTrialUtilities.jl.git");
 ```
-
 ### Functions:
 
 sampleSize (;param, type, group, alpha, beta, diff, sd, a, b, k) - Sample size calculation.
@@ -36,7 +40,7 @@ beSampleN(;theta0=0.95, theta1=0.8, theta2=1.25, cv=0, alpha=0.05, beta=0.2, log
 
 owensT(h,a) - Owen's T function
 
-owensQ(nu, t, delta, a, b) - Owen's Q function
+owensQ(nu, t, delta, a, b) - Owen's Q function, "a" always should be equal 0.
 
 
 ### Usage
@@ -58,8 +62,8 @@ sampleSize(param="mean|prop|or", type="ea|ei|ns", group="one|two", alpha=0.05, b
 - ns - Non-Inferiority / Superiority;
 
 **group (Group num):**
-- one - one sample  (default);
-- two - Two sample;
+- one - One sample  (default);
+- two - Two sample, result is for one group, second group size = n * k;
 
 **alpha** - Alpha (o < alpha < 1)  (default=0.05);
 
@@ -174,9 +178,11 @@ beSampleN( cv=0.40)
 
 ### ToDo:
 
-
+ - text output
+ - atomic function interface with struct
  - knownDesign () from PowerTost
- - implement parallel design
- - implement replicate design
+ - implement parallel design for BE
+ - implement replicate design for BE
+ - remove Rmath from dependencies
  - cvfromci ()
- - Simulations.
+ - Simulations
