@@ -8,6 +8,10 @@ julia:
   - 1.1
   - nightly
 
+branches:
+  only:
+  - master
+
 matrix:
   allow_failures:
   - julia: nightly
