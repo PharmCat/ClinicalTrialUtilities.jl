@@ -22,6 +22,7 @@ import SpecialFunctions.lgamma
 include("OwensQ.jl")
 include("PowerTOST.jl")
 include("PowerSampleSize.jl")
+include("SampleSize.jl")
 include("Info.jl")
 
 export sampleSize
@@ -49,7 +50,7 @@ export sampleSizeParam
     function sampleSizeParam(x::ParamSet)
         return sampleSize(param=x.param, type=x.type, group=x.group, alpha=x.alpha, beta=x.beta, sd=x.sd, a=x.a, b=x.b, k=x.k)
     end
-
+"""
     #main sample size function
     function sampleSize(;param="mean", type="ea", group="one", alpha=0.05, beta=0.2, diff=0, sd=0, a=0, b=0, k=1)
         if alpha >= 1 || alpha <= 0 || beta >= 1 || beta <= 0 return false end
@@ -214,4 +215,6 @@ export sampleSizeParam
         else return n0, pow end
         return estn, estpower
     end
+
+    """
 end # module end

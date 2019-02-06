@@ -13,7 +13,7 @@ function owensQ(nu, t, delta, a, b)
     if a < 0 return false end
     if a==b return(0) end
     if a > b return false end
-    if a > 0 return owensQ(nu, t, delta, 0, b) - owensQ(nu, t, delta, 0, a) #not effective - double integration
+    if a > 0 return owensQ(nu, t, delta, 0, b) - owensQ(nu, t, delta, 0, a)  end #not effective - double integration
 
     if nu < 29 && abs(delta) > 37.62
         if isinf(b)
