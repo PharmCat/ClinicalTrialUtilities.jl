@@ -1,14 +1,25 @@
 # Copyright © 2019 Vladimir Arnautov aka PharmCat (mail@pharmcat.net)
 
-
-function powerTOST(;alpha::Float64=0.05, logscale::Bool=true, theta1::Float64=0.8, theta2::Float64=1.25, theta0::Float64=0.95, cv::Float64=0.0, n=0, design="2x2"::String, method="owenq"::String)::Float64
-
-    #if isnan(cv) || isnan(n) return false end
+function powerTOST(;alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.0, n=0, design="2x2", method="owenq")
     if n < 2 return throw(CTUException(1021,"powerTOST: n can not be < 2")) end
     if cv == 0 throw(CTUException(1022,"powerTOST: cv can not be equal to 0"))  end
     if !(0 < alpha < 1) return throw(CTUException(1023,"powerTOST: alfa can not be > 1 or < 0")) end
+    theta0 = convert(Float64, theta0)
+    theta1 = convert(Float64, theta1)
+    theta2 = convert(Float64, theta2)
+    logscale = convert(Bool, logscale)
+    cv = convert(Float64, cv)
+    n = convert(Int, n)
+    alpha = convert(Float64, alpha)
 
-    df = n-2
+    powerTOSTint(alpha, logscale, theta1, theta2, theta0, cv, n, design, method)
+end
+
+function powerTOSTint(alpha::Float64, logscale::Bool, theta1::Float64, theta2::Float64, theta0::Float64, cv::Float64, n::Int, design::String, method::String)::Float64
+
+    #if isnan(cv) || isnan(n) return false end
+
+    df::Int = n-2
     n1  = n ÷ 2
     n2  = n1 + n % 2
     sef::Float64 = sqrt((1/n1+1/n2)*0.5)
@@ -59,9 +70,12 @@ function powerTOSTOwenQ(alpha,ltheta1,ltheta2,diffm,sem,df)
     # 'shifted' normal approximation Jan 2015
     # former Julious formula (57)/(58) doesn't work
     if df > 10000
-        tval = qnorm(1-alpha)
-        p1   = pnorm(tval-delta1)
-        p2   = pnorm(-tval-delta2)
+        #tval = qnorm(1-alpha)
+        tval  = quantile(ZDIST, 1-alpha)
+        #p1   = pnorm(tval-delta1)
+        p1    = cdf(ZDIST, tval-delta1)
+        #p2    = pnorm(-tval-delta2)
+        p2    = cdf(ZDIST, -tval-delta2)
 
         pwr = p2-p1
         if pwr > 0 return pwr else return 0 end

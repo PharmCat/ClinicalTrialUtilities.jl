@@ -5,7 +5,6 @@
 # This script contains some graphics examples
 # Plots package require, not in dependencies
 
-
 using Plots
 
 # owensQ function

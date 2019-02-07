@@ -193,20 +193,22 @@ function beSampleN(;theta0=0.95, theta1=0.8, theta2=1.25, cv=0.0, alpha=0.05, be
 
     d0 = diffm - td
 
-    n0 = twoSampleMeanEquivalence(0, d0, se, rd, alpha=alpha, beta=beta) #approximate n
-    n0 = ceil(n0/2)*2
+    #approximate n
+    n0::Int = convert(Int, ceil(twoSampleMeanEquivalence(0, d0, se, rd, alpha=alpha, beta=beta)/2)*2)
     tp = 1 - beta  #target power
 
     if n0 > 5000 n0 = 5000 end
     pow = powerTOST(;alpha=alpha, logscale=false, theta1=ltheta1, theta2=ltheta2, theta0=diffm, cv=se, n=n0, design=design, method=method)
     np = 0
-    powp = 0
+    powp::Float64 = 0.0
     if pow > tp
         while (pow > tp)
             np = n0
             powp = pow
             n0 = n0 - 2
-            pow = powerTOST(;alpha=alpha, logscale=false, theta1=ltheta1, theta2=ltheta2, theta0=diffm, cv=se, n=n0, design=design, method=method)
+            #pow = powerTOST(;alpha=alpha, logscale=false, theta1=ltheta1, theta2=ltheta2, theta0=diffm, cv=se, n=n0, design=design, method=method)
+            pow = powerTOSTint(alpha, false, ltheta1, ltheta2, diffm, se, n0, design, method)
+
             if n0 < 4 return n0, pow end
         end
         estpower = powp
@@ -216,7 +218,9 @@ function beSampleN(;theta0=0.95, theta1=0.8, theta2=1.25, cv=0.0, alpha=0.05, be
             np = n0
             powp = pow
             n0 = n0 + 2
-            pow = powerTOST(;alpha=alpha, logscale=false, theta1=ltheta1, theta2=ltheta2, theta0=diffm, cv=se, n=n0, design=design, method=method)
+            #pow = powerTOST(;alpha=alpha, logscale=false, theta1=ltheta1, theta2=ltheta2, theta0=diffm, cv=se, n=n0, design=design, method=method)
+            pow = powerTOSTint(alpha, false, ltheta1, ltheta2, diffm, se, n0, design, method)
+
             if n0 > 10000 return n0, pow end
         end
         estpower = pow
