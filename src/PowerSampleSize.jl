@@ -10,7 +10,7 @@
 #Compare Means
 #One Sample
 # m0 = μ0; m1 = μ
-function oneSampleMeanEquality(m0, m1, sd; alpha=0.05, beta=0.2)
+function oneSampleMeanEquality(m0, m1, sd; alpha=0.05, beta=0.2)::Float64
     return ((quantile(ZDIST, 1-alpha/2) + quantile(ZDIST, 1-beta))*sd/(m1-m0))^2
 end
 function oneSampleMeanEquivalence(m0, m1, sd, diff; alpha=0.05, beta=0.2)

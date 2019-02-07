@@ -8,11 +8,11 @@
 # general OwensQ function
 # https://github.com/Detlew/PowerTOST/blob/master/R/OwensQ.R#L52
 
-function owensQ(nu, t, delta, a, b)
+function owensQ(nu, t::Float64, delta::Float64, a::Float64, b::Float64)::Float64
 
-    if a < 0 return false end
+    if a < 0 return  throw(CTUException(1011,"owensQ: a can not be < 0")) end
     if a==b return(0) end
-    if a > b return false end
+    if a > b return throw(CTUException(1012,"owensQ: a can not be > b")) end
     if a > 0 return owensQ(nu, t, delta, 0, b) - owensQ(nu, t, delta, 0, a)  end #not effective - double integration
 
     if nu < 29 && abs(delta) > 37.62
@@ -43,13 +43,13 @@ end #owensQ
 # Port from PowerTOST - dlabes Mar 2012
 
 #OwensQOwen
-function owensQo(nu,t,delta,b;a=0)
-    if nu < 1 return false end
-    if a != 0 return false end
+function owensQo(nu,t::Float64,delta::Float64,b::Float64;a=0::Float64)::Float64
+    if nu < 1  throw(CTUException(1001,"owensQo: nu can not be < 1")) end
+    if a != 0 throw(CTUException(1002,"owensQo: a can not be not 0")) end
     if isinf(b) return cdf(NoncentralT(nu,delta),t) end
     if isinf(delta) delta = sign(delta)*1e20 end
-    A = t/sqrt(nu)
-    B = nu/(nu + t*t)
+    A::Float64 = t/sqrt(nu)
+    B::Float64 = nu/(nu + t*t)
     upr = nu-2
     #some code abs L vector H vector M vector
     av = Array{Float64}(undef, nu)
@@ -75,14 +75,14 @@ function owensQo(nu,t,delta,b;a=0)
     end
     #pass1
     M = Array{Float64}(undef, ll)
-    sB = sqrt(B)
+    sB::Float64 = sqrt(B)
     for i = 1:length(M)
         if i==1 M[1] = A*sB*dnorm(delta*sB)*(pnorm(delta*A*sB)-pnorm((delta*A*B-b)/sB)) end
         if i==2 M[2] = B*(delta*A*M[1]+A*dnorm(delta*sB)*(dnorm(delta*A*sB)-dnorm((delta*A*B-b)/sB))) end
         if i>2 M[i] = ((i-2)/(i-1))*B*(av[i-1]*delta*A*M[i-1]+M[i-2]) - L[i-2] end
     end
     #pass
-    sumt = 0
+    sumt::Float64 = 0
     if nu%2 > 0
         if upr>=1
             for i = 1:2:upr
@@ -106,13 +106,13 @@ end #OwensQo
 #-------------------------------------------------------------------------------
 # functions bellow used in owensQ
 #PowerTost owensQ #37 and impl b for #52-54
-function ifun1(x, nu, t, delta; b=0)
+@inline function ifun1(x::Float64, nu, t::Float64, delta::Float64; b=0.0::Float64)::Float64
     return owensTint2(b+x/(1-x), nu, t, delta)*1/(1-x)^2
 end
 #.Q.integrand
-function owensTint2(x, nu, t, delta)
+@inline function owensTint2(x::Float64, nu, t::Float64, delta::Float64)::Float64
     if x == 0 return 0 end
-    Qconst = -((nu/2.0)-1.0)*log(2.0)-lgamma(nu/2.0)
+    Qconst::Float64 = -((nu/2.0)-1.0)*log(2.0)-lgamma(nu/2.0)
     return sign(x)^(nu-1)*pnorm(t*x/sqrt(nu)-delta)*exp((nu-1)*log(abs(x))-0.5*x^2+Qconst)
 end
 #-------------------------------------------------------------------------------
@@ -123,7 +123,7 @@ end
 # https://people.sc.fsu.edu/~jburkardt/m_src/asa076/asa076.html
 # by J. Burkhardt, license GNU LGPL
 # rewrite from PowerTOST
-function owensT(h,a)
+function owensT(h::Float64,a::Float64)::Float64
     #not implemented
     epsilon = eps()
     # special cases
@@ -140,14 +140,14 @@ function owensT(h,a)
             return sign(a)*tha
         end
     end
-    aa = abs(a)
+    aa::Float64 = abs(a)
     if aa <= 1.0
-        tha = tfn(h, a)
+        tha::Float64 = tfn(h, a)
         return tha
     else
-        ah  = aa * h
-        gh  = pnorm(h)
-        gah = pnorm(ah)
+        ah::Float64  = aa * h
+        gh::Float64  = pnorm(h)
+        gah::Float64 = pnorm(ah)
         tha = 0.5*(gh + gah) - gh*gah - tfn(ah, 1.0/aa)
     end
     if a < 0.0 return -tha else return tha end
@@ -160,21 +160,21 @@ end #OwensT(h,a)
 # by J. Burkhardt license GNU LGPL
 # is called as tfn(h, a) if a<=1
 # otherwise as tfn(a*h, 1/a)
-function tfn(x, fx)
+@inline function tfn(x::Float64, fx::Float64)::Float64
     ng  = 5
-    r   = [0.1477621, 0.1346334, 0.1095432, 0.0747257, 0.0333357]
-    u   = [0.0744372, 0.2166977, 0.3397048, 0.4325317, 0.4869533]
-    tp  = 1/2/pi
+    r   = Float64[0.1477621, 0.1346334, 0.1095432, 0.0747257, 0.0333357]
+    u   = Float64[0.0744372, 0.2166977, 0.3397048, 0.4325317, 0.4869533]
+    tp::Float64  = 1/2/pi
     tv1 = eps();
-    tv2 = 15.0
-    tv3 = 15.0
-    tv4 = 1.0E-05
+    tv2::Float64 = 15.0
+    tv3::Float64 = 15.0
+    tv4::Float64 = 1.0E-05
     if tv2 < abs(x) return 0 end
-    xs  = -0.5*x*x
-    x2  = fx
-    fxs = fx * fx
+    xs::Float64  = -0.5*x*x
+    x2::Float64  = fx
+    fxs::Float64 = fx * fx
     if tv3 <= (log(1.0 + fxs) - xs*fxs)
-        x1  = 0.5 * fx
+        x1::Float64  = 0.5 * fx
         fxs = 0.25 * fxs
         while true
             rt  = fxs + 1.0
@@ -186,7 +186,9 @@ function tfn(x, fx)
     end
         # 10 point Gaussian quadrature.
         # original via loop
-        rt = 0
+        rt::Float64 = 0
+        r1::Float64 = 0
+        r2::Float64 = 0
         for i in 1:ng
             r1 = 1.0 + fxs*(0.5 + u[i])^2
             r2 = 1.0 + fxs*(0.5 - u[i])^2

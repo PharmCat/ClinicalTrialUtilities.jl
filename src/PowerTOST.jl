@@ -1,19 +1,19 @@
 # Copyright © 2019 Vladimir Arnautov aka PharmCat (mail@pharmcat.net)
 
 
-function powerTOST(;alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0, n=0, design="2x2", method="owenq")
+function powerTOST(;alpha::Float64=0.05, logscale::Bool=true, theta1::Float64=0.8, theta2::Float64=1.25, theta0::Float64=0.95, cv::Float64=0.0, n=0, design="2x2"::String, method="owenq"::String)::Float64
 
     #if isnan(cv) || isnan(n) return false end
-    if n < 2 return false end
-    if cv == 0 return false end
-    if !(0 < alpha < 1) return false end
+    if n < 2 return throw(CTUException(1021,"powerTOST: n can not be < 2")) end
+    if cv == 0 throw(CTUException(1022,"powerTOST: cv can not be equal to 0"))  end
+    if !(0 < alpha < 1) return throw(CTUException(1023,"powerTOST: alfa can not be > 1 or < 0")) end
 
     df = n-2
     n1  = n ÷ 2
     n2  = n1 + n % 2
-    sef = sqrt((1/n1+1/n2)*0.5)
+    sef::Float64 = sqrt((1/n1+1/n2)*0.5)
 
-    if df < 1 return false end
+    if df < 1 return  throw(CTUException(1024,"powerTOST: df < 1")) end
 
     if logscale
         ltheta1 = log(theta1)
@@ -27,7 +27,7 @@ function powerTOST(;alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0
         se      = cv
     end
 
-    sem = se*sef
+    sem::Float64 = se*sef
 
     if method=="owenq"
         return powerTOSTOwenQ(alpha,ltheta1,ltheta2,diffm,sem,df)
@@ -38,18 +38,18 @@ function powerTOST(;alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0
     elseif method=="shifted"
         return approx2PowerTOST(alpha,ltheta1,ltheta2,diffm,sem,df)
     else
-        return false
+         throw(CTUException(1025,"powerTOST: method "*method*" not known!"))
     end
 end #powerTOST
 
 #.power.TOST
 function powerTOSTOwenQ(alpha,ltheta1,ltheta2,diffm,sem,df)
-    tval = qt(1-alpha, df)
+    tval::Float64 = qt(1-alpha, df)
 
-    delta1 = (diffm-ltheta1)/sem
-    delta2 = (diffm-ltheta2)/sem
+    delta1::Float64 = (diffm-ltheta1)/sem
+    delta2::Float64 = (diffm-ltheta2)/sem
 
-    R = (delta1-delta2)*sqrt(df)/(tval+tval) #not clear R implementation of vector form
+    R::Float64 = (delta1-delta2)*sqrt(df)/(tval+tval) #not clear R implementation of vector form
 
     if isnan(R) R = 0 end
 
@@ -71,8 +71,8 @@ function powerTOSTOwenQ(alpha,ltheta1,ltheta2,diffm,sem,df)
     end
     # NOT VECTORIZED
 
-    p1 = owensQ(df, tval, delta1, 0, R)
-    p2 = owensQ(df,-tval, delta2, 0, R)
+    p1 = owensQ(df, tval, delta1, 0.0, R)
+    p2 = owensQ(df,-tval, delta2, 0.0, R)
 
     pwr = p2 - p1
     if pwr > 0 return pwr else return 0 end
@@ -85,16 +85,18 @@ end #powerTOSTOwenQ
 # .approx.power.TOST - PowerTOST
 function approxPowerTOST(alpha,ltheta1,ltheta2,diffm,sem,df)
 
-    tval = qt(1-alpha,df)
-    delta1 = (diffm-ltheta1)/sem
-    delta2 = (diffm-ltheta2)/sem
+    tval::Float64 = qt(1-alpha,df)
+    delta1::Float64 = (diffm-ltheta1)/sem
+    delta2::Float64 = (diffm-ltheta2)/sem
     pow = cdf(NoncentralT(df,delta2), -tval) - cdf(NoncentralT(df,delta1), tval)
     if pow > 0 return pow else return 0 end
 end #approxPowerTOST
 
 #.power.1TOST
 function power1TOST(alpha,ltheta1,ltheta2,diffm,sem,df)
-    return false #Method ON MULTIVARIATE t AND GAUSS PROBABILITIES IN R not implemented
+
+    throw(CTUException(1000,"Method not implemented!"))
+    #Method ON MULTIVARIATE t AND GAUSS PROBABILITIES IN R not implemented
     # Distributions.MvNormal - in plan
     # see  Distributions.jl/src/multivariate/mvtdist.jl
     # Multivariate t-distribution
@@ -105,9 +107,9 @@ end
 
 #.approx2.power.TOST
 function approx2PowerTOST(alpha,ltheta1,ltheta2,diffm,sem,df)
-    tval = qt(1-alpha, df)
-    delta1 = (diffm-ltheta1)/sem
-    delta2 = (diffm-ltheta2)/sem
+    tval::Float64 = qt(1-alpha, df)
+    delta1::Float64 = (diffm-ltheta1)/sem
+    delta2::Float64 = (diffm-ltheta2)/sem
     if isnan(delta1) delta1 = 0 end
     if isnan(delta2) delta2 = 0 end
 
@@ -117,6 +119,6 @@ function approx2PowerTOST(alpha,ltheta1,ltheta2,diffm,sem,df)
 end #approx2PowerTOST
 
 #CV2se
-function cv2se(cv)
+function cv2se(cv::Float64)::Float64
     return sqrt(log(1+cv^2))
 end

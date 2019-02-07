@@ -163,7 +163,13 @@ function ctPower(;param="mean", type="ea", group="one", alpha=0.05, diff=0, sd=0
     else return false end
 end #ctPower
 #-------------------------------------------------------------------------------
-function beSampleN(;theta0=0.95, theta1=0.8, theta2=1.25, cv=0, alpha=0.05, beta=0.2, logscale=true, design="2x2", method="owenq", txt=true)
+function beSampleN(;theta0=0.95, theta1=0.8, theta2=1.25, cv=0.0, alpha=0.05, beta=0.2, logscale::Bool=true, design::String="2x2", method::String="owenq", txt=true)
+    theta0 = convert(Float64, theta0)
+    theta1 = convert(Float64, theta1)
+    theta2 = convert(Float64, theta2)
+    cv = convert(Float64, cv)
+    alpha = convert(Float64, alpha)
+    beta = convert(Float64, beta)
     if cv <= 0 return false end
     if alpha >= 1 || alpha <= 0 || beta >= 1 || beta <= 0 return false end
 
