@@ -136,3 +136,6 @@ end #approx2PowerTOST
 function cv2se(cv::Float64)::Float64
     return sqrt(log(1+cv^2))
 end
+
+function designProp(n::Int, type::String)
+end

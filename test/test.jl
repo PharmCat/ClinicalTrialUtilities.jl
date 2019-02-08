@@ -21,7 +21,8 @@ println(" ---------------------------------- ")
     @test ceil(ClinicalTrialUtilities.sampleSize(param="or", type="ei",  alpha=0.05, beta=0.2, diff=0.5, a=0.25, b=0.25)) == 366
     @test ceil(ClinicalTrialUtilities.sampleSize(param="or", type="ns",  alpha=0.05, beta=0.2, diff=0.2, a=0.4, b=0.25)) == 242
 
-    @test ceil(ClinicalTrialUtilities.mcnm(0.45,0.05)) == 23
+    @test ceil(ClinicalTrialUtilities.sampleSize(param="prop", type="mcnm", a=0.45, b=0.05)) == 23
+    @test ceil(ClinicalTrialUtilities.mcnm(0.45, 0.05)) == 23
 
     @test round(sampleSize(param="mean", type="ns", group="two", alpha=0.05, beta=0.2, diff=1, sd=20, a=1, b=2), digits=12) ≈ 1236.511446403953
 
@@ -75,6 +76,7 @@ println(" ---------------------------------- ")
     @test ClinicalTrialUtilities.orEqualityP(0.4, 0.25, 156; alpha=0.05, k=1) ≈ 0.8020239054864792 ≈ ClinicalTrialUtilities.ctPower(param="or", type="ea", a=0.4, b=0.25, n=156, alpha=0.05)
     @test ClinicalTrialUtilities.orEquivalenceP(0.25, 0.25, 0.5, 366; alpha=0.05, k=1, logdiff=true) ≈ 0.8008593380478983  ≈ ClinicalTrialUtilities.ctPower(param="or", type="ei", a=0.25, b=0.25, diff=0.5, n=366, alpha=0.05)
     @test ClinicalTrialUtilities.orNSP(0.4, 0.25, 0.2, 242; alpha=0.05, k=1, logdiff=true) ≈ 0.8007200876001626  ≈ ctPower(param="or", type="ns", a=0.4, b=0.25, diff=0.2, n=242, alpha=0.05)
+    @test ClinicalTrialUtilities.ctPower(param="prop", type="mcnm", a=0.45, b=0.05, n=23, alpha=0.1) ≈ 0.9023805 atol=1E-7
 
 end
 println(" ---------------------------------- ")

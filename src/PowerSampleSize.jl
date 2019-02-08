@@ -76,6 +76,14 @@ function mcnm(p10, p01; alpha=0.05, beta=0.2)
     pdiff=p10-p01
     return ((quantile(ZDIST, 1-alpha/2)*sqrt(pdisc)+quantile(ZDIST, 1 - beta)*sqrt(pdisc-pdiff^2))/pdiff)^2
 end
+
+function mcnmP(p10, p01, n; alpha=0.05)
+    pdisc=p10+p01
+    pdiff=p10-p01
+    x1=(pdiff*sqrt(n)-quantile(ZDIST, 1-alpha/2)*sqrt(pdisc))/sqrt(pdisc-pdiff^2);
+    x2=(-pdiff*sqrt(n)-quantile(ZDIST, 1-alpha/2)*sqrt(pdisc))/sqrt(pdisc-pdiff^2);
+    return cdf(ZDIST, x1)+cdf(ZDIST, x2)
+end
 #-------------------------------------------------------------------------------
 # Power Section
 # Mean

@@ -4,9 +4,10 @@
 
 
 #main sample size function
-function sampleSize(;param="mean", type="ea", group="one", alpha=0.05, beta=0.2, diff=0, sd=0, a=0, b=0, k=1, out="num")
+function sampleSize(;param="", type="", group="", alpha=0.05, beta=0.2, diff=0, sd=0, a=0, b=0, k=1, out="num")
     if alpha >= 1 || alpha <= 0 || beta >= 1 || beta <= 0 return false end
     if (type == "ei" || type == "ns") && diff == 0 return false end
+    if param == "prop" && !(group == "one" || group == "two" || type == "mcnm")  return false end
     if sd == 0 && param == "mean" return false end
     if k == 0 return false end
     if param == "mean"
@@ -29,23 +30,27 @@ function sampleSize(;param="mean", type="ea", group="one", alpha=0.05, beta=0.2,
         else return false end
     elseif param == "prop"
         if 1 < a || a < 0 || 1 < b || b < 0 return false end
-        if group == "one"
-            if type == "ea"
-                n = oneProportionEquality(a, b; alpha=alpha, beta=beta)
-            elseif type == "ei"
-                n = oneProportionEquivalence(a, b, diff; alpha=alpha, beta=beta)
-            elseif type == "ns"
-                n = oneProportionNS(a, b, diff; alpha=alpha, beta=beta)
+        if type == "mcnm"
+            n = mcnm(a, b; alpha=alpha, beta=beta)
+        else
+            if group == "one"
+                if type == "ea"
+                    n = oneProportionEquality(a, b; alpha=alpha, beta=beta)
+                elseif type == "ei"
+                    n = oneProportionEquivalence(a, b, diff; alpha=alpha, beta=beta)
+                elseif type == "ns"
+                    n = oneProportionNS(a, b, diff; alpha=alpha, beta=beta)
+                else return false end
+            elseif group == "two"
+                if type == "ea"
+                    n = twoProportionEquality(a, b; alpha=alpha, beta=beta, k=k)
+                elseif type == "ei"
+                    n = twoProportionEquivalence(a, b, diff; alpha=alpha, beta=beta, k=k)
+                elseif type == "ns"
+                    n = twoProportionNS(a, b, diff; alpha=alpha, beta=beta, k=k)
+                else return false end
             else return false end
-        elseif group == "two"
-            if type == "ea"
-                n = twoProportionEquality(a, b; alpha=alpha, beta=beta, k=k)
-            elseif type == "ei"
-                n = twoProportionEquivalence(a, b, diff; alpha=alpha, beta=beta, k=k)
-            elseif type == "ns"
-                n = twoProportionNS(a, b, diff; alpha=alpha, beta=beta, k=k)
-            else return false end
-        else return false end
+        end
     elseif param == "or"
         if type == "ea"
             n = orEquality(a, b; alpha=alpha, beta=beta, k=k)
@@ -60,8 +65,8 @@ function sampleSize(;param="mean", type="ea", group="one", alpha=0.05, beta=0.2,
     else
         params = "" #string parameter type
         if param == "mean" params = "Mean" elseif param== "prop" params = "Proportion" elseif param == "or" params = "Odd Ration" end
-        if group == "one" groups = "One" elseif  group == "two" groups = "Two" end
-        if type == "ea" hyps = "Equality" elseif type == "ei" hyps = "Equivalence" elseif type == "ns" hyps = "Non-Infriority/Superiority" end
+        if group == "one" groups = "One" elseif  group == "two" groups = "Two" else groups = "NA" end
+        if type == "ea" hyps = "Equality" elseif type == "ei" hyps = "Equivalence" elseif type == "ns" hyps = "Non-Infriority/Superiority" elseif type == "mcnm" hyps = "McNemar's Equality test" end
         output  = "----------------------------------------\n"
         output *= "         Sample Size Estimation        \n"
         output *= "----------------------------------------\n"
@@ -109,9 +114,10 @@ function sampleSize(;param="mean", type="ea", group="one", alpha=0.05, beta=0.2,
 end #sampleSize
 
 #clinical trial power main function
-function ctPower(;param="mean", type="ea", group="one", alpha=0.05, diff=0, sd=0, a=0, b=0, n=0, k=1)
+function ctPower(;param="", type="", group="", alpha=0.05, diff=0, sd=0, a=0, b=0, n=0, k=1)
     if alpha >= 1 || alpha <= 0  return false end
     if (type == "ei" || type == "ns") && diff == 0 return false end
+    if param == "prop" && !(group == "one" || group == "two" || type == "mcnm")  return false end
     if sd == 0 && param == "mean" return false end
     if k == 0 return false end
     if n == 0 return false end
@@ -135,23 +141,27 @@ function ctPower(;param="mean", type="ea", group="one", alpha=0.05, diff=0, sd=0
         else return false end
     elseif param == "prop"
         if 1 < a || a < 0 || 1 < b || b < 0 return false end
-        if group == "one"
-            if type == "ea"
-                return oneProportionEqualityP(a, b, n; alpha=alpha)
-            elseif type == "ei"
-                return oneProportionEquivalenceP(a, b, diff, n; alpha=alpha)
-            elseif type == "ns"
-                return oneProportionNSP(a, b, diff, n; alpha=alpha)
+        if type == "mcnm"
+            return mcnmP(a, b, n; alpha=alpha)
+        else
+            if group == "one"
+                if type == "ea"
+                    return oneProportionEqualityP(a, b, n; alpha=alpha)
+                elseif type == "ei"
+                    return oneProportionEquivalenceP(a, b, diff, n; alpha=alpha)
+                elseif type == "ns"
+                    return oneProportionNSP(a, b, diff, n; alpha=alpha)
+                else return false end
+            elseif group == "two"
+                if type == "ea"
+                    return twoProportionEqualityP(a, b, n; alpha=alpha, k=k)
+                elseif type == "ei"
+                    return twoProportionEquivalenceP(a, b, diff, n; alpha=alpha, k=k)
+                elseif type == "ns"
+                    return twoProportionNSP(a, b, diff, n; alpha=alpha, k=k)
+                else return false end
             else return false end
-        elseif group == "two"
-            if type == "ea"
-                return twoProportionEqualityP(a, b, n; alpha=alpha, k=k)
-            elseif type == "ei"
-                return twoProportionEquivalenceP(a, b, diff, n; alpha=alpha, k=k)
-            elseif type == "ns"
-                return twoProportionNSP(a, b, diff, n; alpha=alpha, k=k)
-            else return false end
-        else return false end
+        end
     elseif param == "or"
         if type == "ea"
             return orEqualityP(a, b, n; alpha=alpha, k=k)
