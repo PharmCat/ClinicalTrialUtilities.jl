@@ -218,7 +218,6 @@ function beSampleN(;theta0=0.95, theta1=0.8, theta2=1.25, cv=0.0, alpha=0.05, be
             n0 = n0 - 2
             #pow = powerTOST(;alpha=alpha, logscale=false, theta1=ltheta1, theta2=ltheta2, theta0=diffm, cv=se, n=n0, design=design, method=method)
             pow = powerTOSTint(alpha, false, ltheta1, ltheta2, diffm, se, n0, design, method)
-
             if n0 < 4 return n0, pow end
         end
         estpower = powp

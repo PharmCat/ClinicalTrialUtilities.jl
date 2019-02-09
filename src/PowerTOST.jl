@@ -19,10 +19,16 @@ function powerTOSTint(alpha::Float64, logscale::Bool, theta1::Float64, theta2::F
 
     #if isnan(cv) || isnan(n) return false end
 
-    df::Int = n-2
-    n1  = n ÷ 2
-    n2  = n1 + n % 2
-    sef::Float64 = sqrt((1/n1+1/n2)*0.5)
+    #df::Int = n-2
+
+    df, bkni, seq = designProp(n, design)
+    sqa   = Array{Float64, 1}(undef, seq)
+    sqa .= n÷seq
+    for i = 1:n%seq
+        sqa[i] += 1
+    end
+
+    sef = sqrt(sum(1 ./ sqa)*bkni)
 
     if df < 1 return  throw(CTUException(1024,"powerTOST: df < 1")) end
 
@@ -126,7 +132,6 @@ function approx2PowerTOST(alpha,ltheta1,ltheta2,diffm,sem,df)
     delta2::Float64 = (diffm-ltheta2)/sem
     if isnan(delta1) delta1 = 0 end
     if isnan(delta2) delta2 = 0 end
-
     tdist=TDist(df)
     pow = cdf(tdist,-tval-delta2) - cdf(tdist,tval-delta1)
     if pow > 0 return pow else return 0 end
@@ -138,4 +143,15 @@ function cv2se(cv::Float64)::Float64
 end
 
 function designProp(n::Int, type::String)
+    if type == "parallel"
+        return n - 2, 1.0, 1
+    elseif type == "2x2"
+        return n - 2, 0.5, 2
+    elseif type == "2x2x3"
+        return 2*n - 3, 0.375, 2
+    elseif type == "2x2x4"
+        return 3*n - 4, 0.25, 2
+    elseif type == "2x4x4"
+        return 3*n - 4, 0.0625, 4
+    else throw(CTUException(1031,"designProp: design not known!")) end
 end
