@@ -43,9 +43,9 @@ end #owensQ
 # Port from PowerTOST - dlabes Mar 2012
 
 #OwensQOwen
-function owensQo(nu,t::Float64,delta::Float64,b::Float64;a=0::Float64)::Float64
+function owensQo(nu,t::Float64,delta::Float64,b::Float64;a::Float64=0.0)::Float64
     if nu < 1  throw(CTUException(1001,"owensQo: nu can not be < 1")) end
-    if a != 0 throw(CTUException(1002,"owensQo: a can not be not 0")) end
+    if a != 0.0 throw(CTUException(1002,"owensQo: a can not be not 0")) end
     if isinf(b) return cdf(NoncentralT(nu,delta),t) end
     if isinf(delta) delta = sign(delta)*1e20 end
     A::Float64 = t/sqrt(nu)

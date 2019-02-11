@@ -144,7 +144,7 @@ end
 
 function designProp(n::Int, type::String)
     if type == "parallel"
-        return n - 2, 1.0, 1
+        return n - 2, 1.0, 2
     elseif type == "2x2"
         return n - 2, 0.5, 2
     elseif type == "2x2x3"
@@ -153,5 +153,7 @@ function designProp(n::Int, type::String)
         return 3*n - 4, 0.25, 2
     elseif type == "2x4x4"
         return 3*n - 4, 0.0625, 4
+    elseif type == "2x3x3"
+        return 2*n - 3, 1/6, 3
     else throw(CTUException(1031,"designProp: design not known!")) end
 end

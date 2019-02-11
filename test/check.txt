@@ -1,3 +1,37 @@
+> power.TOST(theta0=0.95, theta1=0.8, theta2=1.25, CV=0.3, alpha=0.05, logscale=TRUE, design="parallel", method="owenq", n=31)
+Unbalanced design. n(i)=16/15 assumed.
+[1] 0.2949476
+> power.TOST(theta0=0.95, theta1=0.8, theta2=1.25, CV=0.3, alpha=0.05, logscale=TRUE, design="parallel", method="owenq", n=32)
+[1] 0.3166927
+> power.TOST(theta0=0.95, theta1=0.8, theta2=1.25, CV=0.4, alpha=0.05, logscale=TRUE, design="2x2x4", method="owenq", n=35)
+Unbalanced design. n(i)=18/17 assumed.
+[1] 0.829747
+> power.TOST(theta0=0.95, theta1=0.8, theta2=1.25, CV=0.4, alpha=0.05, logscale=TRUE, design="2x4x4", method="owenq", n=35)
+Unbalanced design. n(i)=9/9/9/8 assumed.
+[1] 0.8291076
+> power.TOST(theta0=0.95, theta1=0.8, theta2=1.25, CV=0.4, alpha=0.05, logscale=TRUE, design="2x4x4", method="owenq", n=34)
+Unbalanced design. n(i)=9/9/8/8 assumed.
+[1] 0.8180596
+> power.TOST(theta0=0.95, theta1=0.8, theta2=1.25, CV=0.4, alpha=0.05, logscale=TRUE, design="2x4x4", method="owenq", n=33)
+Unbalanced design. n(i)=9/8/8/8 assumed.
+[1] 0.8069565
+> power.TOST(theta0=0.95, theta1=0.8, theta2=1.25, CV=0.4, alpha=0.05, logscale=TRUE, design="2x4x4", method="owenq", n=32)
+[1] 0.7958094
+> power.TOST(theta0=0.95, theta1=0.8, theta2=1.25, CV=0.4, alpha=0.05, logscale=TRUE, design="2x2x3", method="owenq", n=31)
+Unbalanced design. n(i)=16/15 assumed.
+[1] 0.5800205
+> power.TOST(theta0=0.95, theta1=0.8, theta2=1.25, CV=0.4, alpha=0.05, logscale=TRUE, design="2x2x3", method="owenq", n=32)
+[1] 0.5988065
+> power.TOST(theta0=0.95, theta1=0.8, theta2=1.25, CV=0.4, alpha=0.05, logscale=TRUE, design="2x3x3", method="owenq", n=32)
+Unbalanced design. n(i)=11/11/10 assumed.
+[1] 0.5976873
+> power.TOST(theta0=0.95, theta1=0.8, theta2=1.25, CV=0.4, alpha=0.05, logscale=TRUE, design="2x3x3", method="owenq", n=31)
+Unbalanced design. n(i)=11/10/10 assumed.
+[1] 0.579468
+> power.TOST(theta0=0.95, theta1=0.8, theta2=1.25, CV=0.4, alpha=0.05, logscale=TRUE, design="2x3x3", method="owenq", n=30)
+[1] 0.5614358
+------------------------------------------------------------------------------------------------------------
+
 ClinicalTrialUtilities.oneSampleMeanEqualityP(1.5,2,1,32;alpha=0.05)
 0.8074304194325561
 ClinicalTrialUtilities.oneSampleMeanEquivalenceP(2, 2, 0.1, 0.05, 35; alpha=0.05)
