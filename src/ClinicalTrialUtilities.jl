@@ -15,7 +15,7 @@
 __precompile__(true)
 module ClinicalTrialUtilities
 using Distributions
-using Rmath #should be rewrited
+#using Rmath #should be rewrited
 using QuadGK
 #using SpecialFunctions
 import SpecialFunctions.lgamma

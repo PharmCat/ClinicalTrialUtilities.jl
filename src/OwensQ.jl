@@ -8,6 +8,8 @@
 # general OwensQ function
 # https://github.com/Detlew/PowerTOST/blob/master/R/OwensQ.R#L52
 
+#pnorm = cdf(ZDIST,  )
+#dnorm = pdf(ZDIST, )
 function owensQ(nu, t::Float64, delta::Float64, a::Float64, b::Float64)::Float64
 
     if a < 0 return  throw(CTUException(1011,"owensQ: a can not be < 0")) end
@@ -26,7 +28,7 @@ function owensQ(nu, t::Float64, delta::Float64, a::Float64, b::Float64)::Float64
             #45 of OwensQ
             return cdf(NoncentralT(nu,delta),t)
         else
-            integral = quadgk(x -> ifun1(x,nu,t,delta, b=b), 0, 1)[1]
+            integral = quadgk(x -> ifun1(x,nu,t,delta, b=b), 0, 1, rtol=1.0E-8)[1]
             #58 of OwensQ
             return cdf(NoncentralT(nu,delta),t)-integral
         end
@@ -60,7 +62,7 @@ function owensQo(nu,t::Float64,delta::Float64,b::Float64;a::Float64=0.0)::Float6
     L  = Array{Float64}(undef, ll)
     if isfinite(b)
          for i=1:length(L)
-             if i==1 L[1] = 0.5*A*B*b*dnorm(b)*dnorm(A*b-delta)
+             if i==1 L[1] = 0.5*A*B*b*pdf(ZDIST,b)*pdf(ZDIST,A*b-delta)
              else L[i] = av[i+3]*b*L[i-1] end
          end
     end
@@ -69,7 +71,7 @@ function owensQo(nu,t::Float64,delta::Float64,b::Float64;a::Float64=0.0)::Float6
     H = Array{Float64}(undef, ll)
     if isfinite(b)
         for i = 1:length(H)
-            if i==1 H[1] = -dnorm(b)*pnorm(A*b-delta)
+            if i==1 H[1] = -pdf(ZDIST,b)*cdf(ZDIST,A*b-delta)
             else H[i] = av[i+1]*b*H[i-1] end
         end
     end
@@ -77,8 +79,8 @@ function owensQo(nu,t::Float64,delta::Float64,b::Float64;a::Float64=0.0)::Float6
     M = Array{Float64}(undef, ll)
     sB::Float64 = sqrt(B)
     for i = 1:length(M)
-        if i==1 M[1] = A*sB*dnorm(delta*sB)*(pnorm(delta*A*sB)-pnorm((delta*A*B-b)/sB)) end
-        if i==2 M[2] = B*(delta*A*M[1]+A*dnorm(delta*sB)*(dnorm(delta*A*sB)-dnorm((delta*A*B-b)/sB))) end
+        if i==1 M[1] = A*sB*pdf(ZDIST,delta*sB)*(cdf(ZDIST,delta*A*sB)-cdf(ZDIST,(delta*A*B-b)/sB)) end
+        if i==2 M[2] = B*(delta*A*M[1]+A*pdf(ZDIST,delta*sB)*(pdf(ZDIST,delta*A*sB)-pdf(ZDIST,(delta*A*B-b)/sB))) end
         if i>2 M[i] = ((i-2)/(i-1))*B*(av[i-1]*delta*A*M[i-1]+M[i-2]) - L[i-2] end
     end
     #pass
@@ -89,7 +91,7 @@ function owensQo(nu,t::Float64,delta::Float64,b::Float64;a::Float64=0.0)::Float6
                 sumt = sumt + M[i+1] + H[i+1]
             end
         end
-        qv = pnorm(b) - 2*owensT(b,A-delta/b) -
+        qv = cdf(ZDIST, b) - 2*owensT(b,A-delta/b) -
                         2*owensT(delta*sB, (delta*A*B-b)/B/delta) +
                         2*owensT(delta*sB, A) - (delta>=0) + 2*sumt
     else
@@ -98,7 +100,7 @@ function owensQo(nu,t::Float64,delta::Float64,b::Float64;a::Float64=0.0)::Float6
                 sumt = sumt + M[i+1] + H[i+1]
             end
         end
-        qv = pnorm(-delta)+sqrt(2*π)*sumt
+        qv = cdf(ZDIST,-delta)+sqrt(2*π)*sumt
     end
     #
 end #OwensQo
@@ -113,7 +115,7 @@ end
 @inline function owensTint2(x::Float64, nu, t::Float64, delta::Float64)::Float64
     if x == 0 return 0 end
     Qconst::Float64 = -((nu/2.0)-1.0)*log(2.0)-lgamma(nu/2.0)
-    return sign(x)^(nu-1)*pnorm(t*x/sqrt(nu)-delta)*exp((nu-1)*log(abs(x))-0.5*x^2+Qconst)
+    return sign(x)^(nu-1)*cdf(ZDIST,t*x/sqrt(nu)-delta)*exp((nu-1)*log(abs(x))-0.5*x^2+Qconst)
 end
 #-------------------------------------------------------------------------------
 
@@ -133,10 +135,10 @@ function owensT(h::Float64,a::Float64)::Float64
     if abs(a) < epsilon || !isfinite(h) || abs(1-abs(a)) < epsilon || abs(h) < epsilon || !isfinite(abs(a))
         if abs(a)< epsilon return 0 end
         if !isfinite(h) return 0 end
-        if abs(1-abs(a)) < epsilon return sign(a)*0.5*pnorm(h)*(1-pnorm(h)) end
+        if abs(1-abs(a)) < epsilon return sign(a)*0.5*cdf(ZDIST,h)*(1-cdf(ZDIST,h)) end
         if abs(h)< epsilon return atan(a)/2/pi end
         if !isfinite(abs(a))
-            if h<0 tha=pnorm(h)/2 else tha = (1-pnorm(h))/2 end
+            if h<0 tha=cdf(ZDIST,h)/2 else tha = (1-cdf(ZDIST,h))/2 end
             return sign(a)*tha
         end
     end
@@ -146,8 +148,8 @@ function owensT(h::Float64,a::Float64)::Float64
         return tha
     else
         ah::Float64  = aa * h
-        gh::Float64  = pnorm(h)
-        gah::Float64 = pnorm(ah)
+        gh::Float64  = cdf(ZDIST,h)
+        gah::Float64 = cdf(ZDIST,ah)
         tha = 0.5*(gh + gah) - gh*gah - tfn(ah, 1.0/aa)
     end
     if a < 0.0 return -tha else return tha end

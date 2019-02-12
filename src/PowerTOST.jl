@@ -61,7 +61,7 @@ end #powerTOST
 
 #.power.TOST
 function powerTOSTOwenQ(alpha,ltheta1,ltheta2,diffm,sem,df)
-    tval::Float64 = qt(1-alpha, df)
+    tval::Float64 = quantile(TDist(df), 1-alpha) #qt(1-alpha, df)
 
     delta1::Float64 = (diffm-ltheta1)/sem
     delta2::Float64 = (diffm-ltheta2)/sem
@@ -104,8 +104,8 @@ end #powerTOSTOwenQ
 # approximation based on non-central t
 # .approx.power.TOST - PowerTOST
 function approxPowerTOST(alpha,ltheta1,ltheta2,diffm,sem,df)
-
-    tval::Float64 = qt(1-alpha,df)
+    tdist=TDist(df)
+    tval::Float64 = quantile(tdist, 1-alpha)# qt(1-alpha,df)
     delta1::Float64 = (diffm-ltheta1)/sem
     delta2::Float64 = (diffm-ltheta2)/sem
     pow = cdf(NoncentralT(df,delta2), -tval) - cdf(NoncentralT(df,delta1), tval)
@@ -127,12 +127,13 @@ end
 
 #.approx2.power.TOST
 function approx2PowerTOST(alpha,ltheta1,ltheta2,diffm,sem,df)
-    tval::Float64 = qt(1-alpha, df)
+    tdist=TDist(df)
+    tval::Float64 = quantile(tdist, 1-alpha) # qt(1-alpha, df)
     delta1::Float64 = (diffm-ltheta1)/sem
     delta2::Float64 = (diffm-ltheta2)/sem
     if isnan(delta1) delta1 = 0 end
     if isnan(delta2) delta2 = 0 end
-    tdist=TDist(df)
+
     pow = cdf(tdist,-tval-delta2) - cdf(tdist,tval-delta1)
     if pow > 0 return pow else return 0 end
 end #approx2PowerTOST
