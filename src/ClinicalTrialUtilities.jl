@@ -19,11 +19,17 @@ using Distributions
 using QuadGK
 #using SpecialFunctions
 import SpecialFunctions.lgamma
+#Owen function calc: owensQ, owensQo, ifun1, owensTint2, owensT, tfn
 include("OwensQ.jl")
+#powerTOST calc: powerTOST, powerTOSTint, powerTOSTOwenQ, approxPowerTOST, power1TOST, approx2PowerTOST, cv2se, designProp
 include("PowerTOST.jl")
+#Sample sise and Power atomic functions
 include("PowerSampleSize.jl")
+#Main sample size and power functions: sampleSize, ctPower, beSampleN
 include("SampleSize.jl")
+#info function
 include("Info.jl")
+
 
 export sampleSize
 export ctPower

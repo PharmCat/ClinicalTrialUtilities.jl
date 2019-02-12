@@ -1,5 +1,10 @@
 # Copyright © 2019 Vladimir Arnautov aka PharmCat (mail@pharmcat.net)
 
+@testset "Info:                 " begin
+    ClinicalTrialUtilities.info()
+    ClinicalTrialUtilities.citation()
+    ClinicalTrialUtilities.licence()
+end
 
 println(" ---------------------------------- ")
 println(" ---------   START TEST   --------- ")

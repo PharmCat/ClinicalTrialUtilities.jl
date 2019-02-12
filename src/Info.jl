@@ -1,11 +1,13 @@
 # Copyright © 2019 Vladimir Arnautov aka PharmCat (mail@pharmcat.net)
 
 function info()
+    println("")
     println("Package name: ClinicalTrialUtilities")
     println("Clinical Trial Power and Sample Size Utilities")
     println("Copyright © 2019 Vladimir Arnautov aka PharmCat (mail@pharmcat.net)")
     println("For references, citations and copyrights type <ClinicalTrialUtilities.citation()>")
     println("Licence <ClinicalTrialUtilities.licence()>")
+    println("")
 end
 
 function citation()
@@ -28,7 +30,9 @@ function citation()
 end
 
 function licence()
+    println("")
     println("Licence:")
     println("GNU Affero General Public License v3.0")
     println("see <https://www.gnu.org/licenses/>")
+    println("")
 end
