@@ -1,5 +1,5 @@
-# Clinical Trial Power and Sample Size calculation
-# Version: 0.1.4
+# Clinical Trial Utilities
+# Version: 0.1.6
 # Author: Vladimir Arnautov aka PharmCat
 # Copyright © 2019 Vladimir Arnautov aka PharmCat (mail@pharmcat.net)
 # OwensQ/PowerTOST functions rewrited from https://github.com/Detlew/PowerTOST by Detlew Labes, Helmut Schuetz, Benjamin Lang
@@ -30,17 +30,22 @@ include("SampleSize.jl")
 #info function
 include("Info.jl")
 
-
+#Sample size
 export sampleSize
+export beSampleN
+#Power
 export ctPower
+export powerTOST
+#Other
 export owensQ
 export owensT
-export powerTOST
-export beSampleN
+#Structs - should be rewrited or deleted
 export ParamSet
 export sampleSizeParam
+#Exceptions
 export CTUException
 
+#Exceptions
 struct CTUException <: Exception
     n::Int
     var::String
@@ -48,7 +53,7 @@ end
 Base.showerror(io::IO, e::CTUException) = print("CTU Exception code: ", e.n, " Message: ", e.var)
 
     const ZDIST = Normal()
-
+#-------------------------------------------------------------------------------
     mutable struct ParamSet
         param::String
         type::String
@@ -63,5 +68,5 @@ Base.showerror(io::IO, e::CTUException) = print("CTU Exception code: ", e.n, " M
     function sampleSizeParam(x::ParamSet)
         return sampleSize(param=x.param, type=x.type, group=x.group, alpha=x.alpha, beta=x.beta, sd=x.sd, a=x.a, b=x.b, k=x.k)
     end
-
+#-------------------------------------------------------------------------------
 end # module end

@@ -7,6 +7,9 @@
 
 using Plots
 
+using ClinicalTrialUtilities
+using Test
+
 # owensQ function
 function graphOwensQ()
     m = Array{Float64}(undef, 120, 2)

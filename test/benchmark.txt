@@ -1,4 +1,4 @@
-
+# Clinical Trial Utilities
 
 
 benchmark(a<-sampleN.TOST(theta0=1, theta1=0.8, theta2=1.25, CV=0.3, alpha=0.05, targetpower=0.9, logscale=TRUE, design="2x2", method="owenq", robust=TRUE, print=FALSE), columns = c("test", "replications", "elapsed", "relative", "user.self", "sys.self", "user.child", "sys.child"),replications = 10000)
@@ -21,4 +21,3 @@ julia> bBenchmarkTools.Trial:
   --------------
   samples:          10000
   evals/sample:     1
- 

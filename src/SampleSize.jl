@@ -1,4 +1,4 @@
-# Clinical Trial Power and Sample Size calculation
+# Clinical Trial Utilities
 # Author: Vladimir Arnautov aka PharmCat
 # Copyright © 2019 Vladimir Arnautov aka PharmCat (mail@pharmcat.net)
 
@@ -114,7 +114,7 @@ function sampleSize(;param="", type="", group="", alpha=0.05, beta=0.2, diff=0, 
 end #sampleSize
 
 #clinical trial power main function
-function ctPower(;param="", type="", group="", alpha=0.05, diff=0, sd=0, a=0, b=0, n=0, k=1)
+function ctPower(;param="", type="", group="", alpha=0.05, diff=0, sd=0, a=0, b=0, n=0, k=1,  out="num")
     if alpha >= 1 || alpha <= 0  return false end
     if (type == "ei" || type == "ns") && diff == 0 return false end
     if param == "prop" && !(group == "one" || group == "two" || type == "mcnm")  return false end
@@ -124,67 +124,113 @@ function ctPower(;param="", type="", group="", alpha=0.05, diff=0, sd=0, a=0, b=
     if param == "mean"
         if group == "one"
             if type == "ea"
-                return oneSampleMeanEqualityP(a, b, sd, n, alpha=alpha)
+                pow =  oneSampleMeanEqualityP(a, b, sd, n, alpha=alpha)
             elseif type == "ei"
-                return oneSampleMeanEquivalenceP(a, b, sd, diff, n, alpha=alpha)
+                pow =  oneSampleMeanEquivalenceP(a, b, sd, diff, n, alpha=alpha)
             elseif type == "ns"
-                return oneSampleMeanNSP(a, b, sd, diff, n, alpha=alpha)
+                pow =  oneSampleMeanNSP(a, b, sd, diff, n, alpha=alpha)
             else return false end
         elseif group == "two"
             if type == "ea"
-                return twoSampleMeanEqualityP(a, b, sd, n, alpha=alpha, k=k)
+                pow =  twoSampleMeanEqualityP(a, b, sd, n, alpha=alpha, k=k)
             elseif type == "ei"
-                return twoSampleMeanEquivalenceP(a, b, sd, diff, n, alpha=alpha, k=k)
+                pow =  twoSampleMeanEquivalenceP(a, b, sd, diff, n, alpha=alpha, k=k)
             elseif type == "ns"
-                return twoSampleMeanNSP(a, b, sd, diff, n, alpha=alpha, k=k)
+                pow =  twoSampleMeanNSP(a, b, sd, diff, n, alpha=alpha, k=k)
             else return false end
         else return false end
     elseif param == "prop"
         if 1 < a || a < 0 || 1 < b || b < 0 return false end
         if type == "mcnm"
-            return mcnmP(a, b, n; alpha=alpha)
+            pow =  mcnmP(a, b, n; alpha=alpha)
         else
             if group == "one"
                 if type == "ea"
-                    return oneProportionEqualityP(a, b, n; alpha=alpha)
+                    pow =  oneProportionEqualityP(a, b, n; alpha=alpha)
                 elseif type == "ei"
-                    return oneProportionEquivalenceP(a, b, diff, n; alpha=alpha)
+                    pow =  oneProportionEquivalenceP(a, b, diff, n; alpha=alpha)
                 elseif type == "ns"
-                    return oneProportionNSP(a, b, diff, n; alpha=alpha)
+                    pow =  oneProportionNSP(a, b, diff, n; alpha=alpha)
                 else return false end
             elseif group == "two"
                 if type == "ea"
-                    return twoProportionEqualityP(a, b, n; alpha=alpha, k=k)
+                    pow =  twoProportionEqualityP(a, b, n; alpha=alpha, k=k)
                 elseif type == "ei"
-                    return twoProportionEquivalenceP(a, b, diff, n; alpha=alpha, k=k)
+                    pow =  twoProportionEquivalenceP(a, b, diff, n; alpha=alpha, k=k)
                 elseif type == "ns"
-                    return twoProportionNSP(a, b, diff, n; alpha=alpha, k=k)
+                    pow =  twoProportionNSP(a, b, diff, n; alpha=alpha, k=k)
                 else return false end
             else return false end
         end
     elseif param == "or"
         if type == "ea"
-            return orEqualityP(a, b, n; alpha=alpha, k=k)
+            pow =  orEqualityP(a, b, n; alpha=alpha, k=k)
         elseif type == "ei"
-            return orEquivalenceP(a, b, diff, n; alpha=alpha, k=k, logdiff=true)
+            pow =  orEquivalenceP(a, b, diff, n; alpha=alpha, k=k, logdiff=true)
         elseif type == "ns"
-            return orNSP(a, b, diff, n; alpha=alpha, k=k, logdiff=true)
+            pow = orNSP(a, b, diff, n; alpha=alpha, k=k, logdiff=true)
         else return false end
     else return false end
+
+    if out == "num" return pow
+    else
+        params = "" #string parameter type
+        if param == "mean" params = "Mean" elseif param== "prop" params = "Proportion" elseif param == "or" params = "Odd Ration" end
+        if group == "one" groups = "One" elseif  group == "two" groups = "Two" else groups = "NA" end
+        if type == "ea" hyps = "Equality" elseif type == "ei" hyps = "Equivalence" elseif type == "ns" hyps = "Non-Infriority/Superiority" elseif type == "mcnm" hyps = "McNemar's Equality test" end
+        output  = "----------------------------------------\n"
+        output *= "            Power Estimation            \n"
+        output *= "----------------------------------------\n"
+        output *= "  Paramether type: "*params*"\n"
+        output *= "  Groups: "*groups*"\n"
+        output *= "  Hypothesis: "*hyps*"\n"
+        output *= "----------------------------------------\n"
+        output *= "  Alpha: "*string(alpha)*" N: "*string(n)*"\n"
+        if group == "two" output *= "  Constant k: "*string(k)*"\n" end
+        output *= "----------------------------------------\n"
+        if param == "mean"
+            output *= "  SD: "*string(sd)*"\n"
+        end
+        if group == "one"
+            output *= "  Null Value: "*string(a)*" "
+            output *= "Test Value: "*string(b)*"\n"
+        else
+            output *= "  Group A Value: "*string(a)*" "
+            output *= "Group B Value: "*string(b)*"\n"
+        end
+        if (type == "ei" || type == "ns")
+            output *= "  Difference: "*string(diff)*"\n"
+        end
+        output *= "----------------------------------------\n"
+        output *= "  Power: "*string(pow)*"\n"
+        #output *= "Estimate group A: "*string(ceil(n))*"\n"
+        #output *= "Total: "*string(ceil(n))*"\n"
+        output *= "----------------------------------------\n"
+        if out == "str"
+            return output
+        elseif out == "print"
+            print(output)
+            return
+        elseif out == "vstr"
+            return pow, output
+        end
+    end
+    return pow
 end #ctPower
 #-------------------------------------------------------------------------------
-function beSampleN(;theta0=0.95, theta1=0.8, theta2=1.25, cv=0.0, alpha=0.05, beta=0.2, logscale::Bool=true, design::String="2x2", method::String="owenq", txt=true)
+function beSampleN(;theta0=0.95, theta1=0.8, theta2=1.25, cv=0.0, alpha=0.05, beta=0.2, logscale::Bool=true, design::String="2x2", method::String="owenq",  out="num")
     theta0 = convert(Float64, theta0)
     theta1 = convert(Float64, theta1)
     theta2 = convert(Float64, theta2)
-    cv = convert(Float64, cv)
-    alpha = convert(Float64, alpha)
-    beta = convert(Float64, beta)
-    if cv <= 0 return false end
-    if alpha >= 1 || alpha <= 0 || beta >= 1 || beta <= 0 return false end
+    cv     = convert(Float64, cv)
+    alpha  = convert(Float64, alpha)
+    beta   = convert(Float64, beta)
+    if cv <= 0 throw(CTUException(1041,"beSampleN: cv can not be <= 0")) end
+    if theta1 >= theta2  throw(CTUException(1042,"beSampleN: theta1 should be < theta2")) end
+    if alpha >= 1 || alpha <= 0 || beta >= 1 || beta <= 0 throw(CTUException(1043,"beSampleN: alpha and beta shold be > 0 and < 1")) end
 
     if logscale
-        if theta1 < 0 || theta2 < 0 || theta0 < 0 return false end
+        if theta1 < 0 || theta2 < 0 || theta0 < 0 throw(CTUException(1044,"beSampleN: theta0, theta1, theta2 shold be > 0 and ")) end
         ltheta1 = log(theta1)
         ltheta2 = log(theta2)
         diffm   = log(theta0)
@@ -199,26 +245,24 @@ function beSampleN(;theta0=0.95, theta1=0.8, theta2=1.25, cv=0.0, alpha=0.05, be
     td = (ltheta1 + ltheta2)/2
     rd = abs((ltheta1 - ltheta2)/2)
 
-    if rd <= 0 return false end
-
+    #if rd <= 0 return false end
     d0 = diffm - td
-
     #approximate n
     n0::Int = convert(Int, ceil(twoSampleMeanEquivalence(0, d0, se, rd, alpha=alpha, beta=beta)/2)*2)
     tp = 1 - beta  #target power
-
+    if n0 < 4 n0 = 4 end
     if n0 > 5000 n0 = 5000 end
-    pow = powerTOST(;alpha=alpha, logscale=false, theta1=ltheta1, theta2=ltheta2, theta0=diffm, cv=se, n=n0, design=design, method=method)
-    np = 0
-    powp::Float64 = 0.0
+    pow = powerTOSTint(alpha, false, ltheta1, ltheta2, diffm, se, n0, design, method)
+    np = 2
+    powp::Float64 = pow
     if pow > tp
         while (pow > tp)
             np = n0
             powp = pow
             n0 = n0 - 2
             #pow = powerTOST(;alpha=alpha, logscale=false, theta1=ltheta1, theta2=ltheta2, theta0=diffm, cv=se, n=n0, design=design, method=method)
+            if n0 < 4 break end #n0, pow end
             pow = powerTOSTint(alpha, false, ltheta1, ltheta2, diffm, se, n0, design, method)
-            if n0 < 4 return n0, pow end
         end
         estpower = powp
         estn     = np
@@ -229,11 +273,40 @@ function beSampleN(;theta0=0.95, theta1=0.8, theta2=1.25, cv=0.0, alpha=0.05, be
             n0 = n0 + 2
             #pow = powerTOST(;alpha=alpha, logscale=false, theta1=ltheta1, theta2=ltheta2, theta0=diffm, cv=se, n=n0, design=design, method=method)
             pow = powerTOSTint(alpha, false, ltheta1, ltheta2, diffm, se, n0, design, method)
-
-            if n0 > 10000 return n0, pow end
+            if n0 > 10000  break end # n0, pow end
         end
         estpower = pow
         estn     = n0
-    else return n0, pow end
-    return estn, estpower
+    else
+        estpower = pow
+        estn     = n0
+    end
+    if out == "num" return estn, estpower
+    else
+        output  = "----------------------------------------\n"
+        output *= "     (Bio)equivalence sample size       \n"
+        output *= "----------------------------------------\n"
+        output *= "  Design: "*string(design)*"\n"
+        output *= "  Method: "*string(method)*"\n"
+        output *= "  Logscale: "*string(logscale)*"\n"
+        output *= "----------------------------------------\n"
+        output *= "  Alpha: "*string(alpha)*"\n"
+        output *= "  Beta: "*string(beta)*"\n"
+        output *= "----------------------------------------\n"
+        output *= "  Lower limit: "*string(theta1)*"\n"
+        output *= "  Upper limit: "*string(theta2)*"\n"
+        output *= "  GMR: "*string(theta0)*"\n"
+        output *= "  CV: "*string(cv)*"\n"
+        output *= "----------------------------------------\n"
+        output *= "  Sample Size: "*string(estn)*"\n"
+        output *= "  Power: "*string(estpower)*"\n"
+        output *= "----------------------------------------\n"
+    end
+    if out == "str"
+        return output
+    elseif out == "print"
+        println(output)
+    elseif out == "vstr"
+        return estn, estpower, output
+    end
 end

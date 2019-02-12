@@ -1,3 +1,4 @@
+# Clinical Trial Utilities
 # Copyright © 2019 Vladimir Arnautov aka PharmCat (mail@pharmcat.net)
 
 @testset "Info:                 " begin
@@ -82,6 +83,11 @@ end
     @test ClinicalTrialUtilities.orEqualityP(0.4, 0.25, 156; alpha=0.05, k=1) ≈ 0.8020239054864792 ≈ ClinicalTrialUtilities.ctPower(param="or", type="ea", a=0.4, b=0.25, n=156, alpha=0.05)
     @test ClinicalTrialUtilities.orEquivalenceP(0.25, 0.25, 0.5, 366; alpha=0.05, k=1, logdiff=true) ≈ 0.8008593380478983  ≈ ClinicalTrialUtilities.ctPower(param="or", type="ei", a=0.25, b=0.25, diff=0.5, n=366, alpha=0.05)
     @test ClinicalTrialUtilities.orNSP(0.4, 0.25, 0.2, 242; alpha=0.05, k=1, logdiff=true) ≈ 0.8007200876001626  ≈ ctPower(param="or", type="ns", a=0.4, b=0.25, diff=0.2, n=242, alpha=0.05)
+
+    pow, str = ClinicalTrialUtilities.ctPower(param="prop", type="ea", group="one", a=0.3, b=0.5, n=50, alpha=0.05, out="vstr")
+    @test pow ≈ 0.8074304194325561
+    @test ClinicalTrialUtilities.ctPower(param="or", type="ns", a=0.4, b=0.25, diff=0.2, n=242, alpha=0.05, out="num") ≈ 0.8007200876001626
+
 end
 
 println(" ---------------------------------- ")
@@ -94,11 +100,11 @@ end
     @test round(ClinicalTrialUtilities.owensTint2(1.0, 3.0, 20.0, 3.0), digits=7) ≈ 0.4839414
 end
 @testset "owensQo function      " begin
-    @test round(ClinicalTrialUtilities.owensQo(1 ,2.0,1.0,1.0;a=0.0), digits=6) ≈ 0.321429
-    @test round(ClinicalTrialUtilities.owensQo(2 ,1.0,0.5,0.2;a=0.0), digits=9) ≈ 0.006781741
-    @test ClinicalTrialUtilities.owensQo(4 ,2.0,1.0,1.0;a=0.0) ≈ 0.03739024 atol=1E-8
-    @test round(ClinicalTrialUtilities.owensQo(7 ,2.0,1.0,1.0;a=0.0), digits=9) ≈ 0.001888241
-    @test round(ClinicalTrialUtilities.owensQo(3 ,2.0,1.0,Inf;a=0.0), digits=7) ≈ 0.7436299
+    @test ClinicalTrialUtilities.owensQo(1 ,2.0,1.0,1.0;a=0.0) ≈ 0.321429    atol=1E-6
+    @test ClinicalTrialUtilities.owensQo(2 ,1.0,0.5,0.2;a=0.0) ≈ 0.006781741 atol=1E-9
+    @test ClinicalTrialUtilities.owensQo(4 ,2.0,1.0,1.0;a=0.0) ≈ 0.03739024  atol=1E-8
+    @test ClinicalTrialUtilities.owensQo(7 ,2.0,1.0,1.0;a=0.0) ≈ 0.001888241 atol=1E-9
+    @test ClinicalTrialUtilities.owensQo(3 ,2.0,1.0,Inf;a=0.0) ≈ 0.7436299   atol=1E-7
 end
 @testset "owensQ  function      " begin
     @test ClinicalTrialUtilities.owensQ(4 ,100.0,40.0,0.0,Inf) ≈ 0.9584071  atol=1E-7
@@ -114,8 +120,8 @@ end
     @test ClinicalTrialUtilities.powerTOSTOwenQ(0.05,0.1,0.4,0.05,0.11,23) ≈ 0.00147511 atol=1E-8
 end
 @testset "approxPowerTOST       " begin
-    @test round(ClinicalTrialUtilities.approxPowerTOST(0.05,0.4,0.9,0.05,0.11,23), digits=12) ≈ 1.076964e-06
-    @test       ClinicalTrialUtilities.approxPowerTOST(0.05,1.0,1.0,0.5,0.2,100) == 0
+    @test ClinicalTrialUtilities.approxPowerTOST(0.05,0.4,0.9,0.05,0.11,23) ≈ 1.076964e-06 atol=1E-12
+    @test ClinicalTrialUtilities.approxPowerTOST(0.05,1.0,1.0,0.5,0.2,100) == 0
 end
 @testset "approx2PowerTOST      " begin
     @test round(ClinicalTrialUtilities.approx2PowerTOST(0.05,0.1,1.0,0.5,0.2,1000), digits=7) ≈ 0.4413917
@@ -132,24 +138,30 @@ end
 
 println(" ---------------------------------- ")
 @testset "designProp            " begin
-    df, bkni, seq = ClinicalTrialUtilities.designProp(31, "2x2")
-    @test df ≈ 29 && bkni ≈ 0.5 && seq ≈ 2
+    dff, bkni, seq = ClinicalTrialUtilities.designProp("parallel")
+    @test dff(30) ≈ 28 && bkni ≈ 1.0 && seq ≈ 2
+    dff, bkni, seq = ClinicalTrialUtilities.designProp("2x2")
+    @test dff(31) ≈ 29 && bkni ≈ 0.5 && seq ≈ 2
+
 end
 
 println(" ---------------------------------- ")
 @testset "PowerTOST Test        " begin
     #parallel
+    @test ClinicalTrialUtilities.powerTOST(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.3, n=31, design="parallel", method="owenq") ≈ 0.2949476 atol=1E-7
+    @test ClinicalTrialUtilities.powerTOST(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.3, n=32, design="parallel", method="owenq") ≈ 0.3166927 atol=1E-7
     #2x2
-    @test round(ClinicalTrialUtilities.powerTOST(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=20, design="2x2", method="owenq"), digits=7) ≈ 0.8346802
-    @test round(ClinicalTrialUtilities.powerTOST(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=10, design="2x2", method="nct"), digits=7) ≈ 0.4316618
-    @test round(ClinicalTrialUtilities.powerTOST(alpha=0.1, logscale=false, theta1=-0.1, theta2=0.1, theta0=0.0, cv=0.14, n=21, design="2x2", method="shifted"), digits=7) ≈ 0.6626132
-    @test round(ClinicalTrialUtilities.powerTOST(alpha=0.05, logscale=false, theta1=-0.1, theta2=0.1, theta0=0.0, cv=0.14, n=30, design="2x2", method="nct"), digits=7) ≈ 0.7079951
-    @test round(ClinicalTrialUtilities.powerTOST(alpha=0.0000001, logscale=false, theta1=-0.1, theta2=0.1, theta0=0.0, cv=1.0, n=10000, design="2x2", method="owenq"), digits=7) ≈ 0.9380914
-    @test round(ClinicalTrialUtilities.powerTOST(alpha=0.0001, logscale=false, theta1=-0.1, theta2=0.1, theta0=0.0, cv=1.0, n=3500, design="2x2", method="owenq"), digits=7) ≈ 0.3545904
-    @test round(powerTOST(alpha=0.00000005, logscale=false, theta1=-0.1, theta2=0.1, theta0=0.0, cv=1.5, n=20000, design="2x2", method="owenq"), digits=7) ≈ 0.8197361
+    @test ClinicalTrialUtilities.powerTOST(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=20, design="2x2", method="owenq")         ≈ 0.8346802 atol=1E-7
+    @test ClinicalTrialUtilities.powerTOST(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=10, design="2x2", method="nct")           ≈ 0.4316618 atol=1E-7
+    @test ClinicalTrialUtilities.powerTOST(alpha=0.1, logscale=false, theta1=-0.1, theta2=0.1, theta0=0.0, cv=0.14, n=21, design="2x2", method="shifted")       ≈ 0.6626132 atol=1E-7
+    @test ClinicalTrialUtilities.powerTOST(alpha=0.05, logscale=false, theta1=-0.1, theta2=0.1, theta0=0.0, cv=0.14, n=30, design="2x2", method="nct")          ≈ 0.7079951 atol=1E-7
+    @test ClinicalTrialUtilities.powerTOST(alpha=0.0000001, logscale=false, theta1=-0.1, theta2=0.1, theta0=0.0, cv=1.0, n=10000, design="2x2", method="owenq") ≈ 0.9380914 atol=1E-7
+    @test ClinicalTrialUtilities.powerTOST(alpha=0.0001, logscale=false, theta1=-0.1, theta2=0.1, theta0=0.0, cv=1.0, n=3500, design="2x2", method="owenq")     ≈ 0.3545904 atol=1E-7
+    @test ClinicalTrialUtilities.powerTOST(alpha=0.00000005, logscale=false, theta1=-0.1, theta2=0.1, theta0=0.0, cv=1.5, n=20000, design="2x2", method="owenq") ≈ 0.8197361 atol=1E-7
+    @test ClinicalTrialUtilities.powerTOST(alpha=0.1, logscale=false, theta1=-0.1, theta2=0.1, theta0=0.0, cv=0.14, n=4, design="2x2", method="shifted") ≈ 0.0
     #
-    @test ClinicalTrialUtilities.powerTOST(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=23, design="2x2", method="owenq") ≈ 0.882682396902984
-    @test ClinicalTrialUtilities.powerTOST(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=25, design="2x2", method="owenq") ≈ 0.9070350873879602
+
+
     @test ClinicalTrialUtilities.powerTOST(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=27, design="2x2", method="owenq") ≈ 0.9264365737448076
     @test ClinicalTrialUtilities.powerTOST(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=29, design="2x2", method="owenq") ≈ 0.941900827163551
     @test ClinicalTrialUtilities.powerTOST(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=31, design="2x2", method="owenq") ≈ 0.9542152686694777
@@ -201,7 +213,16 @@ println(" ---------------------------------- ")
     @test n == 3828 && round(p, digits=7) == 0.8001454
     n, p = ClinicalTrialUtilities.beSampleN(;theta0=0, theta1=-0.2, theta2=0.2, cv=2, alpha=0.01, beta=0.01, logscale=false, method="owenq")
     @test n == 4810 && round(p, digits=7) == 0.9900151
-    n, p = beSampleN(cv=0.347)
+    n, p = ClinicalTrialUtilities.beSampleN(cv=0.347)
+    @test n == 52 && round(p, digits=7) == 0.8136415
+
+    n, p = ClinicalTrialUtilities.beSampleN(;theta0=1.05, theta1=0.9, theta2=1.25, cv=0.0001, alpha=0.05, beta=0.15, logscale=true, method="nct", design="parallel")
+    @test n == 4 && p ≈ 1.0
+    n, p = ClinicalTrialUtilities.beSampleN(;theta0=1.0, theta1=0.95, theta2=1.5, cv=0.8, alpha=0.0000001, beta=0.0001, logscale=true, method="shifted", design="2x2x4")
+    @test n == 10002 && p ≈ 0.9818179411719451
+
+    s = ClinicalTrialUtilities.beSampleN(cv=0.347, out="str")
+    n, p, s = ClinicalTrialUtilities.beSampleN(cv=0.347, out="vstr")
     @test n == 52 && round(p, digits=7) == 0.8136415
 end
 

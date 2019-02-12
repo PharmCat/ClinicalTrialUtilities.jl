@@ -7,3 +7,5 @@
 102*: powerTOST
 
 1031: designProp
+
+104*: beSampleN
