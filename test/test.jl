@@ -10,7 +10,6 @@ end
 println(" ---------------------------------- ")
 println(" ---------   START TEST   --------- ")
 println(" ---------------------------------- ")
-
 println(" ---------------------------------- ")
 @testset "sampleSizeParam Test  " begin
     vals = ClinicalTrialUtilities.ParamSet("mean","ea","one",0.05,0.2,1.0,1.5,2,1)
@@ -124,7 +123,7 @@ end
     @test ClinicalTrialUtilities.approxPowerTOST(0.05,1.0,1.0,0.5,0.2,100) == 0
 end
 @testset "approx2PowerTOST      " begin
-    @test round(ClinicalTrialUtilities.approx2PowerTOST(0.05,0.1,1.0,0.5,0.2,1000), digits=7) ≈ 0.4413917
+    @test ClinicalTrialUtilities.approx2PowerTOST(0.05,0.1,1.0,0.5,0.2,1000) ≈ 0.4413917 atol=1E-7
 end
 @testset "owensT                " begin
     @test ClinicalTrialUtilities.owensT(1.0,Inf)   ≈ 0.07932763  atol=1E-8
