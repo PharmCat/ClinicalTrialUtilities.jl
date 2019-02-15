@@ -150,6 +150,13 @@ powerTOST(alpha=0.05, logscale=true|false, theta1=0.8, theta2=1.25, theta0=0.95,
 - nct
 - shifted
 
+**design** - trial design;
+- parralel
+- 2x2 (default)
+- 2x2x4
+- 2x4x4
+- 2x3x3
+
 #### beSampleN
 
 Using for bioequivalence study.
@@ -176,6 +183,13 @@ beSampleN(alpha=0.05, logscale=true|false, theta1=0.8, theta2=1.25, theta0=0.95,
 - owenq
 - nct
 - shifted
+
+**design** - trial design;
+- parralel
+- 2x2 (default)
+- 2x2x4
+- 2x4x4
+- 2x3x3
 
 **out** - output type:
 - num   - numeric (default);
