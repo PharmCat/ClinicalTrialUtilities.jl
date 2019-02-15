@@ -1,4 +1,4 @@
-# Clinical Trial Power and Sample Size calculation
+# Clinical Trial Utilities
 # Author: Vladimir Arnautov aka PharmCat
 # Copyright © 2019 Vladimir Arnautov aka PharmCat (mail@pharmcat.net)
 # Calculation based on Chow S, Shao J, Wang H. 2008. Sample Size Calculations in Clinical Research. 2nd Ed. Chapman & Hall/CRC Biostatistics Series.
@@ -10,7 +10,8 @@
 #Compare Means
 #One Sample
 # m0 = μ0; m1 = μ
-function oneSampleMeanEquality(m0, m1, sd; alpha=0.05, beta=0.2)
+
+function oneSampleMeanEquality(m0, m1, sd; alpha=0.05, beta=0.2)::Float64
     return ((quantile(ZDIST, 1-alpha/2) + quantile(ZDIST, 1-beta))*sd/(m1-m0))^2
 end
 function oneSampleMeanEquivalence(m0, m1, sd, diff; alpha=0.05, beta=0.2)
@@ -74,6 +75,14 @@ function mcnm(p10, p01; alpha=0.05, beta=0.2)
     pdisc=p10+p01
     pdiff=p10-p01
     return ((quantile(ZDIST, 1-alpha/2)*sqrt(pdisc)+quantile(ZDIST, 1 - beta)*sqrt(pdisc-pdiff^2))/pdiff)^2
+end
+
+function mcnmP(p10, p01, n; alpha=0.05)
+    pdisc=p10+p01
+    pdiff=p10-p01
+    x1=(pdiff*sqrt(n)-quantile(ZDIST, 1-alpha/2)*sqrt(pdisc))/sqrt(pdisc-pdiff^2);
+    x2=(-pdiff*sqrt(n)-quantile(ZDIST, 1-alpha/2)*sqrt(pdisc))/sqrt(pdisc-pdiff^2);
+    return cdf(ZDIST, x1)+cdf(ZDIST, x2)
 end
 #-------------------------------------------------------------------------------
 # Power Section

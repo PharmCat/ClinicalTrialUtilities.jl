@@ -1,19 +1,33 @@
+# Clinical Trial Utilities
 # Copyright © 2019 Vladimir Arnautov aka PharmCat (mail@pharmcat.net)
 
+function powerTOST(;alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.0, n=0, design="2x2", method="owenq",  out="num")
+    if n < 2 throw(CTUException(1021,"powerTOST: n can not be < 2")) end
+    if cv == 0 throw(CTUException(1022,"powerTOST: cv can not be equal to 0"))  end
+    if !(0 < alpha < 1) throw(CTUException(1023,"powerTOST: alfa can not be > 1 or < 0")) end
+    theta0   = convert(Float64, theta0)
+    theta1   = convert(Float64, theta1)
+    theta2   = convert(Float64, theta2)
+    logscale = convert(Bool, logscale)
+    cv       = convert(Float64, cv)
+    n        = convert(Int, n)
+    alpha    = convert(Float64, alpha)
 
-function powerTOST(;alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0, n=0, design="2x2", method="owenq")
+    return powerTOSTint(alpha, logscale, theta1, theta2, theta0, cv, n, design, method)
+end
 
-    #if isnan(cv) || isnan(n) return false end
-    if n < 2 return false end
-    if cv == 0 return false end
-    if !(0 < alpha < 1) return false end
+function powerTOSTint(alpha::Float64, logscale::Bool, theta1::Float64, theta2::Float64, theta0::Float64, cv::Float64, n::Int, design::String, method::String)::Float64
 
-    df = n-2
-    n1  = n ÷ 2
-    n2  = n1 + n % 2
-    sef = sqrt((1/n1+1/n2)*0.5)
+    dffunc, bkni, seq = designProp(design) #dffunc if generic funtion with 1 arg return df
+    df    = dffunc(n)
+    sqa   = Array{Float64, 1}(undef, seq)
+    sqa  .= n÷seq
+    for i = 1:n%seq
+        sqa[i] += 1
+    end
+    sef = sqrt(sum(1 ./ sqa)*bkni)
 
-    if df < 1 return false end
+    if df < 1 throw(CTUException(1024,"powerTOSTint: df < 1")) end
 
     if logscale
         ltheta1 = log(theta1)
@@ -27,56 +41,50 @@ function powerTOST(;alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0
         se      = cv
     end
 
-    sem = se*sef
+    sem::Float64 = se*sef
 
-    if method=="owenq"
+    if method     == "owenq"
         return powerTOSTOwenQ(alpha,ltheta1,ltheta2,diffm,sem,df)
-    elseif method=="nct"
+    elseif method == "nct"
         return approxPowerTOST(alpha,ltheta1,ltheta2,diffm,sem,df)
-    elseif method=="mvt"
+    elseif method == "mvt"
         return power1TOST(alpha,ltheta1,ltheta2,diffm,sem,df) #not implemented
-    elseif method=="shifted"
+    elseif method == "shifted"
         return approx2PowerTOST(alpha,ltheta1,ltheta2,diffm,sem,df)
     else
-        return false
+         throw(CTUException(1025,"powerTOST: method "*method*" not known!"))
     end
 end #powerTOST
 
 #.power.TOST
 function powerTOSTOwenQ(alpha,ltheta1,ltheta2,diffm,sem,df)
-    tval = qt(1-alpha, df)
-
-    delta1 = (diffm-ltheta1)/sem
-    delta2 = (diffm-ltheta2)/sem
-
-    R = (delta1-delta2)*sqrt(df)/(tval+tval) #not clear R implementation of vector form
-
-    if isnan(R) R = 0 end
-
-    if R <= 0 R = Inf end
+    tval::Float64   = quantile(TDist(df), 1-alpha) #qt(1-alpha, df)
+    delta1::Float64 = (diffm-ltheta1)/sem
+    delta2::Float64 = (diffm-ltheta2)/sem
+    R::Float64      = (delta1-delta2)*sqrt(df)/(tval+tval) #not clear R implementation of vector form
+    if isnan(R) R   = 0 end
+    if R <= 0 R     = Inf end
 
     # to avoid numerical errors in OwensQ implementation
     # 'shifted' normal approximation Jan 2015
     # former Julious formula (57)/(58) doesn't work
     if df > 10000
-        tval = qnorm(1-alpha)
-        p1   = pnorm(tval-delta1)
-        p2   = pnorm(-tval-delta2)
-
-        pwr = p2-p1
+        #tval = qnorm(1-alpha)
+        tval  = quantile(ZDIST, 1-alpha)
+        #p1   = pnorm(tval-delta1)
+        p1    = cdf(ZDIST, tval-delta1)
+        #p2   = pnorm(-tval-delta2)
+        p2    = cdf(ZDIST, -tval-delta2)
+        pwr   = p2-p1
         if pwr > 0 return pwr else return 0 end
     elseif df >= 5000
         # approximation via non-central t-distribution
         return approxPowerTOST(alpha,ltheta1,ltheta2,diffm,sem,df)
     end
-    # NOT VECTORIZED
-
-    p1 = owensQ(df, tval, delta1, 0, R)
-    p2 = owensQ(df,-tval, delta2, 0, R)
-
+    p1  = owensQ(df, tval, delta1, 0.0, R)
+    p2  = owensQ(df,-tval, delta2, 0.0, R)
     pwr = p2 - p1
     if pwr > 0 return pwr else return 0 end
-
 end #powerTOSTOwenQ
 
 #------------------------------------------------------------------------------
@@ -84,17 +92,19 @@ end #powerTOSTOwenQ
 # approximation based on non-central t
 # .approx.power.TOST - PowerTOST
 function approxPowerTOST(alpha,ltheta1,ltheta2,diffm,sem,df)
-
-    tval = qt(1-alpha,df)
-    delta1 = (diffm-ltheta1)/sem
-    delta2 = (diffm-ltheta2)/sem
-    pow = cdf(NoncentralT(df,delta2), -tval) - cdf(NoncentralT(df,delta1), tval)
+    tdist           = TDist(df)
+    tval::Float64   = quantile(tdist, 1-alpha)# qt(1-alpha,df)
+    delta1::Float64 = (diffm-ltheta1)/sem
+    delta2::Float64 = (diffm-ltheta2)/sem
+    pow             = cdf(NoncentralT(df,delta2), -tval) - cdf(NoncentralT(df,delta1), tval)
     if pow > 0 return pow else return 0 end
 end #approxPowerTOST
 
 #.power.1TOST
 function power1TOST(alpha,ltheta1,ltheta2,diffm,sem,df)
-    return false #Method ON MULTIVARIATE t AND GAUSS PROBABILITIES IN R not implemented
+
+    throw(CTUException(1000,"Method not implemented!"))
+    #Method ON MULTIVARIATE t AND GAUSS PROBABILITIES IN R not implemented
     # Distributions.MvNormal - in plan
     # see  Distributions.jl/src/multivariate/mvtdist.jl
     # Multivariate t-distribution
@@ -105,18 +115,36 @@ end
 
 #.approx2.power.TOST
 function approx2PowerTOST(alpha,ltheta1,ltheta2,diffm,sem,df)
-    tval = qt(1-alpha, df)
-    delta1 = (diffm-ltheta1)/sem
-    delta2 = (diffm-ltheta2)/sem
+    tdist           = TDist(df)
+    tval::Float64   = quantile(tdist, 1-alpha) # qt(1-alpha, df)
+    delta1::Float64 = (diffm-ltheta1)/sem
+    delta2::Float64 = (diffm-ltheta2)/sem
     if isnan(delta1) delta1 = 0 end
     if isnan(delta2) delta2 = 0 end
 
-    tdist=TDist(df)
     pow = cdf(tdist,-tval-delta2) - cdf(tdist,tval-delta1)
     if pow > 0 return pow else return 0 end
 end #approx2PowerTOST
 
 #CV2se
-function cv2se(cv)
+@inline function cv2se(cv::Float64)::Float64
     return sqrt(log(1+cv^2))
+end
+
+function designProp(type::String)
+    if type == "parallel"
+        function f1(n) n - 2 end
+        return f1, 1.0, 2
+    elseif type == "2x2"
+        function f2(n) n - 2 end
+        return f2, 0.5, 2
+    elseif type == "2x2x3"
+        return function f3(n) 2*n - 3 end, 0.375, 2
+    elseif type == "2x2x4"
+        return function f4(n) 3*n - 4 end, 0.25, 2
+    elseif type == "2x4x4"
+        return function f5(n) 3*n - 4 end, 0.0625, 4
+    elseif type == "2x3x3"
+        return function f6(n) 2*n - 3 end, 1/6, 3
+    else throw(CTUException(1031,"designProp: design not known!")) end
 end
