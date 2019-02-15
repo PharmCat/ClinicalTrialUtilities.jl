@@ -396,3 +396,23 @@ julia> ClinicalTrialUtilities.powerTOST(alpha=0.0001, logscale=false, theta1=-0.
   Design alpha CV theta0 theta1 theta2 Sample size Achieved power Target power
 1    2x2  0.01  2      0   -0.2    0.2        4810      0.9900151         0.99
 >
+> sampleN.TOST(alpha=0.1, targetpower=0.9, theta0=0.95, CV=0.35, design="parallel", method="shifted")
+
++++++++++++ Equivalence test - TOST +++++++++++
+            Sample size estimation
+-----------------------------------------------
+Study design:  2 parallel groups
+log-transformed data (multiplicative model)
+
+alpha = 0.1, target power = 0.9
+BE margins = 0.8 ... 1.25
+True ratio = 0.95,  CV = 0.35
+
+Sample size (total)
+ n     power
+106   0.901389
+
+Approximate power calculation with
+shifted central t-distribution.
+
+> 

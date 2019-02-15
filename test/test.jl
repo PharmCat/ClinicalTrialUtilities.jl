@@ -159,16 +159,20 @@ println(" ---------------------------------- ")
     @test ClinicalTrialUtilities.powerTOST(alpha=0.00000005, logscale=false, theta1=-0.1, theta2=0.1, theta0=0.0, cv=1.5, n=20000, design="2x2", method="owenq") ≈ 0.8197361 atol=1E-7
     @test ClinicalTrialUtilities.powerTOST(alpha=0.1, logscale=false, theta1=-0.1, theta2=0.1, theta0=0.0, cv=0.14, n=4, design="2x2", method="shifted") ≈ 0.0
     #
-
-
     @test ClinicalTrialUtilities.powerTOST(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=27, design="2x2", method="owenq") ≈ 0.9264365737448076
     @test ClinicalTrialUtilities.powerTOST(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=29, design="2x2", method="owenq") ≈ 0.941900827163551
     @test ClinicalTrialUtilities.powerTOST(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=31, design="2x2", method="owenq") ≈ 0.9542152686694777
-    @test ClinicalTrialUtilities.powerTOST(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=31, design="2x2", method="owenq") ≈ 0.9542152686694777
-    #2x2x4
 
+    #2x2x4
+    @test ClinicalTrialUtilities.powerTOST(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.4, n=35, design="2x2x4") ≈ 0.829747  atol=1E-6
     #2x4x4
     @test ClinicalTrialUtilities.powerTOST(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.4, n=35, design="2x4x4") ≈ 0.8291076  atol=1E-7
+    @test ClinicalTrialUtilities.powerTOST(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.4, n=34, design="2x4x4") ≈ 0.8180596  atol=1E-7
+    @test ClinicalTrialUtilities.powerTOST(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.4, n=33, design="2x4x4") ≈ 0.8069565  atol=1E-7
+    #2x3x3
+    @test ClinicalTrialUtilities.powerTOST(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.4, n=32, design="2x3x3") ≈ 0.5976873  atol=1E-7
+    @test ClinicalTrialUtilities.powerTOST(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.4, n=31, design="2x3x3") ≈ 0.579468  atol=1E-6
+    @test ClinicalTrialUtilities.powerTOST(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.4, n=30, design="2x3x3") ≈ 0.5614358  atol=1E-7
 end
 
 @testset "PowerTOST Errors      " begin
@@ -223,6 +227,12 @@ println(" ---------------------------------- ")
     s = ClinicalTrialUtilities.beSampleN(cv=0.347, out="str")
     n, p, s = ClinicalTrialUtilities.beSampleN(cv=0.347, out="vstr")
     @test n == 52 && round(p, digits=7) == 0.8136415
+
+    n, p = ClinicalTrialUtilities.beSampleN(;theta0=1.05, theta1=0.8, theta2=1.25, cv=0.8, alpha=0.05, beta=0.2, logscale=true, method="shifted", design="2x2x4")
+    @test n == 106 && p ≈ 0.8060551186037984
+
+    n, p = ClinicalTrialUtilities.beSampleN(;theta0=0.95, theta1=0.8, theta2=1.25, cv=0.35, alpha=0.1, beta=0.1, logscale=true, method="shifted", design="parallel")
+    @test n == 106 && p ≈ 0.9013894463164578
 end
 
 println(" ---------------------------------- ")
