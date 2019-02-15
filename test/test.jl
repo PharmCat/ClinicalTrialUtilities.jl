@@ -132,7 +132,7 @@ end
     @test ClinicalTrialUtilities.owensT(-1.0,-Inf) ≈ -0.07932763 atol=1E-8
     @test ClinicalTrialUtilities.owensT(1.0, 0.5)  ≈ 0.0430647   atol=1E-8
     @test ClinicalTrialUtilities.owensT(1.0,2.0)   ≈ 0.07846819  atol=1E-8
-    @test                        owensT(Inf, 1)   == 0
+    @test                        owensT(Inf, 1.0)   == 0
 end
 
 println(" ---------------------------------- ")

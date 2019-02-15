@@ -415,4 +415,4 @@ Sample size (total)
 Approximate power calculation with
 shifted central t-distribution.
 
-> 
+>
