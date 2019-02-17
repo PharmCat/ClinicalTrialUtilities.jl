@@ -27,6 +27,8 @@ include("PowerTOST.jl")
 include("PowerSampleSize.jl")
 #Main sample size and power functions: sampleSize, ctPower, beSampleN
 include("SampleSize.jl")
+#Confidence interval calculation
+include("CI.jl")
 #info function
 include("Info.jl")
 
@@ -44,6 +46,8 @@ export ParamSet
 export sampleSizeParam
 #Exceptions
 export CTUException
+#Confidence Intervals for Proportions and Means
+export CI
 
 #Exceptions
 struct CTUException <: Exception
