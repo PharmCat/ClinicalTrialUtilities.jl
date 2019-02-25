@@ -226,7 +226,9 @@ n, p, s = beSampleN(cv=0.347, design="2x2x4", method="nct", out="vstr")
 
 ### Confidence Interval Submodule
 
+Description here:
 
+https://github.com/PharmCat/ClinicalTrialUtilities.jl/blob/dev/doc/CI.md
 
 ### ToDo:
 
