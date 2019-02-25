@@ -121,7 +121,6 @@ function approx2PowerTOST(alpha,ltheta1,ltheta2,diffm,sem,df)
     delta2::Float64 = (diffm-ltheta2)/sem
     if isnan(delta1) delta1 = 0 end
     if isnan(delta2) delta2 = 0 end
-
     pow = cdf(tdist,-tval-delta2) - cdf(tdist,tval-delta1)
     if pow > 0 return pow else return 0 end
 end #approx2PowerTOST
@@ -129,6 +128,10 @@ end #approx2PowerTOST
 #CV2se
 @inline function cv2se(cv::Float64)::Float64
     return sqrt(log(1+cv^2))
+end
+#CV2se
+@inline function se2cv(se::Float64)::Float64
+    return sqrt(exp(se^2)-1)
 end
 
 function designProp(type::String)

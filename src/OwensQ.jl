@@ -168,8 +168,7 @@ end #OwensT(h,a)
     u   = Float64[0.0744372, 0.2166977, 0.3397048, 0.4325317, 0.4869533]
     tp::Float64  = 1/2/pi
     tv1 = eps();
-    tv2::Float64 = 15.0
-    tv3::Float64 = 15.0
+    tv2::Float64 = tv3::Float64 = 15.0
     tv4::Float64 = 1.0E-05
     if tv2 < abs(x) return 0 end
     xs::Float64  = -0.5*x*x
@@ -188,9 +187,9 @@ end #OwensT(h,a)
     end
         # 10 point Gaussian quadrature.
         # original via loop
-        rt::Float64 = 0
-        r1::Float64 = 0
-        r2::Float64 = 0
+        rt::Float64 = r1::Float64 = r2::Float64 = 0
+        #r1::Float64 = 0
+        #r2::Float64 = 0
         for i in 1:ng
             r1 = 1.0 + fxs*(0.5 + u[i])^2
             r2 = 1.0 + fxs*(0.5 - u[i])^2
