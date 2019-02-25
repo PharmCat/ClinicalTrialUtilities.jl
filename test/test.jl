@@ -31,11 +31,11 @@ end
     @test ceil(ClinicalTrialUtilities.sampleSize(param="prop", type="ns", group="two", alpha=0.05, beta=0.2, diff=-0.1, a=0.85, b=0.65)) == 25
     @test ceil(ClinicalTrialUtilities.sampleSize(param="or", type="ea",  alpha=0.05, beta=0.2, a=0.4, b=0.25)) == 156
     @test ceil(ClinicalTrialUtilities.sampleSize(param="or", type="ei",  alpha=0.05, beta=0.2, diff=0.5, a=0.25, b=0.25)) == 366
-    @test ceil(ClinicalTrialUtilities.sampleSize(param="or", type="ns",  alpha=0.05, beta=0.2, diff=0.2, a=0.4, b=0.25)) == 242
-    @test ceil(ClinicalTrialUtilities.sampleSize(param="prop", type="mcnm", a=0.45, b=0.05)) == 23
+    @test ceil(sampleSize(param="or", type="ns",  alpha=0.05, beta=0.2, diff=0.2, a=0.4, b=0.25)) == 242
+    @test ceil(sampleSize(param="prop", type="mcnm", a=0.45, b=0.05)) == 23
 
     @test sampleSize(param="mean", type="ns", group="two", alpha=0.05, beta=0.2, diff=1, sd=20, a=1, b=2) ≈ 1236.511446403953 atol=1E-12
-    @test ClinicalTrialUtilities.sampleSize(param="mean", type="ns", group="two", alpha=0.05, beta=0.2, diff=1, sd=20, a=1, b=2, out="vstr")[1] ≈ 1236.511446403953 atol=1E-12
+    @test sampleSize(param="mean", type="ns", group="two", alpha=0.05, beta=0.2, diff=1, sd=20, a=1, b=2, out="vstr")[1] ≈ 1236.511446403953 atol=1E-12
 end
 
 @testset "sampleSizeParam Errors" begin
@@ -53,9 +53,9 @@ end
     @test !ClinicalTrialUtilities.sampleSize(param="prop", type="", group="one", alpha=0.05, beta=0.2, diff=1, a=0.5, b=0.5, k=1)
     @test !ClinicalTrialUtilities.sampleSize(param="prop", type="", group="two", alpha=0.05, beta=0.2, diff=1, a=0.5, b=0.5, k=1)
     @test !ClinicalTrialUtilities.sampleSize(param="prop", type="ea", group="", alpha=0.05, beta=0.2, diff=1, a=0.5, b=0.5, k=1)
-    @test !ClinicalTrialUtilities.sampleSize(param="prop", type="ea", group="one", alpha=0.05, beta=0.2, diff=1, sd=1, a=-1, b=0, k=1)
-    @test !ClinicalTrialUtilities.sampleSize(param="prop", type="ei", group="one", alpha=0.05, beta=0.2, diff=1, sd=1, a=0.4, b=2, k=1)
-    @test !ClinicalTrialUtilities.sampleSize(param="or", type="", group="",  diff=1, a=0.5, b=0.5, k=1)
+    @test !sampleSize(param="prop", type="ea", group="one", alpha=0.05, beta=0.2, diff=1, sd=1, a=-1, b=0, k=1)
+    @test !sampleSize(param="prop", type="ei", group="one", alpha=0.05, beta=0.2, diff=1, sd=1, a=0.4, b=2, k=1)
+    @test !sampleSize(param="or", type="", group="",  diff=1, a=0.5, b=0.5, k=1)
 end
 
 @testset "sampleSize Atomic     " begin
@@ -83,9 +83,9 @@ end
     @test ClinicalTrialUtilities.orEquivalenceP(0.25, 0.25, 0.5, 366; alpha=0.05, k=1, logdiff=true) ≈ 0.8008593380478983  ≈ ClinicalTrialUtilities.ctPower(param="or", type="ei", a=0.25, b=0.25, diff=0.5, n=366, alpha=0.05)
     @test ClinicalTrialUtilities.orNSP(0.4, 0.25, 0.2, 242; alpha=0.05, k=1, logdiff=true) ≈ 0.8007200876001626  ≈ ctPower(param="or", type="ns", a=0.4, b=0.25, diff=0.2, n=242, alpha=0.05)
 
-    pow, str = ClinicalTrialUtilities.ctPower(param="prop", type="ea", group="one", a=0.3, b=0.5, n=50, alpha=0.05, out="vstr")
+    pow, str = ctPower(param="prop", type="ea", group="one", a=0.3, b=0.5, n=50, alpha=0.05, out="vstr")
     @test pow ≈ 0.8074304194325561
-    @test ClinicalTrialUtilities.ctPower(param="or", type="ns", a=0.4, b=0.25, diff=0.2, n=242, alpha=0.05, out="num") ≈ 0.8007200876001626
+    @test ctPower(param="or", type="ns", a=0.4, b=0.25, diff=0.2, n=242, alpha=0.05, out="num") ≈ 0.8007200876001626
 
 end
 
@@ -142,6 +142,7 @@ println(" ---------------------------------- ")
     dff, bkni, seq = ClinicalTrialUtilities.designProp("2x2")
     @test dff(31) ≈ 29 && bkni ≈ 0.5 && seq ≈ 2
 
+    ClinicalTrialUtilities.se2cv(ClinicalTrialUtilities.cv2se(0.2)) ≈ 0.2
 end
 
 println(" ---------------------------------- ")
@@ -170,69 +171,173 @@ println(" ---------------------------------- ")
     @test ClinicalTrialUtilities.powerTOST(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.4, n=34, design="2x4x4") ≈ 0.8180596  atol=1E-7
     @test ClinicalTrialUtilities.powerTOST(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.4, n=33, design="2x4x4") ≈ 0.8069565  atol=1E-7
     #2x3x3
-    @test ClinicalTrialUtilities.powerTOST(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.4, n=32, design="2x3x3") ≈ 0.5976873  atol=1E-7
-    @test ClinicalTrialUtilities.powerTOST(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.4, n=31, design="2x3x3") ≈ 0.579468  atol=1E-6
-    @test ClinicalTrialUtilities.powerTOST(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.4, n=30, design="2x3x3") ≈ 0.5614358  atol=1E-7
+    @test powerTOST(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.4, n=32, design="2x3x3") ≈ 0.5976873  atol=1E-7
+    @test powerTOST(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.4, n=31, design="2x3x3") ≈ 0.579468  atol=1E-6
+    @test powerTOST(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.4, n=30, design="2x3x3") ≈ 0.5614358  atol=1E-7
 end
 
 @testset "PowerTOST Errors      " begin
     en = 0
     try
-        ClinicalTrialUtilities.powerTOST(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=20,  method="")
+        powerTOST(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=20,  method="")
     catch e
-        if isa(e, ClinicalTrialUtilities.CTUException) en = e.n end
+        if isa(e, CTUException) en = e.n end
     end
     @test en ≈ 1025
     en = 0
     try
-        ClinicalTrialUtilities.powerTOST(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=20, design="2x2", method="mvt")
+        powerTOST(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=20, design="2x2", method="mvt")
     catch e
-        if isa(e, ClinicalTrialUtilities.CTUException) en = e.n end
+        if isa(e, CTUException) en = e.n end
     end
     @test en ≈ 1000
 end
 
 println(" ---------------------------------- ")
 @testset "beSampleN Test        " begin
-    n, p = ClinicalTrialUtilities.beSampleN(;theta0=0.95, theta1=0.8, theta2=1.25, cv=0.2, alpha=0.05, beta=0.2, logscale=true, method="owenq")
+    n, p = beSampleN(;theta0=0.95, theta1=0.8, theta2=1.25, cv=0.2, alpha=0.05, beta=0.2, logscale=true, method="owenq")
     @test n == 20 && round(p, digits=7) == 0.8346802
-    n, p = ClinicalTrialUtilities.beSampleN(;theta0=0.95, theta1=0.8, theta2=1.25, cv=0.3, alpha=0.05, beta=0.2, logscale=true, method="owenq")
+    n, p = beSampleN(;theta0=0.95, theta1=0.8, theta2=1.25, cv=0.3, alpha=0.05, beta=0.2, logscale=true, method="owenq")
     @test n == 40 && round(p, digits=7) == 0.8158453
-    n, p = ClinicalTrialUtilities.beSampleN(;theta0=1.0, theta1=0.8, theta2=1.25, cv=0.3, alpha=0.05, beta=0.1, logscale=true, method="owenq")
+    n, p = beSampleN(;theta0=1.0, theta1=0.8, theta2=1.25, cv=0.3, alpha=0.05, beta=0.1, logscale=true, method="owenq")
     @test n == 40 && round(p, digits=7) == 0.9095603
-    n, p = ClinicalTrialUtilities.beSampleN(;theta0=1.05, theta1=0.8, theta2=1.25, cv=0.4, alpha=0.05, beta=0.15, logscale=true, method="nct")
+    n, p = beSampleN(;theta0=1.05, theta1=0.8, theta2=1.25, cv=0.4, alpha=0.05, beta=0.15, logscale=true, method="nct")
     @test n == 74 && round(p, digits=7) == 0.8558178
-    n, p = ClinicalTrialUtilities.beSampleN(;theta0=1.05, theta1=0.9, theta2=1.25, cv=0.4, alpha=0.05, beta=0.15, logscale=true, method="nct")
+    n, p = beSampleN(;theta0=1.05, theta1=0.9, theta2=1.25, cv=0.4, alpha=0.05, beta=0.15, logscale=true, method="nct")
     @test n == 108 && round(p, digits=7) == 0.8506248
-    n, p = ClinicalTrialUtilities.beSampleN(;theta0=1.05, theta1=0.8, theta2=1.2, cv=0.5, alpha=0.05, beta=0.2, logscale=true, method="nct")
+    n, p = beSampleN(;theta0=1.05, theta1=0.8, theta2=1.2, cv=0.5, alpha=0.05, beta=0.2, logscale=true, method="nct")
     @test n == 158 && round(p, digits=7) == 0.8039191
-    n, p = ClinicalTrialUtilities.beSampleN(;theta0=1.05, theta1=0.8, theta2=1.25, cv=0.8, alpha=0.05, beta=0.2, logscale=true, method="shifted")
+    n, p = beSampleN(;theta0=1.05, theta1=0.8, theta2=1.25, cv=0.8, alpha=0.05, beta=0.2, logscale=true, method="shifted")
     @test n == 210 && round(p, digits=7) == 0.8012471
-    n, p = ClinicalTrialUtilities.beSampleN(;theta0=0.0, theta1=-0.2, theta2=0.2, cv=0.5, alpha=0.05, beta=0.2, logscale=false, method="owenq")
+    n, p = beSampleN(;theta0=0.0, theta1=-0.2, theta2=0.2, cv=0.5, alpha=0.05, beta=0.2, logscale=false, method="owenq")
     @test n == 110 && round(p, digits=7) == 0.8074124
-    n, p = ClinicalTrialUtilities.beSampleN(;theta0=0.0, theta1=-0.2, theta2=0.2, cv=2.0, alpha=0.05, beta=0.2, logscale=false, method="owenq")
+    n, p = beSampleN(;theta0=0.0, theta1=-0.2, theta2=0.2, cv=2.0, alpha=0.05, beta=0.2, logscale=false, method="owenq")
     @test n == 1716 && round(p, digits=7) == 0.8005618
-    n, p = ClinicalTrialUtilities.beSampleN(;theta0=0.0, theta1=-0.2, theta2=0.2, cv=2.0, alpha=0.001, beta=0.2, logscale=false, method="owenq")
+    n, p = beSampleN(;theta0=0.0, theta1=-0.2, theta2=0.2, cv=2.0, alpha=0.001, beta=0.2, logscale=false, method="owenq")
     @test n == 3828 && round(p, digits=7) == 0.8001454
-    n, p = ClinicalTrialUtilities.beSampleN(;theta0=0, theta1=-0.2, theta2=0.2, cv=2, alpha=0.01, beta=0.01, logscale=false, method="owenq")
+    n, p = beSampleN(;theta0=0, theta1=-0.2, theta2=0.2, cv=2, alpha=0.01, beta=0.01, logscale=false, method="owenq")
     @test n == 4810 && round(p, digits=7) == 0.9900151
-    n, p = ClinicalTrialUtilities.beSampleN(cv=0.347)
+    n, p = beSampleN(cv=0.347)
     @test n == 52 && round(p, digits=7) == 0.8136415
 
-    n, p = ClinicalTrialUtilities.beSampleN(;theta0=1.05, theta1=0.9, theta2=1.25, cv=0.0001, alpha=0.05, beta=0.15, logscale=true, method="nct", design="parallel")
+    n, p = beSampleN(;theta0=1.05, theta1=0.9, theta2=1.25, cv=0.0001, alpha=0.05, beta=0.15, logscale=true, method="nct", design="parallel")
     @test n == 4 && p ≈ 1.0
-    n, p = ClinicalTrialUtilities.beSampleN(;theta0=1.0, theta1=0.95, theta2=1.5, cv=0.8, alpha=0.0000001, beta=0.0001, logscale=true, method="shifted", design="2x2x4")
+    n, p = beSampleN(;theta0=1.0, theta1=0.95, theta2=1.5, cv=0.8, alpha=0.0000001, beta=0.0001, logscale=true, method="shifted", design="2x2x4")
     @test n == 10002 && p ≈ 0.9818179411719451
 
-    s = ClinicalTrialUtilities.beSampleN(cv=0.347, out="str")
-    n, p, s = ClinicalTrialUtilities.beSampleN(cv=0.347, out="vstr")
-    @test n == 52 && round(p, digits=7) == 0.8136415
+    st = beSampleN(cv=0.347, out="str")
 
-    n, p = ClinicalTrialUtilities.beSampleN(;theta0=1.05, theta1=0.8, theta2=1.25, cv=0.8, alpha=0.05, beta=0.2, logscale=true, method="shifted", design="2x2x4")
+    n, p, s = beSampleN(cv=0.347, out="vstr")
+    @test n == 52 && round(p, digits=7) == 0.8136415
+    @test st == s
+
+    n, p = beSampleN(;theta0=1.05, theta1=0.8, theta2=1.25, cv=0.8, alpha=0.05, beta=0.2, logscale=true, method="shifted", design="2x2x4")
     @test n == 106 && p ≈ 0.8060551186037984
 
-    n, p = ClinicalTrialUtilities.beSampleN(;theta0=0.95, theta1=0.8, theta2=1.25, cv=0.35, alpha=0.1, beta=0.1, logscale=true, method="shifted", design="parallel")
+    n, p = beSampleN(;theta0=0.95, theta1=0.8, theta2=1.25, cv=0.35, alpha=0.1, beta=0.1, logscale=true, method="shifted", design="parallel")
     @test n == 106 && p ≈ 0.9013894463164578
+end
+
+println(" ---------------------------------- ")
+@testset "  CI Test             " begin
+
+    ci = ClinicalTrialUtilities.CI.oneProp(38, 100, alpha=0.05, method="wald")
+    @test ci.lower    ≈ 0.284866005121432 atol=1E-15
+    @test ci.upper    ≈ 0.47513399487856794 atol=1E-15
+    @test ci.estimate ≈ 0.38 atol=1E-16
+
+    ci = ClinicalTrialUtilities.CI.oneProp(38, 100, alpha=0.05, method="wilson")
+    @test ci.lower    ≈ 0.2909759925247873 atol=1E-16
+    @test ci.upper    ≈ 0.47790244704488943 atol=1E-15
+    @test ci.estimate ≈ 0.38443921978483836 atol=1E-15
+
+    ci = ClinicalTrialUtilities.CI.oneProp(38, 100, alpha=0.05, method="cp")
+    @test ci.lower    ≈ 0.284767476141479 atol=1E-15
+    @test ci.upper    ≈ 0.482539305750806 atol=1E-15
+    @test ci.estimate ≈ 0.38
+
+    ci = ClinicalTrialUtilities.CI.oneProp(38, 100, alpha=0.05, method="soc")
+    @test ci.lower    ≈ 0.289191701883923 atol=1E-15
+    @test ci.upper    ≈ 0.477559239340346 atol=1E-15
+    @test ci.estimate ≈ 0.38
+
+    ci = ClinicalTrialUtilities.CI.oneProp(38, 100, alpha=0.05, method="blaker")
+    @test ci.lower    ≈ 0.2881875 atol=1E-7
+    @test ci.upper    ≈ 0.4798293 atol=1E-7
+    @test ci.estimate ≈ 0.38
+
+    ci = ClinicalTrialUtilities.CI.oneProp(38, 100, alpha=0.05, method="arcsine")
+    @test ci.lower    ≈ 0.2877714314998773 atol=1E-16
+    @test ci.upper    ≈ 0.47682358116201534 atol=1E-16
+    @test ci.estimate ≈ 0.38
+
+    #----
+
+    ci = ClinicalTrialUtilities.CI.twoProp(30, 100, 40, 90; alpha=0.05, type="or", method="mn")
+    @test ci.lower    ≈ 0.2951669 atol=1E-7
+    @test ci.upper    ≈ 0.9722965 atol=1E-7
+    @test ci.estimate ≈ 0.5357142 atol=1E-7
+
+    ci = ClinicalTrialUtilities.CI.twoProp(30, 100, 40, 90; alpha=0.05, type="or", method="awoolf")
+    @test ci.lower    ≈ 0.2982066 atol=1E-7
+    @test ci.upper    ≈ 0.9758363 atol=1E-7
+    @test ci.estimate ≈ 0.5394449 atol=1E-7
+
+    ci = ClinicalTrialUtilities.CI.twoProp(30, 100, 40, 90; alpha=0.05, type="or", method="woolf")
+    @test ci.lower    ≈ 0.29504200273798975 atol=1E-7
+    @test ci.upper    ≈ 0.9727082695179062 atol=1E-7
+    @test ci.estimate ≈ 0.5357142857142857 atol=1E-7
+
+    #----
+
+    ci = ClinicalTrialUtilities.CI.twoProp(30, 100, 40, 90; alpha=0.05, type="diff", method="nhs")
+    @test ci.lower    ≈ -0.275381800 atol=1E-9
+    @test ci.upper    ≈ -0.007158419 atol=1E-9
+    @test ci.estimate ≈ -0.1444444   atol=1E-7
+
+    ci = ClinicalTrialUtilities.CI.twoProp(30, 100, 40, 90; alpha=0.05, type="diff", method="ac")
+    @test ci.lower    ≈ -0.276944506 atol=1E-9
+    @test ci.upper    ≈ -0.006516705 atol=1E-9
+    @test ci.estimate ≈ -0.1444444   atol=1E-7
+
+    @test ClinicalTrialUtilities.CI.zstat(0.4,100,0.3,90,0.05) ≈ 0.5197817 atol=1E-7
+
+    ci = ClinicalTrialUtilities.CI.twoProp(30, 100, 40, 90; alpha=0.05, type="diff", method="mn")
+    @test ci.lower    ≈ -0.278129080 atol=1E-9
+    @test ci.upper    ≈ -0.006708301 atol=1E-9
+    @test ci.estimate ≈ -0.1444444   atol=1E-7
+
+    ci = ClinicalTrialUtilities.CI.twoProp(30, 100, 40, 90; alpha=0.05, type="rr", method="cli")
+    @test ci.lower    ≈ 0.4663950 atol=1E-7
+    @test ci.upper    ≈ 0.9860541 atol=1E-7
+    @test ci.estimate ≈ 0.675     atol=1E-4
+
+    ci = ClinicalTrialUtilities.CI.twoProp(30, 100, 40, 90; alpha=0.05, type="rr", method="mover")
+    @test ci.lower    ≈ 0.4634443 atol=1E-7
+    @test ci.upper    ≈ 0.9808807 atol=1E-7
+    @test ci.estimate ≈ 0.675     atol=1E-4
+
+    ci = ClinicalTrialUtilities.CI.twoProp(30, 100, 40, 90; alpha=0.05, type="rr", method="mover")
+    @test ci.lower    ≈ 0.4634443 atol=1E-7
+    @test ci.upper    ≈ 0.9808807 atol=1E-7
+    @test ci.estimate ≈ 0.675     atol=1E-4
+
+    #----
+
+    ci = ClinicalTrialUtilities.CI.twoMeans(30, 10, 30, 40, 12, 35, alpha=0.05, type="diff", method="ev")
+    @test ci.lower    ≈ -11.6549655 atol=1E-7
+    @test ci.upper    ≈ -8.3450344 atol=1E-7
+    @test ci.estimate ≈ -10.0     atol=1E-4
+
+    ci = ClinicalTrialUtilities.CI.twoMeans(30, 10, 30, 40, 12, 35, alpha=0.05, type="diff", method="uv")
+    @test ci.lower    ≈ -11.6433893 atol=1E-7
+    @test ci.upper    ≈ -8.3566106 atol=1E-7
+    @test ci.estimate ≈ -10.0     atol=1E-4
+    ci = ClinicalTrialUtilities.CI.twoMeans(30.5, 12.6, 23, 34, 21.7, 39, alpha=0.05, type="diff", method="uv")
+    @test ci.lower    ≈ -5.6050900 atol=1E-7
+    @test ci.upper    ≈ -1.3949099 atol=1E-7
+    @test ci.estimate ≈ -3.5     atol=1E-4
+
 end
 
 println(" ---------------------------------- ")
