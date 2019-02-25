@@ -416,3 +416,17 @@ Approximate power calculation with
 shifted central t-distribution.
 
 >
+
+
+Prop.diff(x=c(30,70),y=c(40,50), CImethod="NHS")
+$conf.int
+[1] -0.275381800 -0.007158419
+attr(,"methodname")
+[1] "Newcombes Hybrid Score interval for the difference of proportions"
+$estimate
+[1] -0.1444444
+ClinicalTrialUtilities.CI.twoProp(30, 100, 40, 90; alpha=0.05, type="diff", method="nhs")
+Main.ClinicalTrialUtilities.CI.ConfInt(-0.275381800397722, -0.007158418963689295, -0.14444444444444443)
+
+julia> ClinicalTrialUtilities.CI.twoProp(30, 100, 40, 90; alpha=0.05, type="diff", method="ac")
+Main.ClinicalTrialUtilities.CI.ConfInt(-0.2769445059583262, -0.006516704612858776, -0.14444444444444443)

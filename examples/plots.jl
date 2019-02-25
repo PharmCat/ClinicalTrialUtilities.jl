@@ -7,7 +7,7 @@
 
 using Plots
 
-using ClinicalTrialUtilities
+#using ClinicalTrialUtilities
 using Test
 
 # owensQ function
@@ -15,7 +15,8 @@ function graphOwensQ()
     m = Array{Float64}(undef, 120, 2)
     for a=1:120
         m[a,1] = a/20
-        m[a,2] = ClinicalTrialUtilities.owensQ(7, 9, 0.5, 0, m[a,1])
+        m[a,2] = ClinicalTrialUtilities.owensQ(7.0, 9.0, 0.5, 0.0, m[a,1])
     end
     plot(m[:,1],m[:,2],linewidth=2,title="owensQ", label=["Function"])
 end
+graphOwensQ()
