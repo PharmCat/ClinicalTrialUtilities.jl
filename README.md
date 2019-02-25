@@ -1,7 +1,7 @@
 # ClinicalTrialUtilities
  Clinical Trial Power and Sample Size calculation
 
-Version:0.1.5
+Version:0.1.7
 
 Author: Vladimir Arnautov
 
@@ -29,17 +29,23 @@ Pkg.clone("https://github.com/PharmCat/ClinicalTrialUtilities.jl.git");
 ```
 ### Functions:
 
-sampleSize (;param, type, group, alpha, beta, diff, sd, a, b, k, out="num|str|vstr|print") - Sample size calculation.
+Sample size calculation:
+sampleSize (;param, type, group, alpha, beta, diff, sd, a, b, k, out="num|str|vstr|print")
 
-ctPower(;param, type, group, alpha, n, diff, sd, a, b, k, out="num|str|vstr|print") - Clinical trial power estimation.
+Clinical trial power estimation:
+ctPower(;param, type, group, alpha, n, diff, sd, a, b, k, out)
 
-powerTOST(;theta0=0.95, theta1=0.8, theta2=1.25, cv, n, alpha=0.5, logscale=true, method="owenq",  design="parallel|2x2|2x2x3|2x2x4|2x4x4|2x3x3") - Power calculation for TOST (for Bioequivalence trials).
+Power calculation for TOST (for Bioequivalence trials):
+powerTOST(;theta0, theta1, theta2, cv, n, alpha, logscale, method,  design)
 
-beSampleN(;theta0=0.95, theta1=0.8, theta2=1.25, cv, alpha=0.05, beta=0.2, logscale=true, method="owenq", design="parallel|2x2|2x2x3|2x2x4|2x4x4|2x3x3", out="num|str|vstr|print") - iterative sample size calculation for Bioequivalence trials.
+Iterative sample size calculation for Bioequivalence trials:
+beSampleN(;theta0, theta1, theta2, cv, alpha, beta, logscale, method, design, out)
 
-owensT(h::Float64,a::Float64)::Float64 - Owen's T function.
+Owen's T function:
+owensT(h::Float64,a::Float64)::Float64
 
-owensQ(nu, t, delta, a, b) - Owen's Q function; a,b always should be >= 0.
+Owen's Q function (a,b always should be >= 0):
+owensQ(nu, t::Float64, delta::Float64, a::Float64, b::Float64)::Float64
 
 ### Usage
 
@@ -50,25 +56,25 @@ sampleSize(param="mean|prop|or", type="ea|ei|ns|mcnm", group="one|two", alpha=0.
 
 ```
 **param (Parameter type):**
-- mean - Means (default);
+- mean - Means;
 - prop - Proportions;
 - or - Odd Ratio;
 
 **type (Hypothesis type):**
-- ea - Equality  (default);
+- ea - Equality;
 - ei - Equivalencens;
 - ns - Non-Inferiority / Superiority;
 - mcnm - McNemar's Equality test;
 
-**group (Group num):**
-- one - One sample  (default);
+**group (group num):**
+- one - One sample;
 - two - Two sample, result is for one group, second group size = n * k;
 
 **alpha** - Alpha (o < alpha < 1)  (default=0.05);
 
 **beta** - Beta (o < beta < 1) (default=0.2); power = 1 - beta;
 
-**diff** - difference / equivalence margin/non-inferiority/superiority margin;
+**diff** - difference/equivalence margin/non-inferiority/superiority margin;
 
 **sd** - Standard deviation (σ, for Means only);
 
@@ -76,7 +82,7 @@ sampleSize(param="mean|prop|or", type="ea|ei|ns|mcnm", group="one|two", alpha=0.
 
 **b** - True mean (μ) for one sample / Group B for two sample design;
 
-**k** - Na/Nb (after sample size estimation second group size: Na = k * Nb, only for two sample design) (default=1);
+**k** - Na/Nb (after sample size estimation second group size: Na=k*Nb, only for two sample design) (default=1);
 
 **out** - output type:
 - num   - numeric (default);
@@ -91,25 +97,25 @@ ctPower(param="mean|prop|or", type="ea|ei|ns|mcnm", group="one|two", alpha=0.05,
 ```
 
 **param (Parameter type):**
-- mean - Means (default);
+- mean - Means;
 - prop - Proportions;
 - or - Odd Ratio;
 
 **type (Hypothesis type):**
-- ea - Equality  (default);
+- ea - Equality;
 - ei - Equivalence;
 - ns - Non-Inferiority / Superiority;
 - mcnm - McNemar's Equality test;
 
-**group (Group num):**
-- one - one sample  (default);
+**group (group num):**
+- one - one sample;
 - two - Two sample;
 
-**alpha** - Alpha (o < alpha < 1)  (default=0.05);
+**alpha** - Alpha (0<alpha<1)  (default=0.05);
 
 **n** - Subjects number;
 
-**diff** - difference /equivalence margin/non-inferiority/superiority margin;
+**diff** - difference/equivalence margin/non-inferiority/superiority margin;
 
 **sd** - Standard deviation (σ, for Means only);
 
@@ -117,7 +123,7 @@ ctPower(param="mean|prop|or", type="ea|ei|ns|mcnm", group="one|two", alpha=0.05,
 
 **b** - True mean (μ) for one sample / Group B for two sample design;
 
-**k** - Na/Nb (after sample size estimation second group size: Na = k * Nb, only for two sample design) (default=1);
+**k** - Na/Nb (after sample size estimation second group size: Na=k*Nb, only for two sample design) (default=1);
 
 **out** - output type:
 - num   - numeric (default);
@@ -131,9 +137,9 @@ ctPower(param="mean|prop|or", type="ea|ei|ns|mcnm", group="one|two", alpha=0.05,
 using ClinicalTrialUtilities
 powerTOST(alpha=0.05, logscale=true|false, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.15, n=36, method="owenq|nct|shifted", design="parallel|2x2|2x2x3|2x2x4|2x4x4|2x3x3")
 ```
-**logscale** - theta1, theta2, theta0: if true - make log transformation;
+**logscale** - theta1, theta2, theta0: if true - make log transformation (default true);
 
-**alpha** - Alpha (o < alpha < 1)  (default=0.05);
+**alpha** - Alpha (0 < alpha < 1)  (default=0.05);
 
 **theta1** - Lower Level (default=0.8);
 
@@ -146,7 +152,7 @@ powerTOST(alpha=0.05, logscale=true|false, theta1=0.8, theta2=1.25, theta0=0.95,
 **n** - subject number;
 
 **method** - calculating method: Owen's Q Function | NonCentral T, Shifted;
-- owenq
+- owenq (default)
 - nct
 - shifted
 
@@ -165,7 +171,7 @@ Using for bioequivalence study.
 using ClinicalTrialUtilities
 beSampleN(alpha=0.05, logscale=true|false, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.15, method="owenq|nct|shifted", design="parallel|2x2|2x2x3|2x2x4|2x4x4|2x3x3")
 ```
-**logscale** - theta1, theta2, theta0: if true - make log transformation;
+**logscale** - theta1, theta2, theta0: if true - make log transformation (default true);
 
 **alpha** - Alpha (o < alpha < 1)  (default=0.05);
 
@@ -180,7 +186,7 @@ beSampleN(alpha=0.05, logscale=true|false, theta1=0.8, theta2=1.25, theta0=0.95,
 **cv** - coefficient of variation;
 
 **method** - calculating method: Owen's Q Function | NonCentral T | Shifted;
-- owenq
+- owenq (default)
 - nct
 - shifted
 
@@ -217,6 +223,10 @@ beSampleN(cv=0.40)
 
 n, p, s = beSampleN(cv=0.347, design="2x2x4", method="nct", out="vstr")
 ```
+
+### Confidence Interval Submodule
+
+
 
 ### ToDo:
 
