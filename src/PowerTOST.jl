@@ -1,6 +1,11 @@
 # Clinical Trial Utilities
 # Copyright © 2019 Vladimir Arnautov aka PharmCat (mail@pharmcat.net)
 
+# ms = ss / df
+# sd = ms^2
+# se_diff = se = sd * sqrt((1/N1 + ... + 1/Nn)*bkni) = sqrt(ms*(1/N1 + ... + 1/Nn)*bkni)
+# CI bounds = Diff +- t(df, alpha)*se
+
 function powerTOST(;alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.0, n=0, design="2x2", method="owenq",  out="num")
     if n < 2 throw(CTUException(1021,"powerTOST: n can not be < 2")) end
     if cv == 0 throw(CTUException(1022,"powerTOST: cv can not be equal to 0"))  end
@@ -13,10 +18,22 @@ function powerTOST(;alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0
     n        = convert(Int, n)
     alpha    = convert(Float64, alpha)
 
-    return powerTOSTint(alpha, logscale, theta1, theta2, theta0, cv, n, design, method)
+    if logscale
+        ltheta1 = log(theta1)
+        ltheta2 = log(theta2)
+        diffm   = log(theta0)
+        sd      = cv2sd(cv)    # sqrt(ms)
+    else
+        ltheta1 = theta1
+        ltheta2 = theta2
+        diffm   = theta0
+        sd      = cv
+    end
+
+    return powerTOSTint(alpha,  ltheta1, ltheta2, diffm, sd, n, design, method)
 end
 
-function powerTOSTint(alpha::Float64, logscale::Bool, theta1::Float64, theta2::Float64, theta0::Float64, cv::Float64, n::Int, design::String, method::String)::Float64
+function powerTOSTint(alpha::Float64,  ltheta1::Float64, ltheta2::Float64, diffm::Float64, sd::Float64, n::Int, design::String, method::String)::Float64
 
     dffunc, bkni, seq = designProp(design) #dffunc if generic funtion with 1 arg return df
     df    = dffunc(n)
@@ -29,38 +46,26 @@ function powerTOSTint(alpha::Float64, logscale::Bool, theta1::Float64, theta2::F
 
     if df < 1 throw(CTUException(1024,"powerTOSTint: df < 1")) end
 
-    if logscale
-        ltheta1 = log(theta1)
-        ltheta2 = log(theta2)
-        diffm   = log(theta0)
-        se      = cv2se(cv)
-    else
-        ltheta1 = theta1
-        ltheta2 = theta2
-        diffm   = theta0
-        se      = cv
-    end
-
-    sem::Float64 = se*sef
+    se::Float64 = sd*sef
 
     if method     == "owenq"
-        return powerTOSTOwenQ(alpha,ltheta1,ltheta2,diffm,sem,df)
+        return powerTOSTOwenQ(alpha,ltheta1,ltheta2,diffm,se,df)
     elseif method == "nct"
-        return approxPowerTOST(alpha,ltheta1,ltheta2,diffm,sem,df)
+        return approxPowerTOST(alpha,ltheta1,ltheta2,diffm,se,df)
     elseif method == "mvt"
-        return power1TOST(alpha,ltheta1,ltheta2,diffm,sem,df) #not implemented
+        return power1TOST(alpha,ltheta1,ltheta2,diffm,se,df) #not implemented
     elseif method == "shifted"
-        return approx2PowerTOST(alpha,ltheta1,ltheta2,diffm,sem,df)
+        return approx2PowerTOST(alpha,ltheta1,ltheta2,diffm,se,df)
     else
          throw(CTUException(1025,"powerTOST: method "*method*" not known!"))
     end
 end #powerTOST
 
 #.power.TOST
-function powerTOSTOwenQ(alpha,ltheta1,ltheta2,diffm,sem,df)
+function powerTOSTOwenQ(alpha,ltheta1,ltheta2,diffm,se,df)
     tval::Float64   = quantile(TDist(df), 1-alpha) #qt(1-alpha, df)
-    delta1::Float64 = (diffm-ltheta1)/sem
-    delta2::Float64 = (diffm-ltheta2)/sem
+    delta1::Float64 = (diffm-ltheta1)/se
+    delta2::Float64 = (diffm-ltheta2)/se
     R::Float64      = (delta1-delta2)*sqrt(df)/(tval+tval) #not clear R implementation of vector form
     if isnan(R) R   = 0 end
     if R <= 0 R     = Inf end
@@ -79,7 +84,7 @@ function powerTOSTOwenQ(alpha,ltheta1,ltheta2,diffm,sem,df)
         if pwr > 0 return pwr else return 0 end
     elseif df >= 5000
         # approximation via non-central t-distribution
-        return approxPowerTOST(alpha,ltheta1,ltheta2,diffm,sem,df)
+        return approxPowerTOST(alpha,ltheta1,ltheta2,diffm,se,df)
     end
     p1  = owensQ(df, tval, delta1, 0.0, R)
     p2  = owensQ(df,-tval, delta2, 0.0, R)
@@ -91,17 +96,17 @@ end #powerTOSTOwenQ
 # 'raw' approximate power function without any error checks,
 # approximation based on non-central t
 # .approx.power.TOST - PowerTOST
-function approxPowerTOST(alpha,ltheta1,ltheta2,diffm,sem,df)
+function approxPowerTOST(alpha,ltheta1,ltheta2,diffm,se,df)
     tdist           = TDist(df)
-    tval::Float64   = quantile(tdist, 1-alpha)# qt(1-alpha,df)
-    delta1::Float64 = (diffm-ltheta1)/sem
-    delta2::Float64 = (diffm-ltheta2)/sem
+    tval::Float64   = quantile(tdist, 1-alpha)
+    delta1::Float64 = (diffm-ltheta1)/se
+    delta2::Float64 = (diffm-ltheta2)/se
     pow             = cdf(NoncentralT(df,delta2), -tval) - cdf(NoncentralT(df,delta1), tval)
     if pow > 0 return pow else return 0 end
 end #approxPowerTOST
 
 #.power.1TOST
-function power1TOST(alpha,ltheta1,ltheta2,diffm,sem,df)
+function power1TOST(alpha,ltheta1,ltheta2,diffm,se,df)
 
     throw(CTUException(1000,"Method not implemented!"))
     #Method ON MULTIVARIATE t AND GAUSS PROBABILITIES IN R not implemented
@@ -114,11 +119,11 @@ function power1TOST(alpha,ltheta1,ltheta2,diffm,sem,df)
 end
 
 #.approx2.power.TOST
-function approx2PowerTOST(alpha,ltheta1,ltheta2,diffm,sem,df)
+function approx2PowerTOST(alpha,ltheta1,ltheta2,diffm,se,df)
     tdist           = TDist(df)
-    tval::Float64   = quantile(tdist, 1-alpha) # qt(1-alpha, df)
-    delta1::Float64 = (diffm-ltheta1)/sem
-    delta2::Float64 = (diffm-ltheta2)/sem
+    tval::Float64   = quantile(tdist, 1-alpha)
+    delta1::Float64 = (diffm-ltheta1)/se
+    delta2::Float64 = (diffm-ltheta2)/se
     if isnan(delta1) delta1 = 0 end
     if isnan(delta2) delta2 = 0 end
     pow = cdf(tdist,-tval-delta2) - cdf(tdist,tval-delta1)
@@ -126,12 +131,19 @@ function approx2PowerTOST(alpha,ltheta1,ltheta2,diffm,sem,df)
 end #approx2PowerTOST
 
 #CV2se
-@inline function cv2se(cv::Float64)::Float64
+@inline function cv2sd(cv::Float64)::Float64
     return sqrt(log(1+cv^2))
 end
+
+@inline function cv2ms(cv::Float64)::Float64
+    return log(1+cv^2)
+end
+@inline function ms2cv(ms::Float64)::Float64
+    return sqrt(exp(ms)-1)
+end
 #CV2se
-@inline function se2cv(se::Float64)::Float64
-    return sqrt(exp(se^2)-1)
+@inline function sd2cv(sd::Float64)::Float64
+    return sqrt(exp(sd^2)-1)
 end
 
 function designProp(type::String)
