@@ -29,6 +29,8 @@ include("PowerSampleSize.jl")
 include("SampleSize.jl")
 #Confidence interval calculation
 include("CI.jl")
+
+include("SIM.jl")
 #info function
 include("Info.jl")
 
@@ -47,7 +49,7 @@ export sampleSizeParam
 #Exceptions
 export CTUException
 #Confidence Intervals for Proportions and Means
-export CI
+export CI, SIM
 
 #Exceptions
 struct CTUException <: Exception
