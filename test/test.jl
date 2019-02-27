@@ -36,6 +36,10 @@ end
 
     @test sampleSize(param="mean", type="ns", group="two", alpha=0.05, beta=0.2, diff=1, sd=20, a=1, b=2) ≈ 1236.511446403953 atol=1E-12
     @test sampleSize(param="mean", type="ns", group="two", alpha=0.05, beta=0.2, diff=1, sd=20, a=1, b=2, out="vstr")[1] ≈ 1236.511446403953 atol=1E-12
+    @test sampleSize(param="prop", type="ei", group="one", alpha=0.1, beta=0.2, diff=0.1, a=0.65, b=0.6, out="vstr")[1] ≈ 630.6717754175304 atol=1E-12
+    str1 = sampleSize(param="mean", type="ea", group="two", alpha=0.05, beta=0.2, sd=10, a=5, b=10, k=2, out="str");
+    str2 = sampleSize(param="mean", type="ea", group="two", alpha=0.05, beta=0.2, sd=10, a=5, b=10, k=2, out="vstr")[2];
+    @test str1 == str2
 end
 
 @testset "sampleSizeParam Errors" begin
@@ -168,6 +172,7 @@ println(" ---------------------------------- ")
     @test powerTOST(alpha=0.0001, logscale=false, theta1=-0.1, theta2=0.1, theta0=0.0, cv=1.0, n=3500, design="2x2", method="owenq")     ≈ 0.3545904 atol=1E-7
     @test ClinicalTrialUtilities.powerTOST(alpha=0.00000005, logscale=false, theta1=-0.1, theta2=0.1, theta0=0.0, cv=1.5, n=20000, design="2x2", method="owenq") ≈ 0.8197361 atol=1E-7
     @test ClinicalTrialUtilities.powerTOST(alpha=0.1, logscale=false, theta1=-0.1, theta2=0.1, theta0=0.0, cv=0.14, n=4, design="2x2", method="shifted") ≈ 0.0
+    @test powerTOST(alpha=0.1, logscale=false, theta1=-0.1, theta2=0.1, theta0=0.0, cv=0.02, n=3, design="2x2", method="shifted") ≈ 0.7738659 atol=1E-7
     #
     @test powerTOST(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=27, design="2x2", method="owenq") ≈ 0.9264365737448076
     @test powerTOST(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=29, design="2x2", method="owenq") ≈ 0.941900827163551

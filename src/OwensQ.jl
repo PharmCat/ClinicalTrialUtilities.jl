@@ -156,6 +156,8 @@ end #OwensT(h,a)
 # Auxillary function
 # R port of the matlab code given on
 # https://people.sc.fsu.edu/~jburkardt/m_src/owens/owens.html
+# https://people.sc.fsu.edu/~jburkardt/c_src/asa076/asa076.c
+# https://gist.github.com/mtrbean/464859cdf09b260d5ea6
 # by J. Burkhardt license GNU LGPL
 # is called as tfn(h, a) if a<=1
 # otherwise as tfn(a*h, 1/a)

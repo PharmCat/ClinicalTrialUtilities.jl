@@ -253,7 +253,7 @@ function beSampleN(;theta0=0.95, theta1=0.8, theta2=1.25, cv=0.0, alpha=0.05, be
     if n0 < 4 n0 = 4 end
     if n0 > 5000 n0 = 5000 end
     pow = powerTOSTint(alpha,  ltheta1, ltheta2, diffm, sd, n0, design, method)
-    np = 2
+    np::Int = 2
     powp::Float64 = pow
     if pow > tp
         while (pow > tp)
