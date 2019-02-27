@@ -30,22 +30,28 @@ Pkg.clone("https://github.com/PharmCat/ClinicalTrialUtilities.jl.git");
 ### Functions:
 
 Sample size calculation:
-sampleSize (;param, type, group, alpha, beta, diff, sd, a, b, k, out="num|str|vstr|print")
+
+sampleSize (;param, type, group, alpha, beta, diff, sd, a, b, k, out)
 
 Clinical trial power estimation:
+
 ctPower(;param, type, group, alpha, n, diff, sd, a, b, k, out)
 
 Power calculation for TOST (for Bioequivalence trials):
+
 powerTOST(;theta0, theta1, theta2, cv, n, alpha, logscale, method,  design)
 
 Iterative sample size calculation for Bioequivalence trials:
+
 beSampleN(;theta0, theta1, theta2, cv, alpha, beta, logscale, method, design, out)
 
 Owen's T function:
-owensT(h::Float64,a::Float64)::Float64
+
+owensT(h, a)
 
 Owen's Q function (a,b always should be >= 0):
-owensQ(nu, t::Float64, delta::Float64, a::Float64, b::Float64)::Float64
+
+owensQ(nu, t, delta, a, b)
 
 ### Usage
 

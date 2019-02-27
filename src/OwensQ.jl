@@ -11,17 +11,15 @@
 #pnorm = cdf(ZDIST,  )
 #dnorm = pdf(ZDIST, )
 function owensQ(nu, t::Float64, delta::Float64, a::Float64, b::Float64)::Float64
-
     if a < 0 return  throw(CTUException(1011,"owensQ: a can not be < 0")) end
     if a==b return(0) end
     if a > b return throw(CTUException(1012,"owensQ: a can not be > b")) end
     if a > 0 return owensQ(nu, t, delta, 0, b) - owensQ(nu, t, delta, 0, a)  end #not effective - double integration
-
     if nu < 29 && abs(delta) > 37.62
         if isinf(b)
-            return quadgk(x -> ifun1(x, nu, t, delta), 0, 1, rtol=1.0E-8)[1] #ifun1 described in OwensQ.jl
+            return quadgk(x -> ifun1(x, nu, t, delta), 0, 1, rtol=1.0E-8)[1]
         else
-            return owensQo(nu,t,delta,b) #described in OwensQ.jl
+            return owensQo(nu,t,delta,b)
         end
     else
         if isinf(b)
@@ -66,7 +64,6 @@ function owensQo(nu,t::Float64,delta::Float64,b::Float64;a::Float64=0.0)::Float6
              else L[i] = av[i+3]*b*L[i-1] end
          end
     end
-
     if (upr+1)>0 ll = upr+1 else ll = 0 end
     H = Array{Float64}(undef, ll)
     if isfinite(b)
