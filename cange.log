@@ -1,8 +1,23 @@
 v1.0.7
 
-Add sub-module CI for confidense interval computation as part of simulation functions
-  - add se2cv function
-  
+Add sub-module CI for confidence interval computation as part of simulation functions SIM.
+  - add sd2cv function
+  - add cv2sd function
+  - add ms2cv function
+  - add cv2ms function
+  - add SIM submodule
+    - add bePower function
+    - add ctBinPower function
+  - add CI submodule
+    - oneProp
+    - twoProp
+    - oneMeans
+    - twoMeans
+  - PowerTOST optimizations
+  - add test procedure
+  - ClinicalTrialUtilities.jl reconfigure
+  - add documentation
+
 v1.0.6
 
 Robust functions: sampleSize, ctPower, powerTOST, beSampleN
@@ -15,7 +30,7 @@ Canges:
 - beSampleN add designs: parallel, 2x2x4, 2x4x4, 2x2x3, 2x3x3
 - beSampleN add text output
 - owensQ add solution for a!=0
-- optimisations
+- optimizations
 - bugfix, code cosmetics and minor changes
 - Add documentation
 - Add tests
