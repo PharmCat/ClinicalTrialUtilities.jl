@@ -70,7 +70,7 @@ module SIM
     function beReplPowerFSS()
     end
 
-    function ctBinPower(p1, n1, p2, n2, diff; alpha=0.05, type="or", seed=0, simnum=5)
+    function ctPropPower(p1, n1, p2, n2, diff; alpha=0.05, type="or", seed=0, simnum=5)
         rng = MersenneTwister(1234)
         if seed == 0  Random.seed!(rng) else Random.seed!(seed) end
 
