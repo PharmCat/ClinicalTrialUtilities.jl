@@ -234,12 +234,12 @@ function beSampleN(;theta0=0.95, theta1=0.8, theta2=1.25, cv=0.0, alpha=0.05, be
         ltheta1 = log(theta1)
         ltheta2 = log(theta2)
         diffm   = log(theta0)
-        se      = cv2se(cv)
+        sd      = cv2sd(cv)
     else
         ltheta1 = theta1
         ltheta2 = theta2
         diffm   = theta0
-        se      = cv
+        sd      = cv
     end
     #values for approximate n
     td = (ltheta1 + ltheta2)/2
@@ -248,12 +248,12 @@ function beSampleN(;theta0=0.95, theta1=0.8, theta2=1.25, cv=0.0, alpha=0.05, be
     #if rd <= 0 return false end
     d0 = diffm - td
     #approximate n
-    n0::Int = convert(Int, ceil(twoSampleMeanEquivalence(0, d0, se, rd, alpha=alpha, beta=beta)/2)*2)
+    n0::Int = convert(Int, ceil(twoSampleMeanEquivalence(0, d0, sd, rd, alpha=alpha, beta=beta)/2)*2)
     tp = 1 - beta  #target power
     if n0 < 4 n0 = 4 end
     if n0 > 5000 n0 = 5000 end
-    pow = powerTOSTint(alpha, false, ltheta1, ltheta2, diffm, se, n0, design, method)
-    np = 2
+    pow = powerTOSTint(alpha,  ltheta1, ltheta2, diffm, sd, n0, design, method)
+    np::Int = 2
     powp::Float64 = pow
     if pow > tp
         while (pow > tp)
@@ -262,7 +262,7 @@ function beSampleN(;theta0=0.95, theta1=0.8, theta2=1.25, cv=0.0, alpha=0.05, be
             n0 = n0 - 2
             #pow = powerTOST(;alpha=alpha, logscale=false, theta1=ltheta1, theta2=ltheta2, theta0=diffm, cv=se, n=n0, design=design, method=method)
             if n0 < 4 break end #n0, pow end
-            pow = powerTOSTint(alpha, false, ltheta1, ltheta2, diffm, se, n0, design, method)
+            pow = powerTOSTint(alpha,  ltheta1, ltheta2, diffm, sd, n0, design, method)
         end
         estpower = powp
         estn     = np
@@ -272,7 +272,7 @@ function beSampleN(;theta0=0.95, theta1=0.8, theta2=1.25, cv=0.0, alpha=0.05, be
             powp = pow
             n0 = n0 + 2
             #pow = powerTOST(;alpha=alpha, logscale=false, theta1=ltheta1, theta2=ltheta2, theta0=diffm, cv=se, n=n0, design=design, method=method)
-            pow = powerTOSTint(alpha, false, ltheta1, ltheta2, diffm, se, n0, design, method)
+            pow = powerTOSTint(alpha,  ltheta1, ltheta2, diffm, sd, n0, design, method)
             if n0 > 10000  break end # n0, pow end
         end
         estpower = pow

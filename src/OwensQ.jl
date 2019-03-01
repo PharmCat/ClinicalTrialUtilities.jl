@@ -11,17 +11,15 @@
 #pnorm = cdf(ZDIST,  )
 #dnorm = pdf(ZDIST, )
 function owensQ(nu, t::Float64, delta::Float64, a::Float64, b::Float64)::Float64
-
     if a < 0 return  throw(CTUException(1011,"owensQ: a can not be < 0")) end
     if a==b return(0) end
     if a > b return throw(CTUException(1012,"owensQ: a can not be > b")) end
     if a > 0 return owensQ(nu, t, delta, 0, b) - owensQ(nu, t, delta, 0, a)  end #not effective - double integration
-
     if nu < 29 && abs(delta) > 37.62
         if isinf(b)
-            return quadgk(x -> ifun1(x, nu, t, delta), 0, 1, rtol=1.0E-8)[1] #ifun1 described in OwensQ.jl
+            return quadgk(x -> ifun1(x, nu, t, delta), 0, 1, rtol=1.0E-8)[1]
         else
-            return owensQo(nu,t,delta,b) #described in OwensQ.jl
+            return owensQo(nu,t,delta,b)
         end
     else
         if isinf(b)
@@ -66,7 +64,6 @@ function owensQo(nu,t::Float64,delta::Float64,b::Float64;a::Float64=0.0)::Float6
              else L[i] = av[i+3]*b*L[i-1] end
          end
     end
-
     if (upr+1)>0 ll = upr+1 else ll = 0 end
     H = Array{Float64}(undef, ll)
     if isfinite(b)
@@ -159,6 +156,8 @@ end #OwensT(h,a)
 # Auxillary function
 # R port of the matlab code given on
 # https://people.sc.fsu.edu/~jburkardt/m_src/owens/owens.html
+# https://people.sc.fsu.edu/~jburkardt/c_src/asa076/asa076.c
+# https://gist.github.com/mtrbean/464859cdf09b260d5ea6
 # by J. Burkhardt license GNU LGPL
 # is called as tfn(h, a) if a<=1
 # otherwise as tfn(a*h, 1/a)
@@ -168,8 +167,7 @@ end #OwensT(h,a)
     u   = Float64[0.0744372, 0.2166977, 0.3397048, 0.4325317, 0.4869533]
     tp::Float64  = 1/2/pi
     tv1 = eps();
-    tv2::Float64 = 15.0
-    tv3::Float64 = 15.0
+    tv2::Float64 = tv3::Float64 = 15.0
     tv4::Float64 = 1.0E-05
     if tv2 < abs(x) return 0 end
     xs::Float64  = -0.5*x*x
@@ -188,9 +186,9 @@ end #OwensT(h,a)
     end
         # 10 point Gaussian quadrature.
         # original via loop
-        rt::Float64 = 0
-        r1::Float64 = 0
-        r2::Float64 = 0
+        rt::Float64 = r1::Float64 = r2::Float64 = 0
+        #r1::Float64 = 0
+        #r2::Float64 = 0
         for i in 1:ng
             r1 = 1.0 + fxs*(0.5 + u[i])^2
             r2 = 1.0 + fxs*(0.5 - u[i])^2

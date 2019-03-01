@@ -1,0 +1,21 @@
+v1.0.7
+
+Add sub-module CI for confidense interval computation as part of simulation functions
+  - add se2cv function
+  
+v1.0.6
+
+Robust functions: sampleSize, ctPower, powerTOST, beSampleN
+Canges:
+- SampleSize add McNM test;
+- SampleSize add text output;
+- ctPower add McNM test;
+- ctPower add text output;
+- powerTOST add designs: parallel, 2x2x4, 2x4x4, 2x2x3, 2x3x3
+- beSampleN add designs: parallel, 2x2x4, 2x4x4, 2x2x3, 2x3x3
+- beSampleN add text output
+- owensQ add solution for a!=0
+- optimisations
+- bugfix, code cosmetics and minor changes
+- Add documentation
+- Add tests

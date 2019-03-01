@@ -11,6 +11,7 @@ julia:
 branches:
   only:
   - master
+  - dev
 
 matrix:
   allow_failures:
