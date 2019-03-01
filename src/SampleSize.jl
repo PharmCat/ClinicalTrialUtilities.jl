@@ -114,9 +114,9 @@ function sampleSize(;param="", type="", group="", alpha=0.05, beta=0.2, diff=0, 
 end #sampleSize
 
 #clinical trial power main function
-function ctPower(;param="", type="", group="", alpha=0.05, diff=0, sd=0, a=0, b=0, n=0, k=1,  out="num")
+function ctPower(;param="", type="", group="", alpha=0.05, diff=0, sd=0, a=0, b=0, n=0, k=1,  out="num", logdiff=true)
     if alpha >= 1 || alpha <= 0  return false end
-    if (type == "ei" || type == "ns") && diff == 0 return false end
+    #if (type == "ei" || type == "ns") && diff == 0 return false end
     if param == "prop" && !(group == "one" || group == "two" || type == "mcnm")  return false end
     if sd == 0 && param == "mean" return false end
     if k == 0 return false end
@@ -166,9 +166,9 @@ function ctPower(;param="", type="", group="", alpha=0.05, diff=0, sd=0, a=0, b=
         if type == "ea"
             pow =  orEqualityP(a, b, n; alpha=alpha, k=k)
         elseif type == "ei"
-            pow =  orEquivalenceP(a, b, diff, n; alpha=alpha, k=k, logdiff=true)
+            pow =  orEquivalenceP(a, b, diff, n; alpha=alpha, k=k, logdiff=logdiff)
         elseif type == "ns"
-            pow = orNSP(a, b, diff, n; alpha=alpha, k=k, logdiff=true)
+            pow = orNSP(a, b, diff, n; alpha=alpha, k=k, logdiff=logdiff)
         else return false end
     else return false end
 

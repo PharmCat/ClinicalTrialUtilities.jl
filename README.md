@@ -56,6 +56,13 @@ owensQ(nu, t, delta, a, b)
 
 ### Usage
 
+**NB! Hypothesis types:**
+
+- ea - Equality: two-sided;
+- ei - Equivalencens: two one-sided hypothesis;
+- ns - Non-Inferiority / Superiority: one-sided hypothesis, for some cases you should use two-sided hypothesis for  Non-Inferiority/Superiority, you can use alpha/2 for this;
+
+
 #### sampleSize
 ```
 using ClinicalTrialUtilities
@@ -70,7 +77,7 @@ sampleSize(param="mean|prop|or", type="ea|ei|ns|mcnm", group="one|two", alpha=0.
 **type (Hypothesis type):**
 - ea - Equality;
 - ei - Equivalencens;
-- ns - Non-Inferiority / Superiority;
+- ns - Non-Inferiority / Superiority (!one-sided hypothesis!);
 - mcnm - McNemar's Equality test;
 
 **group (group num):**
