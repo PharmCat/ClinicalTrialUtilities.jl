@@ -391,6 +391,14 @@ println(" ---------------------------------- ")
 end
 
 println(" ---------------------------------- ")
+@testset "  Simulations         " begin
+
+    ClinicalTrialUtilities.SIM.bePower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=20, simnum=4, seed=1111) ≈ 0.8346
+
+
+end
+
+println(" ---------------------------------- ")
 @testset "Tpl                   " begin
 
 end

@@ -9,3 +9,5 @@
 1031: designProp
 
 104*: beSampleN
+
+111*: SIM.bePower

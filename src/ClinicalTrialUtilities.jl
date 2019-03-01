@@ -19,21 +19,8 @@ using Distributions
 using QuadGK
 #using SpecialFunctions
 import SpecialFunctions.lgamma
-#Owen function calc: owensQ, owensQo, ifun1, owensTint2, owensT, tfn
-include("OwensQ.jl")
-#powerTOST calc: powerTOST, powerTOSTint, powerTOSTOwenQ, approxPowerTOST, power1TOST, approx2PowerTOST, cv2se, designProp
-include("PowerTOST.jl")
-#Sample sise and Power atomic functions
-include("PowerSampleSize.jl")
-#Main sample size and power functions: sampleSize, ctPower, beSampleN
-include("SampleSize.jl")
-#Confidence interval calculation
-include("CI.jl")
 
-include("SIM.jl")
-#info function
-include("Info.jl")
-
+export CTUException
 #Sample size
 export sampleSize
 export beSampleN
@@ -75,4 +62,20 @@ Base.showerror(io::IO, e::CTUException) = print("CTU Exception code: ", e.n, " M
         return sampleSize(param=x.param, type=x.type, group=x.group, alpha=x.alpha, beta=x.beta, sd=x.sd, a=x.a, b=x.b, k=x.k)
     end
 #-------------------------------------------------------------------------------
+
+#Owen function calc: owensQ, owensQo, ifun1, owensTint2, owensT, tfn
+include("OwensQ.jl")
+#powerTOST calc: powerTOST, powerTOSTint, powerTOSTOwenQ, approxPowerTOST, power1TOST, approx2PowerTOST, cv2se, designProp
+include("PowerTOST.jl")
+#Sample sise and Power atomic functions
+include("PowerSampleSize.jl")
+#Main sample size and power functions: sampleSize, ctPower, beSampleN
+include("SampleSize.jl")
+#Confidence interval calculation
+include("CI.jl")
+#Simulations
+include("SIM.jl")
+#info function
+include("Info.jl")
+
 end # module end

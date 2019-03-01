@@ -1,9 +1,9 @@
 
 module CI
     using Distributions
-    #import ClinicalTrialUtilities.ZDIST
+    import ClinicalTrialUtilities.ZDIST
     import ClinicalTrialUtilities.CTUException
-    const ZDIST = Normal()
+    #const ZDIST = Normal()
     export oneProp, oneMeans, twoProp, twoMeans, ConfInt
 
     struct ConfInt
