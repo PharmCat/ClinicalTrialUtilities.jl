@@ -8,6 +8,9 @@ module SIM
     import ..ZDIST
     import ..CTUException
     import ..CI.twoProp
+    import ..CI.twoMeans
+
+    export bePower, ctBinPower
 
 
     function bePower(;alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.0, n=0, simnum=5, seed=0)
@@ -28,9 +31,9 @@ module SIM
         #ms    = log(1+cv^2)
 
         if logscale
-            ltheta1 = log(theta1); ltheta2 = log(theta2); diffm   = log(theta0); ms      = log(1+cv^2)
+            ltheta1 = log(theta1); ltheta2 = log(theta2); diffm = log(theta0); ms = log(1+cv^2)
         else
-            ltheta1 = theta1; ltheta2 = theta2; diffm   = theta0; ms      = cv*cv
+            ltheta1 = theta1; ltheta2 = theta2; diffm = theta0; ms = cv*cv
         end
 
         return bePowerSIM(ltheta1, ltheta2, ms, diffm, df, sef, 10^simnum, alpha, seed=seed)
@@ -42,7 +45,7 @@ module SIM
 
         CHSQ    = Chisq(df)
         tval    = quantile(TDist(df), 1-alpha)
-        se      = sef*sqrt(ms)                                                #se_diff
+        se      = sef*sqrt(ms)                                                  #se_diff
         pow     = 0
         for i=1:nsim
             smean   = rand(ZDIST)*se+mean
@@ -53,6 +56,18 @@ module SIM
             if lwr > theta1 && upr < theta2 pow += 1 end
         end
         return pow/nsim
+    end
+
+    function beSampleSetGen()
+    end
+
+    function bePowerFSS()
+    end
+
+    function twoStageBEPower()
+    end
+
+    function beReplPowerFSS()
     end
 
     function ctBinPower(p1, n1, p2, n2, diff; alpha=0.05, type="or", seed=0, simnum=5)
@@ -71,5 +86,11 @@ module SIM
         end
         return pow/nsim
     end
+
+    function ctMeansPower()
+
+    end
+
+
 
 end #end module
