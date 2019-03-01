@@ -2,11 +2,12 @@
 # Copyright © 2019 Vladimir Arnautov aka PharmCat (mail@pharmcat.net)
 
 module SIM
-    using Distributions, Random, ClinicalTrialUtilities
-    import ClinicalTrialUtilities.designProp
-    import ClinicalTrialUtilities.cv2ms
-    import ClinicalTrialUtilities.ZDIST
-    import ClinicalTrialUtilities.CTUException
+    using Distributions, Random
+    import ..designProp
+    import ..cv2ms
+    import ..ZDIST
+    import ..CTUException
+    import ..CI.twoProp
 
 
     function bePower(;alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.0, n=0, simnum=5, seed=0)
@@ -65,7 +66,7 @@ module SIM
         for i=1:nsim
             x1 = rand(BIN1)
             x2 = rand(BIN2)
-            ci = ClinicalTrialUtilities.CI.twoProp(x1, n1, x2, n2; alpha=alpha, type="or", method="mn")
+            ci = twoProp(x1, n1, x2, n2; alpha=alpha, type="or", method="mn")
             if ci.lower > diff pow += 1 end
         end
         return pow/nsim

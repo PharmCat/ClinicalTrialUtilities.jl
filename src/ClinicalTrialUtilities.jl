@@ -12,7 +12,7 @@
 # D.B. Owen "Tables for computing bivariate normal Probabilities" The Annals of Mathematical Statistics, Vol. 27 (4) Dec. 1956, pp. 1075-1090
 # matlab code  by J. Burkhardt license GNU LGPL
 # If you want to check and get R code you can find some here: http://powerandsamplesize.com/Calculators/
-__precompile__(true)
+#__precompile__(true)
 module ClinicalTrialUtilities
 using Distributions
 #using Rmath #should be rewrited
@@ -20,16 +20,17 @@ using QuadGK
 #using SpecialFunctions
 import SpecialFunctions.lgamma
 
+
 #Exceptions
 struct CTUException <: Exception
     n::Int
     var::String
 end
 Base.showerror(io::IO, e::CTUException) = print("CTU Exception code: ", e.n, " Message: ", e.var)
+const ZDIST = Normal()
 #Exceptions
 export CTUException
 
-const ZDIST = Normal()
 
 #Owen function calc: owensQ, owensQo, ifun1, owensTint2, owensT, tfn
 include("OwensQ.jl")
@@ -41,8 +42,6 @@ include("PowerSampleSize.jl")
 include("SampleSize.jl")
 #Confidence interval calculation
 include("CI.jl")
-#Confidence Intervals for Proportions and Means
-export CI
 #Simulations
 include("SIM.jl")
 #info function
@@ -60,8 +59,6 @@ export owensT
 #Structs - should be rewrited or deleted
 export ParamSet
 export sampleSizeParam
-
-export SIM
 
 #-------------------------------------------------------------------------------
     mutable struct ParamSet
