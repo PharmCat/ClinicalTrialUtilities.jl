@@ -59,8 +59,6 @@ module CI
                 return propORaWoolfCI(x1, n1, x2, n2, alpha)
             elseif method=="woolf"
                 return propORWoolfCI(x1, n1, x2, n2, alpha)
-            elseif method=="exact"
-
             end
         end
     end #twoProp
@@ -105,9 +103,7 @@ module CI
     end
     #Blaker, H. (2000). Confidence curves and improved exact confidence intervals for discrete distribu-tions,Canadian Journal of Statistics28 (4), 783–798
     function propBlakerCI(x, n, alpha)::ConfInt
-        tol = 1E-5
-        lower = 0
-        upper = 1
+        tol = 1E-5; lower = 0; upper = 1;
         if n != 0
             lower = quantile(Beta(x, n-x+1), alpha/2)
             while acceptbin(x, n, lower+tol) < alpha

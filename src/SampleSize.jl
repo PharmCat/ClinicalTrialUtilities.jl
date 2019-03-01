@@ -215,16 +215,12 @@ function ctPower(;param="", type="", group="", alpha=0.05, diff=0, sd=0, a=0, b=
             return pow, output
         end
     end
-    return pow
 end #ctPower
 #-------------------------------------------------------------------------------
 function beSampleN(;theta0=0.95, theta1=0.8, theta2=1.25, cv=0.0, alpha=0.05, beta=0.2, logscale::Bool=true, design::String="2x2", method::String="owenq",  out="num")
-    theta0 = convert(Float64, theta0)
-    theta1 = convert(Float64, theta1)
-    theta2 = convert(Float64, theta2)
-    cv     = convert(Float64, cv)
-    alpha  = convert(Float64, alpha)
-    beta   = convert(Float64, beta)
+
+    theta0 = convert(Float64, theta0); theta1 = convert(Float64, theta1); theta2 = convert(Float64, theta2); cv = convert(Float64, cv); alpha  = convert(Float64, alpha); beta = convert(Float64, beta)
+
     if cv <= 0 throw(CTUException(1041,"beSampleN: cv can not be <= 0")) end
     if theta1 >= theta2  throw(CTUException(1042,"beSampleN: theta1 should be < theta2")) end
     if alpha >= 1 || alpha <= 0 || beta >= 1 || beta <= 0 throw(CTUException(1043,"beSampleN: alpha and beta shold be > 0 and < 1")) end

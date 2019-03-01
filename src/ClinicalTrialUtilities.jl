@@ -26,7 +26,7 @@ struct CTUException <: Exception
     n::Int
     var::String
 end
-Base.showerror(io::IO, e::CTUException) = print("CTU Exception code: ", e.n, " Message: ", e.var)
+Base.showerror(io::IO, e::CTUException) = print("CTU Exception code: ", e.n, " Message: ", e.var);
 const ZDIST = Normal()
 #Exceptions
 export CTUException

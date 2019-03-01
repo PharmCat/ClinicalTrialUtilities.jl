@@ -394,10 +394,12 @@ println(" ---------------------------------- ")
 @testset "  Simulations         " begin
 
     @test ClinicalTrialUtilities.SIM.bePower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=20, simnum=4, seed=1111) ≈ 0.8346
-    ClinicalTrialUtilities.SIM.ctBinPower(0.5, 100, 0.5, 100, 0.6; alpha=0.05, type="or", seed=123, simnum=4) ≈ 0.4131
+    @test ClinicalTrialUtilities.SIM.bePower(alpha=0.1, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=29, simnum=4, seed=1111) ≈ 0.9744
 
-    ClinicalTrialUtilities.orNSP(0.5, 0.4, 0.8, 100; alpha=0.05, k=1, logdiff=false) ≈ 0.710550974559294
-    ClinicalTrialUtilities.SIM.ctBinPower(0.5, 100, 0.4, 100, 0.8; alpha=0.1, type="or", seed=123, simnum=4) ≈ 0.6988
+    @test ClinicalTrialUtilities.SIM.ctBinPower(0.5, 100, 0.5, 100, 0.6; alpha=0.05, type="or", seed=123, simnum=4) ≈ 0.4131
+
+    #@test ClinicalTrialUtilities.orNSP(0.5, 0.4, 0.8, 100; alpha=0.05, k=1, logdiff=false) ≈ 0.710550974559294
+    @test ClinicalTrialUtilities.SIM.ctBinPower(0.5, 100, 0.4, 100, 0.8; alpha=0.1, type="or", seed=123, simnum=4) ≈ 0.6988
 end
 
 println(" ---------------------------------- ")

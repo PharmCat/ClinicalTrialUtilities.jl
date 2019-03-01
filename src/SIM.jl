@@ -31,9 +31,9 @@ module SIM
         #ms    = log(1+cv^2)
 
         if logscale
-            ltheta1 = log(theta1); ltheta2 = log(theta2); diffm = log(theta0); ms = log(1+cv^2)
+            ltheta1 = log(theta1); ltheta2 = log(theta2); diffm = log(theta0); ms = log(1+cv^2);
         else
-            ltheta1 = theta1; ltheta2 = theta2; diffm = theta0; ms = cv*cv
+            ltheta1 = theta1; ltheta2 = theta2; diffm = theta0; ms = cv*cv;
         end
 
         return bePowerSIM(ltheta1, ltheta2, ms, diffm, df, sef, 10^simnum, alpha, seed=seed)

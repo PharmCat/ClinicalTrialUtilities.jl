@@ -24,10 +24,10 @@ function powerTOST(;alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0
         diffm   = log(theta0)
         sd      = cv2sd(cv)    # sqrt(ms)
     else
-        ltheta1 = theta1
-        ltheta2 = theta2
-        diffm   = theta0
-        sd      = cv
+        ltheta1 = theta1;
+        ltheta2 = theta2;
+        diffm   = theta0;
+        sd      = cv;
     end
 
     return powerTOSTint(alpha,  ltheta1, ltheta2, diffm, sd, n, design, method)
