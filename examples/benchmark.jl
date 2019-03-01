@@ -1,5 +1,5 @@
 using BenchmarkTools
-using ClinicalTrialUtilities
+#using ClinicalTrialUtilities
 GC.enable(false)
 
 b = @benchmark ClinicalTrialUtilities.sampleSize(param="mean", type="ea", group="one", alpha=0.05, beta=0.2, sd=1, a=1.5, b=2, k=1)

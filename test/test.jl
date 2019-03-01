@@ -32,7 +32,7 @@ end
     @test ceil(sampleSize(param="or", type="ea",  alpha=0.05, beta=0.2, a=0.4, b=0.25)) == 156
     @test ceil(sampleSize(param="or", type="ei",  alpha=0.05, beta=0.2, diff=0.5, a=0.25, b=0.25)) == 366
     @test ceil(sampleSize(param="or", type="ns",  alpha=0.05, beta=0.2, diff=0.2, a=0.4, b=0.25)) == 242
-    @test ceil(sampleSize(param="prop", type="mcnm", a=0.45, b=0.05)) == 23
+    @test ceil(ClinicalTrialUtilities.sampleSize(param="prop", type="mcnm", a=0.45, b=0.05)) == 23
 
     @test sampleSize(param="mean", type="ns", group="two", alpha=0.05, beta=0.2, diff=1, sd=20, a=1, b=2) ≈ 1236.511446403953 atol=1E-12
     @test sampleSize(param="mean", type="ns", group="two", alpha=0.05, beta=0.2, diff=1, sd=20, a=1, b=2, out="vstr")[1] ≈ 1236.511446403953 atol=1E-12

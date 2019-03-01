@@ -16,6 +16,7 @@ Author: Vladimir Arnautov
  - Distributions
  - QuadGK
  - SpecialFunctions
+ - Random
 
 ### Install:
 ```
