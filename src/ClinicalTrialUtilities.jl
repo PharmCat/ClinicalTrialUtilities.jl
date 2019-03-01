@@ -26,6 +26,8 @@ struct CTUException <: Exception
     var::String
 end
 Base.showerror(io::IO, e::CTUException) = print("CTU Exception code: ", e.n, " Message: ", e.var)
+#Exceptions
+export CTUException
 
 const ZDIST = Normal()
 
@@ -39,12 +41,13 @@ include("PowerSampleSize.jl")
 include("SampleSize.jl")
 #Confidence interval calculation
 include("CI.jl")
+#Confidence Intervals for Proportions and Means
+export CI
 #Simulations
 include("SIM.jl")
 #info function
 include("Info.jl")
 
-export CTUException
 #Sample size
 export sampleSize
 export beSampleN
@@ -57,10 +60,8 @@ export owensT
 #Structs - should be rewrited or deleted
 export ParamSet
 export sampleSizeParam
-#Exceptions
-export CTUException
-#Confidence Intervals for Proportions and Means
-export CI, SIM
+
+export SIM
 
 #-------------------------------------------------------------------------------
     mutable struct ParamSet
