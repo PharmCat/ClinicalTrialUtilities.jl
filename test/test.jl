@@ -404,13 +404,14 @@ println(" ---------------------------------- ")
     @test ci.lower    ≈ 0.0061 atol=1E-4
     @test ci.upper    ≈ 0.1718 atol=1E-4
 
+    ci = ClinicalTrialUtilities.CI.oneProp(0, 20, alpha=0.05, method=:wilsoncc)
+    @test ci.lower    ≈ 0.0000 atol=1E-4
+    @test ci.upper    ≈ 0.2005 atol=1E-4
+
     ci = ClinicalTrialUtilities.CI.oneProp(1, 29, alpha=0.05, method=:wilsoncc)
     @test ci.lower    ≈ 0.0018 atol=1E-4
     @test ci.upper    ≈ 0.1963 atol=1E-4
 
-    ci = ClinicalTrialUtilities.CI.oneProp(0, 20, alpha=0.05, method=:wilsoncc)
-    @test ci.lower    ≈ 0.0000 atol=1E-4
-    @test ci.upper    ≈ 0.2005 atol=1E-4
     #exact (CP)
     ci = ClinicalTrialUtilities.CI.oneProp(0, 20, alpha=0.05, method=:cp)
     @test ci.lower    ≈ 0.0000 atol=1E-4
