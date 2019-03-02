@@ -12,19 +12,21 @@ module CI
         estimate::Float64
     end
 
-    function oneProp(x, n; alpha=0.05, method="wilson")
-        if method=="wilson"
+    function oneProp(x, n; alpha=0.05, method=:wilson)
+        if method==:wilson
             return propWilsonCI(x, n, alpha)
-        elseif method=="cp"
+        elseif method==:cp
             return propCPCI(x, n, alpha)
-        elseif method=="soc"
+        elseif method==:soc
             return propSOCCI(x, n, alpha)
-        elseif method=="blaker"
+        elseif method==:blaker
             return propBlakerCI(x, n, alpha)
-        elseif method=="arcsine"
+        elseif method==:arcsine
             return propARCCI(x, n, alpha)
-        elseif method=="wald"
+        elseif method==:wald
             return propWaldCI(x, n, alpha)
+        elseif method==:wilsoncc
+            return propWilsonCCCI(x, n, alpha)
         end
     end
 
@@ -77,14 +79,23 @@ module CI
 
     #-----------------------------PROPORTIONS-----------------------------------
 
-    #Wilson’s confidence interval for a single proportion
+    #Wilson’s confidence interval for a single proportion, wilson score
     #Wilson, E.B. (1927) Probable inference, the law of succession, and statistical inferenceJ. Amer.Stat. Assoc22, 209–212
     function propWilsonCI(x, n, alpha)::ConfInt
         z = abs(quantile(ZDIST, 1-alpha/2))
         p = x/n
-        b = (z*((p*(1-p)+(z^2)/(4*n))/n)^(1/2))/(1+(z^2)/n)
+        b = z*sqrt((p*(1-p)+(z^2)/(4*n))/n)/(1+(z^2)/n)
         m = (p+(z^2)/(2*n))/(1+(z^2)/n)
         return ConfInt(m - b,m + b,m)
+    end
+    #Wilson CC
+    #Newcombe, R. G. (1998). "Two-sided confidence intervals for the single proportion: comparison of seven methods". Statistics in Medicine. 17 (8): 857–872. doi:10.1002/(SICI)1097-0258(19980430)17:8<857::AID-SIM777>3.0.CO;2-E. PMID 9595616
+    function propWilsonCCCI(x, n, alpha)::ConfInt
+        z = abs(quantile(ZDIST, 1-alpha/2))
+        p = x/n
+        l = (2*n*p+z*z-1-z*sqrt(z*z-2-1/n+4*p*(n*(1-p)+1)))/2/(n+z*z)
+        u = (2*n*p+z*z+1+z*sqrt(z*z+2-1/n+4*p*(n*(1-p)-1)))/2/(n+z*z)
+        return ConfInt(min(p, l), max(p, u), p)
     end
     #Clopper-Pearson exatct CI
     #Clopper, C. and Pearson, E.S. (1934) The use of confidence or fiducial limits illustrated in the caseof the binomial.Biometrika26, 404–413.
@@ -255,7 +266,8 @@ module CI
         return ConfInt(estI-q*stderr, estI+q*stderr, estimate)
     end
     #Method of Mee 1984 with Miettinen and Nurminen modification nxy / (nxy - 1) Newcombe 1998
-    function propDiffMNCI(x1::Int, n1::Int, x2::Int, n2::Int, alpha::Float64)::ConfInt
+    #Score intervals for the difference of two binomial proportions
+    function propDiffMNCI(x1::Int, n1::Int, x2::Int, n2::Int, alpha::Float64)::ConfInt  #With correction factor
         p1    = x1/n1
         p2    = x2/n2
         z     = quantile(Chisq(1), 1-alpha)
@@ -269,6 +281,7 @@ module CI
             score = zstat(p1, n1, p2, n2, up2)
             if score < z proot = up2 end
         end
+        score = 0
         proot = p1-p2
         dp    = 1 + proot
         low2  = 0

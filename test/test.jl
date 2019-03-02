@@ -291,32 +291,32 @@ end
 println(" ---------------------------------- ")
 @testset "  CI Test             " begin
 
-    ci = ClinicalTrialUtilities.CI.oneProp(38, 100, alpha=0.05, method="wald")
+    ci = ClinicalTrialUtilities.CI.oneProp(38, 100, alpha=0.05, method=:wald)
     @test ci.lower    ≈ 0.284866005121432 atol=1E-15
     @test ci.upper    ≈ 0.47513399487856794 atol=1E-15
     @test ci.estimate ≈ 0.38 atol=1E-16
 
-    ci = ClinicalTrialUtilities.CI.oneProp(38, 100, alpha=0.05, method="wilson")
+    ci = ClinicalTrialUtilities.CI.oneProp(38, 100, alpha=0.05, method=:wilson)
     @test ci.lower    ≈ 0.2909759925247873 atol=1E-16
     @test ci.upper    ≈ 0.47790244704488943 atol=1E-15
     @test ci.estimate ≈ 0.38443921978483836 atol=1E-15
 
-    ci = ClinicalTrialUtilities.CI.oneProp(38, 100, alpha=0.05, method="cp")
+    ci = ClinicalTrialUtilities.CI.oneProp(38, 100, alpha=0.05, method=:cp)
     @test ci.lower    ≈ 0.284767476141479 atol=1E-15
     @test ci.upper    ≈ 0.482539305750806 atol=1E-15
     @test ci.estimate ≈ 0.38
 
-    ci = ClinicalTrialUtilities.CI.oneProp(38, 100, alpha=0.05, method="soc")
+    ci = ClinicalTrialUtilities.CI.oneProp(38, 100, alpha=0.05, method=:soc)
     @test ci.lower    ≈ 0.289191701883923 atol=1E-15
     @test ci.upper    ≈ 0.477559239340346 atol=1E-15
     @test ci.estimate ≈ 0.38
 
-    ci = ClinicalTrialUtilities.CI.oneProp(38, 100, alpha=0.05, method="blaker")
+    ci = ClinicalTrialUtilities.CI.oneProp(38, 100, alpha=0.05, method=:blaker)
     @test ci.lower    ≈ 0.2881875 atol=1E-7
     @test ci.upper    ≈ 0.4798293 atol=1E-7
     @test ci.estimate ≈ 0.38
 
-    ci = ClinicalTrialUtilities.CI.oneProp(38, 100, alpha=0.05, method="arcsine")
+    ci = ClinicalTrialUtilities.CI.oneProp(38, 100, alpha=0.05, method=:arcsine)
     @test ci.lower    ≈ 0.2877714314998773 atol=1E-16
     @test ci.upper    ≈ 0.47682358116201534 atol=1E-16
     @test ci.estimate ≈ 0.38
@@ -388,6 +388,43 @@ println(" ---------------------------------- ")
     @test ci.upper    ≈ -1.3949099 atol=1E-7
     @test ci.estimate ≈ -3.5     atol=1E-4
 
+    #Source Validation
+    #---------------------------------------------------------------------------
+    #doi:10.1002/(sici)1097-0258(19980430)17:8<857::aid-sim777>3.0.co;2-e
+    ci = ClinicalTrialUtilities.CI.oneProp(81, 263, alpha=0.05, method=:wilson)
+    @test ci.lower    ≈ 0.2553 atol=1E-4
+    @test ci.upper    ≈ 0.3662 atol=1E-4
+    ci = ClinicalTrialUtilities.CI.oneProp(15, 148, alpha=0.05, method=:wilson)
+    @test ci.lower    ≈ 0.0624 atol=1E-4
+    @test ci.upper    ≈ 0.1605 atol=1E-4
+    ci = ClinicalTrialUtilities.CI.oneProp(0, 20, alpha=0.05, method=:wilson)
+    @test ci.lower    ≈ 0.0000 atol=1E-4
+    @test ci.upper    ≈ 0.1611 atol=1E-4
+    ci = ClinicalTrialUtilities.CI.oneProp(1, 29, alpha=0.05, method=:wilson)
+    @test ci.lower    ≈ 0.0061 atol=1E-4
+    @test ci.upper    ≈ 0.1718 atol=1E-4
+
+    ci = ClinicalTrialUtilities.CI.oneProp(1, 29, alpha=0.05, method=:wilsoncc)
+    @test ci.lower    ≈ 0.0018 atol=1E-4
+    @test ci.upper    ≈ 0.1963 atol=1E-4
+
+    ci = ClinicalTrialUtilities.CI.oneProp(0, 20, alpha=0.05, method=:wilsoncc)
+    @test ci.lower    ≈ 0.0000 atol=1E-4
+    @test ci.upper    ≈ 0.2005 atol=1E-4
+    #exact (CP)
+    ci = ClinicalTrialUtilities.CI.oneProp(0, 20, alpha=0.05, method=:cp)
+    @test ci.lower    ≈ 0.0000 atol=1E-4
+    @test ci.upper    ≈ 0.1684 atol=1E-4
+
+    #Recommended confidence intervals for two independent binomial proportions DOI: 10.1177/0962280211415469
+    ci = ClinicalTrialUtilities.CI.twoProp(7, 34, 1, 34; alpha=0.05, type="diff", method="nhs")
+    @test ci.lower    ≈ 0.019 atol=1E-3
+    @test ci.upper    ≈ 0.34 atol=1E-2
+
+    #https://www.researchgate.net/publication/328407614_Score_intervals_for_the_difference_of_two_binomial_proportions
+    ci = ClinicalTrialUtilities.CI.twoProp(4, 5, 2, 5; alpha=0.05, type="diff", method="mn")
+    @test ci.lower    ≈ -0.228 atol=1E-3
+    @test ci.upper    ≈ 0.794 atol=1E-3
 end
 
 println(" ---------------------------------- ")
@@ -396,10 +433,10 @@ println(" ---------------------------------- ")
     @test ClinicalTrialUtilities.SIM.bePower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=20, simnum=4, seed=1111) ≈ 0.8346
     @test ClinicalTrialUtilities.SIM.bePower(alpha=0.1, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=29, simnum=4, seed=1111) ≈ 0.9744
 
-    @test ClinicalTrialUtilities.SIM.ctPropPower(0.5, 100, 0.5, 100, 0.6; alpha=0.05, type="or", seed=123, simnum=4) ≈ 0.4131
+    @test ClinicalTrialUtilities.SIM.ctPropPower(0.5, 100, 0.5, 100, 0.6; alpha=0.05, type="or", method="mn", seed=123, simnum=4) ≈ 0.4131
 
     #@test ClinicalTrialUtilities.orNSP(0.5, 0.4, 0.8, 100; alpha=0.05, k=1, logdiff=false) ≈ 0.710550974559294
-    @test ClinicalTrialUtilities.SIM.ctPropPower(0.5, 100, 0.4, 100, 0.8; alpha=0.1, type="or", seed=123, simnum=4) ≈ 0.6988
+    @test ClinicalTrialUtilities.SIM.ctPropPower(0.5, 100, 0.4, 100, 0.8; alpha=0.1, type="or", method="mn", seed=123, simnum=4) ≈ 0.6988
 end
 
 println(" ---------------------------------- ")

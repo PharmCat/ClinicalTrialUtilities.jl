@@ -70,7 +70,7 @@ module SIM
     function beReplPowerFSS()
     end
 
-    function ctPropPower(p1, n1, p2, n2, diff; alpha=0.05, type="or", seed=0, simnum=5)
+    function ctPropPower(p1, n1, p2, n2, diff; alpha=0.05, type="or", method=:mn, seed=0, simnum=5)
         rng = MersenneTwister(1234)
         if seed == 0  Random.seed!(rng) else Random.seed!(seed) end
 
@@ -78,10 +78,11 @@ module SIM
         BIN2 = Binomial(n2, p2)
         pow     = 0
         nsim = 10^simnum
+        if method==:mn method = "mn" end
         for i=1:nsim
             x1 = rand(BIN1)
             x2 = rand(BIN2)
-            ci = twoProp(x1, n1, x2, n2; alpha=alpha, type="or", method="mn")
+            ci = twoProp(x1, n1, x2, n2; alpha=alpha, type="or", method=method)
             if ci.lower > diff pow += 1 end
         end
         return pow/nsim
