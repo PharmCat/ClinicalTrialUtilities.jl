@@ -6,7 +6,7 @@
 # se_diff = se = sd * sqrt((1/N1 + ... + 1/Nn)*bkni) = sqrt(ms*(1/N1 + ... + 1/Nn)*bkni)
 # CI bounds = Diff +- t(df, alpha)*se
 
-function powerTOST(;alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.0, n=0, design="2x2", method="owenq",  out="num")
+function powerTOST(;alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.0, n=0, design=:d2x2, method=:owenq,  out=:num)
     if n < 2 throw(CTUException(1021,"powerTOST: n can not be < 2")) end
     if cv == 0 throw(CTUException(1022,"powerTOST: cv can not be equal to 0"))  end
     if !(0 < alpha < 1) throw(CTUException(1023,"powerTOST: alfa can not be > 1 or < 0")) end
@@ -33,7 +33,7 @@ function powerTOST(;alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0
     return powerTOSTint(alpha,  ltheta1, ltheta2, diffm, sd, n, design, method)
 end
 
-function powerTOSTint(alpha::Float64,  ltheta1::Float64, ltheta2::Float64, diffm::Float64, sd::Float64, n::Int, design::String, method::String)::Float64
+function powerTOSTint(alpha::Float64,  ltheta1::Float64, ltheta2::Float64, diffm::Float64, sd::Float64, n::Int, design::Symbol, method::Symbol)::Float64
 
     dffunc, bkni, seq = designProp(design) #dffunc if generic funtion with 1 arg return df
     df    = dffunc(n)
@@ -48,16 +48,16 @@ function powerTOSTint(alpha::Float64,  ltheta1::Float64, ltheta2::Float64, diffm
 
     se::Float64 = sd*sef
 
-    if method     == "owenq"
+    if method     == :owenq
         return powerTOSTOwenQ(alpha,ltheta1,ltheta2,diffm,se,df)
-    elseif method == "nct"
+    elseif method == :nct
         return approxPowerTOST(alpha,ltheta1,ltheta2,diffm,se,df)
-    elseif method == "mvt"
+    elseif method == :mvt
         return power1TOST(alpha,ltheta1,ltheta2,diffm,se,df) #not implemented
-    elseif method == "shifted"
+    elseif method == :shifted
         return approx2PowerTOST(alpha,ltheta1,ltheta2,diffm,se,df)
     else
-         throw(CTUException(1025,"powerTOST: method "*method*" not known!"))
+         throw(CTUException(1025,"powerTOST: method not known!"))
     end
 end #powerTOST
 
@@ -107,7 +107,6 @@ end #approxPowerTOST
 
 #.power.1TOST
 function power1TOST(alpha,ltheta1,ltheta2,diffm,se,df)
-
     throw(CTUException(1000,"Method not implemented!"))
     #Method ON MULTIVARIATE t AND GAUSS PROBABILITIES IN R not implemented
     # Distributions.MvNormal - in plan
@@ -115,7 +114,6 @@ function power1TOST(alpha,ltheta1,ltheta2,diffm,se,df)
     # Multivariate t-distribution
     # Generic multivariate t-distribution class
     # mvt = MvTDist()
-
 end
 
 #.approx2.power.TOST
@@ -146,20 +144,20 @@ end
     return sqrt(exp(sd^2)-1)
 end
 
-function designProp(type::String)
-    if type == "parallel"
+function designProp(type::Symbol)
+    if type == :parallel
         function f1(n) n - 2 end
         return f1, 1.0, 2
-    elseif type == "2x2"
+    elseif type == :d2x2
         function f2(n) n - 2 end
         return f2, 0.5, 2
-    elseif type == "2x2x3"
+    elseif type == :d2x2x3
         return function f3(n) 2*n - 3 end, 0.375, 2
-    elseif type == "2x2x4"
+    elseif type == :d2x2x4
         return function f4(n) 3*n - 4 end, 0.25, 2
-    elseif type == "2x4x4"
+    elseif type == :d2x4x4
         return function f5(n) 3*n - 4 end, 0.0625, 4
-    elseif type == "2x3x3"
+    elseif type == :d2x3x3
         return function f6(n) 2*n - 3 end, 1/6, 3
     else throw(CTUException(1031,"designProp: design not known!")) end
 end

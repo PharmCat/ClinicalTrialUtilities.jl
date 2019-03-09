@@ -66,7 +66,7 @@ owensQ(nu, t, delta, a, b)
 #### sampleSize
 ```
 using ClinicalTrialUtilities
-sampleSize(param="mean|prop|or", type="ea|ei|ns|mcnm", group="one|two", alpha=0.05, beta=0.2, diff=1, sd=2, a=1, b=2, k=1)
+sampleSize(param=[:mean|:prop|:or], type=[:ea|:ei|:ns|:mcnm], group=[:one|:two], alpha=0.05, beta=0.2, diff=0, sd=0, a=0, b=0, k=1, out=[:num|:str|:vstr|:print])
 
 ```
 **param (Parameter type):**
@@ -107,7 +107,7 @@ sampleSize(param="mean|prop|or", type="ea|ei|ns|mcnm", group="one|two", alpha=0.
 #### ctPower
 ```
 using ClinicalTrialUtilities
-ctPower(param="mean|prop|or", type="ea|ei|ns|mcnm", group="one|two", alpha=0.05, n=30, diff=1, sd=2, a=1, b=2, k=1)
+ctPower(param=[:mean|:prop|:or], type=[:ea|:ei|:ns|:mcnm], group=[:one|:two], alpha=0.05, logdiff=true, n=0, diff=0,  sd=0, a=0, b=0, k=1, out=[:num|:str|:vstr|:print])
 ```
 
 **param (Parameter type):**
@@ -149,7 +149,7 @@ ctPower(param="mean|prop|or", type="ea|ei|ns|mcnm", group="one|two", alpha=0.05,
 
 ```
 using ClinicalTrialUtilities
-powerTOST(alpha=0.05, logscale=true|false, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.15, n=36, method="owenq|nct|shifted", design="parallel|2x2|2x2x3|2x2x4|2x4x4|2x3x3")
+powerTOST(alpha=0.05, logscale=[true|false], theta1=0.8, theta2=1.25, theta0=0.95, cv=0.0, n=36, method=":owenq|:nct|:shifted", design=":parallel|:d2x2|:d2x2x3|:d2x2x4|:d2x4x4|:d2x3x3", out=[:num|:str|:vstr|:print])
 ```
 **logscale** - theta1, theta2, theta0: if true - make log transformation (default true);
 
@@ -183,7 +183,7 @@ Using for bioequivalence study.
 
 ```
 using ClinicalTrialUtilities
-beSampleN(alpha=0.05, logscale=true|false, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.15, method="owenq|nct|shifted", design="parallel|2x2|2x2x3|2x2x4|2x4x4|2x3x3")
+beSampleN(alpha=0.05, logscale=[true|false], theta1=0.8, theta2=1.25, theta0=0.95, cv=0, method=[:owenq|:nct|:shifted], design=[:parallel|:d2x2|:d2x2x3|:d2x2x4|:d2x4x4|:d2x3x3], out=[:num|:str|:vstr|:print])
 ```
 **logscale** - theta1, theta2, theta0: if true - make log transformation (default true);
 
@@ -220,22 +220,41 @@ beSampleN(alpha=0.05, logscale=true|false, theta1=0.8, theta2=1.25, theta0=0.95,
 ### Examples:
 
 ```
-sampleSize(param="prop", type="ea", group="one", a=0.3, b=0.5)
-sampleSize(param="mean", type="ei", group="two", diff=0.3, sd=1, a=0.3, b=0.5)
-sampleSize(param="or", type="ns", diff=-0.1, a=0.3, b=0.5, k=2)
-sampleSize(param="or", type="ea", a=0.3, b=0.5, k=2)
+#Sample size for one proportion equality
+sampleSize(param=:prop, type=:ea, group=:one, a=0.3, b=0.5)
 
-powerTOST(alpha=0.1, logscale=false, theta1=-0.1, theta2=0.1, theta0=0, cv=0.14, n=21, method="shifted")
+#Equivalence for two means
+sampleSize(param=:mean, type=:ei, group=:two, diff=0.3, sd=1, a=0.3, b=0.5)
+
+#Odd ratio non-inferiority
+sampleSize(param=:or, type=:ns, diff=-0.1, a=0.3, b=0.5, k=2)
+
+#Odd ratio equality
+sampleSize(param=:or, type=:ea, a=0.3, b=0.5, k=2)
+
+#Bioequivalence power for 2x2 design, default method - OwensQ
+powerTOST(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=20, design=:d2x2, method=:owenq)
+
+#Same
+powerTOST(alpha=0.05, cv=0.2, n=20, design=:d2x2)
+
+#Bioequivalence power for cv 14%, 21 subjects, default OwensQ method, logscale false
 powerTOST(alpha=0.1, logscale=false, theta1=-0.1, theta2=0.1, theta0=0, cv=0.14, n=21)
-powerTOST(cv=0.4, n=35, design="2x4x4")
+
+#Bioequivalence power for cv 14%, 21 subjects, shifted method, logscale false
+powerTOST(alpha=0.1, logscale=false, theta1=-0.1, theta2=0.1, theta0=0, cv=0.14, n=21, method=:shifted)
+
+#Simple notations
+powerTOST(cv=0.4, n=35, design=:d2x4x4)
 powerTOST(cv=0.14, n=21)
 
-beSampleN(alpha=0.05,  theta1=0.8, theta2=1.25, theta0=0.95, cv=0.15, method="owenq")
-beSampleN(cv=0.20, method="nct")
-beSampleN(cv=0.347, design="parallel",  out="print")
+#Bioequivalence sample size
+beSampleN(alpha=0.05,  theta1=0.8, theta2=1.25, theta0=0.95, cv=0.15, method=:owenq)
+beSampleN(cv=0.20, method=:nct)
+beSampleN(cv=0.347, design=:parallel,  out=:print)
 beSampleN(cv=0.40)
 
-n, p, s = beSampleN(cv=0.347, design="2x2x4", method="nct", out="vstr")
+n, p, s = beSampleN(cv=0.347, design=:d2x2x4, method=:nct, out=:vstr)
 ```
 
 ### Confidence Interval Submodule
@@ -244,8 +263,8 @@ Description here:
 
 https://github.com/PharmCat/ClinicalTrialUtilities.jl/blob/dev/doc/CI.md
 
-### ToDo:
+### Simulations
 
- - atomic function interface with struct
- - cvfromci ()
- - Simulations
+Description here:
+
+https://github.com/PharmCat/ClinicalTrialUtilities.jl/blob/master/doc/SIM.md

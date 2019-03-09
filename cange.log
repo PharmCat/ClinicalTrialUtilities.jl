@@ -1,6 +1,7 @@
 v1.0.7
 
 Add sub-module CI for confidence interval computation as part of simulation functions SIM.
+  - change all tokens from string to symol
   - add sd2cv function
   - add cv2sd function
   - add ms2cv function

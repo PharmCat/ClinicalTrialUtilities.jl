@@ -63,9 +63,9 @@ export sampleSizeParam
 
 #-------------------------------------------------------------------------------
     mutable struct ParamSet
-        param::String
-        type::String
-        group::String
+        param::Symbol
+        type::Symbol
+        group::Symbol
         alpha::Float32
         beta::Float32
         sd::Float32
