@@ -382,7 +382,7 @@ module CI
         est = p1 - p2
         z = quantile(ZDIST, 1 - alpha/2)
         f(x) = fmpval2(p1, n1, p2, n2, est, x) - z
-        return ConfInt(find_zero(f, (-1.0+1e-6, est-1e-6),FalsePosition(8), atol=1E-5), find_zero(f, ( est+1e-6, 1.0-1e-6),FalsePosition(8), atol=1E-5), est)
+        return ConfInt(find_zero(f, (-1.0+1e-6, est-1e-6), atol=1E-5), find_zero(f, (est+1e-6, 1.0-1e-6), atol=1E-5), est)
     end
     @inline function fmpval2(p1, n1, p2, n2, est, delta)
         return abs((est-delta)/sqrt(fmvar(p1, n1, p2, n2, delta)))

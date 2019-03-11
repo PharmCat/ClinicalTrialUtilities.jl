@@ -1,6 +1,9 @@
 v1.0.7
 
 Add sub-module CI for confidence interval computation as part of simulation functions SIM.
+  - remove struct with sampleSize wrapper
+  - change name sampleSize -> ctSampleN
+  - change name powerTOST -> bePower
   - change all tokens from string to symol
   - add sd2cv function
   - add cv2sd function
@@ -12,7 +15,7 @@ Add sub-module CI for confidence interval computation as part of simulation func
   - add CI submodule
     - oneProp
     - twoProp
-    - oneMeans
+    - oneMean
     - twoMeans
   - PowerTOST optimizations
   - add test procedure

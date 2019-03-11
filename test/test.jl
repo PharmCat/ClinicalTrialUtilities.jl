@@ -11,88 +11,85 @@ println(" ---------------------------------- ")
 println(" ---------   START TEST   --------- ")
 println(" ---------------------------------- ")
 println(" ---------------------------------- ")
-@testset "sampleSizeParam Test  " begin
-    vals = ClinicalTrialUtilities.ParamSet(:mean,:ea,:one,0.05,0.2,1.0,1.5,2,1)
-    @test ceil(ClinicalTrialUtilities.sampleSizeParam(vals)) == 32
-end
 
-@testset "sampleSize Test       " begin
-    @test ceil(ClinicalTrialUtilities.sampleSize(param=:mean, type=:ea, group=:one, alpha=0.05, beta=0.2, sd=1, a=1.5, b=2, k=1)) == 32
-    @test ceil(ClinicalTrialUtilities.sampleSize(param=:mean, type=:ei, group=:one, alpha=0.05, beta=0.2, sd=0.1, diff=0.05, a=2, b=2, k=1)) == 35
-    @test ceil(ClinicalTrialUtilities.sampleSize(param=:mean, type=:ns, group=:one, alpha=0.05, beta=0.2, sd=1, diff=-0.5, a=1.5, b=2, k=1)) == 7
-    @test ceil(ClinicalTrialUtilities.sampleSize(param=:mean, type=:ea, group=:two, alpha=0.05, beta=0.2, sd=10, a=5, b=10, k=1)) == 63
-    @test ceil(ClinicalTrialUtilities.sampleSize(param=:mean, type=:ei, group=:two, alpha=0.05, beta=0.2, sd=10, diff=5, a=5, b=4, k=1)) == 108
-    @test ceil(ClinicalTrialUtilities.sampleSize(param=:mean, type=:ns, group=:two, alpha=0.05, beta=0.2, sd=10, diff=5, a=5, b=5, k=1)) == 50
-    @test ceil(ClinicalTrialUtilities.sampleSize(param=:prop, type=:ea, group=:one, alpha=0.05, beta=0.2, a=0.3, b=0.5)) == 50
-    @test ceil(ClinicalTrialUtilities.sampleSize(param=:prop, type=:ei, group=:one, alpha=0.05, beta=0.2, diff=0.2, a=0.6, b=0.6)) == 52
-    @test ceil(ClinicalTrialUtilities.sampleSize(param=:prop, type=:ns, group=:one, alpha=0.05, beta=0.2, diff=-0.1, a=0.3, b=0.5)) == 18
-    @test ceil(ClinicalTrialUtilities.sampleSize(param=:prop, type=:ea, group=:two, alpha=0.05, beta=0.2, a=0.65, b=0.85)) == 70
-    @test ceil(ClinicalTrialUtilities.sampleSize(param=:prop, type=:ei, group=:two, alpha=0.05, beta=0.2, diff=0.05, a=0.65, b=0.85)) == 136
-    @test ceil(ClinicalTrialUtilities.sampleSize(param=:prop, type=:ns, group=:two, alpha=0.05, beta=0.2, diff=-0.1, a=0.85, b=0.65)) == 25
-    @test ceil(ClinicalTrialUtilities.sampleSize(param=:or, type=:ea,  alpha=0.05, beta=0.2, a=0.4, b=0.25)) == 156
-    @test ceil(ClinicalTrialUtilities.sampleSize(param=:or, type=:ei,  alpha=0.05, beta=0.2, diff=0.5, a=0.25, b=0.25)) == 366
-    @test ceil(ClinicalTrialUtilities.sampleSize(param=:or, type=:ns,  alpha=0.05, beta=0.2, diff=0.2, a=0.4, b=0.25)) == 242
-    @test ceil(ClinicalTrialUtilities.sampleSize(param=:prop, type=:mcnm, a=0.45, b=0.05)) == 23
 
-    @test ClinicalTrialUtilities.sampleSize(param=:mean, type=:ns, group=:two, alpha=0.05, beta=0.2, diff=1, sd=20, a=1, b=2) ≈ 1236.511446403953 atol=1E-12
-    @test ClinicalTrialUtilities.sampleSize(param=:mean, type=:ns, group=:two, alpha=0.05, beta=0.2, diff=1, sd=20, a=1, b=2, out=:vstr)[1] ≈ 1236.511446403953 atol=1E-12
-    @test ClinicalTrialUtilities.sampleSize(param=:prop, type=:ei, group=:one, alpha=0.1, beta=0.2, diff=0.1, a=0.65, b=0.6, out=:vstr)[1] ≈ 630.6717754175304 atol=1E-12
-    str1 = ClinicalTrialUtilities.sampleSize(param=:mean, type=:ea, group=:two, alpha=0.05, beta=0.2, sd=10, a=5, b=10, k=2, out=:str);
-    str2 = ClinicalTrialUtilities.sampleSize(param=:mean, type=:ea, group=:two, alpha=0.05, beta=0.2, sd=10, a=5, b=10, k=2, out=:vstr)[2];
+@testset "ctSampleN Test       " begin
+    @test ceil(ClinicalTrialUtilities.ctSampleN(param=:mean, type=:ea, group=:one, alpha=0.05, beta=0.2, sd=1, a=1.5, b=2, k=1)) == 32
+    @test ceil(ClinicalTrialUtilities.ctSampleN(param=:mean, type=:ei, group=:one, alpha=0.05, beta=0.2, sd=0.1, diff=0.05, a=2, b=2, k=1)) == 35
+    @test ceil(ClinicalTrialUtilities.ctSampleN(param=:mean, type=:ns, group=:one, alpha=0.05, beta=0.2, sd=1, diff=-0.5, a=1.5, b=2, k=1)) == 7
+    @test ceil(ClinicalTrialUtilities.ctSampleN(param=:mean, type=:ea, group=:two, alpha=0.05, beta=0.2, sd=10, a=5, b=10, k=1)) == 63
+    @test ceil(ClinicalTrialUtilities.ctSampleN(param=:mean, type=:ei, group=:two, alpha=0.05, beta=0.2, sd=10, diff=5, a=5, b=4, k=1)) == 108
+    @test ceil(ClinicalTrialUtilities.ctSampleN(param=:mean, type=:ns, group=:two, alpha=0.05, beta=0.2, sd=10, diff=5, a=5, b=5, k=1)) == 50
+    @test ceil(ClinicalTrialUtilities.ctSampleN(param=:prop, type=:ea, group=:one, alpha=0.05, beta=0.2, a=0.3, b=0.5)) == 50
+    @test ceil(ClinicalTrialUtilities.ctSampleN(param=:prop, type=:ei, group=:one, alpha=0.05, beta=0.2, diff=0.2, a=0.6, b=0.6)) == 52
+    @test ceil(ClinicalTrialUtilities.ctSampleN(param=:prop, type=:ns, group=:one, alpha=0.05, beta=0.2, diff=-0.1, a=0.3, b=0.5)) == 18
+    @test ceil(ClinicalTrialUtilities.ctSampleN(param=:prop, type=:ea, group=:two, alpha=0.05, beta=0.2, a=0.65, b=0.85)) == 70
+    @test ceil(ClinicalTrialUtilities.ctSampleN(param=:prop, type=:ei, group=:two, alpha=0.05, beta=0.2, diff=0.05, a=0.65, b=0.85)) == 136
+    @test ceil(ClinicalTrialUtilities.ctSampleN(param=:prop, type=:ns, group=:two, alpha=0.05, beta=0.2, diff=-0.1, a=0.85, b=0.65)) == 25
+    @test ceil(ClinicalTrialUtilities.ctSampleN(param=:or, type=:ea,  alpha=0.05, beta=0.2, a=0.4, b=0.25)) == 156
+    @test ceil(ClinicalTrialUtilities.ctSampleN(param=:or, type=:ei,  alpha=0.05, beta=0.2, diff=0.5, a=0.25, b=0.25)) == 366
+    @test ceil(ClinicalTrialUtilities.ctSampleN(param=:or, type=:ns,  alpha=0.05, beta=0.2, diff=0.2, a=0.4, b=0.25)) == 242
+    @test ceil(ClinicalTrialUtilities.ctSampleN(param=:prop, type=:mcnm, a=0.45, b=0.05)) == 23
+
+    @test ClinicalTrialUtilities.ctSampleN(param=:mean, type=:ns, group=:two, alpha=0.05, beta=0.2, diff=1, sd=20, a=1, b=2) ≈ 1236.511446403953 atol=1E-12
+    @test ClinicalTrialUtilities.ctSampleN(param=:mean, type=:ns, group=:two, alpha=0.05, beta=0.2, diff=1, sd=20, a=1, b=2, out=:vstr)[1] ≈ 1236.511446403953 atol=1E-12
+    @test ClinicalTrialUtilities.ctSampleN(param=:prop, type=:ei, group=:one, alpha=0.1, beta=0.2, diff=0.1, a=0.65, b=0.6, out=:vstr)[1] ≈ 630.6717754175304 atol=1E-12
+    str1 = ClinicalTrialUtilities.ctSampleN(param=:mean, type=:ea, group=:two, alpha=0.05, beta=0.2, sd=10, a=5, b=10, k=2, out=:str);
+    str2 = ClinicalTrialUtilities.ctSampleN(param=:mean, type=:ea, group=:two, alpha=0.05, beta=0.2, sd=10, a=5, b=10, k=2, out=:vstr)[2];
     @test str1 == str2
 end
 
-@testset "sampleSizeParam Errors" begin
+@testset "ctSampleNParam Errors" begin
     en = 0
     try
-        ClinicalTrialUtilities.sampleSize(param=:mean, type=:ea, group=:one, alpha=2, beta=0.2, diff=1, sd=1, a=1, b=1, k=1)
+        ClinicalTrialUtilities.ctSampleN(param=:mean, type=:ea, group=:one, alpha=2, beta=0.2, diff=1, sd=1, a=1, b=1, k=1)
     catch e
         if isa(e, ClinicalTrialUtilities.CTUException) en = e.n end
     end
     @test en ≈ 1201
     en = 0
     try
-        ClinicalTrialUtilities.sampleSize(param=:mean, type=:ei, group=:one, alpha=0.5, beta=0.2, diff=0, sd=1, a=1, b=1, k=1)
+        ClinicalTrialUtilities.ctSampleN(param=:mean, type=:ei, group=:one, alpha=0.5, beta=0.2, diff=0, sd=1, a=1, b=1, k=1)
     catch e
         if isa(e, ClinicalTrialUtilities.CTUException) en = e.n end
     end
     @test en ≈ 1202
     en = 0
     try
-        ClinicalTrialUtilities.sampleSize(param=:prop, type=:ea, group=:oone, alpha=0.05, beta=0.2, diff=1, a=0.5, b=0.5, k=1)
+        ClinicalTrialUtilities.ctSampleN(param=:prop, type=:ea, group=:oone, alpha=0.05, beta=0.2, diff=1, a=0.5, b=0.5, k=1)
     catch e
         if isa(e, ClinicalTrialUtilities.CTUException) en = e.n end
     end
     @test en ≈ 1203
     en = 0
     try
-        ClinicalTrialUtilities.sampleSize(param=:mean, type=:ns, group=:one, alpha=0.5, beta=0.2, diff=1, sd=0, a=1, b=1, k=1)
+        ClinicalTrialUtilities.ctSampleN(param=:mean, type=:ns, group=:one, alpha=0.5, beta=0.2, diff=1, sd=0, a=1, b=1, k=1)
     catch e
         if isa(e, ClinicalTrialUtilities.CTUException) en = e.n end
     end
     @test en ≈ 1204
     en = 0
     try
-        ClinicalTrialUtilities.sampleSize(param=:mean, type=:ea, group=:one, alpha=0.05, beta=0.2, diff=1, sd=1, a=0, b=0, k=0)
+        ClinicalTrialUtilities.ctSampleN(param=:mean, type=:ea, group=:one, alpha=0.05, beta=0.2, diff=1, sd=1, a=0, b=0, k=0)
     catch e
         if isa(e, ClinicalTrialUtilities.CTUException) en = e.n end
     end
     @test en ≈ 1205
 
 
-    @test !ClinicalTrialUtilities.sampleSize(param=:mean, type=:ea, group=:oone, alpha=0.5, beta=0.2, diff=1, sd=1, a=1, b=1, k=1)
-    @test !ClinicalTrialUtilities.sampleSize(param=:mean, type=:eea, group=:one, alpha=0.5, beta=0.2, diff=1, sd=1, a=1, b=1, k=1)
-    @test !ClinicalTrialUtilities.sampleSize(param=:mean, type=:eea, group=:two, alpha=0.5, beta=0.2, diff=1, sd=1, a=1, b=1, k=1)
-    @test !ClinicalTrialUtilities.sampleSize(param=:pprop, type=:eea, group=:one, alpha=0.5, beta=0.2, diff=1, sd=1, a=1, b=1, k=1)
-    @test !ClinicalTrialUtilities.sampleSize(param=:prop, type=:eea, group=:one, alpha=0.05, beta=0.2, diff=1, a=0.5, b=0.5, k=1)
-    @test !ClinicalTrialUtilities.sampleSize(param=:prop, type=:eea, group=:two, alpha=0.05, beta=0.2, diff=1, a=0.5, b=0.5, k=1)
+    @test !ClinicalTrialUtilities.ctSampleN(param=:mean, type=:ea, group=:oone, alpha=0.5, beta=0.2, diff=1, sd=1, a=1, b=1, k=1)
+    @test !ClinicalTrialUtilities.ctSampleN(param=:mean, type=:eea, group=:one, alpha=0.5, beta=0.2, diff=1, sd=1, a=1, b=1, k=1)
+    @test !ClinicalTrialUtilities.ctSampleN(param=:mean, type=:eea, group=:two, alpha=0.5, beta=0.2, diff=1, sd=1, a=1, b=1, k=1)
+    @test !ClinicalTrialUtilities.ctSampleN(param=:pprop, type=:eea, group=:one, alpha=0.5, beta=0.2, diff=1, sd=1, a=1, b=1, k=1)
+    @test !ClinicalTrialUtilities.ctSampleN(param=:prop, type=:eea, group=:one, alpha=0.05, beta=0.2, diff=1, a=0.5, b=0.5, k=1)
+    @test !ClinicalTrialUtilities.ctSampleN(param=:prop, type=:eea, group=:two, alpha=0.05, beta=0.2, diff=1, a=0.5, b=0.5, k=1)
 
-    @test !ClinicalTrialUtilities.sampleSize(param=:prop, type=:ea, group=:one, alpha=0.05, beta=0.2, diff=1, sd=1, a=-1, b=0, k=1)
-    @test !ClinicalTrialUtilities.sampleSize(param=:prop, type=:ei, group=:one, alpha=0.05, beta=0.2, diff=1, sd=1, a=0.4, b=2, k=1)
-    @test !ClinicalTrialUtilities.sampleSize(param=:or, type=:eea, group=:oone,  diff=1, a=0.5, b=0.5, k=1)
+    @test !ClinicalTrialUtilities.ctSampleN(param=:prop, type=:ea, group=:one, alpha=0.05, beta=0.2, diff=1, sd=1, a=-1, b=0, k=1)
+    @test !ClinicalTrialUtilities.ctSampleN(param=:prop, type=:ei, group=:one, alpha=0.05, beta=0.2, diff=1, sd=1, a=0.4, b=2, k=1)
+    @test !ClinicalTrialUtilities.ctSampleN(param=:or, type=:eea, group=:oone,  diff=1, a=0.5, b=0.5, k=1)
 end
 
-@testset "sampleSize Atomic     " begin
+@testset "ctSampleN Atomic     " begin
     @test ceil(ClinicalTrialUtilities.ClinicalTrialUtilities.mcnm(0.45, 0.05)) == 23
 end
 
@@ -191,33 +188,33 @@ end
 println(" ---------------------------------- ")
 @testset "PowerTOST Test        " begin
     #parallel
-    @test ClinicalTrialUtilities.powerTOST(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.3, n=31, design=:parallel, method=:owenq) ≈ 0.2949476 atol=1E-7
-    @test ClinicalTrialUtilities.powerTOST(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.3, n=32, design=:parallel, method=:owenq) ≈ 0.3166927 atol=1E-7
+    @test ClinicalTrialUtilities.bePower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.3, n=31, design=:parallel, method=:owenq) ≈ 0.2949476 atol=1E-7
+    @test ClinicalTrialUtilities.bePower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.3, n=32, design=:parallel, method=:owenq) ≈ 0.3166927 atol=1E-7
     #2x2
-    @test ClinicalTrialUtilities.powerTOST(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=20, design=:d2x2, method=:owenq)         ≈ 0.8346802 atol=1E-7
-    @test ClinicalTrialUtilities.powerTOST(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=10, design=:d2x2, method=:nct)           ≈ 0.4316618 atol=1E-7
-    @test ClinicalTrialUtilities.powerTOST(alpha=0.1, logscale=false, theta1=-0.1, theta2=0.1, theta0=0.0, cv=0.14, n=21, design=:d2x2, method=:shifted)       ≈ 0.6626132 atol=1E-7
-    @test ClinicalTrialUtilities.powerTOST(alpha=0.05, logscale=false, theta1=-0.1, theta2=0.1, theta0=0.0, cv=0.14, n=30, design=:d2x2, method=:nct)          ≈ 0.7079951 atol=1E-7
-    @test ClinicalTrialUtilities.powerTOST(alpha=0.0000001, logscale=false, theta1=-0.1, theta2=0.1, theta0=0.0, cv=1.0, n=10000, design=:d2x2, method=:owenq) ≈ 0.9380914 atol=1E-7
-    @test ClinicalTrialUtilities.powerTOST(alpha=0.0001, logscale=false, theta1=-0.1, theta2=0.1, theta0=0.0, cv=1.0, n=3500, design=:d2x2, method=:owenq)     ≈ 0.3545904 atol=1E-7
-    @test ClinicalTrialUtilities.powerTOST(alpha=0.00000005, logscale=false, theta1=-0.1, theta2=0.1, theta0=0.0, cv=1.5, n=20000, design=:d2x2, method=:owenq) ≈ 0.8197361 atol=1E-7
-    @test ClinicalTrialUtilities.powerTOST(alpha=0.1, logscale=false, theta1=-0.1, theta2=0.1, theta0=0.0, cv=0.14, n=4, design=:d2x2, method=:shifted) ≈ 0.0
-    @test ClinicalTrialUtilities.powerTOST(alpha=0.1, logscale=false, theta1=-0.1, theta2=0.1, theta0=0.0, cv=0.02, n=3, design=:d2x2, method=:shifted) ≈ 0.7738659 atol=1E-7
+    @test ClinicalTrialUtilities.bePower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=20, design=:d2x2, method=:owenq)         ≈ 0.8346802 atol=1E-7
+    @test ClinicalTrialUtilities.bePower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=10, design=:d2x2, method=:nct)           ≈ 0.4316618 atol=1E-7
+    @test ClinicalTrialUtilities.bePower(alpha=0.1, logscale=false, theta1=-0.1, theta2=0.1, theta0=0.0, cv=0.14, n=21, design=:d2x2, method=:shifted)       ≈ 0.6626132 atol=1E-7
+    @test ClinicalTrialUtilities.bePower(alpha=0.05, logscale=false, theta1=-0.1, theta2=0.1, theta0=0.0, cv=0.14, n=30, design=:d2x2, method=:nct)          ≈ 0.7079951 atol=1E-7
+    @test ClinicalTrialUtilities.bePower(alpha=0.0000001, logscale=false, theta1=-0.1, theta2=0.1, theta0=0.0, cv=1.0, n=10000, design=:d2x2, method=:owenq) ≈ 0.9380914 atol=1E-7
+    @test ClinicalTrialUtilities.bePower(alpha=0.0001, logscale=false, theta1=-0.1, theta2=0.1, theta0=0.0, cv=1.0, n=3500, design=:d2x2, method=:owenq)     ≈ 0.3545904 atol=1E-7
+    @test ClinicalTrialUtilities.bePower(alpha=0.00000005, logscale=false, theta1=-0.1, theta2=0.1, theta0=0.0, cv=1.5, n=20000, design=:d2x2, method=:owenq) ≈ 0.8197361 atol=1E-7
+    @test ClinicalTrialUtilities.bePower(alpha=0.1, logscale=false, theta1=-0.1, theta2=0.1, theta0=0.0, cv=0.14, n=4, design=:d2x2, method=:shifted) ≈ 0.0
+    @test ClinicalTrialUtilities.bePower(alpha=0.1, logscale=false, theta1=-0.1, theta2=0.1, theta0=0.0, cv=0.02, n=3, design=:d2x2, method=:shifted) ≈ 0.7738659 atol=1E-7
     #
-    @test ClinicalTrialUtilities.powerTOST(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=27, design=:d2x2, method=:owenq) ≈ 0.9264365737448076
-    @test ClinicalTrialUtilities.powerTOST(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=29, design=:d2x2, method=:owenq) ≈ 0.941900827163551
-    @test ClinicalTrialUtilities.powerTOST(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=31, design=:d2x2, method=:owenq) ≈ 0.9542152686694777
+    @test ClinicalTrialUtilities.bePower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=27, design=:d2x2, method=:owenq) ≈ 0.9264365737448076
+    @test ClinicalTrialUtilities.bePower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=29, design=:d2x2, method=:owenq) ≈ 0.941900827163551
+    @test ClinicalTrialUtilities.bePower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=31, design=:d2x2, method=:owenq) ≈ 0.9542152686694777
 
     #2x2x4
-    @test ClinicalTrialUtilities.powerTOST(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.4, n=35, design=:d2x2x4) ≈ 0.829747  atol=1E-6
+    @test ClinicalTrialUtilities.bePower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.4, n=35, design=:d2x2x4) ≈ 0.829747  atol=1E-6
     #2x4x4
-    @test ClinicalTrialUtilities.powerTOST(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.4, n=35, design=:d2x4x4) ≈ 0.8291076  atol=1E-7
-    @test ClinicalTrialUtilities.powerTOST(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.4, n=34, design=:d2x4x4) ≈ 0.8180596  atol=1E-7
-    @test ClinicalTrialUtilities.powerTOST(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.4, n=33, design=:d2x4x4) ≈ 0.8069565  atol=1E-7
+    @test ClinicalTrialUtilities.bePower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.4, n=35, design=:d2x4x4) ≈ 0.8291076  atol=1E-7
+    @test ClinicalTrialUtilities.bePower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.4, n=34, design=:d2x4x4) ≈ 0.8180596  atol=1E-7
+    @test ClinicalTrialUtilities.bePower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.4, n=33, design=:d2x4x4) ≈ 0.8069565  atol=1E-7
     #2x3x3
-    @test ClinicalTrialUtilities.powerTOST(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.4, n=32, design=:d2x3x3) ≈ 0.5976873  atol=1E-7
-    @test ClinicalTrialUtilities.powerTOST(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.4, n=31, design=:d2x3x3) ≈ 0.579468  atol=1E-6
-    @test ClinicalTrialUtilities.powerTOST(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.4, n=30, design=:d2x3x3) ≈ 0.5614358  atol=1E-7
+    @test ClinicalTrialUtilities.bePower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.4, n=32, design=:d2x3x3) ≈ 0.5976873  atol=1E-7
+    @test ClinicalTrialUtilities.bePower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.4, n=31, design=:d2x3x3) ≈ 0.579468  atol=1E-6
+    @test ClinicalTrialUtilities.bePower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.4, n=30, design=:d2x3x3) ≈ 0.5614358  atol=1E-7
 end
 
 @testset "PowerTOST Errors      " begin
@@ -231,42 +228,42 @@ end
     @test en ≈ 1031
     en = 0
     try
-        ClinicalTrialUtilities.powerTOST(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=0,  method=:mvt)
+        ClinicalTrialUtilities.bePower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=0,  method=:mvt)
     catch e
         if isa(e, ClinicalTrialUtilities.CTUException) en = e.n end
     end
     @test en ≈ 1021
     en = 0
     try
-        ClinicalTrialUtilities.powerTOST(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0, n=10,  method=:mvt)
+        ClinicalTrialUtilities.bePower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0, n=10,  method=:mvt)
     catch e
         if isa(e, ClinicalTrialUtilities.CTUException) en = e.n end
     end
     @test en ≈ 1022
     en = 0
     try
-        ClinicalTrialUtilities.powerTOST(alpha=1.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=10,  method=:mvt)
+        ClinicalTrialUtilities.bePower(alpha=1.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=10,  method=:mvt)
     catch e
         if isa(e, ClinicalTrialUtilities.CTUException) en = e.n end
     end
     @test en ≈ 1023
     en = 0
     try
-        ClinicalTrialUtilities.powerTOST(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=2,  method=:mvt)
+        ClinicalTrialUtilities.bePower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=2,  method=:mvt)
     catch e
         if isa(e, ClinicalTrialUtilities.CTUException) en = e.n end
     end
     @test en ≈ 1024
     en = 0
     try
-        ClinicalTrialUtilities.powerTOST(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=20,  method=:mmvt)
+        ClinicalTrialUtilities.bePower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=20,  method=:mmvt)
     catch e
         if isa(e, ClinicalTrialUtilities.CTUException) en = e.n end
     end
     @test en ≈ 1025
     en = 0
     try
-        ClinicalTrialUtilities.powerTOST(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=20, design=:d2x2, method=:mvt)
+        ClinicalTrialUtilities.bePower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=20, design=:d2x2, method=:mvt)
     catch e
         if isa(e, ClinicalTrialUtilities.CTUException) en = e.n end
     end

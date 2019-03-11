@@ -32,19 +32,19 @@ Pkg.clone("https://github.com/PharmCat/ClinicalTrialUtilities.jl.git");
 
 Sample size calculation:
 
-sampleSize (;param, type, group, alpha, beta, diff, sd, a, b, k, out)
+ctSampleN(;param, type, group, alpha, beta, diff, sd, a, b, k, out)
 
 Clinical trial power estimation:
+
+Iterative sample size calculation for Bioequivalence trials:
+
+beSampleN(;theta0, theta1, theta2, cv, alpha, beta, logscale, method, design, out)
 
 ctPower(;param, type, group, alpha, n, diff, sd, a, b, k, out)
 
 Power calculation for TOST (for Bioequivalence trials):
 
-powerTOST(;theta0, theta1, theta2, cv, n, alpha, logscale, method,  design)
-
-Iterative sample size calculation for Bioequivalence trials:
-
-beSampleN(;theta0, theta1, theta2, cv, alpha, beta, logscale, method, design, out)
+bePower(;theta0, theta1, theta2, cv, n, alpha, logscale, method,  design)
 
 Owen's T function:
 
@@ -66,7 +66,7 @@ owensQ(nu, t, delta, a, b)
 #### sampleSize
 ```
 using ClinicalTrialUtilities
-sampleSize(param=[:mean|:prop|:or], type=[:ea|:ei|:ns|:mcnm], group=[:one|:two], alpha=0.05, beta=0.2, diff=0, sd=0, a=0, b=0, k=1, out=[:num|:str|:vstr|:print])
+ctSampleN(param=[:mean|:prop|:or], type=[:ea|:ei|:ns|:mcnm], group=[:one|:two], alpha=0.05, beta=0.2, diff=0, sd=0, a=0, b=0, k=1, out=[:num|:str|:vstr|:print])
 
 ```
 **param (Parameter type):**
@@ -172,10 +172,10 @@ powerTOST(alpha=0.05, logscale=[true|false], theta1=0.8, theta2=1.25, theta0=0.9
 
 **design** - trial design;
 - parralel
-- 2x2 (default)
-- 2x2x4
-- 2x4x4
-- 2x3x3
+- d2x2 (default)
+- d2x2x4
+- d2x4x4
+- d2x3x3
 
 #### beSampleN
 
@@ -206,10 +206,10 @@ beSampleN(alpha=0.05, logscale=[true|false], theta1=0.8, theta2=1.25, theta0=0.9
 
 **design** - trial design;
 - parralel
-- 2x2 (default)
-- 2x2x4
-- 2x4x4
-- 2x3x3
+- d2x2 (default)
+- d2x2x4
+- d2x4x4
+- d2x3x3
 
 **out** - output type:
 - num   - numeric (default);
@@ -221,32 +221,32 @@ beSampleN(alpha=0.05, logscale=[true|false], theta1=0.8, theta2=1.25, theta0=0.9
 
 ```
 #Sample size for one proportion equality
-sampleSize(param=:prop, type=:ea, group=:one, a=0.3, b=0.5)
+ctSampleN(param=:prop, type=:ea, group=:one, a=0.3, b=0.5)
 
 #Equivalence for two means
-sampleSize(param=:mean, type=:ei, group=:two, diff=0.3, sd=1, a=0.3, b=0.5)
+ctSampleN(param=:mean, type=:ei, group=:two, diff=0.3, sd=1, a=0.3, b=0.5)
 
 #Odd ratio non-inferiority
-sampleSize(param=:or, type=:ns, diff=-0.1, a=0.3, b=0.5, k=2)
+ctSampleN(param=:or, type=:ns, diff=-0.1, a=0.3, b=0.5, k=2)
 
 #Odd ratio equality
-sampleSize(param=:or, type=:ea, a=0.3, b=0.5, k=2)
+ctSampleN(param=:or, type=:ea, a=0.3, b=0.5, k=2)
 
 #Bioequivalence power for 2x2 design, default method - OwensQ
-powerTOST(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=20, design=:d2x2, method=:owenq)
+bePower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=20, design=:d2x2, method=:owenq)
 
 #Same
-powerTOST(alpha=0.05, cv=0.2, n=20, design=:d2x2)
+bePower(alpha=0.05, cv=0.2, n=20, design=:d2x2)
 
 #Bioequivalence power for cv 14%, 21 subjects, default OwensQ method, logscale false
-powerTOST(alpha=0.1, logscale=false, theta1=-0.1, theta2=0.1, theta0=0, cv=0.14, n=21)
+bePower(alpha=0.1, logscale=false, theta1=-0.1, theta2=0.1, theta0=0, cv=0.14, n=21)
 
 #Bioequivalence power for cv 14%, 21 subjects, shifted method, logscale false
-powerTOST(alpha=0.1, logscale=false, theta1=-0.1, theta2=0.1, theta0=0, cv=0.14, n=21, method=:shifted)
+bePower(alpha=0.1, logscale=false, theta1=-0.1, theta2=0.1, theta0=0, cv=0.14, n=21, method=:shifted)
 
 #Simple notations
-powerTOST(cv=0.4, n=35, design=:d2x4x4)
-powerTOST(cv=0.14, n=21)
+bePower(cv=0.4, n=35, design=:d2x4x4)
+bePower(cv=0.14, n=21)
 
 #Bioequivalence sample size
 beSampleN(alpha=0.05,  theta1=0.8, theta2=1.25, theta0=0.95, cv=0.15, method=:owenq)

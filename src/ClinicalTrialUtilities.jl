@@ -48,34 +48,19 @@ include("SIM.jl")
 include("Info.jl")
 
 #Sample size
-export sampleSize
+export ctSampleN
 export beSampleN
 #Power
 export ctPower
-export powerTOST
+export bePower
 #Other
 export owensQ
 export owensT
-#Structs - should be rewrited or deleted
-export ParamSet
-export sampleSizeParam
+
 
 
 #-------------------------------------------------------------------------------
-    mutable struct ParamSet
-        param::Symbol
-        type::Symbol
-        group::Symbol
-        alpha::Float32
-        beta::Float32
-        sd::Float32
-        a::Float32
-        b::Float32
-        k::Float32
-    end
-    function sampleSizeParam(x::ParamSet)
-        return sampleSize(param=x.param, type=x.type, group=x.group, alpha=x.alpha, beta=x.beta, sd=x.sd, a=x.a, b=x.b, k=x.k)
-    end
+
 #-------------------------------------------------------------------------------
 
 

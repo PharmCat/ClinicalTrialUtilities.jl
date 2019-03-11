@@ -73,12 +73,10 @@ module SIM
     function ctPropPower(p1, n1, p2, n2, diff; alpha=0.05, type=:or, method=:mn, simnum=5, seed=0)
         rng = MersenneTwister(1234)
         if seed == 0  Random.seed!(rng) else Random.seed!(seed) end
-
         BIN1 = Binomial(n1, p1)
         BIN2 = Binomial(n2, p2)
         pow     = 0
         nsim = 10^simnum
-
         for i=1:nsim
             x1 = rand(BIN1)
             x2 = rand(BIN2)
@@ -86,6 +84,9 @@ module SIM
             if ci.lower > diff pow += 1 end
         end
         return pow/nsim
+    end
+
+    function ctPropSampleN()
     end
 
     function ctMeansPower()
