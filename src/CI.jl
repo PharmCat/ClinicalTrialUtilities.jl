@@ -2,7 +2,6 @@
 # Copyright © 2019 Vladimir Arnautov aka PharmCat (mail@pharmcat.net)
 # Package ‘DescTools’
 
-
 module CI
     using Distributions
     using Roots
@@ -78,15 +77,13 @@ module CI
         end
     end #twoProp
 
-    function twoMeans(m1::Real, s1::Real, n1::Real, m2::Real, s2::Real, n2::Real; alpha::Real=0.05, type, method)::ConfInt
+    function twoMeans(m1::Real, s1::Real, n1::Real, m2::Real, s2::Real, n2::Real; alpha::Real=0.05, type=:diff, method=:notdef)::ConfInt
         if type==:diff
             if method == :ev
                 return meanDiffEV(m1::Real, s1::Real, n1::Real, m2::Real, s2::Real, n2::Real, alpha::Real)
             elseif method == :uv
                 return meanDiffUV(m1::Real, s1::Real, n1::Real, m2::Real, s2::Real, n2::Real, alpha::Real)
             end
-        elseif type== :ratio
-            return
         end
     end #twoMeans
 
@@ -115,11 +112,11 @@ module CI
     #Clopper, C. and Pearson, E.S. (1934) The use of confidence or fiducial limits illustrated in the caseof the binomial.Biometrika26, 404–413.
     function propCPCI(x::Int, n::Int, alpha::Float64)::ConfInt
         if x==0
-            ll=0.0
-            ul=1.0-(alpha/2)^(1/n)
+            ll = 0.0
+            ul = 1.0-(alpha/2)^(1/n)
         elseif x==n
-            ul=1.0
-            ll=(alpha/2)^(1/n)
+            ul = 1.0
+            ll = (alpha/2)^(1/n)
         else
             ll = 1/(1+(n-x+1)/(x*quantile(FDist(2*x, 2*(n-x+1)), alpha/2)))
             ul = 1/(1+(n-x) / ((x+1)*quantile(FDist(2*(x+1), 2*(n-x)), 1-alpha/2)))
@@ -249,24 +246,23 @@ module CI
             return ConfInt(exp(estI - z*stde), exp(estI + z*stde), estimate)
     end
 
-
     #------------------------------DIFF-----------------------------------------
     #Wald
     function propDiffWaldCI(x1::Int, n1::Int, x2::Int, n2::Int, alpha::Float64)::ConfInt
-        p1 = x1/n1
-        p2 = x2/n2
+        p1  = x1/n1
+        p2  = x2/n2
         est = p1-p2
-        q = quantile(ZDIST, 1 - alpha/2)
+        q   = quantile(ZDIST, 1 - alpha/2)
         stderr = sqrt(p1*(1-p1)/n1+p2*(1-p2)/n2)
         return ConfInt(est - q*stderr, est + q*stderr, est)
     end
     #Wald CC
     function propDiffWaldCCCI(x1::Int, n1::Int, x2::Int, n2::Int, alpha::Float64)::ConfInt
-        p1 = x1/n1
-        p2 = x2/n2
+        p1  = x1/n1
+        p2  = x2/n2
         est = p1-p2
         cc  = 0.5*(1/n1+1/n2)
-        q = quantile(ZDIST, 1 - alpha/2)
+        q   = quantile(ZDIST, 1 - alpha/2)
         stderr = sqrt(p1*(1-p1)/n1+p2*(1-p2)/n2)
         return ConfInt(est - q*stderr - cc, est + q*stderr + cc, est)
     end
@@ -274,10 +270,10 @@ module CI
     #Newcombes Hybrid (wilson) Score interval for the difference of proportions
     #10
     function propDiffNHSCI(x1::Int, n1::Int, x2::Int, n2::Int, alpha::Float64)::ConfInt
-        p1 = x1/n1
-        p2 = x2/n2
+        p1  = x1/n1
+        p2  = x2/n2
         est = p1-p2
-        q = quantile(ZDIST, 1 - alpha/2)
+        q   = quantile(ZDIST, 1 - alpha/2)
         ci1 = propWilsonCI(x1, n1, alpha)
         ci2 = propWilsonCI(x2, n2, alpha)
         return ConfInt(est-q*sqrt(ci1.lower*(1-ci1.lower)/n1+ci2.upper*(1-ci2.upper)/n2),
@@ -285,10 +281,10 @@ module CI
     end
 
     function propDiffNHSCCCI(x1::Int, n1::Int, x2::Int, n2::Int, alpha::Float64)::ConfInt
-        p1 = x1/n1
-        p2 = x2/n2
+        p1  = x1/n1
+        p2  = x2/n2
         est = p1-p2
-        q = quantile(ZDIST, 1 - alpha/2)
+        q   = quantile(ZDIST, 1 - alpha/2)
         ci1 = propWilsonCCCI(x1, n1, alpha)
         ci2 = propWilsonCCCI(x2, n2, alpha)
         return ConfInt(est-sqrt((p1-ci1.lower)^2 + (ci2.upper-p2)^2),
@@ -348,9 +344,9 @@ module CI
     #Mee
     #Mee RW (1984) Confidence bounds for the difference between two probabilities,Biometrics40:1175-1176
     function propDiffMeeCI(x1::Int, n1::Int, x2::Int, n2::Int, alpha::Float64)
-        p1 = x1/n1
-        p2 = x2/n2
-        est = p1 - p2
+        p1   = x1/n1
+        p2   = x2/n2
+        est  = p1 - p2
         f(x) = fmpval(p1, n1, p2, n2, est, x) - alpha
         return ConfInt(find_zero(f, (-1.0+1e-6, est-1e-6)), find_zero(f, ( est+1e-6, 1.0-1e-6)), est)
 
@@ -377,10 +373,10 @@ module CI
     #FM2 - Faster than propDiffMeeCI
     #Farrington, C. P. and Manning, G. (1990), “Test Statistics and Sample Size Formulae for Comparative Binomial Trials with Null Hypothesis of Non-zero Risk Difference or Non-unity Relative Risk,” Statistics in Medicine, 9, 1447–1454
     function propDiffFMCI(x1::Int, n1::Int, x2::Int, n2::Int, alpha::Float64)::ConfInt
-        p1 = x1/n1
-        p2 = x2/n2
+        p1  = x1/n1
+        p2  = x2/n2
         est = p1 - p2
-        z = quantile(ZDIST, 1 - alpha/2)
+        z   = quantile(ZDIST, 1 - alpha/2)
         f(x) = fmpval2(p1, n1, p2, n2, est, x) - z
         return ConfInt(find_zero(f, (-1.0+1e-6, est-1e-6), atol=1E-5), find_zero(f, (est+1e-6, 1.0-1e-6), atol=1E-5), est)
     end
@@ -413,7 +409,6 @@ module CI
         Z        = quantile(ZDIST, 1-alpha/2)
         wilci1   = propWilsonCI(x1, n1, alpha)
         wilci2   = propWilsonCI(x2, n2, alpha)
-
         lower    = (p1*p2-sqrt((p1*p2)^2 - wilci1.lower*wilci2.upper*(2*p1-wilci1.lower)*(2*p2-wilci2.upper)))/(wilci2.upper*(2*p2 - wilci2.upper))
         upper    = (p1*p2+sqrt((p1*p2)^2 - wilci1.upper*wilci2.lower*(2*p1-wilci1.upper)*(2*p2-wilci2.lower)))/(wilci2.lower*(2*p2 - wilci2.lower))
         return ConfInt(lower, upper, estimate)

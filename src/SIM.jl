@@ -3,6 +3,7 @@
 
 module SIM
     using Distributions, Random
+    import ..ctSampleN
     import ..designProp
     import ..cv2ms
     import ..ZDIST
@@ -12,14 +13,11 @@ module SIM
 
     export bePower, ctBinPower
 
-
     function bePower(;alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.0, n=0, simnum=5, seed=0)
-
         if alpha <= 0.0 || alpha >= 1.0  throw(CTUException(1111,"SIM.bePower: alpha should be > 0 and < 1")) end
         if cv <= 0.0   throw(CTUException(1112,"SIM.bePower: cv should be > 0")) end
         if n <= 0   throw(CTUException(1113,"SIM.bePower: n should be > 0")) end
         if simnum <= 0   throw(CTUException(1114,"SIM.bePower: simnum should be > 0")) end
-
         dffunc, bkni, seq = designProp(:d2x2)                                   #dffunc if generic funtion with 1 arg return df
         df    = dffunc(n)
         sqa   = Array{Float64, 1}(undef, seq)
@@ -29,20 +27,17 @@ module SIM
         end
         sef   = sqrt(sum(1 ./ sqa)*bkni)                                        #for se
         #ms    = log(1+cv^2)
-
         if logscale
             ltheta1 = log(theta1); ltheta2 = log(theta2); diffm = log(theta0); ms = log(1+cv^2);
         else
             ltheta1 = theta1; ltheta2 = theta2; diffm = theta0; ms = cv*cv;
         end
-
         return bePowerSIM(ltheta1, ltheta2, ms, diffm, df, sef, 10^simnum, alpha, seed=seed)
     end
 
     function bePowerSIM(theta1, theta2, ms, mean, df, sef, nsim, alpha; seed=0)
         rng = MersenneTwister(1234)
         if seed == 0  Random.seed!(rng) else Random.seed!(seed) end
-
         CHSQ    = Chisq(df)
         tval    = quantile(TDist(df), 1-alpha)
         se      = sef*sqrt(ms)                                                  #se_diff
@@ -70,7 +65,8 @@ module SIM
     function beReplPowerFSS()
     end
 
-    function ctPropPower(p1, n1, p2, n2, diff; alpha=0.05, type=:or, method=:mn, simnum=5, seed=0)
+    function ctPropPower(p1, n1, p2, n2, diff; alpha=0.05, type=:notdef, method=:notdef, simnum=5, seed=0)
+        if type == :notdef || method == :notdef throw(CTUException(1115,"ctPropPower: type or method not defined.")) end
         rng = MersenneTwister(1234)
         if seed == 0  Random.seed!(rng) else Random.seed!(seed) end
         BIN1 = Binomial(n1, p1)
@@ -86,10 +82,34 @@ module SIM
         return pow/nsim
     end
 
-    function ctPropSampleN()
+    function ctPropSampleN(p1, p2, diff; alpha=0.05, beta=0.2, type=:notdef, method=:notdef, simnum=5, seed=0)
+        if type == :notdef || method == :notdef throw(CTUException(1116,"ctPropSampleN: type or method not defined.")) end
+        st::Int = sn::Int = ceil(ctSampleN(param=:prop, type=:ns, group=:two, alpha=alpha/2, beta=beta, diff=diff, a=p1, b=p2))
+        pow = ctPropPower(p1, sn, p2, sn, diff; alpha=alpha, type=type, method=method, simnum=simnum, seed=seed)
+        conu(x, y) = x < 1 - y
+        cond(x, y) = x > 1 - y
+        if pow < 1-beta
+            inc = 1
+            con = conu
+        else
+            con = cond
+            inc = -1
+        end
+        pown = pow
+        snn  = sn
+        while con(pown, beta)
+            pow = pown
+            sn  = snn
+            snn = snn + inc
+            pown = ctPropPower(p1, snn, p2, snn, diff; alpha=alpha, type=type, method=method, simnum=simnum, seed=seed)
+        end
+        return snn, pown, sn, pow
     end
 
-    function ctMeansPower()
+    function ctMeansPower(;type=:notdef, method=:notdef, simnum=5, seed=0)
+        if type == :notdef || method == :notdef throw(CTUException(1115,"ctPropPower: type or method not defined.")) end
+        rng = MersenneTwister(1234)
+        if seed == 0  Random.seed!(rng) else Random.seed!(seed) end
 
     end
 
