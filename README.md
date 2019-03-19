@@ -17,6 +17,7 @@ Author: Vladimir Arnautov
  - QuadGK
  - SpecialFunctions
  - Random
+ - Roots
 
 ### Install:
 ```

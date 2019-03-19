@@ -1,6 +1,8 @@
 v1.0.7
 
 Add sub-module CI for confidence interval computation as part of simulation functions SIM.
+  - add Roots in dependencies for mee/fm score ci calc
+  - add Random in dependencies for simulations 
   - remove struct with sampleSize wrapper
   - change name sampleSize -> ctSampleN
   - change name powerTOST -> bePower

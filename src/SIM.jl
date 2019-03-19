@@ -42,7 +42,7 @@ module SIM
         tval    = quantile(TDist(df), 1-alpha)
         se      = sef*sqrt(ms)                                                  #se_diff
         pow     = 0
-        for i=1:nsim
+        for i = 1:nsim
             smean   = rand(ZDIST)*se+mean
             sms     = rand(CHSQ)*ms/df
             hw      = tval*sqrt(sms)*sef
@@ -106,11 +106,47 @@ module SIM
         return snn, pown, sn, pow
     end
 
-    function ctMeansPower(;type=:notdef, method=:notdef, simnum=5, seed=0)
-        if type == :notdef || method == :notdef throw(CTUException(1115,"ctPropPower: type or method not defined.")) end
+    function ctMeansPower(m1, s1, n1, m2, s2, n2, diff;alpha=0.05, method=:notdef, simnum=5, seed=0)
+        #if type == :notdef || method == :notdef throw(CTUException(1115,"ctPropPower: type or method not defined.")) end
+        rng = MersenneTwister(1234)
+        if seed == 0  Random.seed!(rng) else Random.seed!(seed) end
+        se1    = sqrt(s1/(n1-1))
+        se2    = sqrt(s2/(n2-1))
+        CHSQ1  = Chisq(n1-1)
+        CHSQ2  = Chisq(n2-1)
+        pow    = 0
+        nsim   = 10^simnum
+        for i=1:nsim
+            sm1    = rand(ZDIST)*se1+m1
+            sm2    = rand(ZDIST)*se2+m2
+            ss1    = rand(CHSQ1)*s1/(n1-1)
+            ss2    = rand(CHSQ2)*s2/(n2-1)
+            ci = twoMeans(sm1, ss1, n1, sm2, ss2, n2; alpha=alpha,  method=:ev)
+            if ci.lower > diff pow += 1 end
+        end
+        return pow/nsim
+    end
+
+    function ctMeansPowerFS(m1, s1, n1, m2, s2, n2, diff;alpha=0.05, method=:notdef, simnum::Real=5, seed=0)
+        #if type == :notdef || method == :notdef throw(CTUException(1115,"ctPropPower: type or method not defined.")) end
         rng = MersenneTwister(1234)
         if seed == 0  Random.seed!(rng) else Random.seed!(seed) end
 
+        sd1    = sqrt(s1)
+        sd2    = sqrt(s2)
+        pow    = 0
+        nsim   = convert(Int, 10^simnum)
+        for i=1:nsim
+            set1   = (rand(ZDIST, n1)*sd1).+m1
+            set2   = (rand(ZDIST, n2)*sd2).+m2
+            #set1   = rand(ZDIST, n1)
+            #set2   = rand(ZDIST, n2)
+            #set1  = (set1*sd1).+m1
+            #set2  = (set2*sd2).+m2
+            ci     = twoMeans(mean(set1), var(set1), n1, mean(set2), var(set2), n2; alpha=alpha,  method=:ev)
+            if ci.lower > diff pow += 1 end
+        end
+        return pow/nsim
     end
 
 
