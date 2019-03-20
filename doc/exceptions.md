@@ -1,5 +1,6 @@
 ## CTUExeption codes
 
+
 100*: owensQo
 
 101*: owensQ
@@ -11,3 +12,7 @@
 104*: beSampleN
 
 111*: SIM.bePower
+
+12**: sampleSize
+
+13**: CI

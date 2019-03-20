@@ -1,11 +1,11 @@
-# Clinical Trial Power and Sample Size calculation
+# Clinical Trial Utilities
 # Author: Vladimir Arnautov aka PharmCat
 # Copyright © 2019 Vladimir Arnautov aka PharmCat (mail@pharmcat.net)
 
 # This script contains some graphics examples
 # Plots package require, not in dependencies
 
-using Plots
+using Distributions, Random, Distributed, Plots
 
 #using ClinicalTrialUtilities
 using Test
@@ -19,4 +19,14 @@ function graphOwensQ()
     end
     plot(m[:,1],m[:,2],linewidth=2,title="owensQ", label=["Function"])
 end
-graphOwensQ()
+#graphOwensQ()
+
+function binsin()
+    a = Array{Float64, 1}(undef,0)
+    b = Binomial(4, 0.2)
+    for i = 1:3000
+        push!(a, cos(rand(b))+2)
+    end
+    return a
+end
+    histogram(binsin())

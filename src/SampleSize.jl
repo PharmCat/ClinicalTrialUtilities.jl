@@ -4,69 +4,69 @@
 
 
 #main sample size function
-function sampleSize(;param="", type="", group="", alpha=0.05, beta=0.2, diff=0, sd=0, a=0, b=0, k=1, out="num")
-    if alpha >= 1 || alpha <= 0 || beta >= 1 || beta <= 0 return false end
-    if (type == "ei" || type == "ns") && diff == 0 return false end
-    if param == "prop" && !(group == "one" || group == "two" || type == "mcnm")  return false end
-    if sd == 0 && param == "mean" return false end
-    if k == 0 return false end
-    if param == "mean"
-        if group == "one"
-            if type == "ea"
+function ctSampleN(;param=:notdef, type=:notdef, group=:notdef, alpha=0.05, beta=0.2, diff=0, sd=0, a=0, b=0, k=1, out=:num)
+    if alpha >= 1 || alpha <= 0 || beta >= 1 || beta <= 0  throw(CTUException(1201,"sampleSize: alpha and beta sould be > 0 and < 1.")) end
+    if (type == :ei || type == :ns) && diff == 0  throw(CTUException(1202,"sampleSize: diff cannot be 0")) end
+    if param == :prop && !(group == :one || group == :two || type == :mcnm)  throw(CTUException(1203,"sampleSize: group should be defined or mcnm type.")) end
+    if sd == 0 && param == :mean throw(CTUException(1204,"sampleSize: sd cannot be 0.")) end
+    if k <= 0 throw(CTUException(1205,"sampleSize: k cannot be <= 0")) end
+    if param == :mean
+        if group == :one
+            if type == :ea
                 n = oneSampleMeanEquality(a, b, sd, alpha=alpha, beta=beta)
-            elseif type == "ei"
+            elseif type == :ei
                 n = oneSampleMeanEquivalence(a, b, sd, diff, alpha=alpha, beta=beta)
-            elseif type == "ns"
+            elseif type == :ns
                 n = oneSampleMeanNS(a, b, sd, diff, alpha=alpha, beta=beta)
             else return false end
-        elseif group == "two"
-            if type == "ea"
+        elseif group == :two
+            if type == :ea
                 n = twoSampleMeanEquality(a, b, sd, alpha=alpha, beta=beta, k=k)
-            elseif type == "ei"
+            elseif type == :ei
                 n = twoSampleMeanEquivalence(a, b, sd, diff, alpha=alpha, beta=beta, k=k)
-            elseif type == "ns"
+            elseif type == :ns
                 n = twoSampleMeanNS(a, b, sd, diff, alpha=alpha, beta=beta, k=k)
             else return false end
         else return false end
-    elseif param == "prop"
+    elseif param == :prop
         if 1 < a || a < 0 || 1 < b || b < 0 return false end
-        if type == "mcnm"
+        if type == :mcnm
             n = mcnm(a, b; alpha=alpha, beta=beta)
         else
-            if group == "one"
-                if type == "ea"
+            if group == :one
+                if type == :ea
                     n = oneProportionEquality(a, b; alpha=alpha, beta=beta)
-                elseif type == "ei"
+                elseif type == :ei
                     n = oneProportionEquivalence(a, b, diff; alpha=alpha, beta=beta)
-                elseif type == "ns"
+                elseif type == :ns
                     n = oneProportionNS(a, b, diff; alpha=alpha, beta=beta)
                 else return false end
-            elseif group == "two"
-                if type == "ea"
+            elseif group == :two
+                if type == :ea
                     n = twoProportionEquality(a, b; alpha=alpha, beta=beta, k=k)
-                elseif type == "ei"
+                elseif type == :ei
                     n = twoProportionEquivalence(a, b, diff; alpha=alpha, beta=beta, k=k)
-                elseif type == "ns"
+                elseif type == :ns
                     n = twoProportionNS(a, b, diff; alpha=alpha, beta=beta, k=k)
                 else return false end
             else return false end
         end
-    elseif param == "or"
-        if type == "ea"
+    elseif param == :or
+        if type == :ea
             n = orEquality(a, b; alpha=alpha, beta=beta, k=k)
-        elseif type == "ei"
+        elseif type == :ei
             n = orEquivalence(a, b, diff; alpha=alpha, beta=beta, k=k, logdiff=true)
-        elseif type == "ns"
+        elseif type == :ns
             n = orNS(a, b, diff; alpha=alpha, beta=beta, k=k, logdiff=true)
         else return false end
     else return false end
 
-    if out == "num" return n
+    if out == :num return n
     else
-        params = "" #string parameter type
-        if param == "mean" params = "Mean" elseif param== "prop" params = "Proportion" elseif param == "or" params = "Odd Ration" end
-        if group == "one" groups = "One" elseif  group == "two" groups = "Two" else groups = "NA" end
-        if type == "ea" hyps = "Equality" elseif type == "ei" hyps = "Equivalence" elseif type == "ns" hyps = "Non-Infriority/Superiority" elseif type == "mcnm" hyps = "McNemar's Equality test" end
+        let params::String end #string parameter type
+        if param == :mean params = "Mean" elseif param== :prop params = "Proportion" elseif param == :or params = "Odd Ration" end
+        if group == :one groups = "One" elseif  group == :two groups = "Two" else groups = "NA" end
+        if type == :ea hyps = "Equality" elseif type == :ei hyps = "Equivalence" elseif type == :ns hyps = "Non-Infriority/Superiority" elseif type == :mcnm hyps = "McNemar's Equality test" end
         output  = "----------------------------------------\n"
         output *= "         Sample Size Estimation        \n"
         output *= "----------------------------------------\n"
@@ -75,23 +75,23 @@ function sampleSize(;param="", type="", group="", alpha=0.05, beta=0.2, diff=0, 
         output *= "  Hypothesis: "*hyps*"\n"
         output *= "----------------------------------------\n"
         output *= "  Alpha: "*string(alpha)*" Beta: "*string(beta)*"\n"
-        if group == "two" output *= "  Constant k: "*string(k)*"\n" end
+        if group == :two output *= "  Constant k: "*string(k)*"\n" end
         output *= "----------------------------------------\n"
-        if param == "mean"
+        if param == :mean
             output *= "  SD: "*string(sd)*"\n"
         end
-        if group == "one"
+        if group == :one
             output *= "  Null Value: "*string(a)*" "
             output *= "Test Value: "*string(b)*"\n"
         else
             output *= "  Group A Value: "*string(a)*" "
             output *= "Group B Value: "*string(b)*"\n"
         end
-        if (type == "ei" || type == "ns")
+        if (type == :ei || type == :ns)
             output *= "  Difference: "*string(diff)*"\n"
         end
         output *= "----------------------------------------\n"
-        if group == "one"
+        if group == :one
             output *= "  Estimate: "*string(ceil(n))*"\n"
         else
             output *= "  Group A: "*string(ceil(n*k))*"  "
@@ -101,12 +101,12 @@ function sampleSize(;param="", type="", group="", alpha=0.05, beta=0.2, diff=0, 
         #output *= "Estimate group A: "*string(ceil(n))*"\n"
         #output *= "Total: "*string(ceil(n))*"\n"
         output *= "----------------------------------------\n"
-        if out == "str"
+        if out == :str
             return output
-        elseif out == "print"
+        elseif out == :print
             print(output)
             return
-        elseif out == "vstr"
+        elseif out == :vstr
             return n, output
         end
     end
@@ -114,70 +114,70 @@ function sampleSize(;param="", type="", group="", alpha=0.05, beta=0.2, diff=0, 
 end #sampleSize
 
 #clinical trial power main function
-function ctPower(;param="", type="", group="", alpha=0.05, diff=0, sd=0, a=0, b=0, n=0, k=1,  out="num")
+function ctPower(;param=:notdef, type=:notdef, group=:notdef, alpha=0.05, logdiff=true, diff=0, sd=0, a=0, b=0, n=0, k=1,  out=:num)
     if alpha >= 1 || alpha <= 0  return false end
-    if (type == "ei" || type == "ns") && diff == 0 return false end
-    if param == "prop" && !(group == "one" || group == "two" || type == "mcnm")  return false end
-    if sd == 0 && param == "mean" return false end
+    #if (type == :ei || type == :ns) && diff == 0 return false end
+    if param == :prop && !(group == :one || group == :two || type == :mcnm)  return false end
+    if sd == 0 && param == :mean return false end
     if k == 0 return false end
     if n == 0 return false end
-    if param == "mean"
-        if group == "one"
-            if type == "ea"
+    if param == :mean
+        if group == :one
+            if type == :ea
                 pow =  oneSampleMeanEqualityP(a, b, sd, n, alpha=alpha)
-            elseif type == "ei"
+            elseif type == :ei
                 pow =  oneSampleMeanEquivalenceP(a, b, sd, diff, n, alpha=alpha)
-            elseif type == "ns"
+            elseif type == :ns
                 pow =  oneSampleMeanNSP(a, b, sd, diff, n, alpha=alpha)
             else return false end
-        elseif group == "two"
-            if type == "ea"
+        elseif group == :two
+            if type == :ea
                 pow =  twoSampleMeanEqualityP(a, b, sd, n, alpha=alpha, k=k)
-            elseif type == "ei"
+            elseif type == :ei
                 pow =  twoSampleMeanEquivalenceP(a, b, sd, diff, n, alpha=alpha, k=k)
-            elseif type == "ns"
+            elseif type == :ns
                 pow =  twoSampleMeanNSP(a, b, sd, diff, n, alpha=alpha, k=k)
             else return false end
         else return false end
-    elseif param == "prop"
+    elseif param == :prop
         if 1 < a || a < 0 || 1 < b || b < 0 return false end
-        if type == "mcnm"
+        if type == :mcnm
             pow =  mcnmP(a, b, n; alpha=alpha)
         else
-            if group == "one"
-                if type == "ea"
+            if group == :one
+                if type == :ea
                     pow =  oneProportionEqualityP(a, b, n; alpha=alpha)
-                elseif type == "ei"
+                elseif type == :ei
                     pow =  oneProportionEquivalenceP(a, b, diff, n; alpha=alpha)
-                elseif type == "ns"
+                elseif type == :ns
                     pow =  oneProportionNSP(a, b, diff, n; alpha=alpha)
                 else return false end
-            elseif group == "two"
-                if type == "ea"
+            elseif group == :two
+                if type == :ea
                     pow =  twoProportionEqualityP(a, b, n; alpha=alpha, k=k)
-                elseif type == "ei"
+                elseif type == :ei
                     pow =  twoProportionEquivalenceP(a, b, diff, n; alpha=alpha, k=k)
-                elseif type == "ns"
+                elseif type == :ns
                     pow =  twoProportionNSP(a, b, diff, n; alpha=alpha, k=k)
                 else return false end
             else return false end
         end
-    elseif param == "or"
-        if type == "ea"
+    elseif param == :or
+        if type == :ea
             pow =  orEqualityP(a, b, n; alpha=alpha, k=k)
-        elseif type == "ei"
-            pow =  orEquivalenceP(a, b, diff, n; alpha=alpha, k=k, logdiff=true)
-        elseif type == "ns"
-            pow = orNSP(a, b, diff, n; alpha=alpha, k=k, logdiff=true)
+        elseif type == :ei
+            pow =  orEquivalenceP(a, b, diff, n; alpha=alpha, k=k, logdiff=logdiff)
+        elseif type == :ns
+            pow = orNSP(a, b, diff, n; alpha=alpha, k=k, logdiff=logdiff)
         else return false end
     else return false end
 
-    if out == "num" return pow
+    if out == :num return pow
     else
-        params = "" #string parameter type
-        if param == "mean" params = "Mean" elseif param== "prop" params = "Proportion" elseif param == "or" params = "Odd Ration" end
-        if group == "one" groups = "One" elseif  group == "two" groups = "Two" else groups = "NA" end
-        if type == "ea" hyps = "Equality" elseif type == "ei" hyps = "Equivalence" elseif type == "ns" hyps = "Non-Infriority/Superiority" elseif type == "mcnm" hyps = "McNemar's Equality test" end
+        let params::String end #string parameter type
+        if param == :mean params = "Mean" elseif param== :prop params = "Proportion" elseif param == :or params = "Odd Ration" end
+        if group == :one groups = "One" elseif  group == :two groups = "Two" else groups = "NA" end
+        if type == :ea hyps = "Equality" elseif type == :ei hyps = "Equivalence" elseif type == :ns hyps = "Non-Infriority/Superiority" elseif type == :mcnm hyps = "McNemar's Equality test" end
         output  = "----------------------------------------\n"
         output *= "            Power Estimation            \n"
         output *= "----------------------------------------\n"
@@ -186,19 +186,19 @@ function ctPower(;param="", type="", group="", alpha=0.05, diff=0, sd=0, a=0, b=
         output *= "  Hypothesis: "*hyps*"\n"
         output *= "----------------------------------------\n"
         output *= "  Alpha: "*string(alpha)*" N: "*string(n)*"\n"
-        if group == "two" output *= "  Constant k: "*string(k)*"\n" end
+        if group == :two output *= "  Constant k: "*string(k)*"\n" end
         output *= "----------------------------------------\n"
-        if param == "mean"
+        if param == :mean
             output *= "  SD: "*string(sd)*"\n"
         end
-        if group == "one"
+        if group == :one
             output *= "  Null Value: "*string(a)*" "
             output *= "Test Value: "*string(b)*"\n"
         else
             output *= "  Group A Value: "*string(a)*" "
             output *= "Group B Value: "*string(b)*"\n"
         end
-        if (type == "ei" || type == "ns")
+        if (type == :ei || type == :ns)
             output *= "  Difference: "*string(diff)*"\n"
         end
         output *= "----------------------------------------\n"
@@ -206,25 +206,21 @@ function ctPower(;param="", type="", group="", alpha=0.05, diff=0, sd=0, a=0, b=
         #output *= "Estimate group A: "*string(ceil(n))*"\n"
         #output *= "Total: "*string(ceil(n))*"\n"
         output *= "----------------------------------------\n"
-        if out == "str"
+        if out == :str
             return output
-        elseif out == "print"
+        elseif out == :print
             print(output)
             return
-        elseif out == "vstr"
+        elseif out == :vstr
             return pow, output
         end
     end
-    return pow
 end #ctPower
 #-------------------------------------------------------------------------------
-function beSampleN(;theta0=0.95, theta1=0.8, theta2=1.25, cv=0.0, alpha=0.05, beta=0.2, logscale::Bool=true, design::String="2x2", method::String="owenq",  out="num")
-    theta0 = convert(Float64, theta0)
-    theta1 = convert(Float64, theta1)
-    theta2 = convert(Float64, theta2)
-    cv     = convert(Float64, cv)
-    alpha  = convert(Float64, alpha)
-    beta   = convert(Float64, beta)
+function beSampleN(;theta0=0.95, theta1=0.8, theta2=1.25, cv=0.0, alpha=0.05, beta=0.2, logscale::Bool=true, design=:d2x2, method=:owenq,  out=:num)
+
+    theta0 = convert(Float64, theta0); theta1 = convert(Float64, theta1); theta2 = convert(Float64, theta2); cv = convert(Float64, cv); alpha  = convert(Float64, alpha); beta = convert(Float64, beta)
+
     if cv <= 0 throw(CTUException(1041,"beSampleN: cv can not be <= 0")) end
     if theta1 >= theta2  throw(CTUException(1042,"beSampleN: theta1 should be < theta2")) end
     if alpha >= 1 || alpha <= 0 || beta >= 1 || beta <= 0 throw(CTUException(1043,"beSampleN: alpha and beta shold be > 0 and < 1")) end
@@ -281,7 +277,7 @@ function beSampleN(;theta0=0.95, theta1=0.8, theta2=1.25, cv=0.0, alpha=0.05, be
         estpower = pow
         estn     = n0
     end
-    if out == "num" return estn, estpower
+    if out == :num return estn, estpower
     else
         output  = "----------------------------------------\n"
         output *= "     (Bio)equivalence sample size       \n"
@@ -302,11 +298,11 @@ function beSampleN(;theta0=0.95, theta1=0.8, theta2=1.25, cv=0.0, alpha=0.05, be
         output *= "  Power: "*string(estpower)*"\n"
         output *= "----------------------------------------\n"
     end
-    if out == "str"
+    if out == :str
         return output
-    elseif out == "print"
+    elseif out == :print
         println(output)
-    elseif out == "vstr"
+    elseif out == :vstr
         return estn, estpower, output
     end
 end

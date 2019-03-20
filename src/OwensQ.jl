@@ -81,7 +81,7 @@ function owensQo(nu,t::Float64,delta::Float64,b::Float64;a::Float64=0.0)::Float6
         if i>2 M[i] = ((i-2)/(i-1))*B*(av[i-1]*delta*A*M[i-1]+M[i-2]) - L[i-2] end
     end
     #pass
-    sumt::Float64 = 0
+    sumt::Float64 = 0;
     if nu%2 > 0
         if upr>=1
             for i = 1:2:upr
