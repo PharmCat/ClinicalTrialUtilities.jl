@@ -11,7 +11,7 @@ module SIM
     import ..CI.twoProp
     import ..CI.twoMeans
 
-    export bePower, ctBinPower
+    export bePower, ctPropPower, ctPropSampleN, ctMeansPower, ctMeansPowerFS
 
     function bePower(;alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.0, n=0, simnum=5, seed=0)
         if alpha <= 0.0 || alpha >= 1.0  throw(CTUException(1111,"SIM.bePower: alpha should be > 0 and < 1")) end
@@ -129,6 +129,7 @@ module SIM
 
     function ctMeansPowerFS(m1, s1, n1, m2, s2, n2, diff;alpha=0.05, method=:notdef, simnum::Real=5, seed=0)
         #if type == :notdef || method == :notdef throw(CTUException(1115,"ctPropPower: type or method not defined.")) end
+        if method == :notdef throw(CTUException(1117,"ctMeansPowerFS: method not defined.")) end
         rng = MersenneTwister(1234)
         if seed == 0  Random.seed!(rng) else Random.seed!(seed) end
 
@@ -139,11 +140,7 @@ module SIM
         for i=1:nsim
             set1   = (rand(ZDIST, n1)*sd1).+m1
             set2   = (rand(ZDIST, n2)*sd2).+m2
-            #set1   = rand(ZDIST, n1)
-            #set2   = rand(ZDIST, n2)
-            #set1  = (set1*sd1).+m1
-            #set2  = (set2*sd2).+m2
-            ci     = twoMeans(mean(set1), var(set1), n1, mean(set2), var(set2), n2; alpha=alpha,  method=:ev)
+            ci     = twoMeans(mean(set1), var(set1), n1, mean(set2), var(set2), n2; alpha=alpha,  method=method)
             if ci.lower > diff pow += 1 end
         end
         return pow/nsim

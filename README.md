@@ -1,5 +1,5 @@
 # ClinicalTrialUtilities
- Clinical Trial Power and Sample Size calculation
+ Clinical Trial Power and Sample Size calculation and simulations. Also can be used for confidence intervals estimation.
 
 Version:0.1.7
 

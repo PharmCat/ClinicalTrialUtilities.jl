@@ -13,7 +13,7 @@ println(" ---------------------------------- ")
 println(" ---------------------------------- ")
 
 
-@testset "ctSampleN Test       " begin
+@testset "ctSampleN Test        " begin
     @test ceil(ClinicalTrialUtilities.ctSampleN(param=:mean, type=:ea, group=:one, alpha=0.05, beta=0.2, sd=1, a=1.5, b=2, k=1)) == 32
     @test ceil(ClinicalTrialUtilities.ctSampleN(param=:mean, type=:ei, group=:one, alpha=0.05, beta=0.2, sd=0.1, diff=0.05, a=2, b=2, k=1)) == 35
     @test ceil(ClinicalTrialUtilities.ctSampleN(param=:mean, type=:ns, group=:one, alpha=0.05, beta=0.2, sd=1, diff=-0.5, a=1.5, b=2, k=1)) == 7
@@ -39,7 +39,7 @@ println(" ---------------------------------- ")
     @test str1 == str2
 end
 
-@testset "ctSampleNParam Errors" begin
+@testset "ctSampleNParam Errors " begin
     en = 0
     try
         ClinicalTrialUtilities.ctSampleN(param=:mean, type=:ea, group=:one, alpha=2, beta=0.2, diff=1, sd=1, a=1, b=1, k=1)
@@ -89,7 +89,7 @@ end
     @test !ClinicalTrialUtilities.ctSampleN(param=:or, type=:eea, group=:oone,  diff=1, a=0.5, b=0.5, k=1)
 end
 
-@testset "ctSampleN Atomic     " begin
+@testset "ctSampleN Atomic      " begin
     @test ceil(ClinicalTrialUtilities.ClinicalTrialUtilities.mcnm(0.45, 0.05)) == 23
 end
 
@@ -464,6 +464,16 @@ println(" ---------------------------------- ")
     ci = ClinicalTrialUtilities.CI.twoProp(56, 70, 48, 80; alpha=0.05, type=:diff, method=:nhscc)
     @test ci.lower    ≈  0.0428 atol=1E-4
     @test ci.upper    ≈  0.3422 atol=1E-4
+
+    #CI Test for random sample
+    m1  = rand(Normal(), 100)
+    m2  = rand(Normal(), 100)
+    ci1 = ClinicalTrialUtilities.CI.meanDiffUV(m1, m2, 0.05)
+    ci2 = ClinicalTrialUtilities.CI.meanDiffUV(mean(m1), var(m1), length(m1), mean(m2), var(m2), length(m2), 0.05)
+    @test ci1 == ci2
+    ci1 = ClinicalTrialUtilities.CI.meanDiffEV(m1, m2, 0.05)
+    ci2 = ClinicalTrialUtilities.CI.meanDiffEV(mean(m1), var(m1), length(m1), mean(m2), var(m2), length(m2), 0.05)
+    @test ci1 == ci2
 end
 
 println(" ---------------------------------- ")
@@ -477,12 +487,14 @@ println(" ---------------------------------- ")
     #@test ClinicalTrialUtilities.orNSP(0.5, 0.4, 0.8, 100; alpha=0.05, k=1, logdiff=false) ≈ 0.710550974559294
     @test ClinicalTrialUtilities.SIM.ctPropPower(0.5, 100, 0.4, 100, 0.8; alpha=0.1, type=:or, method=:mn, seed=123, simnum=4) ≈ 0.6988
 
-    @test ClinicalTrialUtilities.SIM.ctMeansPowerFS(1.0, 1.0, 10, 1.0, 1.0, 10, -0.3; alpha=0.1,  seed=1235, simnum=4) ≈ 0.1584
+    @test ClinicalTrialUtilities.SIM.ctMeansPowerFS(1.0, 1.0, 10, 1.0, 1.0, 10, -0.3; alpha=0.1, method=:ev,  seed=1235, simnum=4) ≈ 0.1584
     @test ClinicalTrialUtilities.SIM.ctMeansPower(1.0, 1.0, 10, 1.0, 1.0, 10, -0.3; alpha=0.1,  seed=1235, simnum=4) ≈ 0.1662
 
     T = ClinicalTrialUtilities.SIM.ctPropSampleN(0.6, 0.6,-0.15; alpha=0.1, type=:diff, method=:nhs, seed=1234, simnum=4)
     @test T[1] == 129
     @test T[2] ≈ 0.795
+
+
 end
 
 println(" ---------------------------------- ")

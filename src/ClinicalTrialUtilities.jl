@@ -57,6 +57,9 @@ export bePower
 export owensQ
 export owensT
 
+export SIM
+export CI
+
 
 
 #-------------------------------------------------------------------------------
