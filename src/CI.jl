@@ -449,4 +449,13 @@ module CI
     function meanDiffUV(a1::AbstractVector{T}, a2::AbstractVector{S}, alpha::Real)::ConfInt where {T<:Real,S<:Real}
         return meanDiffUV(mean(a1), var(a1), length(a1), mean(a2), var(a2), length(a2), alpha)
     end
+
+    #Not validated
+    function bartlettsTest(s1::Real, n1::Real, s2::Real, n2::Real)
+        n = n1 + n2
+        k = 2
+        s = ((n1 - 1)*s1 + (n2 - 1)*s2)/(n - k)
+        x = ((n-k)*log(s) - ((n1-1)*log(s1)+(n2-1)*log(s2)))/(1+(1/(n1-1) + 1/(n2-1) - 1/(n-k))/3/(k-1))
+        return 1-cdf(Chisq(k-1),x), x
+    end
 end #end module CI
