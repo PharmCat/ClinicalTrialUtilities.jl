@@ -2,6 +2,7 @@
 v0.1.8
 
   - bugfix (meanNormCI)
+  - wald ci include 
   - add test
   - move ConfInt to main module
 

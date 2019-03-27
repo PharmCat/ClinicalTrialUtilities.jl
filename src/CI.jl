@@ -60,6 +60,10 @@ module CI
                 return propDiffMeeCI(x1, n1, x2, n2, alpha)
             elseif method ==:mee2
                 return propDiffFMCI(x1, n1, x2, n2, alpha)
+            elseif method ==:wald
+                return propDiffWaldCI(x1, n1, x2, n2, alpha)
+            elseif method ==:waldcc
+                return propDiffWaldCCCI(x1, n1, x2, n2, alpha)
             end
         elseif type==:rr
             if method ==:cli

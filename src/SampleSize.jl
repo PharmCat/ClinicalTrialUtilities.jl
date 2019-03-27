@@ -110,7 +110,7 @@ function ctSampleN(;param=:notdef, type=:notdef, group=:notdef, alpha=0.05, beta
             return n, output
         end
     end
-    return n
+
 end #sampleSize
 
 #clinical trial power main function
@@ -170,7 +170,7 @@ function ctPower(;param=:notdef, type=:notdef, group=:notdef, alpha=0.05, logdif
         elseif type == :ns
             pow = orNSP(a, b, diff, n; alpha=alpha, k=k, logdiff=logdiff)
         else return false end
-    else return false end
+    end
 
     if out == :num return pow
     else
@@ -210,7 +210,6 @@ function ctPower(;param=:notdef, type=:notdef, group=:notdef, alpha=0.05, logdif
             return output
         elseif out == :print
             print(output)
-            return
         elseif out == :vstr
             return pow, output
         end

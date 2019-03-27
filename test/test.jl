@@ -117,6 +117,12 @@ end
 
     pow, str = ClinicalTrialUtilities.ctPower(param=:prop, type=:ea, group=:one, a=0.3, b=0.5, n=50, alpha=0.05, out=:vstr)
     @test pow ≈ 0.8074304194325561
+
+    pow, str = ClinicalTrialUtilities.ctPower(param=:mean, type=:ea, group=:two, a=5, b=10, sd=10, n=63, alpha=0.05, out=:vstr)
+    @test pow ≈ 0.8013023941055788
+    str2 = ClinicalTrialUtilities.ctPower(param=:mean, type=:ea, group=:two, a=5, b=10, sd=10, n=63, alpha=0.05, out=:str)
+    @test str == str2
+
     @test ClinicalTrialUtilities.ctPower(param=:or, type=:ns, a=0.4, b=0.25, diff=0.2, n=242, alpha=0.05, out=:num) ≈ 0.8007200876001626
 
 end
@@ -341,6 +347,11 @@ println(" ---------------------------------- ")
     @test ci.upper    ≈ 0.482539305750806 atol=1E-15
     @test ci.estimate ≈ 0.38
 
+    ci = ClinicalTrialUtilities.CI.oneProp(100, 100, alpha=0.05, method=:cp)
+    @test ci.lower    ≈ 0.9637833073548235 atol=1E-15
+    @test ci.upper    ≈ 1.0 atol=1E-15
+    @test ci.estimate ≈ 1.0
+
     ci = ClinicalTrialUtilities.CI.oneProp(38, 100, alpha=0.05, method=:soc)
     @test ci.lower    ≈ 0.289191701883923 atol=1E-15
     @test ci.upper    ≈ 0.477559239340346 atol=1E-15
@@ -362,6 +373,21 @@ println(" ---------------------------------- ")
     @test ci.lower    ≈ 0.2951669 atol=1E-7
     @test ci.upper    ≈ 0.9722965 atol=1E-7
     @test ci.estimate ≈ 0.5357142 atol=1E-7
+
+    ci = ClinicalTrialUtilities.CI.twoProp(100, 100, 90, 90; alpha=0.05, type=:or, method=:mn)
+    @test ci.lower    ≈ 0.0
+    @test ci.upper    ≈ Inf
+    #@test ci.estimate == NaN
+
+    ci = ClinicalTrialUtilities.CI.twoProp(0, 100, 90, 90; alpha=0.05, type=:or, method=:mn)
+    @test ci.lower    ≈ 0.0
+    @test ci.upper    ≈ 0.0004144169697670039  atol=1E-7
+    @test ci.estimate ≈ 0.0
+
+    ci = ClinicalTrialUtilities.CI.twoProp(100, 100, 0, 90; alpha=0.05, type=:or, method=:mn)
+    @test ci.lower    ≈ 2411.6137253788347 atol=1E-7
+    @test ci.upper    ≈ Inf
+    @test ci.estimate ≈ Inf
 
     ci = ClinicalTrialUtilities.CI.twoProp(30, 100, 40, 90; alpha=0.05, type=:or, method=:awoolf)
     @test ci.lower    ≈ 0.2982066 atol=1E-7
@@ -391,6 +417,26 @@ println(" ---------------------------------- ")
     @test ci.lower    ≈ -0.278129080 atol=1E-9
     @test ci.upper    ≈ -0.006708301 atol=1E-9
     @test ci.estimate ≈ -0.1444444   atol=1E-7
+
+    ci = ClinicalTrialUtilities.CI.twoProp(30, 100, 40, 90; alpha=0.05, type=:diff, method=:mee)
+    @test ci.lower    ≈ -0.27778778455 atol=1E-9
+    @test ci.upper    ≈ -0.00707120778 atol=1E-9
+    @test ci.estimate ≈ -0.14444444444 atol=1E-7
+
+    ci = ClinicalTrialUtilities.CI.twoProp(30, 100, 40, 90; alpha=0.05, type=:diff, method=:mee2)
+    @test ci.lower    ≈ -0.27778778455 atol=1E-9
+    @test ci.upper    ≈ -0.00707120778 atol=1E-9
+    @test ci.estimate ≈ -0.14444444444 atol=1E-7
+
+    ci = ClinicalTrialUtilities.CI.twoProp(30, 100, 40, 90; alpha=0.05, type=:diff, method=:wald)
+    @test ci.lower    ≈ -0.28084842238 atol=1E-9
+    @test ci.upper    ≈ -0.00804046650 atol=1E-9
+    @test ci.estimate ≈ -0.14444444444 atol=1E-7
+
+    ci = ClinicalTrialUtilities.CI.twoProp(30, 100, 40, 90; alpha=0.05, type=:diff, method=:waldcc)
+    @test ci.lower    ≈ -0.29140397794 atol=1E-9
+    @test ci.upper    ≈  0.00251508905 atol=1E-9
+    @test ci.estimate ≈ -0.14444444444 atol=1E-7
 
     ci = ClinicalTrialUtilities.CI.twoProp(30, 100, 40, 90; alpha=0.05, type=:rr, method=:cli)
     @test ci.lower    ≈ 0.4663950 atol=1E-7
