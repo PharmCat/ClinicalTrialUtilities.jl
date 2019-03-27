@@ -1,9 +1,7 @@
 # ClinicalTrialUtilities
  Clinical Trial Power and Sample Size calculation and simulations. Also can be used for confidence intervals estimation.
 
-Version:0.1.7
-
-Author: Vladimir Arnautov
+Version:0.1.8
 
 2019 &copy; Vladimir Arnautov
 

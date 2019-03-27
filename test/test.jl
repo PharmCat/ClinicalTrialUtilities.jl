@@ -1,5 +1,6 @@
 # Clinical Trial Utilities
 # Copyright © 2019 Vladimir Arnautov aka PharmCat (mail@pharmcat.net)
+using Distributions, Random
 
 @testset "Info:                 " begin
     ClinicalTrialUtilities.info()
@@ -268,6 +269,13 @@ end
         if isa(e, ClinicalTrialUtilities.CTUException) en = e.n end
     end
     @test en ≈ 1000
+    en = 0
+    try
+        ClinicalTrialUtilities.CI.oneProp(38, 100, alpha=0.05, method=:err)
+    catch e
+        if isa(e, ClinicalTrialUtilities.CTUException) en = e.n end
+    end
+    @test en ≈ 1301
 end
 
 println(" ---------------------------------- ")
@@ -414,6 +422,13 @@ println(" ---------------------------------- ")
     @test ci.lower    ≈ -5.6050900 atol=1E-7
     @test ci.upper    ≈ -1.3949099 atol=1E-7
     @test ci.estimate ≈ -3.5     atol=1E-4
+
+    ci = ClinicalTrialUtilities.CI.oneMean(30,10,30,0.05; method=:norm)
+    @test ci.lower    ≈ 28.86841 atol=1E-5
+    @test ci.upper    ≈ 31.13159 atol=1E-5
+    ci = ClinicalTrialUtilities.CI.oneMean(30,10,30,0.05; method=:tdist)
+    @test ci.lower    ≈ 28.81919 atol=1E-5
+    @test ci.upper    ≈ 31.18081 atol=1E-5
 
     #Source Validation
     #---------------------------------------------------------------------------
