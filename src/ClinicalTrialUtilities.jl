@@ -12,7 +12,7 @@
 # D.B. Owen "Tables for computing bivariate normal Probabilities" The Annals of Mathematical Statistics, Vol. 27 (4) Dec. 1956, pp. 1075-1090
 # matlab code  by J. Burkhardt license GNU LGPL
 # If you want to check and get R code you can find some here: http://powerandsamplesize.com/Calculators/
-#__precompile__(true)
+__precompile__(true)
 module ClinicalTrialUtilities
 using Distributions
 #using Rmath #should be rewrited
@@ -28,6 +28,7 @@ end
 
 Base.showerror(io::IO, e::CTUException) = print("CTU Exception code: ", e.n, " Message: ", e.var);
 const ZDIST = Normal()
+const VERSION = "0.1.8"
 #Exceptions
 
 struct ConfInt
