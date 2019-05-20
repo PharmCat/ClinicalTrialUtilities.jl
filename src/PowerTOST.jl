@@ -173,6 +173,12 @@ function designProp(type::Symbol)
         return function f5(n) 3*n - 4 end, 0.0625, 4
     elseif type == :d2x3x3
         return function f6(n) 2*n - 3 end, 1/6, 3
+    elseif type == :d2x4x2
+        return function f7(n) n - 2 end, 0.5, 4
+    elseif type == :d3x3
+        return function f8(n) 2*n - 4 end, 2/9, 3
+    elseif type == :d3x6x3
+        return function f9(n) 2*n - 4 end, 1/18, 6
     else throw(CTUException(1031,"designProp: design not known!")) end
 end
 
