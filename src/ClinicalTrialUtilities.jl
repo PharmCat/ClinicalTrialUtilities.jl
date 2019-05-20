@@ -60,6 +60,8 @@ export beSampleN
 #Power
 export ctPower
 export bePower
+#Utils
+export ci2cv
 #Other
 export owensQ
 export owensT

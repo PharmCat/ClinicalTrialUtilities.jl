@@ -6,6 +6,20 @@
 # se_diff = se = sd * sqrt((1/N1 + ... + 1/Nn)*bkni) = sqrt(ms*(1/N1 + ... + 1/Nn)*bkni)
 # CI bounds = Diff +- t(df, alpha)*se
 
+#bePower
+#powerTOSTint
+#powerTOSTOwenQ
+#approxPowerTOST
+#power1TOST
+#approx2PowerTOST
+#cv2sd
+#cv2ms
+#ms2cv
+#sd2cv
+#designProp
+#ci2cv
+
+
 function bePower(;alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.0, n=0, design=:d2x2, method=:owenq,  out=:num)
     if n < 2 throw(CTUException(1021,"powerTOST: n can not be < 2")) end
     if cv == 0.0 throw(CTUException(1022,"powerTOST: cv can not be equal to 0"))  end
@@ -130,11 +144,11 @@ end #approx2PowerTOST
 
 #CV2se
 @inline function cv2sd(cv::Float64)::Float64
-    return sqrt(log(1+cv^2))
+    return sqrt(cv2ms(cv))
 end
 
 @inline function cv2ms(cv::Float64)::Float64
-    return log(1+cv^2)
+     return log(1+cv^2)
 end
 @inline function ms2cv(ms::Float64)::Float64
     return sqrt(exp(ms)-1)
@@ -160,4 +174,20 @@ function designProp(type::Symbol)
     elseif type == :d2x3x3
         return function f6(n) 2*n - 3 end, 1/6, 3
     else throw(CTUException(1031,"designProp: design not known!")) end
+end
+
+function ci2cv(;alpha = 0.05, theta1 = 0.8, theta2 = 1.25, n, design=:d2x2, mso=false, cvms=false)
+    dffunc, bkni, seq = designProp(design)
+    df    = dffunc(n)
+    if df < 1 throw(CTUException(1051,"ci2cv: df < 1")) end
+    sqa   = Array{Float64, 1}(undef, seq)
+    sqa  .= n÷seq
+    for i = 1:n%seq
+        sqa[i] += 1
+    end
+    sef = sum(1 ./ sqa)*bkni
+    ms = ((log(theta2/theta1)/2/quantile(TDist(df), 1-alpha))^2)/sef
+    if cvms return ms2cv(ms), ms end
+    if mso return ms end
+    return ms2cv(ms)
 end
