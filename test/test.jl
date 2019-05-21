@@ -1,7 +1,8 @@
 # Clinical Trial Utilities
 # Copyright © 2019 Vladimir Arnautov aka PharmCat (mail@pharmcat.net)
+using Distributions, Random
 
-@testset "Info:                 " begin
+@testset "  Info:               " begin
     ClinicalTrialUtilities.info()
     ClinicalTrialUtilities.citation()
     ClinicalTrialUtilities.licence()
@@ -13,7 +14,7 @@ println(" ---------------------------------- ")
 println(" ---------------------------------- ")
 
 
-@testset "ctSampleN Test        " begin
+@testset "  ctSampleN Test      " begin
     @test ceil(ClinicalTrialUtilities.ctSampleN(param=:mean, type=:ea, group=:one, alpha=0.05, beta=0.2, sd=1, a=1.5, b=2, k=1)) == 32
     @test ceil(ClinicalTrialUtilities.ctSampleN(param=:mean, type=:ei, group=:one, alpha=0.05, beta=0.2, sd=0.1, diff=0.05, a=2, b=2, k=1)) == 35
     @test ceil(ClinicalTrialUtilities.ctSampleN(param=:mean, type=:ns, group=:one, alpha=0.05, beta=0.2, sd=1, diff=-0.5, a=1.5, b=2, k=1)) == 7
@@ -39,65 +40,15 @@ println(" ---------------------------------- ")
     @test str1 == str2
 end
 
-@testset "ctSampleNParam Errors " begin
-    en = 0
-    try
-        ClinicalTrialUtilities.ctSampleN(param=:mean, type=:ea, group=:one, alpha=2, beta=0.2, diff=1, sd=1, a=1, b=1, k=1)
-    catch e
-        if isa(e, ClinicalTrialUtilities.CTUException) en = e.n end
-    end
-    @test en ≈ 1201
-    en = 0
-    try
-        ClinicalTrialUtilities.ctSampleN(param=:mean, type=:ei, group=:one, alpha=0.5, beta=0.2, diff=0, sd=1, a=1, b=1, k=1)
-    catch e
-        if isa(e, ClinicalTrialUtilities.CTUException) en = e.n end
-    end
-    @test en ≈ 1202
-    en = 0
-    try
-        ClinicalTrialUtilities.ctSampleN(param=:prop, type=:ea, group=:oone, alpha=0.05, beta=0.2, diff=1, a=0.5, b=0.5, k=1)
-    catch e
-        if isa(e, ClinicalTrialUtilities.CTUException) en = e.n end
-    end
-    @test en ≈ 1203
-    en = 0
-    try
-        ClinicalTrialUtilities.ctSampleN(param=:mean, type=:ns, group=:one, alpha=0.5, beta=0.2, diff=1, sd=0, a=1, b=1, k=1)
-    catch e
-        if isa(e, ClinicalTrialUtilities.CTUException) en = e.n end
-    end
-    @test en ≈ 1204
-    en = 0
-    try
-        ClinicalTrialUtilities.ctSampleN(param=:mean, type=:ea, group=:one, alpha=0.05, beta=0.2, diff=1, sd=1, a=0, b=0, k=0)
-    catch e
-        if isa(e, ClinicalTrialUtilities.CTUException) en = e.n end
-    end
-    @test en ≈ 1205
-
-
-    @test !ClinicalTrialUtilities.ctSampleN(param=:mean, type=:ea, group=:oone, alpha=0.5, beta=0.2, diff=1, sd=1, a=1, b=1, k=1)
-    @test !ClinicalTrialUtilities.ctSampleN(param=:mean, type=:eea, group=:one, alpha=0.5, beta=0.2, diff=1, sd=1, a=1, b=1, k=1)
-    @test !ClinicalTrialUtilities.ctSampleN(param=:mean, type=:eea, group=:two, alpha=0.5, beta=0.2, diff=1, sd=1, a=1, b=1, k=1)
-    @test !ClinicalTrialUtilities.ctSampleN(param=:pprop, type=:eea, group=:one, alpha=0.5, beta=0.2, diff=1, sd=1, a=1, b=1, k=1)
-    @test !ClinicalTrialUtilities.ctSampleN(param=:prop, type=:eea, group=:one, alpha=0.05, beta=0.2, diff=1, a=0.5, b=0.5, k=1)
-    @test !ClinicalTrialUtilities.ctSampleN(param=:prop, type=:eea, group=:two, alpha=0.05, beta=0.2, diff=1, a=0.5, b=0.5, k=1)
-
-    @test !ClinicalTrialUtilities.ctSampleN(param=:prop, type=:ea, group=:one, alpha=0.05, beta=0.2, diff=1, sd=1, a=-1, b=0, k=1)
-    @test !ClinicalTrialUtilities.ctSampleN(param=:prop, type=:ei, group=:one, alpha=0.05, beta=0.2, diff=1, sd=1, a=0.4, b=2, k=1)
-    @test !ClinicalTrialUtilities.ctSampleN(param=:or, type=:eea, group=:oone,  diff=1, a=0.5, b=0.5, k=1)
-end
-
-@testset "ctSampleN Atomic      " begin
+@testset "  ctSampleN Atomic    " begin
     @test ceil(ClinicalTrialUtilities.ClinicalTrialUtilities.mcnm(0.45, 0.05)) == 23
 end
 
 println(" ---------------------------------- ")
-@testset "ctPower Test          " begin
+@testset "  ctPower Test        " begin
     @test ClinicalTrialUtilities.ctPower(param=:prop, type=:mcnm, a=0.45, b=0.05, n=23, alpha=0.1) ≈ 0.9023805 atol=1E-7
 end
-@testset "ctPower + Atomic      " begin
+@testset "  ctPower + Atomic    " begin
     @test ClinicalTrialUtilities.oneSampleMeanEqualityP(1.5,2,1,32;alpha=0.05) ≈ 0.8074304194325561 ≈ ClinicalTrialUtilities.ctPower(param=:mean, type=:ea, group=:one, a=1.5, b=2, sd=1,n=32, alpha=0.05)
     @test ClinicalTrialUtilities.oneSampleMeanEquivalenceP(2, 2, 0.1, 0.05, 35; alpha=0.05) ≈ 0.8108839754376387  ≈ ClinicalTrialUtilities.ctPower(param=:mean, type=:ei, group=:one, a=2, b=2, sd=0.1, diff=0.05, n=35, alpha=0.05)
     @test ClinicalTrialUtilities.oneSampleMeanNSP(1.5, 2, 1, -.5, 7; alpha=0.05) ≈ 0.8415707712023641 ≈ ClinicalTrialUtilities.ctPower(param=:mean, type=:ns, group=:one, a=1.5, b=2, sd=1, diff=-0.5, n=7, alpha=0.05)
@@ -116,27 +67,33 @@ end
 
     pow, str = ClinicalTrialUtilities.ctPower(param=:prop, type=:ea, group=:one, a=0.3, b=0.5, n=50, alpha=0.05, out=:vstr)
     @test pow ≈ 0.8074304194325561
+
+    pow, str = ClinicalTrialUtilities.ctPower(param=:mean, type=:ea, group=:two, a=5, b=10, sd=10, n=63, alpha=0.05, out=:vstr)
+    @test pow ≈ 0.8013023941055788
+    str2 = ClinicalTrialUtilities.ctPower(param=:mean, type=:ea, group=:two, a=5, b=10, sd=10, n=63, alpha=0.05, out=:str)
+    @test str == str2
+
     @test ClinicalTrialUtilities.ctPower(param=:or, type=:ns, a=0.4, b=0.25, diff=0.2, n=242, alpha=0.05, out=:num) ≈ 0.8007200876001626
 
 end
 
 println(" ---------------------------------- ")
-@testset "tfn function          " begin
+@testset "  tfn function        " begin
     @test ClinicalTrialUtilities.tfn(1.0,2.0) ≈  0.07846821 atol=1E-8
     @test ClinicalTrialUtilities.tfn(0.1,10.0) > 0 #Not validated with PowerTOST
     @test ClinicalTrialUtilities.tfn(0.1,10E20) > 0 #Not validated with PowerTOST
 end
-@testset "owensTint2 function   " begin
+@testset "  owensTint2 function " begin
     @test round(ClinicalTrialUtilities.owensTint2(1.0, 3.0, 20.0, 3.0), digits=7) ≈ 0.4839414
 end
-@testset "owensQo function      " begin
+@testset "  owensQo function    " begin
     @test ClinicalTrialUtilities.owensQo(1 ,2.0,1.0,1.0;a=0.0) ≈ 0.321429    atol=1E-6
     @test ClinicalTrialUtilities.owensQo(2 ,1.0,0.5,0.2;a=0.0) ≈ 0.006781741 atol=1E-9
     @test ClinicalTrialUtilities.owensQo(4 ,2.0,1.0,1.0;a=0.0) ≈ 0.03739024  atol=1E-8
     @test ClinicalTrialUtilities.owensQo(7 ,2.0,1.0,1.0;a=0.0) ≈ 0.001888241 atol=1E-9
     @test ClinicalTrialUtilities.owensQo(3 ,2.0,1.0,Inf;a=0.0) ≈ 0.7436299   atol=1E-7
 end
-@testset "owensQ  function      " begin
+@testset "  owensQ  function    " begin
     @test ClinicalTrialUtilities.owensQ(4 ,100.0,40.0,0.0,Inf) ≈ 0.9584071  atol=1E-7
     @test ClinicalTrialUtilities.owensQ(1 ,1.0,1.0,0.0,Inf)    ≈ 0.42202    atol=1E-5
     @test ClinicalTrialUtilities.owensQ(4 ,100.0,30.0,0.0,0.8) ≈ 0.02702275 atol=1E-8
@@ -146,28 +103,28 @@ end
     @test ClinicalTrialUtilities.owensQ(4 ,100.0,30.0,0.0,0.8) ≈ 0.02702275 atol=1E-8
     @test ClinicalTrialUtilities.owensQ(1,100.0,40.0,0.0,1.0)  ≈ 0.3718607  atol=1E-7
 end
-@testset "powerTOSTOwenQ        " begin
+@testset "  powerTOSTOwenQ      " begin
     @test ClinicalTrialUtilities.powerTOSTOwenQ(0.05,0.1,0.4,0.05,0.11,23) ≈ 0.00147511 atol=1E-8
 end
-@testset "approxPowerTOST       " begin
+@testset "  approxPowerTOST     " begin
     @test ClinicalTrialUtilities.approxPowerTOST(0.05,0.4,0.9,0.05,0.11,23) ≈ 1.076964e-06 atol=1E-12
     @test ClinicalTrialUtilities.approxPowerTOST(0.05,1.0,1.0,0.5,0.2,100) == 0
 end
-@testset "approx2PowerTOST      " begin
+@testset "  approx2PowerTOST    " begin
     @test ClinicalTrialUtilities.approx2PowerTOST(0.05,0.1,1.0,0.5,0.2,1000) ≈ 0.4413917 atol=1E-7
 end
-@testset "owensT                " begin
-    @test owensT(1.0,Inf)   ≈ 0.07932763  atol=1E-8
-    @test owensT(-1.0,Inf)  ≈ 0.07932763  atol=1E-8
-    @test owensT(1.0,-Inf)  ≈ -0.07932763 atol=1E-8
-    @test owensT(-1.0,-Inf) ≈ -0.07932763 atol=1E-8
-    @test owensT(1.0, 0.5)  ≈ 0.0430647   atol=1E-8
-    @test owensT(1.0,2.0)   ≈ 0.07846819  atol=1E-8
-    @test owensT(Inf, 1.0)   == 0
+@testset "  owensT              " begin
+    @test ClinicalTrialUtilities.owensT(1.0,Inf)   ≈ 0.07932763  atol=1E-8
+    @test ClinicalTrialUtilities.owensT(-1.0,Inf)  ≈ 0.07932763  atol=1E-8
+    @test ClinicalTrialUtilities.owensT(1.0,-Inf)  ≈ -0.07932763 atol=1E-8
+    @test ClinicalTrialUtilities.owensT(-1.0,-Inf) ≈ -0.07932763 atol=1E-8
+    @test ClinicalTrialUtilities.owensT(1.0, 0.5)  ≈ 0.0430647   atol=1E-8
+    @test ClinicalTrialUtilities.owensT(1.0,2.0)   ≈ 0.07846819  atol=1E-8
+    @test ClinicalTrialUtilities.owensT(Inf, 1.0)   == 0
 end
 
 println(" ---------------------------------- ")
-@testset "designProp            " begin
+@testset "  designProp          " begin
     dff, bkni, seq = ClinicalTrialUtilities.designProp(:parallel)
     @test dff(30) ≈ 28 && bkni ≈ 1.0 && seq ≈ 2
     dff, bkni, seq = ClinicalTrialUtilities.designProp(:d2x2)
@@ -186,7 +143,18 @@ println(" ---------------------------------- ")
 end
 
 println(" ---------------------------------- ")
-@testset "PowerTOST Test        " begin
+@testset "  ci2cv Test          " begin
+
+    cvms = ClinicalTrialUtilities.ci2cv(;alpha = 0.05, theta1 = 0.9, theta2 = 1.25, n=30, design=:d2x2x4, cvms=true)
+    @test cvms[1] ≈ 0.583175066140736 && cvms[2] ≈ 0.29273913226894244
+    @test ClinicalTrialUtilities.ci2cv(;alpha = 0.05, theta1 = 0.9, theta2 = 1.25, n=30, design=:d2x2x4, mso=true) ≈ 0.29273913226894244
+    @test ClinicalTrialUtilities.ci2cv(;alpha = 0.05, theta1 = 0.9, theta2 = 1.25, n=30) ≈ 0.387417014838382
+    @test ClinicalTrialUtilities.ci2cv(;alpha = 0.05, theta1 = 0.8, theta2 = 1.25, n=30) ≈ 0.5426467811605913
+    @test ClinicalTrialUtilities.ci2cv(;alpha = 0.05, theta1 = 1.01, theta2 = 1.21, n=31, design=:d2x2) ≈ 0.21151405971696524
+end
+
+println(" ---------------------------------- ")
+@testset "  PowerTOST Test      " begin
     #parallel
     @test ClinicalTrialUtilities.bePower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.3, n=31, design=:parallel, method=:owenq) ≈ 0.2949476 atol=1E-7
     @test ClinicalTrialUtilities.bePower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.3, n=32, design=:parallel, method=:owenq) ≈ 0.3166927 atol=1E-7
@@ -207,6 +175,7 @@ println(" ---------------------------------- ")
 
     #2x2x4
     @test ClinicalTrialUtilities.bePower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.4, n=35, design=:d2x2x4) ≈ 0.829747  atol=1E-6
+    @test ClinicalTrialUtilities.bePower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=1, n=35, design=:d2x2x4) ≈ 0.014249535210231756  atol=1E-6
     #2x4x4
     @test ClinicalTrialUtilities.bePower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.4, n=35, design=:d2x4x4) ≈ 0.8291076  atol=1E-7
     @test ClinicalTrialUtilities.bePower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.4, n=34, design=:d2x4x4) ≈ 0.8180596  atol=1E-7
@@ -217,61 +186,8 @@ println(" ---------------------------------- ")
     @test ClinicalTrialUtilities.bePower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.4, n=30, design=:d2x3x3) ≈ 0.5614358  atol=1E-7
 end
 
-@testset "PowerTOST Errors      " begin
-
-    en = 0
-    try
-        ClinicalTrialUtilities.designProp(:ddd)
-    catch e
-        if isa(e, ClinicalTrialUtilities.CTUException) en = e.n end
-    end
-    @test en ≈ 1031
-    en = 0
-    try
-        ClinicalTrialUtilities.bePower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=0,  method=:mvt)
-    catch e
-        if isa(e, ClinicalTrialUtilities.CTUException) en = e.n end
-    end
-    @test en ≈ 1021
-    en = 0
-    try
-        ClinicalTrialUtilities.bePower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0, n=10,  method=:mvt)
-    catch e
-        if isa(e, ClinicalTrialUtilities.CTUException) en = e.n end
-    end
-    @test en ≈ 1022
-    en = 0
-    try
-        ClinicalTrialUtilities.bePower(alpha=1.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=10,  method=:mvt)
-    catch e
-        if isa(e, ClinicalTrialUtilities.CTUException) en = e.n end
-    end
-    @test en ≈ 1023
-    en = 0
-    try
-        ClinicalTrialUtilities.bePower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=2,  method=:mvt)
-    catch e
-        if isa(e, ClinicalTrialUtilities.CTUException) en = e.n end
-    end
-    @test en ≈ 1024
-    en = 0
-    try
-        ClinicalTrialUtilities.bePower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=20,  method=:mmvt)
-    catch e
-        if isa(e, ClinicalTrialUtilities.CTUException) en = e.n end
-    end
-    @test en ≈ 1025
-    en = 0
-    try
-        ClinicalTrialUtilities.bePower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=20, design=:d2x2, method=:mvt)
-    catch e
-        if isa(e, ClinicalTrialUtilities.CTUException) en = e.n end
-    end
-    @test en ≈ 1000
-end
-
 println(" ---------------------------------- ")
-@testset "beSampleN Test        " begin
+@testset "  beSampleN Test      " begin
     n, p = ClinicalTrialUtilities.beSampleN(;theta0=0.95, theta1=0.8, theta2=1.25, cv=0.2, alpha=0.05, beta=0.2, logscale=true, method=:owenq)
     @test n == 20 && round(p, digits=7) == 0.8346802
     n, p = ClinicalTrialUtilities.beSampleN(;theta0=0.95, theta1=0.8, theta2=1.25, cv=0.3, alpha=0.05, beta=0.2, logscale=true, method=:owenq)
@@ -333,6 +249,11 @@ println(" ---------------------------------- ")
     @test ci.upper    ≈ 0.482539305750806 atol=1E-15
     @test ci.estimate ≈ 0.38
 
+    ci = ClinicalTrialUtilities.CI.oneProp(100, 100, alpha=0.05, method=:cp)
+    @test ci.lower    ≈ 0.9637833073548235 atol=1E-15
+    @test ci.upper    ≈ 1.0 atol=1E-15
+    @test ci.estimate ≈ 1.0
+
     ci = ClinicalTrialUtilities.CI.oneProp(38, 100, alpha=0.05, method=:soc)
     @test ci.lower    ≈ 0.289191701883923 atol=1E-15
     @test ci.upper    ≈ 0.477559239340346 atol=1E-15
@@ -354,6 +275,21 @@ println(" ---------------------------------- ")
     @test ci.lower    ≈ 0.2951669 atol=1E-7
     @test ci.upper    ≈ 0.9722965 atol=1E-7
     @test ci.estimate ≈ 0.5357142 atol=1E-7
+
+    ci = ClinicalTrialUtilities.CI.twoProp(100, 100, 90, 90; alpha=0.05, type=:or, method=:mn)
+    @test ci.lower    ≈ 0.0
+    @test ci.upper    ≈ Inf
+    #@test ci.estimate == NaN
+
+    ci = ClinicalTrialUtilities.CI.twoProp(0, 100, 90, 90; alpha=0.05, type=:or, method=:mn)
+    @test ci.lower    ≈ 0.0
+    @test ci.upper    ≈ 0.0004144169697670039  atol=1E-7
+    @test ci.estimate ≈ 0.0
+
+    ci = ClinicalTrialUtilities.CI.twoProp(100, 100, 0, 90; alpha=0.05, type=:or, method=:mn)
+    @test ci.lower    ≈ 2411.6137253788347 atol=1E-7
+    @test ci.upper    ≈ Inf
+    @test ci.estimate ≈ Inf
 
     ci = ClinicalTrialUtilities.CI.twoProp(30, 100, 40, 90; alpha=0.05, type=:or, method=:awoolf)
     @test ci.lower    ≈ 0.2982066 atol=1E-7
@@ -383,6 +319,27 @@ println(" ---------------------------------- ")
     @test ci.lower    ≈ -0.278129080 atol=1E-9
     @test ci.upper    ≈ -0.006708301 atol=1E-9
     @test ci.estimate ≈ -0.1444444   atol=1E-7
+
+    ci = ClinicalTrialUtilities.CI.twoProp(30, 100, 40, 90; alpha=0.05, type=:diff, method=:mee)
+    @test ci.lower    ≈ -0.27778778455 atol=1E-9
+    @test ci.upper    ≈ -0.00707120778 atol=1E-9
+    @test ci.estimate ≈ -0.14444444444 atol=1E-7
+
+    ci = ClinicalTrialUtilities.CI.twoProp(30, 100, 40, 90; alpha=0.05, type=:diff, method=:mee2)
+    #Roots 0.7.4 CTU 0.1.7
+    @test ci.lower    ≈ -0.27778778455 atol=1E-5 #Chang atol for validation
+    @test ci.upper    ≈ -0.00707120778 atol=1E-5
+    @test ci.estimate ≈ -0.14444444444 atol=1E-7
+
+    ci = ClinicalTrialUtilities.CI.twoProp(30, 100, 40, 90; alpha=0.05, type=:diff, method=:wald)
+    @test ci.lower    ≈ -0.28084842238 atol=1E-9
+    @test ci.upper    ≈ -0.00804046650 atol=1E-9
+    @test ci.estimate ≈ -0.14444444444 atol=1E-7
+
+    ci = ClinicalTrialUtilities.CI.twoProp(30, 100, 40, 90; alpha=0.05, type=:diff, method=:waldcc)
+    @test ci.lower    ≈ -0.29140397794 atol=1E-9
+    @test ci.upper    ≈  0.00251508905 atol=1E-9
+    @test ci.estimate ≈ -0.14444444444 atol=1E-7
 
     ci = ClinicalTrialUtilities.CI.twoProp(30, 100, 40, 90; alpha=0.05, type=:rr, method=:cli)
     @test ci.lower    ≈ 0.4663950 atol=1E-7
@@ -414,6 +371,13 @@ println(" ---------------------------------- ")
     @test ci.lower    ≈ -5.6050900 atol=1E-7
     @test ci.upper    ≈ -1.3949099 atol=1E-7
     @test ci.estimate ≈ -3.5     atol=1E-4
+
+    ci = ClinicalTrialUtilities.CI.oneMean(30,10,30,0.05; method=:norm)
+    @test ci.lower    ≈ 28.86841 atol=1E-5
+    @test ci.upper    ≈ 31.13159 atol=1E-5
+    ci = ClinicalTrialUtilities.CI.oneMean(30,10,30,0.05; method=:tdist)
+    @test ci.lower    ≈ 28.81919 atol=1E-5
+    @test ci.upper    ≈ 31.18081 atol=1E-5
 
     #Source Validation
     #---------------------------------------------------------------------------
@@ -482,6 +446,9 @@ println(" ---------------------------------- ")
     @test ClinicalTrialUtilities.SIM.bePower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=20, simnum=4, seed=1111) ≈ 0.8346
     @test ClinicalTrialUtilities.SIM.bePower(alpha=0.1, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=29, simnum=4, seed=1111) ≈ 0.9744
 
+    #!
+    ClinicalTrialUtilities.SIM.bePower(alpha=0.1, logscale=false, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=29, simnum=4, seed=1111)
+
     @test ClinicalTrialUtilities.SIM.ctPropPower(0.5, 100, 0.5, 100, 0.6; alpha=0.05, type=:or, method=:mn, seed=123, simnum=4) ≈ 0.4131
 
     #@test ClinicalTrialUtilities.orNSP(0.5, 0.4, 0.8, 100; alpha=0.05, k=1, logdiff=false) ≈ 0.710550974559294
@@ -498,6 +465,116 @@ println(" ---------------------------------- ")
 end
 
 println(" ---------------------------------- ")
-@testset "Tpl                   " begin
+@testset "  Errors              " begin
 
+    en = 0
+    try
+        ClinicalTrialUtilities.designProp(:ddd)
+    catch e
+        if isa(e, ClinicalTrialUtilities.CTUException) en = e.n end
+    end
+    @test en ≈ 1031
+    en = 0
+    try
+        ClinicalTrialUtilities.bePower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=0,  method=:mvt)
+    catch e
+        if isa(e, ClinicalTrialUtilities.CTUException) en = e.n end
+    end
+    @test en ≈ 1021
+
+    en = 0
+    try
+        ClinicalTrialUtilities.bePower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0, n=10,  method=:mvt)
+    catch e
+        if isa(e, ClinicalTrialUtilities.CTUException) en = e.n end
+    end
+    @test en ≈ 1022
+
+    en = 0
+    try
+        ClinicalTrialUtilities.bePower(alpha=1.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=10,  method=:mvt)
+    catch e
+        if isa(e, ClinicalTrialUtilities.CTUException) en = e.n end
+    end
+    @test en ≈ 1023
+    en = 0
+    try
+        ClinicalTrialUtilities.bePower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=2,  method=:mvt)
+    catch e
+        if isa(e, ClinicalTrialUtilities.CTUException) en = e.n end
+    end
+    @test en ≈ 1024
+    en = 0
+    try
+        ClinicalTrialUtilities.bePower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=20,  method=:mmvt)
+    catch e
+        if isa(e, ClinicalTrialUtilities.CTUException) en = e.n end
+    end
+    @test en ≈ 1025
+    en = 0
+    try
+        ClinicalTrialUtilities.bePower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=20, design=:d2x2, method=:mvt)
+    catch e
+        if isa(e, ClinicalTrialUtilities.CTUException) en = e.n end
+    end
+    @test en ≈ 1000
+
+    en = 0
+    try
+        ClinicalTrialUtilities.ctSampleN(param=:mean, type=:ea, group=:one, alpha=2, beta=0.2, diff=1, sd=1, a=1, b=1, k=1)
+    catch e
+        if isa(e, ClinicalTrialUtilities.CTUException) en = e.n end
+    end
+    @test en ≈ 1201
+    en = 0
+    try
+        ClinicalTrialUtilities.ctSampleN(param=:mean, type=:ei, group=:one, alpha=0.5, beta=0.2, diff=0, sd=1, a=1, b=1, k=1)
+    catch e
+        if isa(e, ClinicalTrialUtilities.CTUException) en = e.n end
+    end
+    @test en ≈ 1202
+    en = 0
+    try
+        ClinicalTrialUtilities.ctSampleN(param=:prop, type=:ea, group=:oone, alpha=0.05, beta=0.2, diff=1, a=0.5, b=0.5, k=1)
+    catch e
+        if isa(e, ClinicalTrialUtilities.CTUException) en = e.n end
+    end
+    @test en ≈ 1203
+    en = 0
+    try
+        ClinicalTrialUtilities.ctSampleN(param=:mean, type=:ns, group=:one, alpha=0.5, beta=0.2, diff=1, sd=0, a=1, b=1, k=1)
+    catch e
+        if isa(e, ClinicalTrialUtilities.CTUException) en = e.n end
+    end
+    @test en ≈ 1204
+    en = 0
+    try
+        ClinicalTrialUtilities.ctSampleN(param=:mean, type=:ea, group=:one, alpha=0.05, beta=0.2, diff=1, sd=1, a=0, b=0, k=0)
+    catch e
+        if isa(e, ClinicalTrialUtilities.CTUException) en = e.n end
+    end
+    @test en ≈ 1205
+
+    en = 0
+    try
+        ClinicalTrialUtilities.CI.oneProp(38, 100, alpha=0.05, method=:err)
+    catch e
+        if isa(e, ClinicalTrialUtilities.CTUException) en = e.n end
+    end
+    @test en ≈ 1301
+
+    @test !ClinicalTrialUtilities.ctSampleN(param=:mean, type=:ea, group=:oone, alpha=0.5, beta=0.2, diff=1, sd=1, a=1, b=1, k=1)
+    @test !ClinicalTrialUtilities.ctSampleN(param=:mean, type=:eea, group=:one, alpha=0.5, beta=0.2, diff=1, sd=1, a=1, b=1, k=1)
+    @test !ClinicalTrialUtilities.ctSampleN(param=:mean, type=:eea, group=:two, alpha=0.5, beta=0.2, diff=1, sd=1, a=1, b=1, k=1)
+    @test !ClinicalTrialUtilities.ctSampleN(param=:pprop, type=:eea, group=:one, alpha=0.5, beta=0.2, diff=1, sd=1, a=1, b=1, k=1)
+    @test !ClinicalTrialUtilities.ctSampleN(param=:prop, type=:eea, group=:one, alpha=0.05, beta=0.2, diff=1, a=0.5, b=0.5, k=1)
+    @test !ClinicalTrialUtilities.ctSampleN(param=:prop, type=:eea, group=:two, alpha=0.05, beta=0.2, diff=1, a=0.5, b=0.5, k=1)
+
+    @test !ClinicalTrialUtilities.ctSampleN(param=:prop, type=:ea, group=:one, alpha=0.05, beta=0.2, diff=1, sd=1, a=-1, b=0, k=1)
+    @test !ClinicalTrialUtilities.ctSampleN(param=:prop, type=:ei, group=:one, alpha=0.05, beta=0.2, diff=1, sd=1, a=0.4, b=2, k=1)
+    @test !ClinicalTrialUtilities.ctSampleN(param=:or, type=:eea, group=:oone,  diff=1, a=0.5, b=0.5, k=1)
 end
+
+#println(" ---------------------------------- ")
+#@testset "  Tpl                 " begin
+#end

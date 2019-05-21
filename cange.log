@@ -1,8 +1,18 @@
+
+v0.1.8
+
+  - bugfix (meanNormCI, text output)
+  - wald ci include
+  - add test
+  - move ConfInt to main module
+  - ci2cv
+  - new designs in designProp
+
 v1.0.7
 
 Add sub-module CI for confidence interval computation as part of simulation functions SIM.
   - add Roots in dependencies for mee/fm score ci calc
-  - add Random in dependencies for simulations 
+  - add Random in dependencies for simulations
   - remove struct with sampleSize wrapper
   - change name sampleSize -> ctSampleN
   - change name powerTOST -> bePower

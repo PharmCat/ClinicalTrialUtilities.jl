@@ -2,7 +2,7 @@
 
 function info()
     println("")
-    println("Package name: ClinicalTrialUtilities")
+    println("Package name: ClinicalTrialUtilities, Version: "*VERSION)
     println("Clinical Trial Power and Sample Size Utilities")
     println("Copyright © 2019 Vladimir Arnautov aka PharmCat (mail@pharmcat.net)")
     println("For references, citations and copyrights type <ClinicalTrialUtilities.citation()>")

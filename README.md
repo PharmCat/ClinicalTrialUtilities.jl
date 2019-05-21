@@ -1,9 +1,7 @@
 # ClinicalTrialUtilities
  Clinical Trial Power and Sample Size calculation and simulations. Also can be used for confidence intervals estimation.
 
-Version:0.1.7
-
-Author: Vladimir Arnautov
+Version:0.1.8
 
 2019 &copy; Vladimir Arnautov
 
@@ -34,27 +32,31 @@ Pkg.test("ClinicalTrialUtilities");
 
 ### Functions:
 
-Sample size calculation:
+- Sample size calculation:
 
 ctSampleN(;param, type, group, alpha, beta, diff, sd, a, b, k, out)
 
-Clinical trial power estimation:
-
-Iterative sample size calculation for Bioequivalence trials:
-
-beSampleN(;theta0, theta1, theta2, cv, alpha, beta, logscale, method, design, out)
+- Clinical trial power estimation:
 
 ctPower(;param, type, group, alpha, n, diff, sd, a, b, k, out)
 
-Power calculation for TOST (for Bioequivalence trials):
+- Iterative sample size calculation for Bioequivalence trials:
+
+beSampleN(;theta0, theta1, theta2, cv, alpha, beta, logscale, method, design, out)
+
+- Power calculation for TOST (for Bioequivalence trials):
 
 bePower(;theta0, theta1, theta2, cv, n, alpha, logscale, method,  design)
 
-Owen's T function:
+- CV from CI for bioequivalence trials:
+
+ci2cv(;alpha, theta1, theta2, n, design, mso, cvms)
+
+- Owen's T function:
 
 owensT(h, a)
 
-Owen's Q function (a,b always should be >= 0):
+- Owen's Q function (a,b always should be >= 0):
 
 owensQ(nu, t, delta, a, b)
 
@@ -221,6 +223,37 @@ beSampleN(alpha=0.05, logscale=[true|false], theta1=0.8, theta2=1.25, theta0=0.9
 - vstr  - numeric and String variable;
 - print - print to console;
 
+#### cv2ci
+
+**alpha** - Alpha (o < alpha < 1)  (default=0.05);
+
+**beta** - Beta (o < beta < 1) (default=0.2); power = 1 - beta;
+
+**theta1** - Lower Level (default=0.8);
+
+**theta2** - Upper level (default=1.25);
+
+**cv** - coefficient of variation;
+
+**design** - trial design;
+- parralel
+- d2x2 (default)
+- d2x2x4
+- d2x4x4
+- d2x3x3
+
+**mso**
+
+Calculate MS only
+- false(default)
+- true
+
+**cvms**
+
+Calculate CV and MS
+- false(default)
+- true
+
 ### Examples:
 
 ```
@@ -259,6 +292,10 @@ beSampleN(cv=0.347, design=:parallel,  out=:print)
 beSampleN(cv=0.40)
 
 n, p, s = beSampleN(cv=0.347, design=:d2x2x4, method=:nct, out=:vstr)
+
+#CV from CI
+ci2cv(;alpha = 0.05, theta1 = 0.9, theta2 = 1.25, n=30, design=:d2x2x4)
+
 ```
 
 ### Confidence Interval Submodule

@@ -11,6 +11,8 @@
 
 104*: beSampleN
 
+1051: cv2ci
+
 111*: SIM.bePower
 
 12**: sampleSize

@@ -66,11 +66,11 @@ function ctSampleN(;param=:notdef, type=:notdef, group=:notdef, alpha=0.05, beta
         let params::String end #string parameter type
         if param == :mean params = "Mean" elseif param== :prop params = "Proportion" elseif param == :or params = "Odd Ration" end
         if group == :one groups = "One" elseif  group == :two groups = "Two" else groups = "NA" end
-        if type == :ea hyps = "Equality" elseif type == :ei hyps = "Equivalence" elseif type == :ns hyps = "Non-Infriority/Superiority" elseif type == :mcnm hyps = "McNemar's Equality test" end
+        if type == :ea hyps = "Equality" elseif type == :ei hyps = "Equivalence" elseif type == :ns hyps = "Non-Inferiority/Superiority" elseif type == :mcnm hyps = "McNemar's Equality test" end
         output  = "----------------------------------------\n"
         output *= "         Sample Size Estimation        \n"
         output *= "----------------------------------------\n"
-        output *= "  Paramether type: "*params*"\n"
+        output *= "  Parameter type: "*params*"\n"
         output *= "  Groups: "*groups*"\n"
         output *= "  Hypothesis: "*hyps*"\n"
         output *= "----------------------------------------\n"
@@ -110,7 +110,7 @@ function ctSampleN(;param=:notdef, type=:notdef, group=:notdef, alpha=0.05, beta
             return n, output
         end
     end
-    return n
+
 end #sampleSize
 
 #clinical trial power main function
@@ -170,18 +170,18 @@ function ctPower(;param=:notdef, type=:notdef, group=:notdef, alpha=0.05, logdif
         elseif type == :ns
             pow = orNSP(a, b, diff, n; alpha=alpha, k=k, logdiff=logdiff)
         else return false end
-    else return false end
+    end
 
     if out == :num return pow
     else
         let params::String end #string parameter type
         if param == :mean params = "Mean" elseif param== :prop params = "Proportion" elseif param == :or params = "Odd Ration" end
         if group == :one groups = "One" elseif  group == :two groups = "Two" else groups = "NA" end
-        if type == :ea hyps = "Equality" elseif type == :ei hyps = "Equivalence" elseif type == :ns hyps = "Non-Infriority/Superiority" elseif type == :mcnm hyps = "McNemar's Equality test" end
+        if type == :ea hyps = "Equality" elseif type == :ei hyps = "Equivalence" elseif type == :ns hyps = "Non-Inferiority/Superiority" elseif type == :mcnm hyps = "McNemar's Equality test" end
         output  = "----------------------------------------\n"
         output *= "            Power Estimation            \n"
         output *= "----------------------------------------\n"
-        output *= "  Paramether type: "*params*"\n"
+        output *= "  Parameter type: "*params*"\n"
         output *= "  Groups: "*groups*"\n"
         output *= "  Hypothesis: "*hyps*"\n"
         output *= "----------------------------------------\n"
@@ -210,7 +210,6 @@ function ctPower(;param=:notdef, type=:notdef, group=:notdef, alpha=0.05, logdif
             return output
         elseif out == :print
             print(output)
-            return
         elseif out == :vstr
             return pow, output
         end

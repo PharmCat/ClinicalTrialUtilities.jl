@@ -1,20 +1,21 @@
 # Clinical Trial Utilities
 # Copyright © 2019 Vladimir Arnautov aka PharmCat (mail@pharmcat.net)
-# Package ‘DescTools’
+# Some ideas was taken from R project packages:
+# PropCIs by Ralph Scherer https://cran.r-project.org/web/packages/PropCIs/index.html
+# pairwiseCI by Frank Schaarschmidt, Daniel Gerhard  https://CRAN.R-project.org/package=pairwiseCI
+# binGroup by Boan Zhang, Christopher Bilder, Brad Biggerstaff, Frank Schaarschmidt Brianna Hitt https://CRAN.R-project.org/package=binGroup
+# proportion by M.Subbiah, V.Rajeswaran https://CRAN.R-project.org/package=proportion
+# binom by Sundar Dorai-Raj https://CRAN.R-project.org/package=binom
+# DescTools https://CRAN.R-project.org/package=DescTools
 
 module CI
     using Distributions
     using Roots
     import ..ZDIST
     import ..CTUException
+    import ..ConfInt
     #const ZDIST = Normal()
-    export oneProp, oneMeans, twoProp, twoMeans, ConfInt
-
-    struct ConfInt
-        lower::Float64
-        upper::Float64
-        estimate::Float64
-    end
+    export oneProp, oneMeans, twoProp, twoMeans
 
     function oneProp(x::Int, n::Int; alpha=0.05, method=:wilson)
         if method==:wilson
@@ -59,6 +60,10 @@ module CI
                 return propDiffMeeCI(x1, n1, x2, n2, alpha)
             elseif method ==:mee2
                 return propDiffFMCI(x1, n1, x2, n2, alpha)
+            elseif method ==:wald
+                return propDiffWaldCI(x1, n1, x2, n2, alpha)
+            elseif method ==:waldcc
+                return propDiffWaldCCCI(x1, n1, x2, n2, alpha)
             end
         elseif type==:rr
             if method ==:cli
@@ -417,12 +422,12 @@ module CI
 
     #Normal
     function meanNormCI(m,s,n,alpha)::ConfInt
-        e = quanlile(ZDIST, 1-alpha/2)*s/sqrt(n)
+        e = quantile(ZDIST, 1-alpha/2)*sqrt(s/n)
         return ConfInt(m-e, m+e, m)
     end
     #T Distribution
     function meanTdistCI(m,s,n,alpha)::ConfInt
-        e = quanlile(TDist(n-1), 1-alpha/2)*s/sqrt(n)
+        e = quantile(TDist(n-1), 1-alpha/2)*sqrt(s/n)
         return ConfInt(m-e, m+e, m)
     end
     #mean diff equal var
