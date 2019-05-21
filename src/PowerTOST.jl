@@ -197,3 +197,6 @@ function ci2cv(;alpha = 0.05, theta1 = 0.8, theta2 = 1.25, n, design=:d2x2, mso=
     if mso return ms end
     return ms2cv(ms)
 end
+
+function pooledCV()
+end
