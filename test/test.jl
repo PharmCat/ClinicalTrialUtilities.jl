@@ -574,7 +574,7 @@ println(" ---------------------------------- ")
     @test !ClinicalTrialUtilities.ctSampleN(param=:or, type=:eea, group=:oone,  diff=1, a=0.5, b=0.5, k=1)
 end
 
-println(" ---------------------------------- ")
-@testset "  Tpl                 " begin
+#println(" ---------------------------------- ")
+#@testset "  Tpl                 " begin
 
 end
