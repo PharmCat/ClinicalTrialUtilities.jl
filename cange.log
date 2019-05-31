@@ -7,6 +7,8 @@ v0.1.8
   - move ConfInt to main module
   - ci2cv
   - new designs in designProp
+  - pooledCV
+  - add DataFrames to dependencies
 
 v1.0.7
 

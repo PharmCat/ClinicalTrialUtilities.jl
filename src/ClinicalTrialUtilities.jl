@@ -17,6 +17,7 @@ module ClinicalTrialUtilities
 using Distributions
 #using Rmath #should be rewrited
 using QuadGK
+using DataFrames
 #using SpecialFunctions
 import SpecialFunctions.lgamma
 

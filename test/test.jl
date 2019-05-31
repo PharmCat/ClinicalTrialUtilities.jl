@@ -1,6 +1,6 @@
 # Clinical Trial Utilities
 # Copyright © 2019 Vladimir Arnautov aka PharmCat (mail@pharmcat.net)
-using Distributions, Random
+using Distributions, Random, DataFrames
 
 @testset "  Info:               " begin
     ClinicalTrialUtilities.info()
@@ -151,6 +151,26 @@ println(" ---------------------------------- ")
     @test ClinicalTrialUtilities.ci2cv(;alpha = 0.05, theta1 = 0.9, theta2 = 1.25, n=30) ≈ 0.387417014838382
     @test ClinicalTrialUtilities.ci2cv(;alpha = 0.05, theta1 = 0.8, theta2 = 1.25, n=30) ≈ 0.5426467811605913
     @test ClinicalTrialUtilities.ci2cv(;alpha = 0.05, theta1 = 1.01, theta2 = 1.21, n=31, design=:d2x2) ≈ 0.21151405971696524
+end
+
+println(" ---------------------------------- ")
+@testset "  pooledCV            " begin
+
+    data = DataFrame(cv = Float64[], df = Int[])
+    push!(data, (0.12, 12))
+    push!(data, (0.2, 20))
+    push!(data, (0.25, 30))
+
+    ci = ClinicalTrialUtilities.pooledCV(data; cv="cv", df="df")
+    @test ci.lower    ≈ 0.18145259424967664 atol=1E-15
+    @test ci.upper    ≈ 0.2609307413637307 atol=1E-15
+    @test ci.estimate ≈ 0.21393949168210136 atol=1E-15
+
+    ci = ClinicalTrialUtilities.pooledCV(data; cv="cv", df="df", returncv=false)
+    @test ci.lower    ≈ 0.032394625994562894 atol=1E-15
+    @test ci.upper    ≈ 0.06586718662236608 atol=1E-15
+    @test ci.estimate ≈ 0.04475355764465427 atol=1E-15
+
 end
 
 println(" ---------------------------------- ")
