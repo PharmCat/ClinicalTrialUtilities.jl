@@ -1,4 +1,9 @@
 
+v0.1.9
+
+- pooledCV
+- add DataFrames to dependencies
+
 v0.1.8
 
   - bugfix (meanNormCI, text output)
@@ -7,8 +12,7 @@ v0.1.8
   - move ConfInt to main module
   - ci2cv
   - new designs in designProp
-  - pooledCV
-  - add DataFrames to dependencies
+
 
 v1.0.7
 
