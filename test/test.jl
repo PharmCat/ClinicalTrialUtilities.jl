@@ -469,17 +469,18 @@ println(" ---------------------------------- ")
     #!
     ClinicalTrialUtilities.SIM.bePower(alpha=0.1, logscale=false, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=29, simnum=4, seed=1111)
 
-    @test ClinicalTrialUtilities.SIM.ctPropPower(0.5, 100, 0.5, 100, 0.6; alpha=0.05, type=:or, method=:mn, seed=123, simnum=4) ≈ 0.4131
+    @test ClinicalTrialUtilities.SIM.ctPropPower(0.5, 100, 0.5, 100, 0.6; alpha=0.05, type=:noninf, citype=:or, method=:mn, seed=123, simnum=4) ≈ 0.4131
 
     #@test ClinicalTrialUtilities.orNSP(0.5, 0.4, 0.8, 100; alpha=0.05, k=1, logdiff=false) ≈ 0.710550974559294
-    @test ClinicalTrialUtilities.SIM.ctPropPower(0.5, 100, 0.4, 100, 0.8; alpha=0.1, type=:or, method=:mn, seed=123, simnum=4) ≈ 0.6988
+    @test ClinicalTrialUtilities.SIM.ctPropPower(0.5, 100, 0.4, 100, 0.8; alpha=0.1, type=:noninf,  citype=:or, method=:mn, seed=123, simnum=4) ≈ 0.6988
 
     @test ClinicalTrialUtilities.SIM.ctMeansPowerFS(1.0, 1.0, 10, 1.0, 1.0, 10, -0.3; alpha=0.1, method=:ev,  seed=1235, simnum=4) ≈ 0.1584
     @test ClinicalTrialUtilities.SIM.ctMeansPower(1.0, 1.0, 10, 1.0, 1.0, 10, -0.3; alpha=0.1,  seed=1235, simnum=4) ≈ 0.1662
 
-    T = ClinicalTrialUtilities.SIM.ctPropSampleN(0.6, 0.6,-0.15; alpha=0.1, type=:diff, method=:nhs, seed=1234, simnum=4)
-    @test T[1] == 129
-    @test T[2] ≈ 0.795
+    T = ClinicalTrialUtilities.SIM.ctPropSampleN(0.6, 0.6,-0.15; alpha=0.1, type =:noninf, citype=:diff, method=:nhs, seed=1234, simnum=4)
+    @test T[1] == 125
+    @test T[2] ≈ 0.8036
+
 
 
 end
