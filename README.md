@@ -49,6 +49,10 @@ bePower(;theta0, theta1, theta2, cv, n, alpha, logscale, method,  design)
 
 ci2cv(;alpha, theta1, theta2, n, design, mso, cvms)
 
+- Pooled CV
+
+ pooledCV(data::DataFrame; cv, df, alpha, returncv)
+
 - Owen's T function:
 
 owensT(h, a)
@@ -69,7 +73,7 @@ owensQ(nu, t, delta, a, b)
 #### sampleSize
 ```
 using ClinicalTrialUtilities
-ctSampleN(param=[:mean|:prop|:or], type=[:ea|:ei|:ns|:mcnm], group=[:one|:two], alpha=0.05, beta=0.2, diff=0, sd=0, a=0, b=0, k=1, out=[:num|:str|:vstr|:print])
+ctSampleN(param=[:mean|:prop|:or], type=[:ea|:ei|:ns|:mcnm], group=[:one|:two], alpha=0.05, beta=0.2, diff=0, sd=0, a=0, b=0, k=1, logdiff=false, out=[:num|:str|:vstr|:print])
 
 ```
 **param (Parameter type):**
@@ -101,6 +105,10 @@ ctSampleN(param=[:mean|:prop|:or], type=[:ea|:ei|:ns|:mcnm], group=[:one|:two], 
 
 **k** - Na/Nb (after sample size estimation second group size: Na=k*Nb, only for two sample design) (default=1);
 
+**logdiff** - diff is log transformed for OR:
+- false (default, diff would be transformed)
+- true
+
 **out** - output type:
 - num   - numeric (default);
 - str   - String variable with text output;
@@ -110,7 +118,7 @@ ctSampleN(param=[:mean|:prop|:or], type=[:ea|:ei|:ns|:mcnm], group=[:one|:two], 
 #### ctPower
 ```
 using ClinicalTrialUtilities
-ctPower(param=[:mean|:prop|:or], type=[:ea|:ei|:ns|:mcnm], group=[:one|:two], alpha=0.05, logdiff=true, n=0, diff=0,  sd=0, a=0, b=0, k=1, out=[:num|:str|:vstr|:print])
+ctPower(param=[:mean|:prop|:or], type=[:ea|:ei|:ns|:mcnm], group=[:one|:two], alpha=0.05, n=0, diff=0,  sd=0, a=0, b=0, k=1, logdiff=false, out=[:num|:str|:vstr|:print])
 ```
 
 **param (Parameter type):**
@@ -141,6 +149,10 @@ ctPower(param=[:mean|:prop|:or], type=[:ea|:ei|:ns|:mcnm], group=[:one|:two], al
 **b** - True mean (μ) for one sample / Group B for two sample design;
 
 **k** - Na/Nb (after sample size estimation second group size: Na=k*Nb, only for two sample design) (default=1);
+
+**logdiff** - diff is log transformed for OR:
+- false (default, diff would be transformed)
+- true
 
 **out** - output type:
 - num   - numeric (default);
@@ -179,6 +191,9 @@ powerTOST(alpha=0.05, logscale=[true|false], theta1=0.8, theta2=1.25, theta0=0.9
 - d2x2x4
 - d2x4x4
 - d2x3x3
+- d2x4x2
+- d3x3
+- d3x6x3
 
 #### beSampleN
 
@@ -213,6 +228,9 @@ beSampleN(alpha=0.05, logscale=[true|false], theta1=0.8, theta2=1.25, theta0=0.9
 - d2x2x4
 - d2x4x4
 - d2x3x3
+- d2x4x2
+- d3x3
+- d3x6x3
 
 **out** - output type:
 - num   - numeric (default);
@@ -220,7 +238,10 @@ beSampleN(alpha=0.05, logscale=[true|false], theta1=0.8, theta2=1.25, theta0=0.9
 - vstr  - numeric and String variable;
 - print - print to console;
 
-#### cv2ci
+#### ci2cv
+```
+ci2cv(;alpha = 0.05, theta1 = 0.8, theta2 = 1.25, n, design=:d2x2, mso=false, cvms=false)
+```
 
 **alpha** - Alpha (o < alpha < 1)  (default=0.05);
 
@@ -230,7 +251,7 @@ beSampleN(alpha=0.05, logscale=[true|false], theta1=0.8, theta2=1.25, theta0=0.9
 
 **theta2** - Upper level (default=1.25);
 
-**cv** - coefficient of variation;
+**n** - subject n;
 
 **design** - trial design;
 - parralel
@@ -238,6 +259,9 @@ beSampleN(alpha=0.05, logscale=[true|false], theta1=0.8, theta2=1.25, theta0=0.9
 - d2x2x4
 - d2x4x4
 - d2x3x3
+- d2x4x2
+- d3x3
+- d3x6x3
 
 **mso**
 
@@ -250,6 +274,31 @@ Calculate MS only
 Calculate CV and MS
 - false(default)
 - true
+
+### pooledCV
+
+**data**
+
+Dataframe with CV data
+
+**cv**
+
+CV column in dataframe
+
+**df**
+
+DF column in dataframe
+
+**alpha**
+
+Alpha for var/cv confidence interval.
+
+**returncv**
+
+Return CV or var:
+
+- true: return cv
+- false: return var
 
 ### Examples:
 
@@ -292,6 +341,14 @@ n, p, s = beSampleN(cv=0.347, design=:d2x2x4, method=:nct, out=:vstr)
 
 #CV from CI
 ci2cv(;alpha = 0.05, theta1 = 0.9, theta2 = 1.25, n=30, design=:d2x2x4)
+
+#Polled CV
+
+data = DataFrame(cv = Float64[], df = Int[])
+push!(data, (0.12, 12))
+push!(data, (0.2, 20))
+push!(data, (0.25, 30))
+pooledCV(data; cv=:cv, df=:df, alpha=0.05, returncv=true)
 
 ```
 
