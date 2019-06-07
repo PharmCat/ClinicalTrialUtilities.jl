@@ -198,7 +198,7 @@ function ci2cv(;alpha = 0.05, theta1 = 0.8, theta2 = 1.25, n, design=:d2x2, mso=
     return ms2cv(ms)
 end
 
-function pooledCV(data::DataFrame; cv=:cv, df=:df, alpha=0.05, returncv=true)
+function pooledCV(data::DataFrame; cv=:cv, df=:df, alpha=0.05, returncv=true)::ConfInt
     if isa(cv, String)  cv = Symbol(cv) end
     if isa(df, String)  df = Symbol(df) end
     tdf = sum(data[:, df])
