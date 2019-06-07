@@ -77,11 +77,9 @@ module SIM
             x1 = rand(BIN1)
             x2 = rand(BIN2)
             ci = twoProp(x1, n1, x2, n2; alpha=alpha, type=citype, method=method)
-            if type == :noninf
+            if type == :ns
                 if ci.lower > ref pow += 1 end
-            elseif type == :super
-                if ci.upper > ref pow += 1 end
-            elseif type == :equ
+            elseif type == :ei
                 if ci.lower > ref[1] &&  ci.upper < ref[2] pow += 1 end
             end
         end
@@ -90,9 +88,13 @@ module SIM
 
     function ctPropSampleN(p1, p2, ref; alpha=0.05, beta=0.2, type=:notdef, citype =:notdef, method=:notdef, simnum=5, seed=0)
         if type == :notdef || citype == :notdef || method == :notdef throw(CTUException(1116,"ctPropSampleN: type or method not defined.")) end
+            st::Int = sn::Int = 10
+        if citype == :diff
+            st = sn = ceil(ctSampleN(param=:prop, type=type, group=:two, alpha=alpha, beta=beta, diff=ref, a=p1, b=p2))
+        elseif citype == :or
+            st = sn = ceil(ctSampleN(param=:or, type=type, group=:two, alpha=alpha, beta=beta, diff=ref, a=p1, b=p2, logdiff = false))
+        end
 
-        st::Int = sn::Int = 10
-        #need to do approximation for N
         pow = ctPropPower(p1, sn, p2, sn, ref; alpha=alpha, type=type, citype=citype, method=method, simnum=simnum, seed=seed)
         conu(x, y) = x < 1 - y
         cond(x, y) = x > 1 - y
