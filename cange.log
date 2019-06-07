@@ -3,6 +3,10 @@ v0.1.9
 
 - pooledCV
 - add DataFrames to dependencies
+- Simulation unification
+- logdiff set false by default in ctSampleN, ctPower
+
+
 
 v0.1.8
 
