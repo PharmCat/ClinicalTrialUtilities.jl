@@ -2,7 +2,8 @@
 # Copyright © 2019 Vladimir Arnautov aka PharmCat (mail@pharmcat.net)
 
 module SIM
-    using Distributions, Random
+    using Distributions
+    using Random
     import ..ctSampleN
     import ..designProp
     import ..cv2ms
