@@ -38,7 +38,15 @@ struct ConfInt
     estimate::Float64
 end
 
-export CTUException, ConfInt
+struct NCA
+    result::DataFrame
+    elimination::DataFrame
+    settings::DataFrame
+    textout::String
+    errorlog::String
+end
+
+export CTUException, ConfInt, NCA
 
 #Owen function calc: owensQ, owensQo, ifun1, owensTint2, owensT, tfn
 include("OwensQ.jl")
@@ -52,23 +60,21 @@ include("SampleSize.jl")
 include("CI.jl")
 #Simulations
 include("SIM.jl")
+#PK
+include("PK.jl")
 #info function
 include("Info.jl")
 
 #Sample size
-export ctSampleN
-export beSampleN
+export ctSampleN, beSampleN
 #Power
-export ctPower
-export bePower
+export ctPower, bePower
 #Utils
-export ci2cv
+export ci2cv, pooledCV
 #Other
-export owensQ
-export owensT
-
-export SIM
-export CI
+export owensQ, owensT
+#Mudules
+export SIM, CI, PK
 
 
 

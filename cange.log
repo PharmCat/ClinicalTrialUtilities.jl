@@ -1,11 +1,12 @@
 
 v0.1.9
 
+- add PK module
 - pooledCV
 - add DataFrames to dependencies
 - Simulation unification
 - logdiff set false by default in ctSampleN, ctPower
-
+- README.md update and fix
 
 
 v0.1.8

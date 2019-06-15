@@ -14,27 +14,46 @@ println(" ---------------------------------- ")
 println(" ---------------------------------- ")
 
 
-@testset "  ctSampleN Test      " begin
+@testset "#1  ctSampleN Test      " begin
+    #1
     @test ceil(ClinicalTrialUtilities.ctSampleN(param=:mean, type=:ea, group=:one, alpha=0.05, beta=0.2, sd=1, a=1.5, b=2, k=1)) == 32
+    #2
     @test ceil(ClinicalTrialUtilities.ctSampleN(param=:mean, type=:ei, group=:one, alpha=0.05, beta=0.2, sd=0.1, diff=0.05, a=2, b=2, k=1)) == 35
+    #3
     @test ceil(ClinicalTrialUtilities.ctSampleN(param=:mean, type=:ns, group=:one, alpha=0.05, beta=0.2, sd=1, diff=-0.5, a=1.5, b=2, k=1)) == 7
+    #4
     @test ceil(ClinicalTrialUtilities.ctSampleN(param=:mean, type=:ea, group=:two, alpha=0.05, beta=0.2, sd=10, a=5, b=10, k=1)) == 63
+    #5
     @test ceil(ClinicalTrialUtilities.ctSampleN(param=:mean, type=:ei, group=:two, alpha=0.05, beta=0.2, sd=10, diff=5, a=5, b=4, k=1)) == 108
+    #6
     @test ceil(ClinicalTrialUtilities.ctSampleN(param=:mean, type=:ns, group=:two, alpha=0.05, beta=0.2, sd=10, diff=5, a=5, b=5, k=1)) == 50
+    #7
     @test ceil(ClinicalTrialUtilities.ctSampleN(param=:prop, type=:ea, group=:one, alpha=0.05, beta=0.2, a=0.3, b=0.5)) == 50
+    #8
     @test ceil(ClinicalTrialUtilities.ctSampleN(param=:prop, type=:ei, group=:one, alpha=0.05, beta=0.2, diff=0.2, a=0.6, b=0.6)) == 52
+    #9
     @test ceil(ClinicalTrialUtilities.ctSampleN(param=:prop, type=:ns, group=:one, alpha=0.05, beta=0.2, diff=-0.1, a=0.3, b=0.5)) == 18
+    #10
     @test ceil(ClinicalTrialUtilities.ctSampleN(param=:prop, type=:ea, group=:two, alpha=0.05, beta=0.2, a=0.65, b=0.85)) == 70
+    #11
     @test ceil(ClinicalTrialUtilities.ctSampleN(param=:prop, type=:ei, group=:two, alpha=0.05, beta=0.2, diff=0.05, a=0.65, b=0.85)) == 136
+    #12
     @test ceil(ClinicalTrialUtilities.ctSampleN(param=:prop, type=:ns, group=:two, alpha=0.05, beta=0.2, diff=-0.1, a=0.85, b=0.65)) == 25
+    #13
     @test ceil(ClinicalTrialUtilities.ctSampleN(param=:or, type=:ea,  alpha=0.05, beta=0.2, a=0.4, b=0.25, logdiff=true)) == 156
+    #14
     @test ceil(ClinicalTrialUtilities.ctSampleN(param=:or, type=:ei,  alpha=0.05, beta=0.2, diff=0.5, a=0.25, b=0.25, logdiff=true)) == 366
+    #15
     @test ceil(ClinicalTrialUtilities.ctSampleN(param=:or, type=:ns,  alpha=0.05, beta=0.2, diff=0.2, a=0.4, b=0.25, logdiff=true)) == 242
+    #16
     @test ceil(ClinicalTrialUtilities.ctSampleN(param=:prop, type=:mcnm, a=0.45, b=0.05)) == 23
-
+    #17
     @test ClinicalTrialUtilities.ctSampleN(param=:mean, type=:ns, group=:two, alpha=0.05, beta=0.2, diff=1, sd=20, a=1, b=2) ≈ 1236.511446403953 atol=1E-12
+    #18
     @test ClinicalTrialUtilities.ctSampleN(param=:mean, type=:ns, group=:two, alpha=0.05, beta=0.2, diff=1, sd=20, a=1, b=2, out=:vstr)[1] ≈ 1236.511446403953 atol=1E-12
+    #19
     @test ClinicalTrialUtilities.ctSampleN(param=:prop, type=:ei, group=:one, alpha=0.1, beta=0.2, diff=0.1, a=0.65, b=0.6, out=:vstr)[1] ≈ 630.6717754175304 atol=1E-12
+    #20
     str1 = ClinicalTrialUtilities.ctSampleN(param=:mean, type=:ea, group=:two, alpha=0.05, beta=0.2, sd=10, a=5, b=10, k=2, out=:str);
     str2 = ClinicalTrialUtilities.ctSampleN(param=:mean, type=:ea, group=:two, alpha=0.05, beta=0.2, sd=10, a=5, b=10, k=2, out=:vstr)[2];
     @test str1 == str2
@@ -480,9 +499,51 @@ println(" ---------------------------------- ")
     T = ClinicalTrialUtilities.SIM.ctPropSampleN(0.6, 0.6,-0.15; alpha=0.1, type =:ns, citype=:diff, method=:nhs, seed=1234, simnum=4)
     @test T[1] == 125
     @test T[2] ≈ 0.8036
+end
 
+println(" ---------------------------------- ")
+@testset "  PK                  " begin
 
+    data = DataFrame(Concentration = Float64[], Time = Float64[], Subject = String[], Formulation = String[])
+    push!(data, (0.0, 0, "1", "T"))
+    push!(data, (0.2, 1, "1", "T"))
+    push!(data, (0.3, 2, "1", "T"))
+    push!(data, (0.4, 3, "1", "T"))
+    push!(data, (0.3, 4, "1", "T"))
+    push!(data, (0.2, 5, "1", "T"))
+    push!(data, (0.1, 6, "1", "T"))
+    push!(data, (0.0, 0, "2", "T"))
+    push!(data, (0.3, 1, "2", "T"))
+    push!(data, (0.4, 2, "2", "T"))
+    push!(data, (0.5, 3, "2", "T"))
+    push!(data, (0.3, 4, "2", "T"))
+    push!(data, (0.1, 5, "2", "T"))
+    push!(data, (0.05, 6, "2", "T"))
+    push!(data, (0.1, 0, "1", "R"))
+    push!(data, (0.2, 1, "1", "R"))
+    push!(data, (0.9, 2, "1", "R"))
+    push!(data, (0.8, 3, "1", "R"))
+    push!(data, (0.3, 4, "1", "R"))
+    push!(data, (0.2, 5, "1", "R"))
+    push!(data, (0.1, 6, "1", "R"))
 
+    pk = ClinicalTrialUtilities.PK.nca(data; sort=[:Formulation, :Subject])
+    @test pk.result.AUCinf[1] ≈ 1.63205 atol=1E-5
+    @test pk.result.Cmax[1] ≈ 0.4 atol=1E-5
+    @test pk.result.MRTlast[1] ≈ 3.10345 atol=1E-5
+    @test pk.result.Tmax[1] ≈ 3.0 atol=1E-5
+
+    pk = ClinicalTrialUtilities.PK.nca(data[1:7,:]; sort=[:Formulation, :Subject])
+    @test pk.result.AUCinf[1] ≈ 1.63205 atol=1E-5
+    @test pk.result.Cmax[1] ≈ 0.4 atol=1E-5
+    @test pk.result.MRTlast[1] ≈ 3.10345 atol=1E-5
+    @test pk.result.Tmax[1] ≈ 3.0 atol=1E-5
+
+    pk = ClinicalTrialUtilities.PK.nca(data[1:7,:])
+    @test pk.result.AUCinf[1] ≈ 1.63205 atol=1E-5
+    @test pk.result.Cmax[1] ≈ 0.4 atol=1E-5
+    @test pk.result.MRTlast[1] ≈ 3.10345 atol=1E-5
+    @test pk.result.Tmax[1] ≈ 3.0 atol=1E-5
 end
 
 println(" ---------------------------------- ")
