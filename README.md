@@ -9,6 +9,11 @@ Version:0.1.9
 [![Build status](https://ci.appveyor.com/api/projects/status/35f8b5vq259sbssg?svg=true)](https://ci.appveyor.com/project/PharmCat/clinicaltrialutilities-jl)
 [![codecov](https://codecov.io/gh/PharmCat/ClinicalTrialUtilities.jl/branch/master/graph/badge.svg)](https://codecov.io/gh/PharmCat/ClinicalTrialUtilities.jl)
 [![Coverage Status](https://coveralls.io/repos/github/PharmCat/ClinicalTrialUtilities.jl/badge.svg?branch=master)](https://coveralls.io/github/PharmCat/ClinicalTrialUtilities.jl?branch=master)
+
+## Description
+
+The package is designed to perform calculations related to the planning and analysis of the results of clinical trials. The package includes the basic functions described below, as well as a few modules to perform specific calculations.
+
 ### Dependencies:
 
  - Distributions
@@ -16,6 +21,7 @@ Version:0.1.9
  - SpecialFunctions
  - Random
  - Roots
+ - DataFrames
 
 ### Install:
 ```
@@ -27,7 +33,7 @@ or
 using Pkg
 Pkg.clone("https://github.com/PharmCat/ClinicalTrialUtilities.jl.git");
 ```
-### Functions:
+### Basic functions:
 
 - Sample size calculation:
 
@@ -60,6 +66,20 @@ owensT(h, a)
 - Owen's Q function (a,b always should be >= 0):
 
 owensQ(nu, t, delta, a, b)
+
+### Modules
+
+- Confidence interval calculation
+
+[CI](#CI)
+
+- Pharmacokinetics calculation
+
+[PK](#PK)
+
+- Simulations
+
+[SIM](#SIM)
 
 ### Usage
 
@@ -352,13 +372,15 @@ pooledCV(data; cv=:cv, df=:df, alpha=0.05, returncv=true)
 
 ```
 
-### Confidence Interval Submodule
+### <a name="CI"></a>Confidence Interval Submodule
 
 Description here:
 
 https://github.com/PharmCat/ClinicalTrialUtilities.jl/blob/dev/doc/CI.md
 
-### Simulations
+### <a name="PK"></a>Pharmacokinetics
+
+### <a name="SIM"></a>Simulations
 
 Description here:
 
