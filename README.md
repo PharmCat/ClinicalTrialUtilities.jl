@@ -25,14 +25,18 @@ The package is designed to perform calculations related to the planning and anal
 
 ### Install:
 ```
-using Pkg
-Pkg.add("ClinicalTrialUtilities");
+using Pkg; Pkg.add("ClinicalTrialUtilities");
 ```
 or
 ```
-using Pkg
-Pkg.clone("https://github.com/PharmCat/ClinicalTrialUtilities.jl.git");
+using Pkg; Pkg.clone("https://github.com/PharmCat/ClinicalTrialUtilities.jl.git");
 ```
+
+And then to perform tests: 
+```
+Pkg.test("ClinicalTrialUtilities");
+```
+
 ### Basic functions:
 
 - Sample size calculation:
