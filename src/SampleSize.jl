@@ -4,7 +4,7 @@
 
 
 #main sample size function
-function ctSampleN(;param=:notdef, type=:notdef, group=:notdef, alpha=0.05, beta=0.2, diff=0, sd=0, a=0, b=0, k=1, out=:num)
+function ctSampleN(;param=:notdef, type=:notdef, group=:notdef, alpha=0.05, beta=0.2, diff=0, sd=0, a=0, b=0, k=1, logdiff=false, out=:num)
     if alpha >= 1 || alpha <= 0 || beta >= 1 || beta <= 0  throw(CTUException(1201,"sampleSize: alpha and beta sould be > 0 and < 1.")) end
     if (type == :ei || type == :ns) && diff == 0  throw(CTUException(1202,"sampleSize: diff cannot be 0")) end
     if param == :prop && !(group == :one || group == :two || type == :mcnm)  throw(CTUException(1203,"sampleSize: group should be defined or mcnm type.")) end
@@ -55,9 +55,9 @@ function ctSampleN(;param=:notdef, type=:notdef, group=:notdef, alpha=0.05, beta
         if type == :ea
             n = orEquality(a, b; alpha=alpha, beta=beta, k=k)
         elseif type == :ei
-            n = orEquivalence(a, b, diff; alpha=alpha, beta=beta, k=k, logdiff=true)
+            n = orEquivalence(a, b, diff; alpha=alpha, beta=beta, k=k, logdiff=logdiff)
         elseif type == :ns
-            n = orNS(a, b, diff; alpha=alpha, beta=beta, k=k, logdiff=true)
+            n = orNS(a, b, diff; alpha=alpha, beta=beta, k=k, logdiff=logdiff)
         else return false end
     else return false end
 
@@ -114,7 +114,7 @@ function ctSampleN(;param=:notdef, type=:notdef, group=:notdef, alpha=0.05, beta
 end #sampleSize
 
 #clinical trial power main function
-function ctPower(;param=:notdef, type=:notdef, group=:notdef, alpha=0.05, logdiff=true, diff=0, sd=0, a=0, b=0, n=0, k=1,  out=:num)
+function ctPower(;param=:notdef, type=:notdef, group=:notdef, alpha=0.05, logdiff=false, diff=0, sd=0, a=0, b=0, n=0, k=1,  out=:num)
     if alpha >= 1 || alpha <= 0  return false end
     #if (type == :ei || type == :ns) && diff == 0 return false end
     if param == :prop && !(group == :one || group == :two || type == :mcnm)  return false end

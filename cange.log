@@ -1,4 +1,14 @@
 
+v0.1.9
+
+- add PK module
+- pooledCV
+- add DataFrames to dependencies
+- Simulation unification
+- logdiff set false by default in ctSampleN, ctPower
+- README.md update and fix
+
+
 v0.1.8
 
   - bugfix (meanNormCI, text output)
@@ -7,6 +17,7 @@ v0.1.8
   - move ConfInt to main module
   - ci2cv
   - new designs in designProp
+
 
 v1.0.7
 

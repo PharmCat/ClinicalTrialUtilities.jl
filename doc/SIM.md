@@ -10,7 +10,11 @@ bePower(;alpha, logscale, theta1, theta2, theta0, cv, n, simnum, seed)
 
 Proportion power simulation
 
-ctPropPower(p1, n1, p2, n2, diff; alpha, type, method, simnum, seed)
+ctPropPower(p1, n1, p2, n2, ref; alpha, type, citype, method, simnum, seed)
+
+Proportion simulation sample size
+
+ctPropSampleN(p1, p2, ref; alpha, beta, type, citype, method, simnum, seed)
 
 ### bePower
 

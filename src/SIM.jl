@@ -2,7 +2,8 @@
 # Copyright © 2019 Vladimir Arnautov aka PharmCat (mail@pharmcat.net)
 
 module SIM
-    using Distributions, Random
+    using Distributions
+    using Random
     import ..ctSampleN
     import ..designProp
     import ..cv2ms
@@ -65,7 +66,7 @@ module SIM
     function beReplPowerFSS()
     end
 
-    function ctPropPower(p1, n1, p2, n2, diff; alpha=0.05, type=:notdef, method=:notdef, simnum=5, seed=0)
+    function ctPropPower(p1, n1, p2, n2, ref; alpha=0.05, type=:notdef, citype=:notdef, method=:notdef, simnum=5, seed=0)
         if type == :notdef || method == :notdef throw(CTUException(1115,"ctPropPower: type or method not defined.")) end
         rng = MersenneTwister(1234)
         if seed == 0  Random.seed!(rng) else Random.seed!(seed) end
@@ -76,16 +77,26 @@ module SIM
         for i=1:nsim
             x1 = rand(BIN1)
             x2 = rand(BIN2)
-            ci = twoProp(x1, n1, x2, n2; alpha=alpha, type=type, method=method)
-            if ci.lower > diff pow += 1 end
+            ci = twoProp(x1, n1, x2, n2; alpha=alpha, type=citype, method=method)
+            if type == :ns
+                if ci.lower > ref pow += 1 end
+            elseif type == :ei
+                if ci.lower > ref[1] &&  ci.upper < ref[2] pow += 1 end
+            end
         end
         return pow/nsim
     end
 
-    function ctPropSampleN(p1, p2, diff; alpha=0.05, beta=0.2, type=:notdef, method=:notdef, simnum=5, seed=0)
-        if type == :notdef || method == :notdef throw(CTUException(1116,"ctPropSampleN: type or method not defined.")) end
-        st::Int = sn::Int = ceil(ctSampleN(param=:prop, type=:ns, group=:two, alpha=alpha/2, beta=beta, diff=diff, a=p1, b=p2))
-        pow = ctPropPower(p1, sn, p2, sn, diff; alpha=alpha, type=type, method=method, simnum=simnum, seed=seed)
+    function ctPropSampleN(p1, p2, ref; alpha=0.05, beta=0.2, type=:notdef, citype =:notdef, method=:notdef, simnum=5, seed=0)
+        if type == :notdef || citype == :notdef || method == :notdef throw(CTUException(1116,"ctPropSampleN: type or method not defined.")) end
+            st::Int = sn::Int = 10
+        if citype == :diff
+            st = sn = ceil(ctSampleN(param=:prop, type=type, group=:two, alpha=alpha, beta=beta, diff=ref, a=p1, b=p2))
+        elseif citype == :or
+            st = sn = ceil(ctSampleN(param=:or, type=type, group=:two, alpha=alpha, beta=beta, diff=ref, a=p1, b=p2, logdiff = false))
+        end
+
+        pow = ctPropPower(p1, sn, p2, sn, ref; alpha=alpha, type=type, citype=citype, method=method, simnum=simnum, seed=seed)
         conu(x, y) = x < 1 - y
         cond(x, y) = x > 1 - y
         if pow < 1-beta
@@ -101,12 +112,12 @@ module SIM
             pow = pown
             sn  = snn
             snn = snn + inc
-            pown = ctPropPower(p1, snn, p2, snn, diff; alpha=alpha, type=type, method=method, simnum=simnum, seed=seed)
+            pown = ctPropPower(p1, snn, p2, snn, ref; alpha=alpha, type=type, citype=citype,method=method, simnum=simnum, seed=seed)
         end
         return snn, pown, sn, pow
     end
 
-    function ctMeansPower(m1, s1, n1, m2, s2, n2, diff;alpha=0.05, method=:notdef, simnum=5, seed=0)
+    function ctMeansPower(m1, s1, n1, m2, s2, n2, ref; alpha=0.05, method=:notdef, simnum=5, seed=0)
         #if type == :notdef || method == :notdef throw(CTUException(1115,"ctPropPower: type or method not defined.")) end
         rng = MersenneTwister(1234)
         if seed == 0  Random.seed!(rng) else Random.seed!(seed) end
@@ -122,12 +133,12 @@ module SIM
             ss1    = rand(CHSQ1)*s1/(n1-1)
             ss2    = rand(CHSQ2)*s2/(n2-1)
             ci = twoMeans(sm1, ss1, n1, sm2, ss2, n2; alpha=alpha,  method=:ev)
-            if ci.lower > diff pow += 1 end
+            if ci.lower > ref pow += 1 end
         end
         return pow/nsim
     end
 
-    function ctMeansPowerFS(m1, s1, n1, m2, s2, n2, diff;alpha=0.05, method=:notdef, simnum::Real=5, seed=0)
+    function ctMeansPowerFS(m1, s1, n1, m2, s2, n2, ref;alpha=0.05, method=:notdef, simnum::Real=5, seed=0)
         #if type == :notdef || method == :notdef throw(CTUException(1115,"ctPropPower: type or method not defined.")) end
         if method == :notdef throw(CTUException(1117,"ctMeansPowerFS: method not defined.")) end
         rng = MersenneTwister(1234)
@@ -141,7 +152,7 @@ module SIM
             set1   = (rand(ZDIST, n1)*sd1).+m1
             set2   = (rand(ZDIST, n2)*sd2).+m2
             ci     = twoMeans(mean(set1), var(set1), n1, mean(set2), var(set2), n2; alpha=alpha,  method=method)
-            if ci.lower > diff pow += 1 end
+            if ci.lower > ref pow += 1 end
         end
         return pow/nsim
     end

@@ -1,5 +1,5 @@
 # Clinical Trial Utilities
-# Version: 0.1.8
+# Version: 0.1.9
 # Author: Vladimir Arnautov aka PharmCat
 # Copyright © 2019 Vladimir Arnautov aka PharmCat (mail@pharmcat.net)
 # OwensQ/PowerTOST functions rewrited from https://github.com/Detlew/PowerTOST by Detlew Labes, Helmut Schuetz, Benjamin Lang
@@ -17,6 +17,7 @@ module ClinicalTrialUtilities
 using Distributions
 #using Rmath #should be rewrited
 using QuadGK
+using DataFrames
 #using SpecialFunctions
 import SpecialFunctions.lgamma
 
@@ -28,7 +29,7 @@ end
 
 Base.showerror(io::IO, e::CTUException) = print("CTU Exception code: ", e.n, " Message: ", e.var);
 const ZDIST = Normal()
-const VERSION = "0.1.8"
+const VERSION = "0.1.9"
 #Exceptions
 
 struct ConfInt
@@ -37,7 +38,16 @@ struct ConfInt
     estimate::Float64
 end
 
-export CTUException, ConfInt
+struct NCA
+    result::DataFrame
+    elimination::DataFrame
+    settings::DataFrame
+    textout::String
+    errorlog::String
+    errors::Array
+end
+
+export CTUException, ConfInt, NCA
 
 #Owen function calc: owensQ, owensQo, ifun1, owensTint2, owensT, tfn
 include("OwensQ.jl")
@@ -51,23 +61,21 @@ include("SampleSize.jl")
 include("CI.jl")
 #Simulations
 include("SIM.jl")
+#PK
+include("PK.jl")
 #info function
 include("Info.jl")
 
 #Sample size
-export ctSampleN
-export beSampleN
+export ctSampleN, beSampleN
 #Power
-export ctPower
-export bePower
+export ctPower, bePower
 #Utils
-export ci2cv
+export ci2cv, pooledCV
 #Other
-export owensQ
-export owensT
-
-export SIM
-export CI
+export owensQ, owensT
+#Mudules
+export SIM, CI, PK
 
 
 

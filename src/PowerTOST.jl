@@ -198,5 +198,13 @@ function ci2cv(;alpha = 0.05, theta1 = 0.8, theta2 = 1.25, n, design=:d2x2, mso=
     return ms2cv(ms)
 end
 
-function pooledCV()
+function pooledCV(data::DataFrame; cv=:cv, df=:df, alpha=0.05, returncv=true)::ConfInt
+    if isa(cv, String)  cv = Symbol(cv) end
+    if isa(df, String)  df = Symbol(df) end
+    tdf = sum(data[:, df])
+    result = sum(cv2ms.(data[:, cv]) .* data[:, df])/tdf
+    CHSQ = Chisq(tdf)
+    if returncv return ConfInt(ms2cv(result*tdf/quantile(CHSQ, 1-alpha/2)), ms2cv(result*tdf/quantile(CHSQ, alpha/2)), ms2cv(result))
+    else ConfInt(result*tdf/quantile(CHSQ, 1-alpha/2), result*tdf/quantile(CHSQ, alpha/2), result)
+    end
 end

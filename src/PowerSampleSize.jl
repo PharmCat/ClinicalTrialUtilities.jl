@@ -57,12 +57,12 @@ function orEquality(p0, p1; alpha=0.05, beta=0.2, k=1)
     OR=p0*(1-p1)/p1/(1-p0)
     return (1/k/p0/(1-p0)+1/p1/(1-p1))*((quantile(ZDIST, 1-alpha/2)+quantile(ZDIST, 1 - beta))/log(OR))^2
 end
-function orEquivalence(p0, p1, diff; alpha=0.05, beta=0.2, k=1, logdiff=true)
+function orEquivalence(p0, p1, diff; alpha=0.05, beta=0.2, k=1, logdiff=false)
     if !logdiff diff=log(diff) end
     OR=p0*(1-p1)/p1/(1-p0)
     return (1/k/p0/(1-p0)+1/p1/(1-p1))*((quantile(ZDIST, 1-alpha)+quantile(ZDIST, 1 - beta/2))/(log(OR)-diff))^2
 end
-function orNS(p0, p1, diff; alpha=0.05, beta=0.2, k=1, logdiff=true)
+function orNS(p0, p1, diff; alpha=0.05, beta=0.2, k=1, logdiff=false)
     if !logdiff diff=log(diff) end
     OR=p0*(1-p1)/p1/(1-p0)
     return (1/k/p0/(1-p0)+1/p1/(1-p1))*((quantile(ZDIST, 1-alpha)+quantile(ZDIST, 1 - beta))/(log(OR)-diff))^2
