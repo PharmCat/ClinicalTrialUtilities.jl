@@ -544,6 +544,15 @@ println(" ---------------------------------- ")
     @test pk.result.Cmax[1] ≈ 0.4 atol=1E-5
     @test pk.result.MRTlast[1] ≈ 3.10345 atol=1E-5
     @test pk.result.Tmax[1] ≈ 3.0 atol=1E-5
+
+    pk = ClinicalTrialUtilities.PK.nca(data; sort=[:Formulation, :Subject], calcm = :logt)
+    @test pk.result.AUClast[1] ≈ 1.43851 atol=1E-5
+    @test pk.result.AUMClast[1] ≈ 4.49504 atol=1E-5
+
+    pk = ClinicalTrialUtilities.PK.nca(data; sort=[:Formulation, :Subject], calcm = :luld)
+    @test pk.result.AUClast[1] ≈ 1.43851 atol=1E-5
+    @test pk.result.AUMClast[1] ≈ 4.49504 atol=1E-5
+
 end
 
 println(" ---------------------------------- ")

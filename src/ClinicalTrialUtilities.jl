@@ -44,6 +44,7 @@ struct NCA
     settings::DataFrame
     textout::String
     errorlog::String
+    errors::Array
 end
 
 export CTUException, ConfInt, NCA

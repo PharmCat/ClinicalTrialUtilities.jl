@@ -92,7 +92,6 @@ owensQ(nu, t, delta, a, b)
 
 #### sampleSize
 ```
-using ClinicalTrialUtilities
 ctSampleN(param=[:mean|:prop|:or], type=[:ea|:ei|:ns|:mcnm], group=[:one|:two], alpha=0.05, beta=0.2, diff=0, sd=0, a=0, b=0, k=1, logdiff=false, out=[:num|:str|:vstr|:print])
 
 ```
@@ -137,7 +136,6 @@ ctSampleN(param=[:mean|:prop|:or], type=[:ea|:ei|:ns|:mcnm], group=[:one|:two], 
 
 #### ctPower
 ```
-using ClinicalTrialUtilities
 ctPower(param=[:mean|:prop|:or], type=[:ea|:ei|:ns|:mcnm], group=[:one|:two], alpha=0.05, n=0, diff=0,  sd=0, a=0, b=0, k=1, logdiff=false, out=[:num|:str|:vstr|:print])
 ```
 
@@ -376,9 +374,13 @@ pooledCV(data; cv=:cv, df=:df, alpha=0.05, returncv=true)
 
 Description here:
 
-https://github.com/PharmCat/ClinicalTrialUtilities.jl/blob/dev/doc/CI.md
+https://github.com/PharmCat/ClinicalTrialUtilities.jl/blob/master/doc/CI.md
 
 ### <a name="PK"></a>Pharmacokinetics
+
+Description here:
+
+https://github.com/PharmCat/ClinicalTrialUtilities.jl/blob/dev/doc/PK.md
 
 ### <a name="SIM"></a>Simulations
 
