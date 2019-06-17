@@ -32,7 +32,7 @@ or
 using Pkg; Pkg.clone("https://github.com/PharmCat/ClinicalTrialUtilities.jl.git");
 ```
 
-And then to perform tests: 
+And then to perform tests:
 ```
 Pkg.test("ClinicalTrialUtilities");
 ```
@@ -185,7 +185,6 @@ ctPower(param=[:mean|:prop|:or], type=[:ea|:ei|:ns|:mcnm], group=[:one|:two], al
 #### powerTOST
 
 ```
-using ClinicalTrialUtilities
 powerTOST(alpha=0.05, logscale=[true|false], theta1=0.8, theta2=1.25, theta0=0.95, cv=0.0, n=36, method=":owenq|:nct|:shifted", design=":parallel|:d2x2|:d2x2x3|:d2x2x4|:d2x4x4|:d2x3x3", out=[:num|:str|:vstr|:print])
 ```
 **logscale** - theta1, theta2, theta0: if true - make log transformation (default true);
@@ -222,7 +221,6 @@ powerTOST(alpha=0.05, logscale=[true|false], theta1=0.8, theta2=1.25, theta0=0.9
 Using for bioequivalence study.
 
 ```
-using ClinicalTrialUtilities
 beSampleN(alpha=0.05, logscale=[true|false], theta1=0.8, theta2=1.25, theta0=0.95, cv=0, method=[:owenq|:nct|:shifted], design=[:parallel|:d2x2|:d2x2x3|:d2x2x4|:d2x4x4|:d2x3x3], out=[:num|:str|:vstr|:print])
 ```
 **logscale** - theta1, theta2, theta0: if true - make log transformation (default true);

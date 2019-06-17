@@ -30,6 +30,13 @@ Unbalanced design. n(i)=11/10/10 assumed.
 [1] 0.579468
 > power.TOST(theta0=0.95, theta1=0.8, theta2=1.25, CV=0.4, alpha=0.05, logscale=TRUE, design="2x3x3", method="owenq", n=30)
 [1] 0.5614358
+> power.TOST(theta0=0.95, theta1=0.8, theta2=1.25, CV=0.4, alpha=0.05, logscale=TRUE, design="3x3", method="owenq", n=30)
+[1] 0.3847067
+> power.TOST(theta0=0.95, theta1=0.8, theta2=1.25, CV=0.4, alpha=0.05, logscale=TRUE, design="3x6x3", method="owenq", n=30)
+[1] 0.3847067
+> power.TOST(theta0=0.95, theta1=0.8, theta2=1.25, CV=0.4, alpha=0.05, logscale=TRUE, design="2x4x2", method="owenq", n=30)
+Unbalanced design. n(i)=8/8/7/7 assumed.
+[1] 0.0001785665
 ------------------------------------------------------------------------------------------------------------
 
 ClinicalTrialUtilities.oneSampleMeanEqualityP(1.5,2,1,32;alpha=0.05)
