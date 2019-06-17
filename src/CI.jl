@@ -391,7 +391,7 @@ module CI
     #--------------------------------RR-----------------------------------------
     #Miettinen-Nurminen Score interval
     #Not implemented
-    function propRRMNCI(x1::Int, n1::Int, x2::Int, n2::Int, alpha::Float64) end
+    #function propRRMNCI(x1::Int, n1::Int, x2::Int, n2::Int, alpha::Float64) end
 
     #Crude log interval
     #Gart, JJand Nam, J (1988): Approximate interval estimation of the ratio of binomial parameters: Areview and corrections for skewness. Biometrics 44, 323-338.

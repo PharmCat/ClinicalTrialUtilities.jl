@@ -664,6 +664,19 @@ println(" ---------------------------------- ")
     @test !ClinicalTrialUtilities.ctSampleN(param=:prop, type=:ea, group=:one, alpha=0.05, beta=0.2, diff=1, sd=1, a=-1, b=0, k=1)
     @test !ClinicalTrialUtilities.ctSampleN(param=:prop, type=:ei, group=:one, alpha=0.05, beta=0.2, diff=1, sd=1, a=0.4, b=2, k=1)
     @test !ClinicalTrialUtilities.ctSampleN(param=:or, type=:eea, group=:oone,  diff=1, a=0.5, b=0.5, k=1)
+    data = DataFrame(Concentration = Float64[], Time = Float64[], Subject = String[], Formulation = String[])
+    pk = ClinicalTrialUtilities.PK.nca(data; conc = :c, time = :t,  sort=[:Formulatio, :Subjec], calcm = :logtt)
+    @test length(pk.errors) == 5
+    pk = ClinicalTrialUtilities.PK.nca(data; conc = :Concentration, time = :Time,  sort=6, calcm = :logt)
+    @test length(pk.errors) == 1
+end
+
+println(" ---------------------------------- ")
+@testset "  Print test          " begin
+    ClinicalTrialUtilities.ctSampleN(param=:mean, type=:ea, group=:one, alpha=0.05, beta=0.2, sd=1, a=1.5, b=2, k=1, out=:print)
+    ClinicalTrialUtilities.ctPower(param=:prop, type=:ns, group=:two, a=0.85, b=0.65, diff=-0.1, n=25, alpha=0.05, out=:print)
+    ClinicalTrialUtilities.beSampleN(;theta0=0.95, theta1=0.8, theta2=1.25, cv=0.2, alpha=0.05, beta=0.2, logscale=true, method=:owenq, out=:print)
+    @test true
 end
 
 #println(" ---------------------------------- ")

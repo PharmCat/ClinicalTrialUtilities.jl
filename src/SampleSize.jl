@@ -169,7 +169,7 @@ function ctPower(;param=:notdef, type=:notdef, group=:notdef, alpha=0.05, logdif
             pow =  orEquivalenceP(a, b, diff, n; alpha=alpha, k=k, logdiff=logdiff)
         elseif type == :ns
             pow = orNSP(a, b, diff, n; alpha=alpha, k=k, logdiff=logdiff)
-        else return false end
+        end
     end
 
     if out == :num return pow
