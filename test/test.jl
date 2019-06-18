@@ -475,6 +475,11 @@ println(" ---------------------------------- ")
     @test ci.lower    ≈  0.0428 atol=1E-4
     @test ci.upper    ≈  0.3422 atol=1E-4
 
+    #https://rdrr.io/cran/ORCI/man/Woolf.CI.html
+    ci = ClinicalTrialUtilities.CI.twoProp(2, 14, 1, 11; alpha=0.05, type=:or,method=:woolf)
+    @test ci.lower    ≈  0.1310604 atol=1E-7
+    @test ci.upper    ≈  21.1946394 atol=1E-7
+
     #CI Test for random sample
     m1  = rand(Normal(), 100)
     m2  = rand(Normal(), 100)
@@ -484,6 +489,17 @@ println(" ---------------------------------- ")
     ci1 = ClinicalTrialUtilities.CI.meanDiffEV(m1, m2, 0.05)
     ci2 = ClinicalTrialUtilities.CI.meanDiffEV(mean(m1), var(m1), length(m1), mean(m2), var(m2), length(m2), 0.05)
     @test ci1 == ci2
+
+    #CMH
+    #http://www.metafor-project.org/doku.php/analyses:rothman2008
+    data = DataFrame(a = Int[], b = Int[], c = Int[], d = Int[])
+    push!(data, (8, 98, 5, 115))
+    push!(data, (22, 76, 16, 69))
+    ci = ClinicalTrialUtilities.CI.cmh(data, alpha = 0.1)
+    @test ci.estimate ≈  0.03490026933691816 atol=1E-4
+    @test ci.lower    ≈  -0.01757497925425447 atol=1E-4
+    @test ci.upper    ≈  0.08737551792809078 atol=1E-4
+
 end
 
 println(" ---------------------------------- ")

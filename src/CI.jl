@@ -9,13 +9,12 @@
 # DescTools https://CRAN.R-project.org/package=DescTools
 
 module CI
-    using Distributions
-    using Roots
+    using Distributions, Roots, DataFrames
     import ..ZDIST
     import ..CTUException
     import ..ConfInt
     #const ZDIST = Normal()
-    export oneProp, oneMeans, twoProp, twoMeans
+    export oneProp, oneMeans, twoProp, twoMeans, cmh
 
     function oneProp(x::Int, n::Int; alpha=0.05, method=:wilson)
         if method==:wilson
@@ -128,6 +127,7 @@ module CI
         end
         return ConfInt(ll, ul, x/n)
     end
+    #Blaker CI
     #Blaker, H. (2000). Confidence curves and improved exact confidence intervals for discrete distributions,Canadian Journal of Statistics28 (4), 783–798
     function propBlakerCI(x::Int, n::Int, alpha::Float64)::ConfInt
         tol = 1E-5; lower = 0; upper = 1;
@@ -153,7 +153,7 @@ module CI
         a2 = p2+1-cdf(BIN, quantile(BIN,1-p2))
         return min(a1,a2)
     end
-    #Wald
+    #Wald CI
     function propWaldCI(x::Int, n::Int, alpha::Float64)::ConfInt
         p=x/n
         b = quantile(ZDIST, 1-alpha/2)*sqrt(p*(1-p)/n)
@@ -161,7 +161,6 @@ module CI
     end
     #SOC  Second-Order corrected
     #T. Tony Cai One-sided con&dence intervals in discrete distributions doi:10.1016/j.jspi.2004.01.00
-
     function propSOCCI(x::Int, n::Int, alpha::Float64)::ConfInt
         p  = x/n
         k  = quantile(ZDIST, 1-alpha/2)
@@ -173,7 +172,6 @@ module CI
         b  = k*sqrt(p*(1-p)+(γ1*p*(1-p)+γ2)/n)/sqrt(n)
         return ConfInt(m-b, m+b, p)
     end
-
     #Arcsine
     function propARCCI(x::Int, n::Int, alpha::Float64)::ConfInt
         q = quantile(ZDIST, 1-alpha/2)
@@ -239,6 +237,7 @@ module CI
             return ConfInt(exp(estI - z*stde), exp(estI + z*stde), est)
     end
     #Woolf logit
+    #Woolf, B. (1955). On estimating the relation between blood group and disease. Annals of human genetics, 19(4):251-253.
     function propORWoolfCI(x1::Int, n1::Int, x2::Int, n2::Int, alpha::Float64)::ConfInt
             xa = x1
             xb = n1 - x1
@@ -250,6 +249,18 @@ module CI
             z   = quantile(ZDIST, 1-alpha/2)
             return ConfInt(exp(estI - z*stde), exp(estI + z*stde), estimate)
     end
+
+    #Method of variance estimates recovery
+    #Donner, A. and Zou, G. (2012). Closed-form confidence intervals for functions of the normal mean and standard deviation. Statistical Methods in Medical Research, 21(4):347-359.
+    #function propRRMOVERCI()
+    #end
+
+    #?Agresti independence-smoothed logit
+
+    #?Cornfield exact confidence interval
+    #https://rdrr.io/cran/ORCI/man/Cornfieldexact.CI.html
+
+
 
     #------------------------------DIFF-----------------------------------------
     #Wald
@@ -273,7 +284,9 @@ module CI
     end
 
     #Newcombes Hybrid (wilson) Score interval for the difference of proportions
+    #Newcombe 1998
     #10
+    #Newcombe RG (1998): Interval Estimation for the Difference Between Independent Proportions: Comparison of Eleven Methods. Statistics in Medicine 17, 873-890.
     function propDiffNHSCI(x1::Int, n1::Int, x2::Int, n2::Int, alpha::Float64)::ConfInt
         p1  = x1/n1
         p2  = x2/n2
@@ -298,6 +311,7 @@ module CI
 
     #Agresti-Caffo interval for the difference of proportions
     #13
+    #Agresti A, Caffo B., “Simple and effective confidence intervals for proportions and differences of proportions result from adding two successes and two failures”, American Statistician 54: 280–288 (2000)
     function propDiffACCI(x1::Int, n1::Int, x2::Int, n2::Int, alpha::Float64)::ConfInt
         p1       = x1/n1
         p2       = x2/n2
@@ -463,4 +477,33 @@ module CI
         x = ((n-k)*log(s) - ((n1-1)*log(s1)+(n2-1)*log(s2)))/(1+(1/(n1-1) + 1/(n2-1) - 1/(n-k))/3/(k-1))
         return 1-cdf(Chisq(k-1),x), x
     end
+
+    #Cochran–Mantel–Haenszel confidence intervals
+    #p275, Rothman, K. J., Greenland, S., & Lash, T. L. (2008). Modern epidemiology (3rd ed.). Philadelphia: Lippincott Williams & Wilkins.
+    #1 equation in: Sato, Greenland, & Robins (1989)
+    #2 equation in: Greenland & Robins (1985)
+    # metafor: Meta-Analysis Package for R - Wolfgang Viechtbauer
+    function cmh(data::DataFrame; a = :a, b = :b, c = :c, d = :d, alpha = 0.05, type = :diff, method = :default)::ConfInt
+        if type == :diff
+            if method == :default method = :sato end #default method
+
+            n1 = data[a] + data[b]
+            n2 = data[c] + data[d]
+            N  = data[a] + data[b] + data[c] + data[d]
+            est = sum(data[a] .* (n2 ./ N) - data[c] .* (n1 ./ N)) / sum(n1 .* (n2 ./ N))
+            #1
+            se   = sqrt((est * (sum(data[c] .* (n1 ./ N) .^ 2 - data[a] .* (n2 ./ N) .^2 + (n1 ./ N) .* (n2 ./ N) .* (n2-n1) ./ 2)) + sum(data[a] .* (n2 - data[c]) ./ N + data[c] .* (n1 - data[a]) ./ N)/2) / sum(n1 .* (n2 ./ N)) .^ 2) # equation in: Sato, Greenland, & Robins (1989)
+            #2
+            #se   = sqrt(sum(((data[a]./N.^2).*data[b].*(n2.^2./n1) + (data[c]./N.^2).*data[d].*(n1.^2./n2))) / sum(n1.*(n2./N))^2)
+            #zval = est/se
+            #pval = 2*(1-cdf(Normal(), abs(zval)))
+            z = quantile(ZDIST, 1 - alpha/2)
+            return ConfInt(est - z*se, est + z*se, est)
+        elseif type == :or
+            #...
+        elseif type == :rr
+            #...
+        end
+    end
+
 end #end module CI
