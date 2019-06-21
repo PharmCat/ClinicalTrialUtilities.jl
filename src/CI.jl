@@ -7,6 +7,7 @@
 # proportion by M.Subbiah, V.Rajeswaran https://CRAN.R-project.org/package=proportion
 # binom by Sundar Dorai-Raj https://CRAN.R-project.org/package=binom
 # DescTools https://CRAN.R-project.org/package=DescTools
+# metafor by Wolfgang Viechtbauer https://cran.r-project.org/package=metafor
 
 module CI
     using Distributions, Roots, DataFrames
@@ -483,26 +484,52 @@ module CI
     #1 equation in: Sato, Greenland, & Robins (1989)
     #2 equation in: Greenland & Robins (1985)
     # metafor: Meta-Analysis Package for R - Wolfgang Viechtbauer
-    function cmh(data::DataFrame; a = :a, b = :b, c = :c, d = :d, alpha = 0.05, type = :diff, method = :default)::ConfInt
+    function cmh(data::DataFrame; a = :a, b = :b, c = :c, d = :d, alpha = 0.05, type = :diff, method = :default, logscale = false)::ConfInt
+        n1 = data[a] + data[b]
+        n2 = data[c] + data[d]
+        N  = data[a] + data[b] + data[c] + data[d]
+        z = quantile(ZDIST, 1 - alpha/2)
         if type == :diff
             if method == :default method = :sato end #default method
 
-            n1 = data[a] + data[b]
-            n2 = data[c] + data[d]
-            N  = data[a] + data[b] + data[c] + data[d]
             est = sum(data[a] .* (n2 ./ N) - data[c] .* (n1 ./ N)) / sum(n1 .* (n2 ./ N))
             #1
-            se   = sqrt((est * (sum(data[c] .* (n1 ./ N) .^ 2 - data[a] .* (n2 ./ N) .^2 + (n1 ./ N) .* (n2 ./ N) .* (n2-n1) ./ 2)) + sum(data[a] .* (n2 - data[c]) ./ N + data[c] .* (n1 - data[a]) ./ N)/2) / sum(n1 .* (n2 ./ N)) .^ 2) # equation in: Sato, Greenland, & Robins (1989)
+            if method == :sato
+                se   = sqrt((est * (sum(data[c] .* (n1 ./ N) .^ 2 - data[a] .* (n2 ./ N) .^2 + (n1 ./ N) .* (n2 ./ N) .* (n2-n1) ./ 2)) + sum(data[a] .* (n2 - data[c]) ./ N + data[c] .* (n1 - data[a]) ./ N)/2) / sum(n1 .* (n2 ./ N)) .^ 2) # equation in: Sato, Greenland, & Robins (1989)
             #2
-            #se   = sqrt(sum(((data[a]./N.^2).*data[b].*(n2.^2./n1) + (data[c]./N.^2).*data[d].*(n1.^2./n2))) / sum(n1.*(n2./N))^2)
+            elseif method == :gr
+                se   = sqrt(sum(((data[a] ./N .^2) .* data[b] .* (n2 .^2 ./ n1) + (data[c] ./N .^2) .* data[d] .* (n1 .^2 ./ n2))) / sum(n1 .*(n2 ./ N))^2) # equation in: Greenland & Robins (1985)
+            end
             #zval = est/se
             #pval = 2*(1-cdf(Normal(), abs(zval)))
-            z = quantile(ZDIST, 1 - alpha/2)
             return ConfInt(est - z*se, est + z*se, est)
         elseif type == :or
             #...
+            Pi = (data[a] ./ N) + (data[d] ./ N)
+            Qi = (data[b] ./ N) + (data[c] ./ N)
+            Ri = (data[a] ./ N) .* data[d]
+            Si = (data[b] ./ N) .* data[c]
+            R  = sum(Ri)
+            S  = sum(Si)
+            if R == 0 || S == 0 return ConfInt(NaN, NaN, NaN) end
+
+            est = log(R/S)
+            se  = sqrt(1/2 * (sum(Pi .* Ri)/R^2 + sum(Pi .* Si + Qi .* Ri)/(R*S) + sum(Qi .* Si)/S^2)) # based on Robins et al. (1986)
+            #zval= est / se
+            #pval= 2*(1-cdf(Normal(), abs(zval)))
+            if logscale return ConfInt(est - z*se, est + z*se, est) else return ConfInt(exp(est - z*se), exp(est + z*se), exp(est)) end
         elseif type == :rr
             #...
+            R = sum(data[a] .* (n2 ./ N))
+            S = sum(data[c] .* (n1 ./ N))
+
+            if sum(data[a]) == 0 || sum(data[c]) == 0 return ConfInt(NaN, NaN, NaN) end
+
+            est = log(R/S)
+            se  = sqrt(sum(((n1 ./ N) .* (n2 ./ N) .* (data[a] + data[c]) - (data[a] ./ N) .* data[c])) / (R*S))
+            #zval= est / se
+            #pval= 2*(1-cdf(Normal(), abs(zval)))
+            if logscale return ConfInt(est - z*se, est + z*se, est) else return ConfInt(exp(est - z*se), exp(est + z*se), exp(est)) end
         end
     end
 

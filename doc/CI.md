@@ -117,9 +117,57 @@ Confidence interval for mean difference.
 
 Cochran–Mantel–Haenszel confidence intervals.
 
+
+cmh(data::DataFrame; a = :a, b = :b, c = :c, d = :d, alpha = 0.05, type = [**:diff**|:or|:rr], method = :default, logscale = false)::ConfInt
+
+
+ **data**- dataframe with 4 columns, each line represent 2X2 table
+
+**a** **b** **c** **d** - dataframe table names (number of subjects in 2X2 table):
+
+|         | outcome 1 | outcome 2 |
+|---------|-----------|-----------|
+| group 1 |     a     |     b     |
+| group 2 |     c     |     d     |
+
+**alpha** - alpha value (all CI computed as two-sided);
+
+**type** - estimation type
+- diff - risk difference (default)
+- or - odd ratio
+- rr - risk ratio
+
+**logscale** - return CI in log scale.
+
+- false (default)
+- true
+
+For example, let we have 2 sources:
+
+1:
+|         | outcome 1 | outcome 2 |
+|---------|-----------|-----------|
+| group 1 |     8     |     98    |
+| group 2 |     5     |    115    |
+
+2:
+|         | outcome 1 | outcome 2 |
+|---------|-----------|-----------|
+| group 1 |     22    |     76    |
+| group 2 |     16    |     69    |
+
+Dataframe construction:
 ```
- cmh(data::DataFrame; a = :a, b = :b, c = :c, d = :d, alpha = 0.05, type = :diff, method = :default)::ConfInt
- ```
+data = DataFrame(a = Int[], b = Int[], c = Int[], d = Int[])
+  push!(data, (8, 98, 5, 115))
+  push!(data, (22, 76, 16, 69))
+```
+
+For risk difference use:
+
+```
+ci = ClinicalTrialUtilities.CI.cmh(data, alpha = 0.1)
+```
 
 ## Examples:
 
