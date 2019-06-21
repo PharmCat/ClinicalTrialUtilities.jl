@@ -113,12 +113,10 @@ Confidence interval for mean difference.
 
 ### cmh
 
-(!) In development (!)
-
 Cochran–Mantel–Haenszel confidence intervals.
 
 
-cmh(data::DataFrame; a = :a, b = :b, c = :c, d = :d, alpha = 0.05, type = [**:diff**|:or|:rr], method = :default, logscale = false)::ConfInt
+> cmh(data::DataFrame; a = :a, b = :b, c = :c, d = :d, alpha = 0.05, type = [**:diff**|:or|:rr], method = :default, logscale = false)::ConfInt
 
 
  **data**- dataframe with 4 columns, each line represent 2X2 table
@@ -145,18 +143,22 @@ cmh(data::DataFrame; a = :a, b = :b, c = :c, d = :d, alpha = 0.05, type = [**:di
 For example, let we have 2 sources:
 
 1:
+
 |         | outcome 1 | outcome 2 |
 |---------|-----------|-----------|
 | group 1 |     8     |     98    |
 | group 2 |     5     |    115    |
 
 2:
+
 |         | outcome 1 | outcome 2 |
 |---------|-----------|-----------|
 | group 1 |     22    |     76    |
 | group 2 |     16    |     69    |
 
+
 Dataframe construction:
+
 ```
 data = DataFrame(a = Int[], b = Int[], c = Int[], d = Int[])
   push!(data, (8, 98, 5, 115))
