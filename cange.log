@@ -1,3 +1,11 @@
+v0.1.10
+
+- add Cochran–Mantel–Haenszel confidence intervals
+- add documentation and comments
+- improve coverage
+- add tests
+- code cosmetics
+
 
 v0.1.9
 

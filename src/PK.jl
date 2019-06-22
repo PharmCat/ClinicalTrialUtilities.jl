@@ -7,9 +7,44 @@ export nca
 using DataFrames
 
     function nca(data; conc=:Concentration, time=:Time, sort = NaN, calcm = :lint, stack = false)
-        if  !(calcm == :lint || calcm == :logt || calcm == :luld)
-            return NCA(NaN, NaN, NaN, "", "Calculation method not found\n", [1])
+        columns  = DataFrames.names(data)
+        errorlog = ""
+        errorn   = 0
+        errors   = Int[]
+
+        if typeof(findfirst(x ->  x  == conc, columns)) == Nothing
+            errorn+=1
+            errorlog *= string(errorn)*": Concentration column not found\n"
+            push!(errors, 1)
+
         end
+        if typeof(findfirst(x ->  x  == time, columns)) == Nothing
+            errorn+=1
+            errorlog *= string(errorn)*": Time column not found\n"
+            push!(errors, 2)
+        end
+        if  !(calcm == :lint || calcm == :logt || calcm == :luld)
+            errorn+=1
+            errorlog *= string(errorn)*": Calculation method not found\n"
+            push!(errors, 3)
+        end
+        if sort !== NaN
+            if isa(sort, Array)
+                for i = 1:length(sort)
+                    if typeof(findfirst(x ->  x  == sort[i], columns)) == Nothing
+                        errorn+=1
+                        errorlog *= string(errorn)*": Sort column not found\n"
+                        push!(errors, 4)
+                    end
+                end
+            else
+                errorn+=1
+                errorlog *= string(errorn)*": Sort is not array\n"
+                push!(errors, 5)
+            end
+        end
+        if errorn > 0 return NCA(DataFrame(), DataFrame(), DataFrame(), "", errorlog, errors) end
+
         if isa(conc, String)  conc = Symbol(conc) end
         if isa(time, String)  time = Symbol(time) end
 

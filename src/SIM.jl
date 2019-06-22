@@ -54,17 +54,17 @@ module SIM
         return pow/nsim
     end
 
-    function beSampleSetGen()
-    end
+    #function beSampleSetGen()
+    #end
 
-    function bePowerFSS()
-    end
+    #function bePowerFSS()
+    #end
 
-    function twoStageBEPower()
-    end
+    #function twoStageBEPower()
+    #end
 
-    function beReplPowerFSS()
-    end
+    #function beReplPowerFSS()
+    #end
 
     function ctPropPower(p1, n1, p2, n2, ref; alpha=0.05, type=:notdef, citype=:notdef, method=:notdef, simnum=5, seed=0)
         if type == :notdef || method == :notdef throw(CTUException(1115,"ctPropPower: type or method not defined.")) end

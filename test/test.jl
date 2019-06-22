@@ -223,6 +223,13 @@ println(" ---------------------------------- ")
     @test ClinicalTrialUtilities.bePower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.4, n=32, design=:d2x3x3) ≈ 0.5976873  atol=1E-7
     @test ClinicalTrialUtilities.bePower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.4, n=31, design=:d2x3x3) ≈ 0.579468  atol=1E-6
     @test ClinicalTrialUtilities.bePower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.4, n=30, design=:d2x3x3) ≈ 0.5614358  atol=1E-7
+    #3x3
+    @test ClinicalTrialUtilities.bePower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.4, n=30, design=:d3x3) ≈ 0.3847067  atol=1E-7
+    #3x6x3
+    @test ClinicalTrialUtilities.bePower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.4, n=30, design=:d3x6x3) ≈ 0.3847067  atol=1E-7
+    #2x4x2
+    @test ClinicalTrialUtilities.bePower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.4, n=30, design=:d2x4x2) ≈ 0.0001785665  atol=1E-10
+
 end
 
 println(" ---------------------------------- ")
@@ -468,6 +475,11 @@ println(" ---------------------------------- ")
     @test ci.lower    ≈  0.0428 atol=1E-4
     @test ci.upper    ≈  0.3422 atol=1E-4
 
+    #https://rdrr.io/cran/ORCI/man/Woolf.CI.html
+    ci = ClinicalTrialUtilities.CI.twoProp(2, 14, 1, 11; alpha=0.05, type=:or,method=:woolf)
+    @test ci.lower    ≈  0.1310604 atol=1E-7
+    @test ci.upper    ≈  21.1946394 atol=1E-7
+
     #CI Test for random sample
     m1  = rand(Normal(), 100)
     m2  = rand(Normal(), 100)
@@ -477,6 +489,26 @@ println(" ---------------------------------- ")
     ci1 = ClinicalTrialUtilities.CI.meanDiffEV(m1, m2, 0.05)
     ci2 = ClinicalTrialUtilities.CI.meanDiffEV(mean(m1), var(m1), length(m1), mean(m2), var(m2), length(m2), 0.05)
     @test ci1 == ci2
+
+    #CMH
+    #http://www.metafor-project.org/doku.php/analyses:rothman2008
+    data = DataFrame(a = Int[], b = Int[], c = Int[], d = Int[])
+    push!(data, (8, 98, 5, 115))
+    push!(data, (22, 76, 16, 69))
+    ci = ClinicalTrialUtilities.CI.cmh(data, alpha = 0.1)
+    @test ci.estimate ≈  0.03490026933691816 atol=1E-4
+    @test ci.lower    ≈  -0.01757497925425447 atol=1E-4
+    @test ci.upper    ≈  0.08737551792809078 atol=1E-4
+
+    ci = ClinicalTrialUtilities.CI.cmh(data, alpha = 0.1, type = :or, logscale = true)
+    @test ci.estimate ≈  0.33871867108844556 atol=1E-7 #0.3387187
+    @test ci.lower    ≈  -0.1730848826896063 atol=1E-7 #-0.1730849
+    @test ci.upper    ≈  0.8505222248664974 atol=1E-7  #0.8505222
+
+    ci = ClinicalTrialUtilities.CI.cmh(data, alpha = 0.1, type = :rr, logscale = true)
+    @test ci.estimate ≈  0.28183148420493526 atol=1E-7
+    @test ci.lower    ≈  -0.14415538594969263 atol=1E-7
+    @test ci.upper    ≈  0.7078183543595631 atol=1E-7
 end
 
 println(" ---------------------------------- ")
@@ -664,6 +696,19 @@ println(" ---------------------------------- ")
     @test !ClinicalTrialUtilities.ctSampleN(param=:prop, type=:ea, group=:one, alpha=0.05, beta=0.2, diff=1, sd=1, a=-1, b=0, k=1)
     @test !ClinicalTrialUtilities.ctSampleN(param=:prop, type=:ei, group=:one, alpha=0.05, beta=0.2, diff=1, sd=1, a=0.4, b=2, k=1)
     @test !ClinicalTrialUtilities.ctSampleN(param=:or, type=:eea, group=:oone,  diff=1, a=0.5, b=0.5, k=1)
+    data = DataFrame(Concentration = Float64[], Time = Float64[], Subject = String[], Formulation = String[])
+    pk = ClinicalTrialUtilities.PK.nca(data; conc = :c, time = :t,  sort=[:Formulatio, :Subjec], calcm = :logtt)
+    @test length(pk.errors) == 5
+    pk = ClinicalTrialUtilities.PK.nca(data; conc = :Concentration, time = :Time,  sort=6, calcm = :logt)
+    @test length(pk.errors) == 1
+end
+
+println(" ---------------------------------- ")
+@testset "  Print test          " begin
+    ClinicalTrialUtilities.ctSampleN(param=:mean, type=:ea, group=:one, alpha=0.05, beta=0.2, sd=1, a=1.5, b=2, k=1, out=:print)
+    ClinicalTrialUtilities.ctPower(param=:prop, type=:ns, group=:two, a=0.85, b=0.65, diff=-0.1, n=25, alpha=0.05, out=:print)
+    ClinicalTrialUtilities.beSampleN(;theta0=0.95, theta1=0.8, theta2=1.25, cv=0.2, alpha=0.05, beta=0.2, logscale=true, method=:owenq, out=:print)
+    @test true
 end
 
 #println(" ---------------------------------- ")
