@@ -1,7 +1,7 @@
 # ClinicalTrialUtilities
  Clinical Trial related calculation: power and sample size calculation, power simulations, confidence interval, pharmacokinetics parameters calculation.
 
-Version:0.1.9
+Version:0.1.10
 
 2019 &copy; Vladimir Arnautov
 
