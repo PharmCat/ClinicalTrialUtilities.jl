@@ -11,10 +11,7 @@
 
 module CI
     using Distributions, Roots, DataFrames
-    import ..ZDIST
-    import ..CTUException
-    import ..ConfInt
-    #const ZDIST = Normal()
+    import ..ZDIST, ..CTUException, ..ConfInt
     export oneProp, oneMeans, twoProp, twoMeans, cmh
 
     function oneProp(x::Int, n::Int; alpha=0.05, method=:wilson)
@@ -46,7 +43,6 @@ module CI
     end
 
     function twoProp(x1::Int, n1::Int, x2::Int, n2::Int; alpha=0.05, type::Symbol, method::Symbol)::ConfInt
-
         if type==:diff
             if method ==:nhs
                 return propDiffNHSCI(x1, n1, x2, n2, alpha)
