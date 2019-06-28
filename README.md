@@ -24,59 +24,46 @@ using Pkg; Pkg.clone("https://github.com/PharmCat/ClinicalTrialUtilities.jl.git"
 ```
 
 And then to perform tests:
+
 ```
 Pkg.test("ClinicalTrialUtilities");
 ```
 
 ### Basic functions:
 
-- Descriptive statistics:
-
-descriptives(data::DataFrame, vars, sort, stats)
+- [Descriptive statistics](#descriptives)
 
 - [Sample size calculation](#ctSampleN)
 
 - [Clinical trial power estimation](#ctPower)
 
-ctPower(;param, type, group, alpha, n, diff, sd, a, b, k, out)
+- [Iterative sample size calculation for Bioequivalence trials](#beSampleN)
 
-- Iterative sample size calculation for Bioequivalence trials:
+- [Power calculation for TOST (for Bioequivalence trials)](#bePower)
 
-beSampleN(;theta0, theta1, theta2, cv, alpha, beta, logscale, method, design, out)
+- [CV from CI for bioequivalence trials](#ci2cv)
 
-- Power calculation for TOST (for Bioequivalence trials):
-
-bePower(;theta0, theta1, theta2, cv, n, alpha, logscale, method,  design)
-
-- CV from CI for bioequivalence trials:
-
-ci2cv(;alpha, theta1, theta2, n, design, mso, cvms)
-
-- Pooled CV
-
- pooledCV(data::DataFrame; cv, df, alpha, returncv)
-
-- Owen's T function:
-
-owensT(h, a)
-
-- Owen's Q function (a,b always should be >= 0):
-
-owensQ(nu, t, delta, a, b)
+- [Pooled CV](#pooledCV)
 
 ### Modules
 
-- Confidence interval calculation
+* [Confidence interval calculation](#CI)
+  * oneProp
+  * oneMeans
+  * twoProp
+  * twoMeans
+  * cmh
 
-[CI](#CI)
+* [Pharmacokinetics calculation](#PK)
+  * nca
 
-- Pharmacokinetics calculation
-
-[PK](#PK)
-
-- Simulations
-
-[SIM](#SIM)
+* [Simulations](#SIM)
+  * bePower
+  * bePowerSIM
+  * ctPropPower
+  * ctPropSampleN
+  * ctMeansPower
+  * ctMeansPowerFS
 
 ### Usage
 
@@ -86,26 +73,32 @@ owensQ(nu, t, delta, a, b)
 - ei - Equivalencens: two one-sided hypothesis;
 - ns - Non-Inferiority / Superiority: one-sided hypothesis, for some cases you should use two-sided hypothesis for  Non-Inferiority/Superiority, you can use alpha/2 for this;
 
-
-#### <a name="ctSampleN"></a>ctSampleN
-```
-ctSampleN(param=[:mean|:prop|:or], type=[:ea|:ei|:ns|:mcnm], group=[:one|:two], alpha=0.05, beta=0.2, diff=0, sd=0, a=0, b=0, k=1, logdiff=false, out=[:num|:str|:vstr|:print])
+### <a name="descriptives">descriptives</a>
 
 ```
+descriptives(data::DataFrame; sort = NaN, vars = NaN, stats = [:n, :mean, :sd, :sem, :uq, :median, :lq])::DataFrame
+```
+
+### <a name="ctSampleN">ctSampleN</a>
+
+```
+ctSampleN(;param=:notdef, type=:notdef, group=:notdef, alpha=0.05, beta=0.2, diff=0, sd=0, a=0, b=0, k=1, logdiff=false, out=:num)
+```
+
 **param (Parameter type):**
-- mean - Means;
-- prop - Proportions;
-- or - Odd Ratio;
+- :mean - Means;
+- :prop - Proportions;
+- :or - Odd Ratio;
 
 **type (Hypothesis type):**
-- ea - Equality;
-- ei - Equivalencens;
-- ns - Non-Inferiority / Superiority (!one-sided hypothesis!);
-- mcnm - McNemar's Equality test;
+- :ea - Equality;
+- :ei - Equivalencens;
+- :ns - Non-Inferiority / Superiority (!one-sided hypothesis!);
+- :mcnm - McNemar's Equality test;
 
 **group (group num):**
-- one - One sample;
-- two - Two sample, result is for one group, second group size = n * k;
+- :one - One sample;
+- :two - Two sample, result is for one group, second group size = n * k;
 
 **alpha** - Alpha (o < alpha < 1)  (default=0.05);
 
@@ -126,30 +119,31 @@ ctSampleN(param=[:mean|:prop|:or], type=[:ea|:ei|:ns|:mcnm], group=[:one|:two], 
 - true
 
 **out** - output type:
-- num   - numeric (default);
-- str   - String variable with text output;
-- vstr  - numeric and String variable;
-- print - print to console;
+- :num   - numeric (default);
+- :str   - String variable with text output;
+- :vstr  - numeric and String variable;
+- :print - print to console;
 
-#### <a name="ctPower">ctPower</a>
+### <a name="ctPower">ctPower</a>
+
 ```
-ctPower(param=[:mean|:prop|:or], type=[:ea|:ei|:ns|:mcnm], group=[:one|:two], alpha=0.05, n=0, diff=0,  sd=0, a=0, b=0, k=1, logdiff=false, out=[:num|:str|:vstr|:print])
+ctPower(;param=:notdef, type=:notdef, group=:notdef, alpha=0.05, logdiff=false, diff=0, sd=0, a=0, b=0, n=0, k=1,  out=:num)
 ```
 
 **param (Parameter type):**
-- mean - Means;
-- prop - Proportions;
-- or - Odd Ratio;
+- :mean - Means;
+- :prop - Proportions;
+- :or   - Odd Ratio;
 
 **type (Hypothesis type):**
-- ea - Equality;
-- ei - Equivalence;
-- ns - Non-Inferiority / Superiority;
-- mcnm - McNemar's Equality test;
+- :ea   - Equality;
+- :ei   - Equivalence;
+- :ns   - Non-Inferiority / Superiority;
+- :mcnm - McNemar's Equality test;
 
 **group (group num):**
-- one - one sample;
-- two - Two sample;
+- :one - one sample;
+- :two - Two sample;
 
 **alpha** - Alpha (0<alpha<1)  (default=0.05);
 
@@ -170,17 +164,16 @@ ctPower(param=[:mean|:prop|:or], type=[:ea|:ei|:ns|:mcnm], group=[:one|:two], al
 - true
 
 **out** - output type:
-- num   - numeric (default);
-- str   - String variable with text output;
-- vstr  - numeric and String variable;
-- print - print to console;
+- :num   - numeric (default);
+- :str   - String variable with text output;
+- :vstr  - numeric and String variable;
+- :print - print to console;
 
-#### powerTOST
+### <a name="bePower">bePower</a>
 
 ```
-powerTOST(alpha=0.05, logscale=[true|false], theta1=0.8, theta2=1.25, theta0=0.95, cv=0.0, n=36, method=":owenq|:nct|:shifted", design=":parallel|:d2x2|:d2x2x3|:d2x2x4|:d2x4x4|:d2x3x3", out=[:num|:str|:vstr|:print])
+bePower(;alpha=0.05, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.0, n=0, logscale=true, design=:d2x2, method=:owenq,  out=:num)
 ```
-**logscale** - theta1, theta2, theta0: if true - make log transformation (default true);
 
 **alpha** - Alpha (0 < alpha < 1)  (default=0.05);
 
@@ -194,46 +187,50 @@ powerTOST(alpha=0.05, logscale=[true|false], theta1=0.8, theta2=1.25, theta0=0.9
 
 **n** - subject number;
 
+**logscale** - theta1, theta2, theta0: if true - make log transformation (default true);
+
+**design** - trial design;
+- parralel
+- d2x2 (default)
+- d2x2x4
+- d2x4x4
+- d2x3x3
+- d2x4x2
+- d3x3
+- d3x6x3
+
 **method** - calculating method: Owen's Q Function | NonCentral T, Shifted;
 - owenq (default)
 - nct
 - shifted
 
-**design** - trial design;
-- parralel
-- d2x2 (default)
-- d2x2x4
-- d2x4x4
-- d2x3x3
-- d2x4x2
-- d3x3
-- d3x6x3
+**out** - output type:
+- :num   - numeric (default);
+- :str   - String variable with text output;
+- :vstr  - numeric and String variable;
+- :print - print to console;
 
-#### beSampleN
+### <a name="beSampleN">beSampleN</a>
 
 Using for bioequivalence study.
 
 ```
-beSampleN(alpha=0.05, logscale=[true|false], theta1=0.8, theta2=1.25, theta0=0.95, cv=0, method=[:owenq|:nct|:shifted], design=[:parallel|:d2x2|:d2x2x3|:d2x2x4|:d2x4x4|:d2x3x3], out=[:num|:str|:vstr|:print])
+beSampleN(;alpha=0.05, beta=0.2, theta0=0.95, theta1=0.8, theta2=1.25, cv=0.0, logscale=true, design=:d2x2, method=:owenq,  out=:num)
 ```
-**logscale** - theta1, theta2, theta0: if true - make log transformation (default true);
 
 **alpha** - Alpha (o < alpha < 1)  (default=0.05);
 
 **beta** - Beta (o < beta < 1) (default=0.2); power = 1 - beta;
 
+**theta0** - T/R Ratio (default=0.95);
+
 **theta1** - Lower Level (default=0.8);
 
 **theta2** - Upper level (default=1.25);
 
-**theta0** - T/R Ratio (default=0.95);
-
 **cv** - coefficient of variation;
 
-**method** - calculating method: Owen's Q Function | NonCentral T | Shifted;
-- owenq (default)
-- nct
-- shifted
+**logscale** - theta1, theta2, theta0: if true - make log transformation (default true);
 
 **design** - trial design;
 - parralel
@@ -244,6 +241,11 @@ beSampleN(alpha=0.05, logscale=[true|false], theta1=0.8, theta2=1.25, theta0=0.9
 - d2x4x2
 - d3x3
 - d3x6x3
+
+**method** - calculating method: Owen's Q Function | NonCentral T | Shifted;
+- owenq (default)
+- nct
+- shifted
 
 **out** - output type:
 - num   - numeric (default);
@@ -251,7 +253,10 @@ beSampleN(alpha=0.05, logscale=[true|false], theta1=0.8, theta2=1.25, theta0=0.9
 - vstr  - numeric and String variable;
 - print - print to console;
 
-#### ci2cv
+### <a name="ci2cv">ci2cv</a>
+
+Take CV from known CI and subject number.
+
 ```
 ci2cv(;alpha = 0.05, theta1 = 0.8, theta2 = 1.25, n, design=:d2x2, mso=false, cvms=false)
 ```
@@ -288,30 +293,51 @@ Calculate CV and MS
 - false(default)
 - true
 
-### pooledCV
+### <a name="pooledCV">pooledCV</a>
 
-**data**
+```
+pooledCV(data::DataFrame; cv=:cv, df=:df, alpha=0.05, returncv=true)::ConfInt
+```
 
-Dataframe with CV data
+Get pooled CV from multiple sources.
 
-**cv**
+**data**::DataFrame - Dataframe with CV data
 
-CV column in dataframe
+**cv**::Symbol - CV column in dataframe
 
-**df**
+**df**::Symbol - DF column in dataframe
 
-DF column in dataframe
+**alpha** - Alpha for var/cv confidence interval.
 
-**alpha**
+**returncv** - Return CV or var:
 
-Alpha for var/cv confidence interval.
+- true  - return cv
+- false - return var
 
-**returncv**
+### Types:
 
-Return CV or var:
+Confidence interval:
 
-- true: return cv
-- false: return var
+```
+struct ConfInt
+    lower::Float64
+    upper::Float64
+    estimate::Float64
+end
+```
+
+Pharmacokinetics noncompartment analysis output:
+
+```
+struct NCA
+    result::DataFrame
+    elimination::DataFrame
+    settings::DataFrame
+    textout::String
+    errorlog::String
+    errors::Array
+end
+```
 
 ### Examples:
 
@@ -382,6 +408,20 @@ https://github.com/PharmCat/ClinicalTrialUtilities.jl/blob/dev/doc/PK.md
 Description here:
 
 https://github.com/PharmCat/ClinicalTrialUtilities.jl/blob/master/doc/SIM.md
+
+### Other functions:
+
+- Owen's T function:
+
+```
+owensT(h::Float64,a::Float64)::Float64
+```
+
+- Owen's Q function (a,b always should be >= 0):
+
+```
+owensQ(nu, t::Float64, delta::Float64, a::Float64, b::Float64)::Float64
+```
 
 ### Dependencies:
 

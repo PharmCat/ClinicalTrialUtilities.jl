@@ -216,7 +216,7 @@ function ctPower(;param=:notdef, type=:notdef, group=:notdef, alpha=0.05, logdif
     end
 end #ctPower
 #-------------------------------------------------------------------------------
-function beSampleN(;theta0=0.95, theta1=0.8, theta2=1.25, cv=0.0, alpha=0.05, beta=0.2, logscale::Bool=true, design=:d2x2, method=:owenq,  out=:num)
+function beSampleN(;alpha=0.05, beta=0.2, theta0=0.95, theta1=0.8, theta2=1.25, cv=0.0, logscale=true, design=:d2x2, method=:owenq,  out=:num)
 
     theta0 = convert(Float64, theta0); theta1 = convert(Float64, theta1); theta2 = convert(Float64, theta2); cv = convert(Float64, cv); alpha  = convert(Float64, alpha); beta = convert(Float64, beta)
 

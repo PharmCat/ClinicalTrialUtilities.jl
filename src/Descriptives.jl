@@ -1,5 +1,5 @@
 
-function descriptives(data::DataFrame; sort = NaN, vars = NaN, stats = [:n, :mean, :sd, :sem, :uq, :median, :lq])
+function descriptives(data::DataFrame; sort = NaN, vars = NaN, stats = [:n, :mean, :sd, :sem, :uq, :median, :lq])::DataFrame
     #Filtering
     if isa(sort, Array)
         sort = Symbol.(sort)
