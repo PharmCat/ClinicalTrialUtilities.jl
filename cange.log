@@ -3,6 +3,7 @@ v0.1.11
   - descriptives()
   - html export
   - StatsBase, Statistics in deps
+  - change documenting
   - add test
   - code cosmetics
 

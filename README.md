@@ -1,5 +1,5 @@
 # ClinicalTrialUtilities
- Clinical Trial related calculation: power and sample size calculation, power simulations, confidence interval, pharmacokinetics parameters calculation.
+ Clinical trial related calculation: descriptive statistics, power and sample size calculation, power simulations, confidence interval, pharmacokinetics parameters calculation.
 
 Version:0.1.11
 
@@ -14,7 +14,26 @@ Version:0.1.11
 
 The package is designed to perform calculations related to the planning and analysis of the results of clinical trials. The package includes the basic functions described below, as well as a few modules to perform specific calculations.
 
-### Install:
+## Content
+
+- [Installation](#Installation)
+- [Basic functions](#Basic)
+- [Submodules](#Submodules)
+- [Usage](#Usage)
+  - [descriptives](#descriptives)
+  - [ctSampleN](#ctSampleN)
+  - [ctPower](#ctPower)
+  - [beSampleN](#beSampleN)
+  - [bePower](#bePower)
+  - [ci2cv](#ci2cv)
+  - [pooledCV](#pooledCV)
+- [Types](#Types)
+- [Examples](#Examples)
+- [Other](#Other)
+- [Dependencies](#Dependencies)
+- [Copyrights&References](#Copyrights&References)
+
+### <a name="Installation">Installation</a>
 ```
 using Pkg; Pkg.add("ClinicalTrialUtilities");
 ```
@@ -29,35 +48,35 @@ And then to perform tests:
 Pkg.test("ClinicalTrialUtilities");
 ```
 
-### Basic functions:
+### <a name="Basic">Basic functions</a>
 
 - [Descriptive statistics](#descriptives)
 
-- [Sample size calculation](#ctSampleN)
+- [Clinical trial sample size estimation](#ctSampleN)
 
 - [Clinical trial power estimation](#ctPower)
 
-- [Iterative sample size calculation for Bioequivalence trials](#beSampleN)
+- [Iterative sample size estimation for bioequivalence trials](#beSampleN)
 
-- [Power calculation for TOST (for Bioequivalence trials)](#bePower)
+- [Power estimation for bioequivalence trials](#bePower)
 
 - [CV from CI for bioequivalence trials](#ci2cv)
 
-- [Pooled CV](#pooledCV)
+- [Pooled CV from multiple sources](#pooledCV)
 
-### Modules
+### <a name="Submodules">Submodules</a>
 
-* [Confidence interval calculation](#CI)
+* Confidence interval calculation - [Doc](https://github.com/PharmCat/ClinicalTrialUtilities.jl/blob/master/doc/CI.md)
   * oneProp
   * oneMeans
   * twoProp
   * twoMeans
   * cmh
 
-* [Pharmacokinetics calculation](#PK)
+* Pharmacokinetics calculation - [Doc](https://github.com/PharmCat/ClinicalTrialUtilities.jl/blob/mater/doc/PK.md)
   * nca
 
-* [Simulations](#SIM)
+* Simulations - [Doc](https://github.com/PharmCat/ClinicalTrialUtilities.jl/blob/master/doc/SIM.md)
   * bePower
   * bePowerSIM
   * ctPropPower
@@ -65,21 +84,25 @@ Pkg.test("ClinicalTrialUtilities");
   * ctMeansPower
   * ctMeansPowerFS
 
-### Usage
+### <a name="Usage">Usage</a>
 
 **NB! Hypothesis types:**
 
-- ea - Equality: two-sided;
-- ei - Equivalencens: two one-sided hypothesis;
-- ns - Non-Inferiority / Superiority: one-sided hypothesis, for some cases you should use two-sided hypothesis for  Non-Inferiority/Superiority, you can use alpha/2 for this;
+- :ea - Equality: two-sided;
+- :ei - Equivalencens: two one-sided hypothesis;
+- :ns - Non-Inferiority / Superiority: one-sided hypothesis, for some cases you should use two-sided hypothesis for  Non-Inferiority/Superiority, you can use alpha/2 for this;
 
 ### <a name="descriptives">descriptives</a>
+
+Descriptive statistics.
 
 ```
 descriptives(data::DataFrame; sort = NaN, vars = NaN, stats = [:n, :mean, :sd, :sem, :uq, :median, :lq])::DataFrame
 ```
 
 ### <a name="ctSampleN">ctSampleN</a>
+
+Sample size estimation for clinical trial.
 
 ```
 ctSampleN(;param=:notdef, type=:notdef, group=:notdef, alpha=0.05, beta=0.2, diff=0, sd=0, a=0, b=0, k=1, logdiff=false, out=:num)
@@ -126,6 +149,8 @@ ctSampleN(;param=:notdef, type=:notdef, group=:notdef, alpha=0.05, beta=0.2, dif
 
 ### <a name="ctPower">ctPower</a>
 
+Power estimation for clinical trials.
+
 ```
 ctPower(;param=:notdef, type=:notdef, group=:notdef, alpha=0.05, logdiff=false, diff=0, sd=0, a=0, b=0, n=0, k=1,  out=:num)
 ```
@@ -171,6 +196,8 @@ ctPower(;param=:notdef, type=:notdef, group=:notdef, alpha=0.05, logdiff=false, 
 
 ### <a name="bePower">bePower</a>
 
+Power estimation for bioequivalence trials.
+
 ```
 bePower(;alpha=0.05, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.0, n=0, logscale=true, design=:d2x2, method=:owenq,  out=:num)
 ```
@@ -190,19 +217,19 @@ bePower(;alpha=0.05, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.0, n=0, logscale
 **logscale** - theta1, theta2, theta0: if true - make log transformation (default true);
 
 **design** - trial design;
-- parralel
-- d2x2 (default)
-- d2x2x4
-- d2x4x4
-- d2x3x3
-- d2x4x2
-- d3x3
-- d3x6x3
+- :parallel
+- :d2x2 (default)
+- :d2x2x4
+- :d2x4x4
+- :d2x3x3
+- :d2x4x2
+- :d3x3
+- :d3x6x3
 
 **method** - calculating method: Owen's Q Function | NonCentral T, Shifted;
-- owenq (default)
-- nct
-- shifted
+- :owenq (default)
+- :nct
+- :shifted
 
 **out** - output type:
 - :num   - numeric (default);
@@ -212,7 +239,7 @@ bePower(;alpha=0.05, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.0, n=0, logscale
 
 ### <a name="beSampleN">beSampleN</a>
 
-Using for bioequivalence study.
+Sample size estimation for bioequivalence study (iterative procedure).
 
 ```
 beSampleN(;alpha=0.05, beta=0.2, theta0=0.95, theta1=0.8, theta2=1.25, cv=0.0, logscale=true, design=:d2x2, method=:owenq,  out=:num)
@@ -233,25 +260,25 @@ beSampleN(;alpha=0.05, beta=0.2, theta0=0.95, theta1=0.8, theta2=1.25, cv=0.0, l
 **logscale** - theta1, theta2, theta0: if true - make log transformation (default true);
 
 **design** - trial design;
-- parralel
-- d2x2 (default)
-- d2x2x4
-- d2x4x4
-- d2x3x3
-- d2x4x2
-- d3x3
-- d3x6x3
+- :parallel
+- :d2x2 (default)
+- :d2x2x4
+- :d2x4x4
+- :d2x3x3
+- :d2x4x2
+- :d3x3
+- :d3x6x3
 
 **method** - calculating method: Owen's Q Function | NonCentral T | Shifted;
-- owenq (default)
-- nct
-- shifted
+- :owenq (default)
+- :nct
+- :shifted
 
 **out** - output type:
-- num   - numeric (default);
-- str   - String variable with text output;
-- vstr  - numeric and String variable;
-- print - print to console;
+- :num   - numeric (default);
+- :str   - String variable with text output;
+- :vstr  - numeric and String variable;
+- :print - print to console;
 
 ### <a name="ci2cv">ci2cv</a>
 
@@ -272,14 +299,14 @@ ci2cv(;alpha = 0.05, theta1 = 0.8, theta2 = 1.25, n, design=:d2x2, mso=false, cv
 **n** - subject n;
 
 **design** - trial design;
-- parralel
-- d2x2 (default)
-- d2x2x4
-- d2x4x4
-- d2x3x3
-- d2x4x2
-- d3x3
-- d3x6x3
+- :parallel
+- :d2x2 (default)
+- :d2x2x4
+- :d2x4x4
+- :d2x3x3
+- :d2x4x2
+- :d3x3
+- :d3x6x3
 
 **mso**
 
@@ -295,11 +322,11 @@ Calculate CV and MS
 
 ### <a name="pooledCV">pooledCV</a>
 
+Get pooled CV from multiple sources.
+
 ```
 pooledCV(data::DataFrame; cv=:cv, df=:df, alpha=0.05, returncv=true)::ConfInt
 ```
-
-Get pooled CV from multiple sources.
 
 **data**::DataFrame - Dataframe with CV data
 
@@ -314,9 +341,9 @@ Get pooled CV from multiple sources.
 - true  - return cv
 - false - return var
 
-### Types:
+### <a name="Types">Types</a>
 
-Confidence interval:
+Confidence intervals
 
 ```
 struct ConfInt
@@ -326,7 +353,7 @@ struct ConfInt
 end
 ```
 
-Pharmacokinetics noncompartment analysis output:
+Pharmacokinetics noncompartment analysis output
 
 ```
 struct NCA
@@ -339,7 +366,7 @@ struct NCA
 end
 ```
 
-### Examples:
+### <a name="Examples">Examples</a>
 
 ```
 #Sample size for one proportion equality
@@ -391,25 +418,7 @@ pooledCV(data; cv=:cv, df=:df, alpha=0.05, returncv=true)
 
 ```
 
-### <a name="CI"></a>Confidence Interval Submodule
-
-Description here:
-
-https://github.com/PharmCat/ClinicalTrialUtilities.jl/blob/master/doc/CI.md
-
-### <a name="PK"></a>Pharmacokinetics
-
-Description here:
-
-https://github.com/PharmCat/ClinicalTrialUtilities.jl/blob/dev/doc/PK.md
-
-### <a name="SIM"></a>Simulations
-
-Description here:
-
-https://github.com/PharmCat/ClinicalTrialUtilities.jl/blob/master/doc/SIM.md
-
-### Other functions:
+### <a name="Other">Other functions</a>
 
 - Owen's T function:
 
@@ -423,7 +432,7 @@ owensT(h::Float64,a::Float64)::Float64
 owensQ(nu, t::Float64, delta::Float64, a::Float64, b::Float64)::Float64
 ```
 
-### Dependencies:
+### <a name="Dependencies">Dependencies</a>
 
  - Distributions
  - StatsBase
@@ -433,3 +442,28 @@ owensQ(nu, t::Float64, delta::Float64, a::Float64, b::Float64)::Float64
  - Random
  - Roots
  - DataFrames
+
+ ### <a name="Copyrights&References">Copyrights&References</a>
+
+ > Clinical Trial Utilities
+ > Author: Vladimir Arnautov aka PharmCat
+ > Copyright © 2019 Vladimir Arnautov aka PharmCat (mail@pharmcat.net)
+ > OwensQ/PowerTOST functions rewrited from https://github.com/Detlew/PowerTOST by Detlew Labes, Helmut Schuetz, Benjamin Lang
+ > Licence: GNU Affero General Public License v3.0
+ > Reference:
+ > Calculation based on Chow S, Shao J, Wang H. 2008. Sample Size Calculations in Clinical Research. 2nd Ed. Chapman & Hall/CRC Biostatistics Series.
+ > Connor R. J. 1987. Sample size for testing differences in proportions for the paired-sample design. Biometrics 43(1):207-211. page 209.
+ > Owen, D B (1965) "A Special Case of a Bivariate Non-central t-Distribution" Biometrika Vol. 52, pp.437-446.
+ > FORTRAN code by J. Burkhardt, license GNU LGPL
+ > D.B. Owen "Tables for computing bivariate normal Probabilities" The Annals of Mathematical Statistics, Vol. 27 (4) Dec. 1956, pp. 1075-1090
+ > matlab code  by J. Burkhardt license GNU LGPL
+ > If you want to check and get R code - you can find some here: http://powerandsamplesize.com/Calculators/
+ > Some ideas was taken from R project packages:
+ > PropCIs by Ralph Scherer https://cran.r-project.org/web/packages/PropCIs/index.html
+ > pairwiseCI by Frank Schaarschmidt, Daniel Gerhard  https://CRAN.R-project.org/package=pairwiseCI
+ > binGroup by Boan Zhang, Christopher Bilder, Brad Biggerstaff, Frank Schaarschmidt Brianna Hitt https://CRAN.R-project.org/package=binGroup
+ > proportion by M.Subbiah, V.Rajeswaran https://CRAN.R-project.org/package=proportion
+ > binom by Sundar Dorai-Raj https://CRAN.R-project.org/package=binom
+ > DescTools https://CRAN.R-project.org/package=DescTools
+ > ORCI by Libo Sun https://CRAN.R-project.org/package=ORCI
+ > metafor by Wolfgang Viechtbauer https://cran.r-project.org/package=metafor
