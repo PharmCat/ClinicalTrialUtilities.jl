@@ -1,7 +1,7 @@
 # ClinicalTrialUtilities
  Clinical Trial related calculation: power and sample size calculation, power simulations, confidence interval, pharmacokinetics parameters calculation.
 
-Version:0.1.10
+Version:0.1.11
 
 2019 &copy; Vladimir Arnautov
 
@@ -13,15 +13,6 @@ Version:0.1.10
 ## Description
 
 The package is designed to perform calculations related to the planning and analysis of the results of clinical trials. The package includes the basic functions described below, as well as a few modules to perform specific calculations.
-
-### Dependencies:
-
- - Distributions
- - QuadGK
- - SpecialFunctions
- - Random
- - Roots
- - DataFrames
 
 ### Install:
 ```
@@ -39,11 +30,13 @@ Pkg.test("ClinicalTrialUtilities");
 
 ### Basic functions:
 
-- Sample size calculation:
+- Descriptive statistics:
 
-ctSampleN(;param, type, group, alpha, beta, diff, sd, a, b, k, out)
+descriptives(data::DataFrame, vars, sort, stats)
 
-- Clinical trial power estimation:
+- [Sample size calculation](#ctSampleN)
+
+- [Clinical trial power estimation](#ctPower)
 
 ctPower(;param, type, group, alpha, n, diff, sd, a, b, k, out)
 
@@ -94,7 +87,7 @@ owensQ(nu, t, delta, a, b)
 - ns - Non-Inferiority / Superiority: one-sided hypothesis, for some cases you should use two-sided hypothesis for  Non-Inferiority/Superiority, you can use alpha/2 for this;
 
 
-#### sampleSize
+#### <a name="ctSampleN"></a>ctSampleN
 ```
 ctSampleN(param=[:mean|:prop|:or], type=[:ea|:ei|:ns|:mcnm], group=[:one|:two], alpha=0.05, beta=0.2, diff=0, sd=0, a=0, b=0, k=1, logdiff=false, out=[:num|:str|:vstr|:print])
 
@@ -138,7 +131,7 @@ ctSampleN(param=[:mean|:prop|:or], type=[:ea|:ei|:ns|:mcnm], group=[:one|:two], 
 - vstr  - numeric and String variable;
 - print - print to console;
 
-#### ctPower
+#### <a name="ctPower">ctPower</a>
 ```
 ctPower(param=[:mean|:prop|:or], type=[:ea|:ei|:ns|:mcnm], group=[:one|:two], alpha=0.05, n=0, diff=0,  sd=0, a=0, b=0, k=1, logdiff=false, out=[:num|:str|:vstr|:print])
 ```
@@ -389,3 +382,14 @@ https://github.com/PharmCat/ClinicalTrialUtilities.jl/blob/dev/doc/PK.md
 Description here:
 
 https://github.com/PharmCat/ClinicalTrialUtilities.jl/blob/master/doc/SIM.md
+
+### Dependencies:
+
+ - Distributions
+ - StatsBase
+ - Statistics
+ - QuadGK
+ - SpecialFunctions
+ - Random
+ - Roots
+ - DataFrames
