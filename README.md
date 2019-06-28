@@ -446,24 +446,41 @@ owensQ(nu, t::Float64, delta::Float64, a::Float64, b::Float64)::Float64
  ### <a name="Copyrights&References">Copyrights&References</a>
 
  > Clinical Trial Utilities
+
  > Author: Vladimir Arnautov aka PharmCat
+
  > Copyright © 2019 Vladimir Arnautov aka PharmCat (mail@pharmcat.net)
- > OwensQ/PowerTOST functions rewrited from https://github.com/Detlew/PowerTOST by Detlew Labes, Helmut Schuetz, Benjamin Lang
- > Licence: GNU Affero General Public License v3.0
- > Reference:
+
+ > OwensQ/PowerTOST functions rewritten from https://github.com/Detlew/PowerTOST by Detlew Labes, Helmut Schuetz, Benjamin Lang
+
  > Calculation based on Chow S, Shao J, Wang H. 2008. Sample Size Calculations in Clinical Research. 2nd Ed. Chapman & Hall/CRC Biostatistics Series.
+
  > Connor R. J. 1987. Sample size for testing differences in proportions for the paired-sample design. Biometrics 43(1):207-211. page 209.
+
  > Owen, D B (1965) "A Special Case of a Bivariate Non-central t-Distribution" Biometrika Vol. 52, pp.437-446.
+
  > FORTRAN code by J. Burkhardt, license GNU LGPL
+
  > D.B. Owen "Tables for computing bivariate normal Probabilities" The Annals of Mathematical Statistics, Vol. 27 (4) Dec. 1956, pp. 1075-1090
+
  > matlab code  by J. Burkhardt license GNU LGPL
+
  > If you want to check and get R code - you can find some here: http://powerandsamplesize.com/Calculators/
+
  > Some ideas was taken from R project packages:
+
  > PropCIs by Ralph Scherer https://cran.r-project.org/web/packages/PropCIs/index.html
+
  > pairwiseCI by Frank Schaarschmidt, Daniel Gerhard  https://CRAN.R-project.org/package=pairwiseCI
+
  > binGroup by Boan Zhang, Christopher Bilder, Brad Biggerstaff, Frank Schaarschmidt Brianna Hitt https://CRAN.R-project.org/package=binGroup
+
  > proportion by M.Subbiah, V.Rajeswaran https://CRAN.R-project.org/package=proportion
+
  > binom by Sundar Dorai-Raj https://CRAN.R-project.org/package=binom
+
  > DescTools https://CRAN.R-project.org/package=DescTools
+
  > ORCI by Libo Sun https://CRAN.R-project.org/package=ORCI
+
  > metafor by Wolfgang Viechtbauer https://cran.r-project.org/package=metafor
