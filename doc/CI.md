@@ -31,7 +31,7 @@ Return result as ConfInt(lower::Float64, upper::Float64, estimate::Float64)
 Confidence interval calculation for one proportion.
 
 ```
-oneProp(x::Int, n::Int; alpha=0.05, method=:wilson)
+CI.oneProp(x::Int, n::Int; alpha=0.05, method=:wilson)
 ```
 
 **x**::Int - number of positive outcomes;
@@ -55,7 +55,7 @@ oneProp(x::Int, n::Int; alpha=0.05, method=:wilson)
 Confidence interval calculation for two proportion.
 
 ```
- twoProp(x1::Int, n1::Int, x2::Int, n2::Int; alpha=0.05, type=[:diff|:rr|:or], method::Symbol)
+ CI.twoProp(x1::Int, n1::Int, x2::Int, n2::Int; alpha=0.05, type=[:diff|:rr|:or], method::Symbol)
  ```
 
  **x1** - number of positive outcomes in group 1;
@@ -102,7 +102,7 @@ Odd ratio
 Confidence interval for one mean.
 
 ```
-oneMean(m::Real, s::Real, n::Int, alpha::Real; method=:norm)::ConfInt
+CI.oneMean(m::Real, s::Real, n::Int, alpha::Real; method=:norm)::ConfInt
 ```
 
 **m** - mean;
@@ -123,7 +123,7 @@ oneMean(m::Real, s::Real, n::Int, alpha::Real; method=:norm)::ConfInt
 Confidence interval for mean difference.
 
 ```
-twoMeans(m1::Real, s1::Real, n1::Real, m2::Real, s2::Real, n2::Real; alpha::Real=0.05, method=:ev)::ConfInt
+CI.twoMeans(m1::Real, s1::Real, n1::Real, m2::Real, s2::Real, n2::Real; alpha::Real=0.05, method=:ev)::ConfInt
 ```
 
 **m1** - mean group 1;
@@ -150,7 +150,7 @@ twoMeans(m1::Real, s1::Real, n1::Real, m2::Real, s2::Real, n2::Real; alpha::Real
 Cochran–Mantel–Haenszel confidence intervals.
 
 ```
-cmh(data::DataFrame; a = :a, b = :b, c = :c, d = :d, alpha = 0.05, type =:diff, method = :default, logscale = false)::ConfInt
+CI.cmh(data::DataFrame; a = :a, b = :b, c = :c, d = :d, alpha = 0.05, type =:diff, method = :default, logscale = false)::ConfInt
 ```
 
  **data**- dataframe with 4 columns, each line represent 2X2 table

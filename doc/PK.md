@@ -4,15 +4,17 @@ Pharmacokinetics module.
 
 ## Functions
 
-PK.nca(data::DataFrame; conc=:Concentration, time=:Time, sort=[**NaN**|Array{Symbol,1}], calcm = [**:lint**|:logt|:luld])
+```
+nca(data; conc=:Concentration, time=:Time, sort = NaN, calcm = :lint)
+```
 
-**conc** - concentration column of dataframe data;
+**conc**::Symbol - concentration column of dataframe data;
 
-**time** - time column of dataframe data;
+**time**::Symbol - time column of dataframe data;
 
-**sort** - sorting columns in dataframe (NaN by default in only one profile);
+**sort**::Symbol[] - sorting columns in dataframe (NaN by default in only one profile);
 
-**calcm** - calculation method:
+**calcm**::Symbol - calculation method:
 
 - :lint - linear trapezoidal;
 - :logt - linear trapezoidal before tmax and linear up log down after;
