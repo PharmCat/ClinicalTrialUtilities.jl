@@ -194,49 +194,6 @@ ctPower(;param=:notdef, type=:notdef, group=:notdef, alpha=0.05, logdiff=false, 
 - :vstr  - numeric and String variable;
 - :print - print to console;
 
-### <a name="bePower">bePower</a>
-
-Power estimation for bioequivalence trials.
-
-```
-bePower(;alpha=0.05, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.0, n=0, logscale=true, design=:d2x2, method=:owenq,  out=:num)
-```
-
-**alpha** - Alpha (0 < alpha < 1)  (default=0.05);
-
-**theta1** - Lower Level (default=0.8);
-
-**theta2** - Upper level (default=1.25);
-
-**theta0** - T/R Ratio (default=0.95);
-
-**cv** - coefficient of variation;
-
-**n** - subject number;
-
-**logscale** - theta1, theta2, theta0: if true - make log transformation (default true);
-
-**design** - trial design;
-- :parallel
-- :d2x2 (default)
-- :d2x2x4
-- :d2x4x4
-- :d2x3x3
-- :d2x4x2
-- :d3x3
-- :d3x6x3
-
-**method** - calculating method: Owen's Q Function | NonCentral T, Shifted;
-- :owenq (default)
-- :nct
-- :shifted
-
-**out** - output type:
-- :num   - numeric (default);
-- :str   - String variable with text output;
-- :vstr  - numeric and String variable;
-- :print - print to console;
-
 ### <a name="beSampleN">beSampleN</a>
 
 Sample size estimation for bioequivalence study (iterative procedure).
@@ -270,6 +227,49 @@ beSampleN(;alpha=0.05, beta=0.2, theta0=0.95, theta1=0.8, theta2=1.25, cv=0.0, l
 - :d3x6x3
 
 **method** - calculating method: Owen's Q Function | NonCentral T | Shifted;
+- :owenq (default)
+- :nct
+- :shifted
+
+**out** - output type:
+- :num   - numeric (default);
+- :str   - String variable with text output;
+- :vstr  - numeric and String variable;
+- :print - print to console;
+
+### <a name="bePower">bePower</a>
+
+Power estimation for bioequivalence trials.
+
+```
+bePower(;alpha=0.05, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.0, n=0, logscale=true, design=:d2x2, method=:owenq,  out=:num)
+```
+
+**alpha** - Alpha (0 < alpha < 1)  (default=0.05);
+
+**theta1** - Lower Level (default=0.8);
+
+**theta2** - Upper level (default=1.25);
+
+**theta0** - T/R Ratio (default=0.95);
+
+**cv** - coefficient of variation;
+
+**n** - subject number;
+
+**logscale** - theta1, theta2, theta0: if true - make log transformation (default true);
+
+**design** - trial design;
+- :parallel
+- :d2x2 (default)
+- :d2x2x4
+- :d2x4x4
+- :d2x3x3
+- :d2x4x2
+- :d3x3
+- :d3x6x3
+
+**method** - calculating method: Owen's Q Function | NonCentral T, Shifted;
 - :owenq (default)
 - :nct
 - :shifted
@@ -371,45 +371,39 @@ end
 ```
 #Sample size for one proportion equality
 ctSampleN(param=:prop, type=:ea, group=:one, a=0.3, b=0.5)
-
 #Equivalence for two means
 ctSampleN(param=:mean, type=:ei, group=:two, diff=0.3, sd=1, a=0.3, b=0.5)
-
 #Odd ratio non-inferiority
 ctSampleN(param=:or, type=:ns, diff=-0.1, a=0.3, b=0.5, k=2)
-
 #Odd ratio equality
 ctSampleN(param=:or, type=:ea, a=0.3, b=0.5, k=2)
 
-#Bioequivalence power for 2x2 design, default method - OwensQ
-bePower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=20, design=:d2x2, method=:owenq)
-
-#Same
-bePower(alpha=0.05, cv=0.2, n=20, design=:d2x2)
-
-#Bioequivalence power for cv 14%, 21 subjects, default OwensQ method, logscale false
-bePower(alpha=0.1, logscale=false, theta1=-0.1, theta2=0.1, theta0=0, cv=0.14, n=21)
-
-#Bioequivalence power for cv 14%, 21 subjects, shifted method, logscale false
-bePower(alpha=0.1, logscale=false, theta1=-0.1, theta2=0.1, theta0=0, cv=0.14, n=21, method=:shifted)
-
-#Simple notations
-bePower(cv=0.4, n=35, design=:d2x4x4)
-bePower(cv=0.14, n=21)
+#Power
+ctPower(param=:mean, type=:ea, group=:one, a=1.5, b=2, sd=1,n=32, alpha=0.05)
 
 #Bioequivalence sample size
 beSampleN(alpha=0.05,  theta1=0.8, theta2=1.25, theta0=0.95, cv=0.15, method=:owenq)
 beSampleN(cv=0.20, method=:nct)
 beSampleN(cv=0.347, design=:parallel,  out=:print)
 beSampleN(cv=0.40)
-
 n, p, s = beSampleN(cv=0.347, design=:d2x2x4, method=:nct, out=:vstr)
+
+#Bioequivalence power for 2x2 design, default method - OwensQ
+bePower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=20, design=:d2x2, method=:owenq)
+#Same
+bePower(alpha=0.05, cv=0.2, n=20, design=:d2x2)
+#Bioequivalence power for cv 14%, 21 subjects, default OwensQ method, logscale false
+bePower(alpha=0.1, logscale=false, theta1=-0.1, theta2=0.1, theta0=0, cv=0.14, n=21)
+#Bioequivalence power for cv 14%, 21 subjects, shifted method, logscale false
+bePower(alpha=0.1, logscale=false, theta1=-0.1, theta2=0.1, theta0=0, cv=0.14, n=21, method=:shifted)
+#Simple notations
+bePower(cv=0.4, n=35, design=:d2x4x4)
+bePower(cv=0.14, n=21)
 
 #CV from CI
 ci2cv(;alpha = 0.05, theta1 = 0.9, theta2 = 1.25, n=30, design=:d2x2x4)
 
 #Polled CV
-
 data = DataFrame(cv = Float64[], df = Int[])
 push!(data, (0.12, 12))
 push!(data, (0.2, 20))
@@ -456,6 +450,10 @@ owensQ(nu, t::Float64, delta::Float64, a::Float64, b::Float64)::Float64
  > Calculation based on Chow S, Shao J, Wang H. 2008. Sample Size Calculations in Clinical Research. 2nd Ed. Chapman & Hall/CRC Biostatistics Series.
 
  > Connor R. J. 1987. Sample size for testing differences in proportions for the paired-sample design. Biometrics 43(1):207-211. page 209.
+
+ >Phillips KF.Power of the Two One-Sided Tests Procedure in BioequivalenceJ Pharmacokin Biopharm. 1990;18(2):137–44. doi: 10.1007/BF01063556
+
+ >Diletti D, Hauschke D, Steinijans VW.Sample Size Determination for Bioequivalence Assessment by Means of Confidence IntervalsInt J Clin Pharmacol Ther Toxicol. 1991;29(1):1–8.
 
  > Owen, D B (1965) "A Special Case of a Bivariate Non-central t-Distribution" Biometrika Vol. 52, pp.437-446.
 

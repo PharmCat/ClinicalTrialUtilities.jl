@@ -12,7 +12,7 @@ module SIM
     import ..CI.twoProp
     import ..CI.twoMeans
 
-    export bePower, bePowerSIM, ctPropPower, ctPropSampleN, ctMeansPower, ctMeansPowerFS
+    export bePower, ctPropPower, ctPropSampleN, ctMeansPower, ctMeansPowerFS
 
     function bePower(;alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.0, n=0, simnum=5, seed=0)
         if alpha <= 0.0 || alpha >= 1.0  throw(CTUException(1111,"SIM.bePower: alpha should be > 0 and < 1")) end

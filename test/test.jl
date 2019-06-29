@@ -404,16 +404,16 @@ println(" ---------------------------------- ")
 
     #----
 
-    ci = ClinicalTrialUtilities.CI.twoMeans(30, 10, 30, 40, 12, 35, alpha=0.05, type=:diff, method=:ev)
+    ci = ClinicalTrialUtilities.CI.twoMeans(30, 10, 30, 40, 12, 35, alpha=0.05, method=:ev)
     @test ci.lower    ≈ -11.6549655 atol=1E-7
     @test ci.upper    ≈ -8.3450344 atol=1E-7
     @test ci.estimate ≈ -10.0     atol=1E-4
 
-    ci = ClinicalTrialUtilities.CI.twoMeans(30, 10, 30, 40, 12, 35, alpha=0.05, type=:diff, method=:uv)
+    ci = ClinicalTrialUtilities.CI.twoMeans(30, 10, 30, 40, 12, 35, alpha=0.05, method=:uv)
     @test ci.lower    ≈ -11.6433893 atol=1E-7
     @test ci.upper    ≈ -8.3566106 atol=1E-7
     @test ci.estimate ≈ -10.0     atol=1E-4
-    ci = ClinicalTrialUtilities.CI.twoMeans(30.5, 12.6, 23, 34, 21.7, 39, alpha=0.05, type=:diff, method=:uv)
+    ci = ClinicalTrialUtilities.CI.twoMeans(30.5, 12.6, 23, 34, 21.7, 39, alpha=0.05, method=:uv)
     @test ci.lower    ≈ -5.6050900 atol=1E-7
     @test ci.upper    ≈ -1.3949099 atol=1E-7
     @test ci.estimate ≈ -3.5     atol=1E-4

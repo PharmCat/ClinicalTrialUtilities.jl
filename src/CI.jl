@@ -34,11 +34,11 @@ module CI
         end
     end
 
-    function oneMean(m,s,n,alpha; method=:norm)
+    function oneMean(m::Real,s::Real,n::Int,alpha::Real; method=:norm)::ConfInt
         if method==:norm
-            meanNormCI(m,s,n,alpha)
+            return meanNormCI(m,s,n,alpha)
         elseif method==:tdist
-            meanTdistCI(m,s,n,alpha)
+            return meanTdistCI(m,s,n,alpha)
         end
     end
 
@@ -78,14 +78,12 @@ module CI
         end
     end #twoProp
 
-    function twoMeans(m1::Real, s1::Real, n1::Real, m2::Real, s2::Real, n2::Real; alpha::Real=0.05, type=:diff, method=:notdef)::ConfInt
-        if type==:diff
+    function twoMeans(m1::Real, s1::Real, n1::Real, m2::Real, s2::Real, n2::Real; alpha::Real=0.05, method=:ev)::ConfInt
             if method == :ev
                 return meanDiffEV(m1::Real, s1::Real, n1::Real, m2::Real, s2::Real, n2::Real, alpha::Real)
             elseif method == :uv
                 return meanDiffUV(m1::Real, s1::Real, n1::Real, m2::Real, s2::Real, n2::Real, alpha::Real)
             end
-        end
     end #twoMeans
 
     #-----------------------------PROPORTIONS-----------------------------------
@@ -157,7 +155,7 @@ module CI
         return ConfInt(p-b,p+b,p)
     end
     #SOC  Second-Order corrected
-    #T. Tony Cai One-sided con&dence intervals in discrete distributions doi:10.1016/j.jspi.2004.01.00
+    #T. Tony Cai One-sided confdence intervals in discrete distributions doi:10.1016/j.jspi.2004.01.00
     function propSOCCI(x::Int, n::Int, alpha::Float64)::ConfInt
         p  = x/n
         k  = quantile(ZDIST, 1-alpha/2)
