@@ -93,7 +93,7 @@ module SIM
         if citype == :diff
             st = sn = ceil(ctSampleN(param=:prop, type=type, group=:two, alpha=alpha, beta=beta, diff=ref, a=p1, b=p2))
         elseif citype == :or
-            st = sn = ceil(ctSampleN(param=:or, type=type, group=:two, alpha=alpha, beta=beta, diff=ref, a=p1, b=p2, logdiff = false))
+            st = sn = ceil(ctSampleN(param=:or, type=type, group=:two, alpha=alpha/2, beta=beta, diff=ref, a=p1, b=p2, logdiff = false))
         end
 
         pow = ctPropPower(p1, sn, p2, sn, ref; alpha=alpha, type=type, citype=citype, method=method, simnum=simnum, seed=seed)
