@@ -531,7 +531,7 @@ println(" ---------------------------------- ")
     T = ClinicalTrialUtilities.SIM.ctPropSampleN(0.6, 0.6,-0.15; alpha=0.1, type =:ns, citype=:diff, method=:nhs, seed=1234, simnum=4)
     @test T[1] == 125
     @test T[2] ≈ 0.8036
-    T = ClinicalTrialUtilities.SIM.ctPropSampleN(0.6, 0.6,0.3; alpha=0.1, type =:ns, citype=:or, method=:awoolf, seed=1234, simnum=4)
+    T = ClinicalTrialUtilities.SIM.ctPropSampleN(0.6, 0.6,0.35; alpha=0.1, type =:ns, citype=:or, method=:awoolf, seed=1234, simnum=4)
     @test T[3] == 35
     @test T[4] ≈ 0.8005
 end
@@ -628,7 +628,6 @@ println(" ---------------------------------- ")
     @test ds[1,:median]   ≈ 51.35 atol=1E-3
 end
 
-res = ClinicalTrialUtilities.descriptives(ClinicalTrialUtilities.PK.nca(df; sort=[:Subject, :Formulation]).result, sort=[:Formulation])
 println(" ---------------------------------- ")
 @testset "  Scenario            " begin
     #Pharmacokinetics statistics
