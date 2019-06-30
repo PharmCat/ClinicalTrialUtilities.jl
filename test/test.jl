@@ -530,10 +530,10 @@ println(" ---------------------------------- ")
 
     T = ClinicalTrialUtilities.SIM.ctPropSampleN(0.6, 0.6,-0.15; alpha=0.1, type =:ns, citype=:diff, method=:nhs, seed=1234, simnum=4)
     @test T[1] == 125
-    @test T[2] ≈ 0.8036
-    T = ClinicalTrialUtilities.SIM.ctPropSampleN(0.6, 0.6,0.35; alpha=0.1, type =:ns, citype=:or, method=:awoolf, seed=1234, simnum=4)
-    @test T[3] == 35
-    @test T[4] ≈ 0.8005
+    @test T[2] ≈ 0.8036 atol=1E-3
+    T = ClinicalTrialUtilities.SIM.ctPropSampleN(0.6, 0.6,0.34; alpha=0.1, type =:ns, citype=:or, method=:awoolf, seed=1234, simnum=4)
+    @test T[3] == 44
+    @test T[4] ≈ 0.8101 atol=1E-3
 end
 
 println(" ---------------------------------- ")
