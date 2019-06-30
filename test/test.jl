@@ -628,6 +628,15 @@ println(" ---------------------------------- ")
     @test ds[1,:median]   ≈ 51.35 atol=1E-3
 end
 
+res = ClinicalTrialUtilities.descriptives(ClinicalTrialUtilities.PK.nca(df; sort=[:Subject, :Formulation]).result, sort=[:Formulation])
+println(" ---------------------------------- ")
+@testset "  Scenario            " begin
+    #Pharmacokinetics statistics
+    res = ClinicalTrialUtilities.descriptives(ClinicalTrialUtilities.PK.nca((CSV.read(IOBuffer(pkdat)) |> DataFrame); sort=[:Subject, :Formulation]).result, sort=[:Formulation], vars = [:AUClast, :Cmax])
+    @test res.mean[1] ≈ 7431.283916666667
+    @test res.mean[2] ≈ 8607.09
+end
+
 println(" ---------------------------------- ")
 @testset "  Errors              " begin
 
