@@ -32,6 +32,14 @@ function descriptives(data::DataFrame; sort = NaN, vars = NaN, stats = [:n, :mea
             dfs[i] = eltype(data[i])[]
         end
     end
+    if isa(stats, Array)
+        filter!(x->x in [:n, :min, :max, :range, :mean, :var, :sd, :sem, :cv, :harmmean, :geomean, :geovar, :geosd, :geocv, :skew, :kurt, :uq, :median, :lq, :iqr, :mode], stats)
+    elseif stats == :all
+        stats = [:n, :min, :max, :range, :mean, :var, :sd, :sem, :cv, :harmmean, :geomean, :geovar, :geosd, :geocv, :skew, :kurt, :uq, :median, :lq, :iqr, :mode]
+    else
+        stats = [:n, :mean, :sd, :sem, :uq, :median, :lq]
+    end
+
     for i in stats                     #make columns for statistics
         dfs[i] = Real[]
     end
@@ -51,7 +59,9 @@ function descriptives(data::DataFrame; sort = NaN, vars = NaN, stats = [:n, :mea
         return dfs
     end
     #If sort...
+
     sortlist = unique(data[sort])
+    sort!(sortlist, tuple(sort))
     for v in vars #For each variable in list
         for i = 1:size(sortlist, 1) #For each line in sortlist
             if size(sdata, 1) > 0 deleterows!(sdata, 1:size(sdata, 1)) end
@@ -112,14 +122,14 @@ function descriptives_!(sarray, data, stats)
             if dn === nothing dn = length(data) end
             push!(sarray, dn)
         elseif s == :min
-            if dmin === nothing dmin = min(data) end
+            if dmin === nothing dmin = minimum(data) end
             push!(sarray, dmin)
         elseif s == :max
-            if dmax === nothing dmax = max(data) end
+            if dmax === nothing dmax = maximum(data) end
             push!(sarray, dmax)
         elseif s == :range
             if dmax === nothing dmax = max(data) end
-            if dmim === nothing dmin = max(data) end
+            if dmin === nothing dmin = max(data) end
             push!(sarray, abs(dmax-dmin))
         elseif s == :mean
             if dmean === nothing dmean = mean(data) end
@@ -175,7 +185,7 @@ function descriptives_!(sarray, data, stats)
         elseif s == :lq
             if dlq  === nothing dlq  = percentile(data, 25) end
             push!(sarray, dlq)
-        elseif s == :irq
+        elseif s == :iqr
             if duq  === nothing duq  = percentile(data, 75) end
             if dlq  === nothing dlq  = percentile(data, 25) end
             push!(sarray, abs(duq-dlq))
