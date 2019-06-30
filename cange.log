@@ -1,3 +1,13 @@
+v0.1.11
+
+  - descriptives()
+  - html export - initial, not final
+  - StatsBase, Statistics in deps
+  - change documenting
+  - add test
+  - code cosmetics and fix
+
+
 v0.1.10
 
 - add Cochran–Mantel–Haenszel confidence intervals

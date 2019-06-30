@@ -31,18 +31,18 @@ Return result as ConfInt(lower::Float64, upper::Float64, estimate::Float64)
 Confidence interval calculation for one proportion.
 
 ```
-oneProp(x::Int, n::Int; alpha=0.05, method=[:wilson|:wilsoncc|:cp|:soc|:blaker|:arcsine|:wald])
+CI.oneProp(x::Int, n::Int; alpha=0.05, method=:wilson)
 ```
 
-**x** - number of positive outcomes;
+**x**::Int - number of positive outcomes;
 
-**n** - number of subjects;
+**n**::Int - number of subjects;
 
 **alpha** - alpha value (all CI computed as two-sided);
 
 **method** - computation method;
 
-- wilson - Wilson's confidence interval (CI) for a single proportion (wilson score);
+- wilson - Wilson's confidence interval (CI) for a single proportion (wilson score) (default);
 - wilsoncc - Wilson's CI with continuity correction (CC);
 - cp - Clopper-Pearson exact CI;
 - soc - SOC: Second-Order corrected CI;
@@ -55,7 +55,7 @@ oneProp(x::Int, n::Int; alpha=0.05, method=[:wilson|:wilsoncc|:cp|:soc|:blaker|:
 Confidence interval calculation for two proportion.
 
 ```
- twoProp(x1::Int, n1::Int, x2::Int, n2::Int; alpha=0.05, type=[:diff|:rr|:or], method::Symbol)
+ CI.twoProp(x1::Int, n1::Int, x2::Int, n2::Int; alpha=0.05, type=[:diff|:rr|:or], method::Symbol)
  ```
 
  **x1** - number of positive outcomes in group 1;
@@ -101,23 +101,57 @@ Odd ratio
 
 Confidence interval for one mean.
 
-...
+```
+CI.oneMean(m::Real, s::Real, n::Int, alpha::Real; method=:norm)::ConfInt
+```
 
+**m** - mean;
+
+**s** - variance;
+
+**n** - subject number;
+
+**alpha** - Alpha;
+
+**method** - distribution:
+
+- :norm - Normal distribution (default);
+- :tdist - T Distribution.
 
 ### twoMeans
 
 Confidence interval for mean difference.
 
-...
+```
+CI.twoMeans(m1::Real, s1::Real, n1::Real, m2::Real, s2::Real, n2::Real; alpha::Real=0.05, method=:ev)::ConfInt
+```
 
+**m1** - mean group 1;
+
+**s1** - variance group 1;
+
+**n1** - subject number group 1;
+
+**m2** - mean group 2;
+
+**s2** - variance group 2;
+
+**n2** - subject number group 2;
+
+**alpha** - Alpha;
+
+**method** - equal or unequal variance;
+
+- :ev - equal variance (default);
+- :uv - unequal variance with Welch-Satterthwaite df correction.
 
 ### cmh
 
 Cochran–Mantel–Haenszel confidence intervals.
 
-
-> cmh(data::DataFrame; a = :a, b = :b, c = :c, d = :d, alpha = 0.05, type = [**:diff**|:or|:rr], method = :default, logscale = false)::ConfInt
-
+```
+CI.cmh(data::DataFrame; a = :a, b = :b, c = :c, d = :d, alpha = 0.05, type =:diff, method = :default, logscale = false)::ConfInt
+```
 
  **data**- dataframe with 4 columns, each line represent 2X2 table
 

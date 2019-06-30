@@ -1,7 +1,7 @@
 # ClinicalTrialUtilities
- Clinical Trial related calculation: power and sample size calculation, power simulations, confidence interval, pharmacokinetics parameters calculation.
+ Clinical trial related calculation: descriptive statistics, power and sample size calculation, power simulations, confidence interval, pharmacokinetics parameters calculation.
 
-Version:0.1.10
+Version:0.1.11
 
 2019 &copy; Vladimir Arnautov
 
@@ -14,16 +14,26 @@ Version:0.1.10
 
 The package is designed to perform calculations related to the planning and analysis of the results of clinical trials. The package includes the basic functions described below, as well as a few modules to perform specific calculations.
 
-### Dependencies:
+## Content
 
- - Distributions
- - QuadGK
- - SpecialFunctions
- - Random
- - Roots
- - DataFrames
+- [Installation](#Installation)
+- [Basic functions](#Basic)
+- [Submodules](#Submodules)
+- [Usage](#Usage)
+  - [descriptives](#descriptives)
+  - [ctSampleN](#ctSampleN)
+  - [ctPower](#ctPower)
+  - [beSampleN](#beSampleN)
+  - [bePower](#bePower)
+  - [ci2cv](#ci2cv)
+  - [pooledCV](#pooledCV)
+- [Types](#Types)
+- [Examples](#Examples)
+- [Other](#Other)
+- [Dependencies](#Dependencies)
+- [Copyrights&References](#Copyrights&References)
 
-### Install:
+### <a name="Installation">Installation</a>
 ```
 using Pkg; Pkg.add("ClinicalTrialUtilities");
 ```
@@ -33,86 +43,85 @@ using Pkg; Pkg.clone("https://github.com/PharmCat/ClinicalTrialUtilities.jl.git"
 ```
 
 And then to perform tests:
+
 ```
 Pkg.test("ClinicalTrialUtilities");
 ```
 
-### Basic functions:
+### <a name="Basic">Basic functions</a>
 
-- Sample size calculation:
+- [Descriptive statistics](#descriptives)
 
-ctSampleN(;param, type, group, alpha, beta, diff, sd, a, b, k, out)
+- [Clinical trial sample size estimation](#ctSampleN)
 
-- Clinical trial power estimation:
+- [Clinical trial power estimation](#ctPower)
 
-ctPower(;param, type, group, alpha, n, diff, sd, a, b, k, out)
+- [Iterative sample size estimation for bioequivalence trials](#beSampleN)
 
-- Iterative sample size calculation for Bioequivalence trials:
+- [Power estimation for bioequivalence trials](#bePower)
 
-beSampleN(;theta0, theta1, theta2, cv, alpha, beta, logscale, method, design, out)
+- [CV from CI for bioequivalence trials](#ci2cv)
 
-- Power calculation for TOST (for Bioequivalence trials):
+- [Pooled CV from multiple sources](#pooledCV)
 
-bePower(;theta0, theta1, theta2, cv, n, alpha, logscale, method,  design)
+### <a name="Submodules">Submodules</a>
 
-- CV from CI for bioequivalence trials:
+* Confidence interval calculation - [Doc](https://github.com/PharmCat/ClinicalTrialUtilities.jl/blob/master/doc/CI.md)
+  * oneProp
+  * oneMeans
+  * twoProp
+  * twoMeans
+  * cmh
 
-ci2cv(;alpha, theta1, theta2, n, design, mso, cvms)
+* Pharmacokinetics calculation - [Doc](https://github.com/PharmCat/ClinicalTrialUtilities.jl/blob/mater/doc/PK.md)
+  * nca
 
-- Pooled CV
+* Simulations - [Doc](https://github.com/PharmCat/ClinicalTrialUtilities.jl/blob/master/doc/SIM.md)
+  * bePower
+  * bePowerSIM
+  * ctPropPower
+  * ctPropSampleN
+  * ctMeansPower
+  * ctMeansPowerFS
 
- pooledCV(data::DataFrame; cv, df, alpha, returncv)
-
-- Owen's T function:
-
-owensT(h, a)
-
-- Owen's Q function (a,b always should be >= 0):
-
-owensQ(nu, t, delta, a, b)
-
-### Modules
-
-- Confidence interval calculation
-
-[CI](#CI)
-
-- Pharmacokinetics calculation
-
-[PK](#PK)
-
-- Simulations
-
-[SIM](#SIM)
-
-### Usage
+### <a name="Usage">Usage</a>
 
 **NB! Hypothesis types:**
 
-- ea - Equality: two-sided;
-- ei - Equivalencens: two one-sided hypothesis;
-- ns - Non-Inferiority / Superiority: one-sided hypothesis, for some cases you should use two-sided hypothesis for  Non-Inferiority/Superiority, you can use alpha/2 for this;
+- :ea - Equality: two-sided;
+- :ei - Equivalencens: two one-sided hypothesis;
+- :ns - Non-Inferiority / Superiority: one-sided hypothesis, for some cases you should use two-sided hypothesis for  Non-Inferiority/Superiority, you can use alpha/2 for this;
 
+### <a name="descriptives">descriptives</a>
 
-#### sampleSize
+Descriptive statistics.
+
 ```
-ctSampleN(param=[:mean|:prop|:or], type=[:ea|:ei|:ns|:mcnm], group=[:one|:two], alpha=0.05, beta=0.2, diff=0, sd=0, a=0, b=0, k=1, logdiff=false, out=[:num|:str|:vstr|:print])
+descriptives(data::DataFrame; sort = NaN, vars = NaN, stats = [:n, :mean, :sd, :sem, :uq, :median, :lq])::DataFrame
+```
+
+### <a name="ctSampleN">ctSampleN</a>
+
+Sample size estimation for clinical trial.
 
 ```
+ctSampleN(;param=:notdef, type=:notdef, group=:notdef, alpha=0.05, beta=0.2, diff=0, sd=0, a=0, b=0, k=1, logdiff=false, out=:num)
+```
+
 **param (Parameter type):**
-- mean - Means;
-- prop - Proportions;
-- or - Odd Ratio;
+- :mean - Means;
+- :prop - Proportions;
+- :or - Odd Ratio;
 
 **type (Hypothesis type):**
-- ea - Equality;
-- ei - Equivalencens;
-- ns - Non-Inferiority / Superiority (!one-sided hypothesis!);
-- mcnm - McNemar's Equality test;
+- :ea - Equality;
+- :ei - Equivalencens;
+- :ns - Non-Inferiority / Superiority (!one-sided hypothesis!);
+- :mcnm - McNemar's Equality test;
 
 **group (group num):**
-- one - One sample;
-- two - Two sample, result is for one group, second group size = n * k;
+- :one - One sample;
+- :two - Two sample, result is for one group, second group size = n * k;
 
 **alpha** - Alpha (o < alpha < 1)  (default=0.05);
 
@@ -133,30 +142,33 @@ ctSampleN(param=[:mean|:prop|:or], type=[:ea|:ei|:ns|:mcnm], group=[:one|:two], 
 - true
 
 **out** - output type:
-- num   - numeric (default);
-- str   - String variable with text output;
-- vstr  - numeric and String variable;
-- print - print to console;
+- :num   - numeric (default);
+- :str   - String variable with text output;
+- :vstr  - numeric and String variable;
+- :print - print to console;
 
-#### ctPower
+### <a name="ctPower">ctPower</a>
+
+Power estimation for clinical trials.
+
 ```
-ctPower(param=[:mean|:prop|:or], type=[:ea|:ei|:ns|:mcnm], group=[:one|:two], alpha=0.05, n=0, diff=0,  sd=0, a=0, b=0, k=1, logdiff=false, out=[:num|:str|:vstr|:print])
+ctPower(;param=:notdef, type=:notdef, group=:notdef, alpha=0.05, logdiff=false, diff=0, sd=0, a=0, b=0, n=0, k=1,  out=:num)
 ```
 
 **param (Parameter type):**
-- mean - Means;
-- prop - Proportions;
-- or - Odd Ratio;
+- :mean - Means;
+- :prop - Proportions;
+- :or   - Odd Ratio;
 
 **type (Hypothesis type):**
-- ea - Equality;
-- ei - Equivalence;
-- ns - Non-Inferiority / Superiority;
-- mcnm - McNemar's Equality test;
+- :ea   - Equality;
+- :ei   - Equivalence;
+- :ns   - Non-Inferiority / Superiority;
+- :mcnm - McNemar's Equality test;
 
 **group (group num):**
-- one - one sample;
-- two - Two sample;
+- :one - one sample;
+- :two - Two sample;
 
 **alpha** - Alpha (0<alpha<1)  (default=0.05);
 
@@ -177,17 +189,61 @@ ctPower(param=[:mean|:prop|:or], type=[:ea|:ei|:ns|:mcnm], group=[:one|:two], al
 - true
 
 **out** - output type:
-- num   - numeric (default);
-- str   - String variable with text output;
-- vstr  - numeric and String variable;
-- print - print to console;
+- :num   - numeric (default);
+- :str   - String variable with text output;
+- :vstr  - numeric and String variable;
+- :print - print to console;
 
-#### powerTOST
+### <a name="beSampleN">beSampleN</a>
+
+Sample size estimation for bioequivalence study (iterative procedure).
 
 ```
-powerTOST(alpha=0.05, logscale=[true|false], theta1=0.8, theta2=1.25, theta0=0.95, cv=0.0, n=36, method=":owenq|:nct|:shifted", design=":parallel|:d2x2|:d2x2x3|:d2x2x4|:d2x4x4|:d2x3x3", out=[:num|:str|:vstr|:print])
+beSampleN(;alpha=0.05, beta=0.2, theta0=0.95, theta1=0.8, theta2=1.25, cv=0.0, logscale=true, design=:d2x2, method=:owenq,  out=:num)
 ```
+
+**alpha** - Alpha (o < alpha < 1)  (default=0.05);
+
+**beta** - Beta (o < beta < 1) (default=0.2); power = 1 - beta;
+
+**theta0** - T/R Ratio (default=0.95);
+
+**theta1** - Lower Level (default=0.8);
+
+**theta2** - Upper level (default=1.25);
+
+**cv** - coefficient of variation;
+
 **logscale** - theta1, theta2, theta0: if true - make log transformation (default true);
+
+**design** - trial design;
+- :parallel
+- :d2x2 (default)
+- :d2x2x4
+- :d2x4x4
+- :d2x3x3
+- :d2x4x2
+- :d3x3
+- :d3x6x3
+
+**method** - calculating method: Owen's Q Function | NonCentral T | Shifted;
+- :owenq (default)
+- :nct
+- :shifted
+
+**out** - output type:
+- :num   - numeric (default);
+- :str   - String variable with text output;
+- :vstr  - numeric and String variable;
+- :print - print to console;
+
+### <a name="bePower">bePower</a>
+
+Power estimation for bioequivalence trials.
+
+```
+bePower(;alpha=0.05, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.0, n=0, logscale=true, design=:d2x2, method=:owenq,  out=:num)
+```
 
 **alpha** - Alpha (0 < alpha < 1)  (default=0.05);
 
@@ -201,64 +257,33 @@ powerTOST(alpha=0.05, logscale=[true|false], theta1=0.8, theta2=1.25, theta0=0.9
 
 **n** - subject number;
 
-**method** - calculating method: Owen's Q Function | NonCentral T, Shifted;
-- owenq (default)
-- nct
-- shifted
-
-**design** - trial design;
-- parralel
-- d2x2 (default)
-- d2x2x4
-- d2x4x4
-- d2x3x3
-- d2x4x2
-- d3x3
-- d3x6x3
-
-#### beSampleN
-
-Using for bioequivalence study.
-
-```
-beSampleN(alpha=0.05, logscale=[true|false], theta1=0.8, theta2=1.25, theta0=0.95, cv=0, method=[:owenq|:nct|:shifted], design=[:parallel|:d2x2|:d2x2x3|:d2x2x4|:d2x4x4|:d2x3x3], out=[:num|:str|:vstr|:print])
-```
 **logscale** - theta1, theta2, theta0: if true - make log transformation (default true);
 
-**alpha** - Alpha (o < alpha < 1)  (default=0.05);
-
-**beta** - Beta (o < beta < 1) (default=0.2); power = 1 - beta;
-
-**theta1** - Lower Level (default=0.8);
-
-**theta2** - Upper level (default=1.25);
-
-**theta0** - T/R Ratio (default=0.95);
-
-**cv** - coefficient of variation;
-
-**method** - calculating method: Owen's Q Function | NonCentral T | Shifted;
-- owenq (default)
-- nct
-- shifted
-
 **design** - trial design;
-- parralel
-- d2x2 (default)
-- d2x2x4
-- d2x4x4
-- d2x3x3
-- d2x4x2
-- d3x3
-- d3x6x3
+- :parallel
+- :d2x2 (default)
+- :d2x2x4
+- :d2x4x4
+- :d2x3x3
+- :d2x4x2
+- :d3x3
+- :d3x6x3
+
+**method** - calculating method: Owen's Q Function | NonCentral T, Shifted;
+- :owenq (default)
+- :nct
+- :shifted
 
 **out** - output type:
-- num   - numeric (default);
-- str   - String variable with text output;
-- vstr  - numeric and String variable;
-- print - print to console;
+- :num   - numeric (default);
+- :str   - String variable with text output;
+- :vstr  - numeric and String variable;
+- :print - print to console;
 
-#### ci2cv
+### <a name="ci2cv">ci2cv</a>
+
+Take CV from known CI and subject number.
+
 ```
 ci2cv(;alpha = 0.05, theta1 = 0.8, theta2 = 1.25, n, design=:d2x2, mso=false, cvms=false)
 ```
@@ -274,14 +299,14 @@ ci2cv(;alpha = 0.05, theta1 = 0.8, theta2 = 1.25, n, design=:d2x2, mso=false, cv
 **n** - subject n;
 
 **design** - trial design;
-- parralel
-- d2x2 (default)
-- d2x2x4
-- d2x4x4
-- d2x3x3
-- d2x4x2
-- d3x3
-- d3x6x3
+- :parallel
+- :d2x2 (default)
+- :d2x2x4
+- :d2x4x4
+- :d2x3x3
+- :d2x4x2
+- :d3x3
+- :d3x6x3
 
 **mso**
 
@@ -295,75 +320,90 @@ Calculate CV and MS
 - false(default)
 - true
 
-### pooledCV
+### <a name="pooledCV">pooledCV</a>
 
-**data**
+Get pooled CV from multiple sources.
 
-Dataframe with CV data
+```
+pooledCV(data::DataFrame; cv=:cv, df=:df, alpha=0.05, returncv=true)::ConfInt
+```
 
-**cv**
+**data**::DataFrame - Dataframe with CV data
 
-CV column in dataframe
+**cv**::Symbol - CV column in dataframe
 
-**df**
+**df**::Symbol - DF column in dataframe
 
-DF column in dataframe
+**alpha** - Alpha for var/cv confidence interval.
 
-**alpha**
+**returncv** - Return CV or var:
 
-Alpha for var/cv confidence interval.
+- true  - return cv
+- false - return var
 
-**returncv**
+### <a name="Types">Types</a>
 
-Return CV or var:
+Confidence intervals
 
-- true: return cv
-- false: return var
+```
+struct ConfInt
+    lower::Float64
+    upper::Float64
+    estimate::Float64
+end
+```
 
-### Examples:
+Pharmacokinetics noncompartment analysis output
+
+```
+struct NCA
+    result::DataFrame
+    elimination::DataFrame
+    settings::DataFrame
+    textout::String
+    errorlog::String
+    errors::Array
+end
+```
+
+### <a name="Examples">Examples</a>
 
 ```
 #Sample size for one proportion equality
 ctSampleN(param=:prop, type=:ea, group=:one, a=0.3, b=0.5)
-
 #Equivalence for two means
 ctSampleN(param=:mean, type=:ei, group=:two, diff=0.3, sd=1, a=0.3, b=0.5)
-
 #Odd ratio non-inferiority
 ctSampleN(param=:or, type=:ns, diff=-0.1, a=0.3, b=0.5, k=2)
-
 #Odd ratio equality
 ctSampleN(param=:or, type=:ea, a=0.3, b=0.5, k=2)
 
-#Bioequivalence power for 2x2 design, default method - OwensQ
-bePower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=20, design=:d2x2, method=:owenq)
-
-#Same
-bePower(alpha=0.05, cv=0.2, n=20, design=:d2x2)
-
-#Bioequivalence power for cv 14%, 21 subjects, default OwensQ method, logscale false
-bePower(alpha=0.1, logscale=false, theta1=-0.1, theta2=0.1, theta0=0, cv=0.14, n=21)
-
-#Bioequivalence power for cv 14%, 21 subjects, shifted method, logscale false
-bePower(alpha=0.1, logscale=false, theta1=-0.1, theta2=0.1, theta0=0, cv=0.14, n=21, method=:shifted)
-
-#Simple notations
-bePower(cv=0.4, n=35, design=:d2x4x4)
-bePower(cv=0.14, n=21)
+#Power
+ctPower(param=:mean, type=:ea, group=:one, a=1.5, b=2, sd=1,n=32, alpha=0.05)
 
 #Bioequivalence sample size
 beSampleN(alpha=0.05,  theta1=0.8, theta2=1.25, theta0=0.95, cv=0.15, method=:owenq)
 beSampleN(cv=0.20, method=:nct)
 beSampleN(cv=0.347, design=:parallel,  out=:print)
 beSampleN(cv=0.40)
-
 n, p, s = beSampleN(cv=0.347, design=:d2x2x4, method=:nct, out=:vstr)
+
+#Bioequivalence power for 2x2 design, default method - OwensQ
+bePower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=20, design=:d2x2, method=:owenq)
+#Same
+bePower(alpha=0.05, cv=0.2, n=20, design=:d2x2)
+#Bioequivalence power for cv 14%, 21 subjects, default OwensQ method, logscale false
+bePower(alpha=0.1, logscale=false, theta1=-0.1, theta2=0.1, theta0=0, cv=0.14, n=21)
+#Bioequivalence power for cv 14%, 21 subjects, shifted method, logscale false
+bePower(alpha=0.1, logscale=false, theta1=-0.1, theta2=0.1, theta0=0, cv=0.14, n=21, method=:shifted)
+#Simple notations
+bePower(cv=0.4, n=35, design=:d2x4x4)
+bePower(cv=0.14, n=21)
 
 #CV from CI
 ci2cv(;alpha = 0.05, theta1 = 0.9, theta2 = 1.25, n=30, design=:d2x2x4)
 
 #Polled CV
-
 data = DataFrame(cv = Float64[], df = Int[])
 push!(data, (0.12, 12))
 push!(data, (0.2, 20))
@@ -372,20 +412,73 @@ pooledCV(data; cv=:cv, df=:df, alpha=0.05, returncv=true)
 
 ```
 
-### <a name="CI"></a>Confidence Interval Submodule
+### <a name="Other">Other functions</a>
 
-Description here:
+- Owen's T function:
 
-https://github.com/PharmCat/ClinicalTrialUtilities.jl/blob/master/doc/CI.md
+```
+owensT(h::Float64,a::Float64)::Float64
+```
 
-### <a name="PK"></a>Pharmacokinetics
+- Owen's Q function (a,b always should be >= 0):
 
-Description here:
+```
+owensQ(nu, t::Float64, delta::Float64, a::Float64, b::Float64)::Float64
+```
 
-https://github.com/PharmCat/ClinicalTrialUtilities.jl/blob/dev/doc/PK.md
+### <a name="Dependencies">Dependencies</a>
 
-### <a name="SIM"></a>Simulations
+ - Distributions
+ - StatsBase
+ - Statistics
+ - QuadGK
+ - SpecialFunctions
+ - Random
+ - Roots
+ - DataFrames
 
-Description here:
+ ### <a name="Copyrights&References">Copyrights&References</a>
 
-https://github.com/PharmCat/ClinicalTrialUtilities.jl/blob/master/doc/SIM.md
+ > Clinical Trial Utilities
+
+ > Author: Vladimir Arnautov aka PharmCat
+
+ > Copyright © 2019 Vladimir Arnautov aka PharmCat (mail@pharmcat.net)
+
+ > OwensQ/PowerTOST functions rewritten from https://github.com/Detlew/PowerTOST by Detlew Labes, Helmut Schuetz, Benjamin Lang
+
+ > Calculation based on Chow S, Shao J, Wang H. 2008. Sample Size Calculations in Clinical Research. 2nd Ed. Chapman & Hall/CRC Biostatistics Series.
+
+ > Connor R. J. 1987. Sample size for testing differences in proportions for the paired-sample design. Biometrics 43(1):207-211. page 209.
+
+ >Phillips KF.Power of the Two One-Sided Tests Procedure in BioequivalenceJ Pharmacokin Biopharm. 1990;18(2):137–44. doi: 10.1007/BF01063556
+
+ >Diletti D, Hauschke D, Steinijans VW.Sample Size Determination for Bioequivalence Assessment by Means of Confidence IntervalsInt J Clin Pharmacol Ther Toxicol. 1991;29(1):1–8.
+
+ > Owen, D B (1965) "A Special Case of a Bivariate Non-central t-Distribution" Biometrika Vol. 52, pp.437-446.
+
+ > FORTRAN code by J. Burkhardt, license GNU LGPL
+
+ > D.B. Owen "Tables for computing bivariate normal Probabilities" The Annals of Mathematical Statistics, Vol. 27 (4) Dec. 1956, pp. 1075-1090
+
+ > matlab code  by J. Burkhardt license GNU LGPL
+
+ > If you want to check and get R code - you can find some here: http://powerandsamplesize.com/Calculators/
+
+ > Some ideas was taken from R project packages:
+
+ > PropCIs by Ralph Scherer https://cran.r-project.org/web/packages/PropCIs/index.html
+
+ > pairwiseCI by Frank Schaarschmidt, Daniel Gerhard  https://CRAN.R-project.org/package=pairwiseCI
+
+ > binGroup by Boan Zhang, Christopher Bilder, Brad Biggerstaff, Frank Schaarschmidt Brianna Hitt https://CRAN.R-project.org/package=binGroup
+
+ > proportion by M.Subbiah, V.Rajeswaran https://CRAN.R-project.org/package=proportion
+
+ > binom by Sundar Dorai-Raj https://CRAN.R-project.org/package=binom
+
+ > DescTools https://CRAN.R-project.org/package=DescTools
+
+ > ORCI by Libo Sun https://CRAN.R-project.org/package=ORCI
+
+ > metafor by Wolfgang Viechtbauer https://cran.r-project.org/package=metafor

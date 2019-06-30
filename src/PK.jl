@@ -6,7 +6,8 @@ export nca
 
 using DataFrames
 
-    function nca(data; conc=:Concentration, time=:Time, sort = NaN, calcm = :lint, stack = false)
+    #Makoid C, Vuchetich J, Banakar V. 1996-1999. Basic Pharmacokinetics. 
+    function nca(data; conc=:Concentration, time=:Time, sort = NaN, calcm = :lint)
         columns  = DataFrames.names(data)
         errorlog = ""
         errorn   = 0

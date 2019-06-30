@@ -27,3 +27,21 @@ bePower(;alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.0
 ```
 ctPropPower(p1, n1, p2, n2, diff; alpha=0.05, type=:or, method=:mn, seed=0, simnum=5)
 ```
+
+### ctPropSampleN
+
+```
+ctPropSampleN(p1, p2, ref; alpha=0.05, beta=0.2, type=:notdef, citype =:notdef, method=:notdef, simnum=5, seed=0)
+```
+
+### ctMeansPower
+
+```
+ctMeansPower(m1, s1, n1, m2, s2, n2, ref; alpha=0.05, method=:notdef, simnum=5, seed=0)
+```
+
+### tMeansPowerFS
+
+```
+ctMeansPowerFS(m1, s1, n1, m2, s2, n2, ref;alpha=0.05, method=:notdef, simnum::Real=5, seed=0)
+```

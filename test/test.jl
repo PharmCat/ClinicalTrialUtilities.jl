@@ -1,6 +1,6 @@
 # Clinical Trial Utilities
 # Copyright © 2019 Vladimir Arnautov aka PharmCat (mail@pharmcat.net)
-using Distributions, Random, DataFrames
+using Distributions, Random, DataFrames, CSV
 
 @testset "  Info:               " begin
     ClinicalTrialUtilities.info()
@@ -193,7 +193,7 @@ println(" ---------------------------------- ")
 end
 
 println(" ---------------------------------- ")
-@testset "  PowerTOST Test      " begin
+@testset "  bePower Test      " begin
     #parallel
     @test ClinicalTrialUtilities.bePower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.3, n=31, design=:parallel, method=:owenq) ≈ 0.2949476 atol=1E-7
     @test ClinicalTrialUtilities.bePower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.3, n=32, design=:parallel, method=:owenq) ≈ 0.3166927 atol=1E-7
@@ -404,16 +404,16 @@ println(" ---------------------------------- ")
 
     #----
 
-    ci = ClinicalTrialUtilities.CI.twoMeans(30, 10, 30, 40, 12, 35, alpha=0.05, type=:diff, method=:ev)
+    ci = ClinicalTrialUtilities.CI.twoMeans(30, 10, 30, 40, 12, 35, alpha=0.05, method=:ev)
     @test ci.lower    ≈ -11.6549655 atol=1E-7
     @test ci.upper    ≈ -8.3450344 atol=1E-7
     @test ci.estimate ≈ -10.0     atol=1E-4
 
-    ci = ClinicalTrialUtilities.CI.twoMeans(30, 10, 30, 40, 12, 35, alpha=0.05, type=:diff, method=:uv)
+    ci = ClinicalTrialUtilities.CI.twoMeans(30, 10, 30, 40, 12, 35, alpha=0.05, method=:uv)
     @test ci.lower    ≈ -11.6433893 atol=1E-7
     @test ci.upper    ≈ -8.3566106 atol=1E-7
     @test ci.estimate ≈ -10.0     atol=1E-4
-    ci = ClinicalTrialUtilities.CI.twoMeans(30.5, 12.6, 23, 34, 21.7, 39, alpha=0.05, type=:diff, method=:uv)
+    ci = ClinicalTrialUtilities.CI.twoMeans(30.5, 12.6, 23, 34, 21.7, 39, alpha=0.05, method=:uv)
     @test ci.lower    ≈ -5.6050900 atol=1E-7
     @test ci.upper    ≈ -1.3949099 atol=1E-7
     @test ci.estimate ≈ -3.5     atol=1E-4
@@ -585,6 +585,44 @@ println(" ---------------------------------- ")
     @test pk.result.AUClast[1] ≈ 1.43851 atol=1E-5
     @test pk.result.AUMClast[1] ≈ 4.49504 atol=1E-5
 
+end
+include("testdata.jl")
+println(" ---------------------------------- ")
+@testset "  descriptives        " begin
+
+    df = CSV.read(IOBuffer(descriptivedat)) |> DataFrame
+    ds = ClinicalTrialUtilities.descriptives(df, stats = :all, sort = [:C1, :C2], vars=[:P1, :P2])
+    @test ds[1,:n]        ≈ 20 atol=1E-5
+    @test ds[1,:min]      ≈ 11.30162773 atol=1E-5
+    @test ds[1,:max]      ≈ 13561.95328 atol=1E-5
+    @test ds[1,:range]    ≈ 13550.65165227 atol=1E-5
+    @test ds[1,:mean]     ≈ 1620.9521026095 atol=1E-5
+    @test ds[1,:var]      ≈ 14034427.3245356 atol=1E-5
+    @test ds[1,:sd]       ≈ 3746.25510670797 atol=1E-5
+    @test ds[1,:sem]      ≈ 837.688107965475 atol=1E-5
+    @test ds[1,:cv]       ≈ 231.114485164431 atol=1E-5
+    @test ds[1,:harmmean] ≈ 43.7567236075722 atol=1E-5
+    @test ds[1,:geomean]  ≈ 205.844666821181 atol=1E-5
+    @test ds[1,:geovar]   ≈ 4.91093447695305 atol=1E-5
+    @test ds[1,:geosd]    ≈ 2.21606283235676 atol=1E-5
+    @test ds[1,:geocv]    ≈ 1160.88856294209 atol=1E-5
+    @test ds[1,:skew]     ≈ 2.63411684077405 atol=1E-5
+    @test ds[1,:kurt]     ≈ 5.20836944102797 atol=1E-5
+    @test ds[1,:uq]       ≈ 1130.162773 atol=1E-5
+    @test ds[1,:median]   ≈ 135.6195328 atol=1E-5
+    @test ds[1,:lq]       ≈ 31.022968125 atol=1E-5   #SPSS 30.853444  Phoenix WNL 30.683919295
+    @test ds[1,:iqr]      ≈ 1099.139804875 atol=1E-5 #Same as above
+    @test ds[1,:mode]     ≈ 645.8072989 atol=1E-5
+
+    ds = ClinicalTrialUtilities.descriptives(df, stats = [:mean, :geomean, :geocv])
+    @test ds[1,:mean]     ≈ 2181.5170114224 atol=1E-5
+    @test ds[1,:geomean]  ≈ 4.86763332369581 atol=1E-5
+    @test ds[1,:geocv]    ≈ 124574201599.317 atol=1E-2
+
+    ds = ClinicalTrialUtilities.descriptives(df, sort=[:C3])
+    @test ds[1,:mean]     ≈ 51.35 atol=1E-5
+    @test ds[1,:sem]      ≈ 48.65 atol=1E-5
+    @test ds[1,:median]   ≈ 51.35 atol=1E-3
 end
 
 println(" ---------------------------------- ")

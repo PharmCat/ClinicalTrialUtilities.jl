@@ -1,5 +1,5 @@
 # Clinical Trial Utilities
-# Version: 0.1.10
+# Version: 0.1.11
 # Author: Vladimir Arnautov aka PharmCat
 # Copyright © 2019 Vladimir Arnautov aka PharmCat (mail@pharmcat.net)
 # OwensQ/PowerTOST functions rewrited from https://github.com/Detlew/PowerTOST by Detlew Labes, Helmut Schuetz, Benjamin Lang
@@ -14,11 +14,9 @@
 # If you want to check and get R code you can find some here: http://powerandsamplesize.com/Calculators/
 __precompile__(true)
 module ClinicalTrialUtilities
-using Distributions
-#using Rmath #should be rewrited
+using Distributions, StatsBase, Statistics
 using QuadGK
 using DataFrames
-#using SpecialFunctions
 import SpecialFunctions.lgamma
 
 #Exceptions
@@ -29,7 +27,7 @@ end
 
 Base.showerror(io::IO, e::CTUException) = print("CTU Exception code: ", e.n, " Message: ", e.var);
 const ZDIST = Normal()
-const VERSION = "0.1.10"
+const VERSION = "0.1.11"
 #Exceptions
 
 struct ConfInt
@@ -65,6 +63,10 @@ include("SIM.jl")
 include("PK.jl")
 #info function
 include("Info.jl")
+#Descriptive statistics
+include("Descriptives.jl")
+#Export
+include("Export.jl")
 
 #Sample size
 export ctSampleN, beSampleN
@@ -73,7 +75,7 @@ export ctPower, bePower
 #Utils
 export ci2cv, pooledCV
 #Other
-export owensQ, owensT
+export descriptives, owensQ, owensT
 #Mudules
 export SIM, CI, PK
 
