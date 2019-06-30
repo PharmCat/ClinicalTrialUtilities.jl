@@ -1,5 +1,5 @@
 # Clinical Trial Utilities
-# Version: 0.1.11
+# Version: 0.1.12
 # Author: Vladimir Arnautov aka PharmCat
 # Copyright © 2019 Vladimir Arnautov aka PharmCat (mail@pharmcat.net)
 # OwensQ/PowerTOST functions rewrited from https://github.com/Detlew/PowerTOST by Detlew Labes, Helmut Schuetz, Benjamin Lang
@@ -27,7 +27,7 @@ end
 
 Base.showerror(io::IO, e::CTUException) = print("CTU Exception code: ", e.n, " Message: ", e.var);
 const ZDIST = Normal()
-const VERSION = "0.1.11"
+const VERSION = "0.1.12"
 #Exceptions
 
 struct ConfInt
