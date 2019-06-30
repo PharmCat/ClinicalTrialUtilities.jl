@@ -6,7 +6,7 @@ export nca
 
 using DataFrames
 
-    #Makoid C, Vuchetich J, Banakar V. 1996-1999. Basic Pharmacokinetics. 
+    #Makoid C, Vuchetich J, Banakar V. 1996-1999. Basic Pharmacokinetics.
     function nca(data; conc=:Concentration, time=:Time, sort = NaN, calcm = :lint)
         columns  = DataFrames.names(data)
         errorlog = ""
@@ -147,7 +147,7 @@ using DataFrames
         if n - tmaxn >= 3
             keldata = DataFrame(Start = Int[], End = Int[], b = Float64[], a = Float64[], Rsq = Float64[])
             logconc = log.(data[conc])
-            for i::Int = tmax+1:n-2
+            for i::Int = tmaxn+1:n-2
                 sl = slope(data[i:n,time], logconc[i:n])
                 if sl[2] < 0
                     push!(keldata, [i, n, sl[1], sl[2], sl[3]])
