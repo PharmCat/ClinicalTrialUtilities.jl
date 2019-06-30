@@ -1,7 +1,7 @@
 v0.1.11
 
   - descriptives()
-  - html export
+  - html export - initial, not final
   - StatsBase, Statistics in deps
   - change documenting
   - add test
