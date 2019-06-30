@@ -15,10 +15,8 @@
 __precompile__(true)
 module ClinicalTrialUtilities
 using Distributions, StatsBase, Statistics
-#using Rmath #should be rewrited
 using QuadGK
 using DataFrames
-#using SpecialFunctions
 import SpecialFunctions.lgamma
 
 #Exceptions
