@@ -70,10 +70,12 @@ module CI
         elseif type==:or
             if method==:mn
                 return propORCI(x1, n1, x2, n2, alpha)
-            elseif method==:awoolf
+            elseif method==:awoolf || method==:gart
                 return propORaWoolfCI(x1, n1, x2, n2, alpha)
             elseif method==:woolf
                 return propORWoolfCI(x1, n1, x2, n2, alpha)
+            elseif method==:mover
+                return propORMOVERCI(x1, n1, x2, n2, alpha)
             end
         end
     end #twoProp
@@ -247,8 +249,19 @@ module CI
 
     #Method of variance estimates recovery
     #Donner, A. and Zou, G. (2012). Closed-form confidence intervals for functions of the normal mean and standard deviation. Statistical Methods in Medical Research, 21(4):347-359.
-    #function propRRMOVERCI()
-    #end
+    function propORMOVERCI(x1::Int, n1::Int, x2::Int, n2::Int, alpha::Float64)::ConfInt
+        p1       = (x1/(n1-x1))
+        p2       = (x2/(n2-x2))
+        estimate = p1/p2
+        Z        = quantile(ZDIST, 1-alpha/2)
+        wilci1   = propWilsonCI(x1, n1, alpha)
+        wilci2   = propWilsonCI(x2, n2, alpha)
+        wilci1   = ConfInt(wilci1.lower/(1-wilci1.lower), wilci1.upper/(1-wilci1.upper), estimate)
+        wilci2   = ConfInt(wilci2.lower/(1-wilci2.lower), wilci2.upper/(1-wilci2.upper), estimate)
+        lower    = (p1*p2-sqrt((p1*p2)^2 - wilci1.lower*wilci2.upper*(2*p1-wilci1.lower)*(2*p2-wilci2.upper)))/(wilci2.upper*(2*p2 - wilci2.upper))
+        upper    = (p1*p2+sqrt((p1*p2)^2 - wilci1.upper*wilci2.lower*(2*p1-wilci1.upper)*(2*p2-wilci2.lower)))/(wilci2.lower*(2*p2 - wilci2.lower))
+        return ConfInt(lower, upper, estimate)
+    end
 
     #?Agresti independence-smoothed logit
 
