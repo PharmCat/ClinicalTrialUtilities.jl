@@ -347,6 +347,11 @@ println(" ---------------------------------- ")
     @test ci.upper    ≈ 0.9727082695179062 atol=1E-7
     @test ci.estimate ≈ 0.5357142857142857 atol=1E-7
 
+    ci = ClinicalTrialUtilities.CI.twoProp(30, 100, 40, 90; alpha=0.05, type=:or, method=:mover)
+    @test ci.lower    ≈ 0.2963748435372293 atol=1E-7
+    @test ci.upper    ≈ 0.9689058534780502 atol=1E-7
+    @test ci.estimate ≈ 0.5357142857142857 atol=1E-7
+
     #----
 
     ci = ClinicalTrialUtilities.CI.twoProp(30, 100, 40, 90; alpha=0.05, type=:diff, method=:nhs)
