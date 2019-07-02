@@ -285,6 +285,11 @@ println(" ---------------------------------- ")
     @test ci.upper    ≈ 0.47513399487856794 atol=1E-15
     @test ci.estimate ≈ 0.38 atol=1E-16
 
+    ci = ClinicalTrialUtilities.CI.oneProp(38, 100, alpha=0.05, method=:waldcc)
+    @test ci.lower    ≈ 0.27986600512143206 atol=1E-15
+    @test ci.upper    ≈ 0.48013399487856795 atol=1E-15
+    @test ci.estimate ≈ 0.38 atol=1E-16
+
     ci = ClinicalTrialUtilities.CI.oneProp(38, 100, alpha=0.05, method=:wilson)
     @test ci.lower    ≈ 0.2909759925247873 atol=1E-16
     @test ci.upper    ≈ 0.47790244704488943 atol=1E-15

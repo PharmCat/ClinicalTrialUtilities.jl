@@ -29,6 +29,8 @@ module CI
             return propARCCI(x, n, alpha)
         elseif method==:wald
             return propWaldCI(x, n, alpha)
+        elseif method==:waldcc
+            return propWaldCICC(x, n, alpha)
         else
             throw(CTUException(1301,"oneProp: no such method."))
         end
@@ -155,6 +157,12 @@ module CI
         p=x/n
         b = quantile(ZDIST, 1-alpha/2)*sqrt(p*(1-p)/n)
         return ConfInt(p-b,p+b,p)
+    end
+    function propWaldCICC(x::Int, n::Int, alpha::Float64)::ConfInt
+        p=x/n
+        b = quantile(ZDIST, 1-alpha/2)*sqrt(p*(1-p)/n)
+        cc = 0.5/n
+        return ConfInt(p-b-cc,p+b+cc,p)
     end
     #SOC  Second-Order corrected
     #T. Tony Cai One-sided confdence intervals in discrete distributions doi:10.1016/j.jspi.2004.01.00
