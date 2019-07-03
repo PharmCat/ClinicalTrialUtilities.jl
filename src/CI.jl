@@ -64,20 +64,25 @@ module CI
                 return propDiffWaldCCCI(x1, n1, x2, n2, alpha)
             end
         elseif type==:rr
-            if method ==:cli
+
+            if method == :cli || method == :walters
                 return propRRCLICI(x1, n1, x2, n2, alpha)
+            elseif method == :li || method == :katz
+                return propRRkatzCI(x1, n1, x2, n2, alpha)
             elseif method ==:mover
                 return  propRRMOVERCI(x1, n1, x2, n2, alpha)
             end
         elseif type==:or
             if method==:mn
-                return propORCI(x1, n1, x2, n2, alpha)
+                return propORMNCI(x1, n1, x2, n2, alpha)
             elseif method==:awoolf || method==:gart
                 return propORaWoolfCI(x1, n1, x2, n2, alpha)
             elseif method==:woolf
                 return propORWoolfCI(x1, n1, x2, n2, alpha)
             elseif method==:mover
                 return propORMOVERCI(x1, n1, x2, n2, alpha)
+            elseif method==:mn2
+                return propORCI(x1, n1, x2, n2, alpha)
             end
         end
     end #twoProp
@@ -229,17 +234,38 @@ module CI
         return ci
     end #limit
 
+    @inline function mlemnor(φ, x1, n1, x2, n2)
+        a = n2*(φ-1)
+        b = φ*n1+n2-(x1+x2)*(φ-1)
+        c = -(x1 + x2)
+        p2 = (-b+sqrt(b*b-4*a*c))/a/2
+        p1 = p2*φ/(1+p2*(φ-1))
+        return p1, p2
+    end
+    @inline function mnorval(φ, x1, n1, x2, n2, z)
+        p1 = x1/n1
+        pmle1, pmle2 = mlemnor(φ, x1, n1, x2, n2)
+        return (n1*(p1-pmle1))^2 * (1/(n1*pmle1*(1-pmle1)) + 1/(n2*pmle2*(1-pmle2))) / ((n1+n2)/(n1+n2-1))  - z
+    end
+    function propORMNCI(x1::Int, n1::Int, x2::Int, n2::Int, alpha::Float64)::ConfInt
+
+        estimate = (x1/(n1-x1))/(x2/(n2-x2))
+        z   = quantile(Chisq(1), 1-alpha)
+        fmnor(x) = mnorval(x, x1, n1, x2, n2, z)
+        return ConfInt(find_zero(fmnor, 1e-6, atol=1E-6), find_zero(fmnor, estimate+1e-6, atol=1E-6), estimate)
+    end
+
     #Adjusted Woolf interval (Gart adjusted logit) Lawson, R (2005):Smallsample confidence intervals for the odds ratio.  Communication in Statistics Simulation andComputation, 33, 1095-1113.
     function propORaWoolfCI(x1::Int, n1::Int, x2::Int, n2::Int, alpha::Float64)::ConfInt
-            xa = x1 + 0.5
-            xb = n1 - x1 + 0.5
-            xc = x2 + 0.5
-            xd = n2 - x2 + 0.5
-            est = xa*xd/xc/xb
-            estI = log(est)
-            stde = sqrt(1/xa + 1/xb + 1/xc + 1/xd)
-            z   = quantile(ZDIST, 1-alpha/2)
-            return ConfInt(exp(estI - z*stde), exp(estI + z*stde), est)
+            xa        = x1 + 0.5
+            xb        = n1 - x1 + 0.5
+            xc        = x2 + 0.5
+            xd        = n2 - x2 + 0.5
+            estimate  = xa*xd/xc/xb
+            estI      = log(estimate)
+            stde      = sqrt(1/xa + 1/xb + 1/xc + 1/xd)
+            z         = quantile(ZDIST, 1-alpha/2)
+            return ConfInt(exp(estI - z*stde), exp(estI + z*stde), estimate)
     end
     #Woolf logit
     #Woolf, B. (1955). On estimating the relation between blood group and disease. Annals of human genetics, 19(4):251-253.
@@ -420,10 +446,40 @@ module CI
     end
     #--------------------------------RR-----------------------------------------
     #Miettinen-Nurminen Score interval
-    #Not implemented
-    #function propRRMNCI(x1::Int, n1::Int, x2::Int, n2::Int, alpha::Float64) end
+    #Miettinen, O. and Nurminen, M. (1985), Comparative analysis of two rates. Statist. Med., 4: 213-226. doi:10.1002/sim.4780040211
+    @inline function mlemnrr(φ, x1, n1, x2, n2)
+        a = (n1+n2)*φ
+        b = -(φ*(x1+n2)+x2+n1)
+        c = x1 + x2
+        p2 = (-b-sqrt(b*b-4*a*c))/2/a
+        p1 = p2*φ
+        return p1, p2
+    end
+    @inline function mnrrval(φ, x1, n1, x2, n2, z)
+        p1 = x1/n1
+        p2 = x2/n2
+        pmle1, pmle2 = mlemnrr(φ, x1, n1, x2, n2)
+        return (p1 - φ*p2)^2/((pmle1*(1-pmle1)/n1 + φ*φ*pmle2*(1-pmle2)/n2)*((n1+n2-1)/(n1+n2)))-z
+    end
+    function propRRMNCI(x1::Int, n1::Int, x2::Int, n2::Int, alpha::Float64)::ConfInt
+        est = (x1/n1)/(x2/n2)
+        z   = quantile(Chisq(1), 1 - alpha)
+        fmnrr(x) = mnrrval(x, x1, n1, x2, n2, z)
+        return ConfInt(find_zero(fmnrr, 1e-6, atol=1E-6), find_zero(fmnrr, est+1e-6, atol=1E-6), est)
+    end
+
+    #Katz D, Baptista J, Azen SP and Pike MC. Obtaining confidence intervals for the risk ratio in cohort studies. Biometrics 1978; 34: 469–474
+    function propRRkatzCI(x1::Int, n1::Int, x2::Int, n2::Int, alpha::Float64)::ConfInt
+
+        estimate  = (x1/n1)/(x2/n2)
+        estI = log(estimate)
+        stderrlog = sqrt(1/x2+1/x1-1/n2-1/n1)
+        Z         =  quantile(ZDIST,1-alpha/2)
+        return ConfInt(exp(estI-Z*stderrlog), exp(estI+Z*stderrlog), estimate)
+    end
 
     #Crude log interval
+    #walters
     #Gart, JJand Nam, J (1988): Approximate interval estimation of the ratio of binomial parameters: Areview and corrections for skewness. Biometrics 44, 323-338.
     function propRRCLICI(x1::Int, n1::Int, x2::Int, n2::Int, alpha::Float64)::ConfInt
         x1I  = x1+0.5

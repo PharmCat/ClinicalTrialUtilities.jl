@@ -323,21 +323,26 @@ println(" ---------------------------------- ")
     #----
 
     ci = ClinicalTrialUtilities.CI.twoProp(30, 100, 40, 90; alpha=0.05, type=:or, method=:mn)
+    @test ci.lower    ≈ 0.29537414 atol=1E-7
+    @test ci.upper    ≈ 0.97166697 atol=1E-7
+    @test ci.estimate ≈ 0.53571428 atol=1E-7
+
+    ci = ClinicalTrialUtilities.CI.twoProp(30, 100, 40, 90; alpha=0.05, type=:or, method=:mn2)
     @test ci.lower    ≈ 0.2951669 atol=1E-7
     @test ci.upper    ≈ 0.9722965 atol=1E-7
     @test ci.estimate ≈ 0.5357142 atol=1E-7
 
-    ci = ClinicalTrialUtilities.CI.twoProp(100, 100, 90, 90; alpha=0.05, type=:or, method=:mn)
+    ci = ClinicalTrialUtilities.CI.twoProp(100, 100, 90, 90; alpha=0.05, type=:or, method=:mn2)
     @test ci.lower    ≈ 0.0
     @test ci.upper    ≈ Inf
     #@test ci.estimate == NaN
 
-    ci = ClinicalTrialUtilities.CI.twoProp(0, 100, 90, 90; alpha=0.05, type=:or, method=:mn)
+    ci = ClinicalTrialUtilities.CI.twoProp(0, 100, 90, 90; alpha=0.05, type=:or, method=:mn2)
     @test ci.lower    ≈ 0.0
     @test ci.upper    ≈ 0.0004144169697670039  atol=1E-7
     @test ci.estimate ≈ 0.0
 
-    ci = ClinicalTrialUtilities.CI.twoProp(100, 100, 0, 90; alpha=0.05, type=:or, method=:mn)
+    ci = ClinicalTrialUtilities.CI.twoProp(100, 100, 0, 90; alpha=0.05, type=:or, method=:mn2)
     @test ci.lower    ≈ 2411.6137253788347 atol=1E-7
     @test ci.upper    ≈ Inf
     @test ci.estimate ≈ Inf
