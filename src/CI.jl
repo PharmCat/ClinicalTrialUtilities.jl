@@ -235,9 +235,9 @@ module CI
     end #limit
 
     @inline function mlemnor(φ, x1, n1, x2, n2)
-        a = n2*(φ-1)
-        b = φ*n1+n2-(x1+x2)*(φ-1)
-        c = -(x1 + x2)
+        a  = n2*(φ-1)
+        b  = φ*n1+n2-(x1+x2)*(φ-1)
+        c  = -(x1 + x2)
         p2 = (-b+sqrt(b*b-4*a*c))/a/2
         p1 = p2*φ/(1+p2*(φ-1))
         return p1, p2
@@ -250,7 +250,7 @@ module CI
     function propORMNCI(x1::Int, n1::Int, x2::Int, n2::Int, alpha::Float64)::ConfInt
 
         estimate = (x1/(n1-x1))/(x2/(n2-x2))
-        z   = quantile(Chisq(1), 1-alpha)
+        z        = quantile(Chisq(1), 1-alpha)
         fmnor(x) = mnorval(x, x1, n1, x2, n2, z)
         return ConfInt(find_zero(fmnor, 1e-6, atol=1E-6), find_zero(fmnor, estimate+1e-6, atol=1E-6), estimate)
     end
@@ -307,12 +307,12 @@ module CI
     #------------------------------DIFF-----------------------------------------
     #Wald
     function propDiffWaldCI(x1::Int, n1::Int, x2::Int, n2::Int, alpha::Float64)::ConfInt
-        p1  = x1/n1
-        p2  = x2/n2
-        est = p1-p2
-        q   = quantile(ZDIST, 1 - alpha/2)
-        stderr = sqrt(p1*(1-p1)/n1+p2*(1-p2)/n2)
-        return ConfInt(est - q*stderr, est + q*stderr, est)
+        p1       = x1/n1
+        p2       = x2/n2
+        estimate = p1-p2
+        q        = quantile(ZDIST, 1 - alpha/2)
+        stderr   = sqrt(p1*(1-p1)/n1+p2*(1-p2)/n2)
+        return ConfInt(estimate - q*stderr, estimate + q*stderr, estimate)
     end
     #Wald CC
     function propDiffWaldCCCI(x1::Int, n1::Int, x2::Int, n2::Int, alpha::Float64)::ConfInt
@@ -482,11 +482,11 @@ module CI
     #walters
     #Gart, JJand Nam, J (1988): Approximate interval estimation of the ratio of binomial parameters: Areview and corrections for skewness. Biometrics 44, 323-338.
     function propRRCLICI(x1::Int, n1::Int, x2::Int, n2::Int, alpha::Float64)::ConfInt
-        x1I  = x1+0.5
-        x2I  = x2+0.5
-        n1I  = n1+0.5
-        n2I  = n2+0.5
-        estI = log((x1I/n1I)/(x2I/n2I))
+        x1I       = x1+0.5
+        x2I       = x2+0.5
+        n1I       = n1+0.5
+        n2I       = n2+0.5
+        estI      = log((x1I/n1I)/(x2I/n2I))
         stderrlog = sqrt(1/x2I+1/x1I-1/n2I-1/n1I)
         estimate  = (x1/n1)/(x2/n2)
         Z         =  quantile(ZDIST,1-alpha/2)
