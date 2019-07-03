@@ -150,7 +150,7 @@ module CI
         end
         return ConfInt(lower,upper, x/n)
     end
-    @inline function acceptbin(x::Int, n::Int, p::Float64)
+    @inline function acceptbin(x::Int, n::Int, p::Float64)::Float64
         BIN = Binomial(n,p)
         p1 = 1-cdf(BIN,x-1)
         p2 =   cdf(BIN,x)
@@ -235,7 +235,7 @@ module CI
         return ci
     end #limit
 
-    @inline function mlemnor(φ, x1, n1, x2, n2)
+    @inline function mlemnor(φ::Float64, x1::Int, n1::Int, x2::Int, n2::Int)::Tuple{Float64,Float64}
         a  = n2*(φ-1)
         b  = φ*n1+n2-(x1+x2)*(φ-1)
         c  = -(x1 + x2)
@@ -243,7 +243,7 @@ module CI
         p1 = p2*φ/(1+p2*(φ-1))
         return p1, p2
     end
-    @inline function mnorval(φ, x1, n1, x2, n2, z)
+    @inline function mnorval(φ::Float64, x1::Int, n1::Int, x2::Int, n2::Int, z)::Float64
         p1 = x1/n1
         pmle1, pmle2 = mlemnor(φ, x1, n1, x2, n2)
         return (n1*(p1-pmle1))^2 * (1/(n1*pmle1*(1-pmle1)) + 1/(n2*pmle2*(1-pmle2))) / ((n1+n2)/(n1+n2-1))  - z
@@ -447,7 +447,7 @@ module CI
     @inline function fmpval(p1::Float64, n1::Int, p2::Float64, n2::Int, estimate::Float64, Δ::Float64)
         return abs((estimate-Δ)^2/mlemndiff(p1, n1, p2, n2, Δ))
     end
-    function propDiffMeeCI(x1::Int, n1::Int, x2::Int, n2::Int, alpha::Float64)
+    function propDiffMeeCI(x1::Int, n1::Int, x2::Int, n2::Int, alpha::Float64)::ConfInt
         p1   = x1/n1
         p2   = x2/n2
         est  = p1 - p2
@@ -463,7 +463,7 @@ module CI
     #--------------------------------RR-----------------------------------------
     #Miettinen-Nurminen Score interval
     #Miettinen, O. and Nurminen, M. (1985), Comparative analysis of two rates. Statist. Med., 4: 213-226. doi:10.1002/sim.4780040211
-    @inline function mlemnrr(φ, x1, n1, x2, n2)
+    @inline function mlemnrr(φ::Float64, x1::Int, n1::Int, x2::Int, n2::Int)::Tuple{Float64,Float64}
         a = (n1+n2)*φ
         b = -(φ*(x1+n2)+x2+n1)
         c = x1 + x2
@@ -471,7 +471,7 @@ module CI
         p1 = p2*φ
         return p1, p2
     end
-    @inline function mnrrval(φ, x1, n1, x2, n2, z)
+    @inline function mnrrval(φ::Float64, x1::Int, n1::Int, x2::Int, n2::Int, z::Float64)::Float64
         p1 = x1/n1
         p2 = x2/n2
         pmle1, pmle2 = mlemnrr(φ, x1, n1, x2, n2)
@@ -497,7 +497,7 @@ module CI
         estimate  = (x1/n1)/(x2/n2)
         estI      = log(estimate)
         stderrlog = sqrt(1/x2+1/x1-1/n2-1/n1)
-        Z         =  quantile(ZDIST,1-alpha/2)
+        Z         = quantile(ZDIST,1-alpha/2)
         return ConfInt(exp(estI-Z*stderrlog), exp(estI+Z*stderrlog), estimate)
     end
 
