@@ -64,8 +64,9 @@ module CI
                 return propDiffWaldCCCI(x1, n1, x2, n2, alpha)
             end
         elseif type==:rr
-
-            if method == :cli || method == :walters
+            if method==:mn
+                return propRRMNCI(x1, n1, x2, n2, alpha)
+            elseif method == :cli || method == :walters
                 return propRRCLICI(x1, n1, x2, n2, alpha)
             elseif method == :li || method == :katz
                 return propRRkatzCI(x1, n1, x2, n2, alpha)
@@ -248,11 +249,18 @@ module CI
         return (n1*(p1-pmle1))^2 * (1/(n1*pmle1*(1-pmle1)) + 1/(n2*pmle2*(1-pmle2))) / ((n1+n2)/(n1+n2-1))  - z
     end
     function propORMNCI(x1::Int, n1::Int, x2::Int, n2::Int, alpha::Float64)::ConfInt
-
-        estimate = (x1/(n1-x1))/(x2/(n2-x2))
         z        = quantile(Chisq(1), 1-alpha)
         fmnor(x) = mnorval(x, x1, n1, x2, n2, z)
-        return ConfInt(find_zero(fmnor, 1e-6, atol=1E-6), find_zero(fmnor, estimate+1e-6, atol=1E-6), estimate)
+        if (x1==0 && x2==0) || (x1==n1 && x2==n2)
+            return ConfInt(0.0, Inf, NaN)
+        elseif x1==0 || x2==n2
+            return ConfInt(0.0, find_zero(fmnor, 1e-6, atol=1E-6), 0.0)
+        elseif x1==n1 || x2 == 0
+            return ConfInt(find_zero(fmnor, 1e-6, atol=1E-6), Inf, Inf)
+        else
+            estimate = (x1/(n1-x1))/(x2/(n2-x2))
+            return ConfInt(find_zero(fmnor, 1e-6, atol=1E-6), find_zero(fmnor, estimate+1e-6, atol=1E-6), estimate)
+        end
     end
 
     #Adjusted Woolf interval (Gart adjusted logit) Lawson, R (2005):Smallsample confidence intervals for the odds ratio.  Communication in Statistics Simulation andComputation, 33, 1095-1113.
@@ -270,14 +278,14 @@ module CI
     #Woolf logit
     #Woolf, B. (1955). On estimating the relation between blood group and disease. Annals of human genetics, 19(4):251-253.
     function propORWoolfCI(x1::Int, n1::Int, x2::Int, n2::Int, alpha::Float64)::ConfInt
-            xa = x1
-            xb = n1 - x1
-            xc = x2
-            xd = n2 - x2
+            xa       = x1
+            xb       = n1 - x1
+            xc       = x2
+            xd       = n2 - x2
             estimate = xa*xd/xc/xb
-            estI = log(estimate)
-            stde = sqrt(1/xa + 1/xb + 1/xc + 1/xd)
-            z   = quantile(ZDIST, 1-alpha/2)
+            estI     = log(estimate)
+            stde     = sqrt(1/xa + 1/xb + 1/xc + 1/xd)
+            z        = quantile(ZDIST, 1-alpha/2)
             return ConfInt(exp(estI - z*stde), exp(estI + z*stde), estimate)
     end
 
@@ -462,17 +470,24 @@ module CI
         return (p1 - φ*p2)^2/((pmle1*(1-pmle1)/n1 + φ*φ*pmle2*(1-pmle2)/n2)*((n1+n2-1)/(n1+n2)))-z
     end
     function propRRMNCI(x1::Int, n1::Int, x2::Int, n2::Int, alpha::Float64)::ConfInt
-        est = (x1/n1)/(x2/n2)
-        z   = quantile(Chisq(1), 1 - alpha)
+        z        = quantile(Chisq(1), 1 - alpha)
         fmnrr(x) = mnrrval(x, x1, n1, x2, n2, z)
-        return ConfInt(find_zero(fmnrr, 1e-6, atol=1E-6), find_zero(fmnrr, est+1e-6, atol=1E-6), est)
-    end
+        if (x1==0 && x2==0) || (x1==n1 && x2==n2)
+            return ConfInt(0.0, Inf, NaN)
+        elseif x1==0 || x2==n2
+            return ConfInt(0.0, find_zero(fmnrr, 1e-6, atol=1E-6), 0.0)
+        elseif x1==n1 || x2 == 0
+            return ConfInt(find_zero(fmnrr, 1e-6, atol=1E-6), Inf, Inf)
+        else
+            estimate = (x1/n1)/(x2/n2)
+            return ConfInt(find_zero(fmnrr, 1e-6, atol=1E-6), find_zero(fmnrr, estimate+1e-6, atol=1E-6), estimate)
+        end
+    end #propRRMNCI
 
     #Katz D, Baptista J, Azen SP and Pike MC. Obtaining confidence intervals for the risk ratio in cohort studies. Biometrics 1978; 34: 469–474
     function propRRkatzCI(x1::Int, n1::Int, x2::Int, n2::Int, alpha::Float64)::ConfInt
-
         estimate  = (x1/n1)/(x2/n2)
-        estI = log(estimate)
+        estI      = log(estimate)
         stderrlog = sqrt(1/x2+1/x1-1/n2-1/n1)
         Z         =  quantile(ZDIST,1-alpha/2)
         return ConfInt(exp(estI-Z*stderrlog), exp(estI+Z*stderrlog), estimate)
