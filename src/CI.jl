@@ -54,9 +54,9 @@ module CI
                 return propDiffACCI(x1, n1, x2, n2, alpha)
             elseif method ==:mn
                 return propDiffMNCI(x1, n1, x2, n2, alpha)
-            elseif method ==:mee
-                return propDiffMeeCI(x1, n1, x2, n2, alpha)
             elseif method ==:mee2
+                return propDiffMeeCI(x1, n1, x2, n2, alpha)
+            elseif method ==:mee || method == :fm
                 return propDiffFMCI(x1, n1, x2, n2, alpha)
             elseif method ==:wald
                 return propDiffWaldCI(x1, n1, x2, n2, alpha)
@@ -318,19 +318,19 @@ module CI
         p1       = x1/n1
         p2       = x2/n2
         estimate = p1-p2
-        q        = quantile(ZDIST, 1 - alpha/2)
+        z        = quantile(ZDIST, 1 - alpha/2)
         stderr   = sqrt(p1*(1-p1)/n1+p2*(1-p2)/n2)
-        return ConfInt(estimate - q*stderr, estimate + q*stderr, estimate)
+        return ConfInt(estimate - z*stderr, estimate + z*stderr, estimate)
     end
     #Wald CC
     function propDiffWaldCCCI(x1::Int, n1::Int, x2::Int, n2::Int, alpha::Float64)::ConfInt
-        p1  = x1/n1
-        p2  = x2/n2
-        est = p1-p2
-        cc  = 0.5*(1/n1+1/n2)
-        q   = quantile(ZDIST, 1 - alpha/2)
-        stderr = sqrt(p1*(1-p1)/n1+p2*(1-p2)/n2)
-        return ConfInt(est - q*stderr - cc, est + q*stderr + cc, est)
+        p1       = x1/n1
+        p2       = x2/n2
+        estimate = p1-p2
+        cc       = 0.5*(1/n1+1/n2)
+        z        = quantile(ZDIST, 1 - alpha/2)
+        stderr   = sqrt(p1*(1-p1)/n1+p2*(1-p2)/n2)
+        return ConfInt(estimate - z*stderr - cc, estimate + z*stderr + cc, estimate)
     end
 
     #Newcombes Hybrid (wilson) Score interval for the difference of proportions
@@ -338,25 +338,25 @@ module CI
     #10
     #Newcombe RG (1998): Interval Estimation for the Difference Between Independent Proportions: Comparison of Eleven Methods. Statistics in Medicine 17, 873-890.
     function propDiffNHSCI(x1::Int, n1::Int, x2::Int, n2::Int, alpha::Float64)::ConfInt
-        p1  = x1/n1
-        p2  = x2/n2
-        est = p1-p2
-        q   = quantile(ZDIST, 1 - alpha/2)
-        ci1 = propWilsonCI(x1, n1, alpha)
-        ci2 = propWilsonCI(x2, n2, alpha)
-        return ConfInt(est-q*sqrt(ci1.lower*(1-ci1.lower)/n1+ci2.upper*(1-ci2.upper)/n2),
-                       est+q*sqrt(ci1.upper*(1-ci1.upper)/n1+ci2.lower*(1-ci2.lower)/n2), est)
+        p1       = x1/n1
+        p2       = x2/n2
+        estimate = p1-p2
+        z        = quantile(ZDIST, 1 - alpha/2)
+        ci1      = propWilsonCI(x1, n1, alpha)
+        ci2      = propWilsonCI(x2, n2, alpha)
+        return ConfInt(estimate-z*sqrt(ci1.lower*(1-ci1.lower)/n1+ci2.upper*(1-ci2.upper)/n2),
+                       estimate+z*sqrt(ci1.upper*(1-ci1.upper)/n1+ci2.lower*(1-ci2.lower)/n2), estimate)
     end
 
     function propDiffNHSCCCI(x1::Int, n1::Int, x2::Int, n2::Int, alpha::Float64)::ConfInt
-        p1  = x1/n1
-        p2  = x2/n2
-        est = p1-p2
-        q   = quantile(ZDIST, 1 - alpha/2)
-        ci1 = propWilsonCCCI(x1, n1, alpha)
-        ci2 = propWilsonCCCI(x2, n2, alpha)
-        return ConfInt(est-sqrt((p1-ci1.lower)^2 + (ci2.upper-p2)^2),
-                       est+sqrt((ci1.upper - p1)^2 + (p2 - ci2.lower)^2), est)
+        p1       = x1/n1
+        p2       = x2/n2
+        estimate = p1-p2
+        z        = quantile(ZDIST, 1 - alpha/2)
+        ci1      = propWilsonCCCI(x1, n1, alpha)
+        ci2      = propWilsonCCCI(x2, n2, alpha)
+        return ConfInt(estimate-sqrt((p1-ci1.lower)^2 + (ci2.upper-p2)^2),
+                       estimate+sqrt((ci1.upper - p1)^2 + (p2 - ci2.lower)^2), estimate)
     end
 
     #Agresti-Caffo interval for the difference of proportions
@@ -365,19 +365,20 @@ module CI
     function propDiffACCI(x1::Int, n1::Int, x2::Int, n2::Int, alpha::Float64)::ConfInt
         p1       = x1/n1
         p2       = x2/n2
-        est      = p1-p2
-        q        = quantile(ZDIST, 1 - alpha/2)
+        estimate = p1-p2
+        z        = quantile(ZDIST, 1 - alpha/2)
         p1I      = (x1+1)/(n1+2)
         p2I      = (x2+1)/(n2+2)
         n1I      = n1+2
         n2I      = n2+2
         estI     = p1I-p2I
         stderr   = sqrt(p1I*(1-p1I)/n1I+p2I*(1-p2I)/n2I)
-        return ConfInt(estI-q*stderr, estI+q*stderr, est)
+        return ConfInt(estI-z*stderr, estI+z*stderr, estimate)
     end
     #Method of Mee 1984 with Miettinen and Nurminen modification n / (n - 1) Newcombe 1998
     #Score intervals for the difference of two binomial proportions
     #6
+    #=
     function propDiffMNCI(x1::Int, n1::Int, x2::Int, n2::Int, alpha::Float64)::ConfInt  #With correction factor
         p1    = x1/n1
         p2    = x2/n2
@@ -404,54 +405,61 @@ module CI
         end
         return ConfInt(low2, up2, p1-p2)
     end
-
-    @inline function mnzstat(p1::Float64, n1::Int, p2::Float64, n2::Int, delta::Float64)::Float64
-        diff = p1-p2-delta
-        n    = n1+n2
-        return diff*diff/(n/(n-1)*fmvar(p1, n1, p2, n2, delta))
+    =#
+    function propDiffMNCI(x1::Int, n1::Int, x2::Int, n2::Int, alpha::Float64)::ConfInt
+        p1       = x1/n1
+        p2       = x2/n2
+        estimate = p1 - p2
+        z        = quantile(Chisq(1), 1-alpha)
+        fmnd(x)  = mndiffval(p1, n1, p2, n2, estimate, x) - z
+        return ConfInt(find_zero(fmnd, (-1.0+1e-6, estimate-1e-6)), find_zero(fmnd, ( estimate+1e-6, 1.0-1e-6)), estimate)
     end
-    #Mee
-    #Mee RW (1984) Confidence bounds for the difference between two probabilities,Biometrics40:1175-1176
-    function propDiffMeeCI(x1::Int, n1::Int, x2::Int, n2::Int, alpha::Float64)
-        p1   = x1/n1
-        p2   = x2/n2
-        est  = p1 - p2
-        f(x) = fmpval(p1, n1, p2, n2, est, x) - alpha
-        return ConfInt(find_zero(f, (-1.0+1e-6, est-1e-6)), find_zero(f, ( est+1e-6, 1.0-1e-6)), est)
-
+    @inline function mndiffval(p1::Float64, n1::Int, p2::Float64, n2::Int, estimate::Float64, Δ::Float64)::Float64
+        return (estimate-Δ)^2/((n1+n2)/(n1+n2-1)*mlemndiff(p1, n1, p2, n2, Δ))
     end
-    @inline function fmvar(p1::Float64, n1::Int, p2::Float64, n2::Int, delta::Float64)::Float64
-        if p1-p2-delta == 0 return 0.0 end
+    @inline function mlemndiff(p1::Float64, n1::Int, p2::Float64, n2::Int, Δ::Float64)::Float64
+        if p1-p2-Δ == 0 return 0.0 end
         theta = n2/n1
         a = 1 + theta
-        b = -(1 + theta + p1 + theta * p2 + delta*(theta + 2))
-        c = delta^2 + delta*(2 * p1 + theta + 1) + p1 + theta * p2
-        d = -p1*delta*(1 + delta)
+        b = -(1 + theta + p1 + theta * p2 + Δ*(theta + 2))
+        c = Δ^2 + Δ*(2 * p1 + theta + 1) + p1 + theta * p2
+        d = -p1*Δ*(1 + Δ)
         v = (b/a/3)^3 - b*c/(6*a*a) + d/2/a
         u = sign(v) * sqrt((b/3/a)^2 - c/3/a)
         w = (pi + acos(v/u^3))/3
         p1n = 2*u*cos(w) - b/3/a
-        p2n = p1n - delta
+        p2n = p1n - Δ
         return p1n * (1-p1n)/n1 + p2n * (1 - p2n)/n2
     end
-    @inline function fmpval(p1, n1, p2, n2, est, delta)::Float64
-        z = (est-delta)/sqrt(fmvar(p1, n1, p2, n2, delta))
+    #Mee
+    #Mee RW (1984) Confidence bounds for the difference between two probabilities,Biometrics40:1175-1176
+    #Farrington, C. P. and Manning, G. (1990), “Test Statistics and Sample Size Formulae for Comparative Binomial Trials with Null Hypothesis of Non-zero Risk Difference or Non-unity Relative Risk,” Statistics in Medicine, 9, 1447–1454
+    #FM - Faster than propDiffMeeCI
+    function propDiffFMCI(x1::Int, n1::Int, x2::Int, n2::Int, alpha::Float64)::ConfInt
+        p1       = x1/n1
+        p2       = x2/n2
+        estimate = p1 - p2
+        z        = quantile(Chisq(1), 1-alpha)
+        f(x)     = fmpval(p1, n1, p2, n2, estimate, x) - z
+        return ConfInt(find_zero(f, (-1.0+1e-6, estimate-1e-6), atol=1E-5),
+                       find_zero(f, (estimate+1e-6, 1.0-1e-6), atol=1E-5), estimate)
+    end
+    @inline function fmpval(p1::Float64, n1::Int, p2::Float64, n2::Int, estimate::Float64, Δ::Float64)
+        return abs((estimate-Δ)^2/mlemndiff(p1, n1, p2, n2, Δ))
+    end
+    function propDiffMeeCI(x1::Int, n1::Int, x2::Int, n2::Int, alpha::Float64)
+        p1   = x1/n1
+        p2   = x2/n2
+        est  = p1 - p2
+        f(x) = fmpval2(p1, n1, p2, n2, est, x) - alpha
+        return ConfInt(find_zero(f, (-1.0+1e-6, est-1e-6)), find_zero(f, ( est+1e-6, 1.0-1e-6)), est)
+    end
+    @inline function fmpval2(p1, n1, p2, n2, est, delta)::Float64
+        z = (est-delta)/sqrt(mlemndiff(p1, n1, p2, n2, delta))
         p = cdf(ZDIST, z)
         return 2*min(1-p, p)
     end
-    #FM2 - Faster than propDiffMeeCI
-    #Farrington, C. P. and Manning, G. (1990), “Test Statistics and Sample Size Formulae for Comparative Binomial Trials with Null Hypothesis of Non-zero Risk Difference or Non-unity Relative Risk,” Statistics in Medicine, 9, 1447–1454
-    function propDiffFMCI(x1::Int, n1::Int, x2::Int, n2::Int, alpha::Float64)::ConfInt
-        p1  = x1/n1
-        p2  = x2/n2
-        est = p1 - p2
-        z   = quantile(ZDIST, 1 - alpha/2)
-        f(x) = fmpval2(p1, n1, p2, n2, est, x) - z
-        return ConfInt(find_zero(f, (-1.0+1e-6, est-1e-6), atol=1E-5), find_zero(f, (est+1e-6, 1.0-1e-6), atol=1E-5), est)
-    end
-    @inline function fmpval2(p1, n1, p2, n2, est, delta)
-        return abs((est-delta)/sqrt(fmvar(p1, n1, p2, n2, delta)))
-    end
+
     #--------------------------------RR-----------------------------------------
     #Miettinen-Nurminen Score interval
     #Miettinen, O. and Nurminen, M. (1985), Comparative analysis of two rates. Statist. Med., 4: 213-226. doi:10.1002/sim.4780040211
