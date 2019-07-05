@@ -701,6 +701,7 @@ println(" ---------------------------------- ")
     res = ClinicalTrialUtilities.descriptives(ClinicalTrialUtilities.PK.nca((CSV.read(IOBuffer(pkdat)) |> DataFrame); sort=[:Subject, :Formulation]).result, sort=[:Formulation], vars = [:AUClast, :Cmax])
     @test res.mean[1] ≈ 7431.283916666667
     @test res.mean[2] ≈ 8607.09
+    html = ClinicalTrialUtilities.Export.htmlExport(res)
 end
 
 println(" ---------------------------------- ")
