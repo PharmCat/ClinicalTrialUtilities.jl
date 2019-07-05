@@ -1,5 +1,22 @@
 module Export
-    function htmlExport(data; title="Title")
+    function htmlExport(data; sort=NaN, rspan=:all, title="Title", dict = NaN, file=NaN)
+        rowlist = Array{String,1}(undef, 0)
+        cnames  = names(data)
+        if isa(sort, Array)
+            sort = Symbol.(sort)
+            filter!(x->x in cnames, sort)
+            if length(sort) == 0 sort = [cnames[1]] end
+        else
+            sort = [cnames[1]]
+        end
+        if isa(rspan, Array)
+            rspan = Symbol.(rspan)
+            filter!(x->x in sort, rspan)
+            if length(sort) == 0 rspan = NaN end
+        else
+            rspan = sort
+        end
+        out = ""
         html_h = """<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <HTML>
 <HEAD>
@@ -54,7 +71,7 @@ module Export
          min-width: 60px;
          max-width: 100px;
          background-color: #ffffff;
-         border-top: 1.00pt solid #152935;
+         border-top: 1.00pt solid #aeaeae;
          border-bottom: 1.00pt solid #aeaeae;
          border-left: 1.00pt solid #e0e0e0;
          border-right: 1.00pt solid #e0e0e0;
@@ -77,6 +94,20 @@ module Export
      TR.cell:last-of-type > TD {
          border-bottom: 2.00pt solid #152935;
      }
+     TD.midcell {
+        min-width: 60px;
+        max-width: 100px;
+        background-color: #ffffff;
+        border-top: 1.00pt solid #aeaeae;
+        border-bottom: 1.00pt solid #aeaeae;
+        border-left: 1.00pt solid #e0e0e0;
+        border-right: 1.00pt solid #e0e0e0;
+        padding: 0in
+     }
+     TD.foot {
+        border-top: 2.00pt solid #152935;
+        border-bottom: 2.00pt solid #152935;
+     }
 
     </STYLE>
 </HEAD>
@@ -85,50 +116,95 @@ module Export
         html_f = """</BODY>
 </HTML>"""
         html_pbr ="""<P LANG="ru-RU" ALIGN=LEFT STYLE="margin-bottom: 0in; line-height: 0.28in; widows: 0; orphans: 0"><BR></P>"""
-        rown   = size(data, 1)
-        coln   = size(data, 2)
-        cnames = names(data)
+        rown        = size(data, 1)
+        coln        = size(data, 2)
+        tablematrix = zeros(Int, rown, coln)
 
-        io = open("export.html", "w")
-        truncate(io, 0)
-        println(io, html_h)
+        out *= html_h
 
-        print(io, """
+        out *= """
     <TABLE CELLPADDING=0 CELLSPACING=0>
+        <THEAD>
         <TR CLASS=cell>
             <TD COLSPAN="""*string(coln)*""" CLASS=title>
                 <P ALIGN=CENTER CLASS=cell>
                 <FONT CLASS=title><B>"""*title*"""</B></FONT></P>
             </TD>
-        </TR>""")
-        print(io, """
-    <TR VALIGN=BOTTOM CLASS=cell>""")
+        </TR>"""
+
+        out *= """
+    <TR VALIGN=BOTTOM CLASS=cell>"""
+
         for c = 1:coln
-            print(io, """
+            out *= """
         <TD CLASS=hcell>
             <P ALIGN=CENTER CLASS=cell>
             <FONT CLASS=cell>"""*string(cnames[c])*"""</FONT></P>
-        </TD>""")
+        </TD>"""
         end
-        print(io, """
-    </TR>""")
+
+        out *= """
+    </TR>
+    </THEAD>
+
+    <TBODY>"""
+
+        sort!(data, tuple(sort))
+        tablematrix .= 1
+        for c = 1:coln
+            s = true
+            while s
+                s = false
+                for r = 2:rown
+                    if tablematrix[r,c] !=0 && data[r,c] == data[r-1,c]
+                        tablematrix[r,c] -= 1;
+                        tablematrix[r-1,c] += 1;
+                        s = true;
+                    end
+                end
+            end
+        end
+        #print(tablematrix)
+
         for r = 1:rown
-            print(io,"""
-        <TR CLASS=cell>""")
+            rowstr = ""
             for c = 1:coln
-                print(io,"""
-            <TD VALIGN=TOP CLASS=cell>
+                if tablematrix[r,c] > 0 || !any(x -> x == cnames[c], rspan)
+                    rowstr *= """
+            <TD ROWSPAN="""*(any(x -> x == cnames[c], rspan) ? string(tablematrix[r,c]) : "1")*""" VALIGN=TOP CLASS=\""""*((c > 1 && c < coln) ? "midcell" : "cell")*"""\">
                 <P ALIGN=RIGHT CLASS=cell>
                 <FONT CLASS=cell><SPAN LANG="ru-RU">"""*string(cellformat(data[r,c]))*"""</SPAN></FONT></P>
-            </TD>""")
+            </TD>"""
+                end
             end
-            print(io,"""
-        </TR>""")
+            push!(rowlist, rowstr)
         end
-        println(io, """
-    </TABLE>""")
-        print(io, html_f)
-        close(io)
+
+        for r in rowlist
+            out *="""
+        <TR CLASS=cell>"""*r*"""
+        </TR>"""
+        end
+
+        out *= """
+    </TBODY>
+    <TFOOT><TR><TD COLSPAN="""*string(coln)*""" class=foot></TD><TR></TFOOT>
+    </TABLE>"""
+        out *= html_f
+
+        if isa(file, String)
+            try
+                io = open(file, "w")
+                truncate(io, 0)
+                print(io, out)
+                close(io)
+                return true
+            catch
+                return false
+            end
+        else
+            return out
+        end
     end
 
     function cellformat(val)

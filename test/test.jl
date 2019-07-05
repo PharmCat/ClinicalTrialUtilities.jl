@@ -682,6 +682,17 @@ println(" ---------------------------------- ")
     @test ds[1,:mean]     ≈ 51.35 atol=1E-5
     @test ds[1,:sem]      ≈ 48.65 atol=1E-5
     @test ds[1,:median]   ≈ 51.35 atol=1E-3
+
+    df = CSV.read(IOBuffer(negdat)) |> DataFrame
+    ds = ClinicalTrialUtilities.descriptives(df, stats = :all)
+    @test ds[1,:harmmean] === NaN
+    @test ds[1,:geomean]  === NaN
+    @test ds[1,:geovar]   === NaN
+    @test ds[1,:geosd]    === NaN
+    @test ds[1,:geocv]    === NaN
+
+    ds = ClinicalTrialUtilities.descriptives(df, stats = 1)
+    @test ds[1,:sem]      ≈ 1.1131 atol=1E-4
 end
 
 println(" ---------------------------------- ")

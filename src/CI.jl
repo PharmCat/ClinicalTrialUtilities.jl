@@ -460,6 +460,20 @@ module CI
         return 2*min(1-p, p)
     end
 
+
+    # Brown, Li's Jeffreys ?
+    #=
+    function propDiffJeffCI(x1::Int, n1::Int, x2::Int, n2::Int, alpha::Float64)::ConfInt
+        p1   = (x1 + 0.5) / (n1+1)
+        p2   = (x2 + 0.5) / (n2+1)
+        v    = p1*(1-p1)/n1 + p2*(1-p2)/n2
+        z    = quantile(ZDIST, 1 - alpha/2)
+        t    = z * sqrt(v)
+        estI = p1-p2
+        return ConfInt(max(-1, estI - t), min(1, estI + t), x1/n1-x2/n2)
+    end
+    =#
+
     #--------------------------------RR-----------------------------------------
     #Miettinen-Nurminen Score interval
     #Miettinen, O. and Nurminen, M. (1985), Comparative analysis of two rates. Statist. Med., 4: 213-226. doi:10.1002/sim.4780040211
