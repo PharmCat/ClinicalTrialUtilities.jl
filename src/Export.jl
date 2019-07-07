@@ -32,7 +32,7 @@ module Export
     table {
  border-collapse: collapse;
         min-width: 300px;
-        width: auto;
+        width: 100%;
  }
      P.cell {
          margin-left: 0.04in;
@@ -111,7 +111,7 @@ module Export
 
     </STYLE>
 </HEAD>
-<BODY LANG="en-US" DIR="LTR">"""
+<BODY LANG="en-US" DIR="LTR" leftmargin="40" rightmargin="20" topmargin="20" bottommargin="20">"""
 
         html_f = """</BODY>
 </HTML>"""

@@ -65,6 +65,8 @@ include("PK.jl")
 include("Info.jl")
 #Descriptive statistics
 include("Descriptives.jl")
+#Frequency
+include("Freque.jl")
 #Export
 include("Export.jl")
 
