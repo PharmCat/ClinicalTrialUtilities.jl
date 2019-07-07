@@ -4,6 +4,12 @@ Pharmacokinetics module.
 
 ## Functions
 
+- [nca](#nca) - Non-noncompartment analysis.
+
+### <a name="nca">nca</a>
+
+Non-noncompartment analysis.
+
 ```
 nca(data; conc=:Concentration, time=:Time, sort = NaN, calcm = :lint)
 ```

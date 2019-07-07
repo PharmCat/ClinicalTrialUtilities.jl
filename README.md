@@ -18,7 +18,6 @@ The package is designed to perform calculations related to the planning and anal
 
 - [Installation](#Installation)
 - [Basic functions](#Basic)
-- [Submodules](#Submodules)
 - [Usage](#Usage)
   - [descriptives](#descriptives)
   - [ctSampleN](#ctSampleN)
@@ -27,6 +26,21 @@ The package is designed to perform calculations related to the planning and anal
   - [bePower](#bePower)
   - [ci2cv](#ci2cv)
   - [pooledCV](#pooledCV)
+- [Submodules](#Submodules)
+  - [CI](https://github.com/PharmCat/ClinicalTrialUtilities.jl/blob/master/doc/CI.md)
+    - [oneProp](https://github.com/PharmCat/ClinicalTrialUtilities.jl/blob/master/doc/CI.md#oneProp)
+    - [oneMean](https://github.com/PharmCat/ClinicalTrialUtilities.jl/blob/master/doc/CI.md#oneMean)
+    - [twoProp](https://github.com/PharmCat/ClinicalTrialUtilities.jl/blob/master/doc/CI.md#twoProp)
+    - [twoMeans](https://github.com/PharmCat/ClinicalTrialUtilities.jl/blob/master/doc/CI.md#twoMeans)
+    - [cmh](https://github.com/PharmCat/ClinicalTrialUtilities.jl/blob/master/doc/CI.md#cmh)
+  - [PK](https://github.com/PharmCat/ClinicalTrialUtilities.jl/blob/master/doc/PK.md)
+    - [nca](https://github.com/PharmCat/ClinicalTrialUtilities.jl/blob/master/doc/PK.md#nca)
+  - [SIM](https://github.com/PharmCat/ClinicalTrialUtilities.jl/blob/master/doc/SIM.md)
+    - [bePower](https://github.com/PharmCat/ClinicalTrialUtilities.jl/blob/master/doc/SIM.md#bePower)
+    - [ctPropPower](https://github.com/PharmCat/ClinicalTrialUtilities.jl/blob/master/doc/SIM.md#ctPropPower)
+    - [ctPropSampleN](https://github.com/PharmCat/ClinicalTrialUtilities.jl/blob/master/doc/SIM.md#ctPropSampleN)
+    - [ctMeansPower](https://github.com/PharmCat/ClinicalTrialUtilities.jl/blob/master/doc/SIM.md#ctMeansPower)
+    - [ctMeansPowerFS](https://github.com/PharmCat/ClinicalTrialUtilities.jl/blob/master/doc/SIM.md#ctMeansPowerFS)
 - [Types](#Types)
 - [Examples](#Examples)
 - [Other](#Other)
@@ -63,26 +77,6 @@ Pkg.test("ClinicalTrialUtilities");
 - [CV from CI for bioequivalence trials](#ci2cv)
 
 - [Pooled CV from multiple sources](#pooledCV)
-
-### <a name="Submodules">Submodules</a>
-
-* Confidence interval calculation - [Doc](https://github.com/PharmCat/ClinicalTrialUtilities.jl/blob/master/doc/CI.md)
-  * oneProp
-  * oneMeans
-  * twoProp
-  * twoMeans
-  * cmh
-
-* Pharmacokinetics calculation - [Doc](https://github.com/PharmCat/ClinicalTrialUtilities.jl/blob/mater/doc/PK.md)
-  * nca
-
-* Simulations - [Doc](https://github.com/PharmCat/ClinicalTrialUtilities.jl/blob/master/doc/SIM.md)
-  * bePower
-  * bePowerSIM
-  * ctPropPower
-  * ctPropSampleN
-  * ctMeansPower
-  * ctMeansPowerFS
 
 ### <a name="Usage">Usage</a>
 
@@ -340,6 +334,26 @@ pooledCV(data::DataFrame; cv=:cv, df=:df, alpha=0.05, returncv=true)::ConfInt
 
 - true  - return cv
 - false - return var
+
+### <a name="Submodules">Submodules</a>
+
+* Confidence interval calculation - [Doc](https://github.com/PharmCat/ClinicalTrialUtilities.jl/blob/master/doc/CI.md)
+  * oneProp
+  * oneMeans
+  * twoProp
+  * twoMeans
+  * cmh
+
+* Pharmacokinetics calculation - [Doc](https://github.com/PharmCat/ClinicalTrialUtilities.jl/blob/mater/doc/PK.md)
+  * nca
+
+* Simulations - [Doc](https://github.com/PharmCat/ClinicalTrialUtilities.jl/blob/master/doc/SIM.md)
+  * bePower
+  * bePowerSIM
+  * ctPropPower
+  * ctPropSampleN
+  * ctMeansPower
+  * ctMeansPowerFS
 
 ### <a name="Types">Types</a>
 

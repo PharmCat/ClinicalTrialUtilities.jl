@@ -4,29 +4,19 @@ CI submodule needs for clinical trial simulations with binomial outcomes, but ca
 
 ## Functions
 
-One proportion
+- [oneProp](#oneProp) - One proportion
 
-oneProp(x, n; alpha, method)
+- [oneMean](#oneMean) - One mean
 
-One mean
+- [twoProp](#twoProp) - Two proportions
 
-oneMean(m, s, n, alpha; method)
+- [twoMeans](#twoMeans) - Two means
 
-Two proportions
+ - [cmh](#cmh) - Cochran–Mantel–Haenszel confidence intervals.
 
-twoProp(x1, n1, x2, n2; alpha, type, method)
+ - [Examples](#Examples)
 
-Two means
-
-twoMeans(m1, s1, n1, m2, s2, n2; alpha, type, method)
-
-Cochran–Mantel–Haenszel confidence intervals.
-
-cmh(data::DataFrame; a = :a, b = :b, c = :c, d = :d, type = :diff, alpha = 0.05, method)
-
-Return result as ConfInt(lower::Float64, upper::Float64, estimate::Float64)
-
-### oneProp
+### <a name="oneProp">oneProp</a>
 
 Confidence interval calculation for one proportion.
 
@@ -50,7 +40,7 @@ CI.oneProp(x::Int, n::Int; alpha=0.05, method=:wilson)
 - arcsine - Arcsine CI;
 - wald - Wald CI without CC;
 
-### twoProp
+### <a name="twoProp">twoProp</a>
 
 Confidence interval calculation for two proportion.
 
@@ -97,7 +87,7 @@ Odd ratio
 - woolf - Woolf logit CI
 - awoolf - Adjusted Woolf interval (Gart adjusted logit)
 
-### oneMean
+### <a name="oneMean">oneMean</a>
 
 Confidence interval for one mean.
 
@@ -118,7 +108,7 @@ CI.oneMean(m::Real, s::Real, n::Int, alpha::Real; method=:norm)::ConfInt
 - :norm - Normal distribution (default);
 - :tdist - T Distribution.
 
-### twoMeans
+### <a name="twoMeans">twoMeans</a>
 
 Confidence interval for mean difference.
 
@@ -145,7 +135,7 @@ CI.twoMeans(m1::Real, s1::Real, n1::Real, m2::Real, s2::Real, n2::Real; alpha::R
 - :ev - equal variance (default);
 - :uv - unequal variance with Welch-Satterthwaite df correction.
 
-### cmh
+### <a name="cmh">cmh</a>
 
 Cochran–Mantel–Haenszel confidence intervals.
 
@@ -205,7 +195,7 @@ For risk difference use:
 ci = ClinicalTrialUtilities.CI.cmh(data, alpha = 0.1)
 ```
 
-## Examples:
+## <a name="Examples">Examples</a>
 
 ```
 ClinicalTrialUtilities.CI.oneProp(81, 263, alpha=0.05, method=:wilson)

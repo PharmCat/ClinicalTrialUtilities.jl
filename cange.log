@@ -1,8 +1,17 @@
 v0.1.12
-  - nca hotfix
-  - add test
+  - add MOVER OR CI
+  - add MN RR CI
+  - MN OR - change algo, for old algo use :mn2
+  - MN Diff - code optimization
+  - Mee|FM Diff- code optimization
+  - Code cleaning and cosmetics
+  - add tests and testdata
+  - HTML Export function
 
 v0.1.11
+
+  - nca hotfix
+  - add test
 
   - descriptives()
   - html export - initial, not final
