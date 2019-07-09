@@ -1,5 +1,7 @@
 # ClinicalTrialUtilities
  Clinical trial related calculation: descriptive statistics, power and sample size calculation, power simulations, confidence interval, pharmacokinetics parameters calculation.
+ 
+ Web site:[ClinicalTrialUtilities](https://pharmcat.net/statistics/4192/clinicaltrialutilities-rew/)
 
 Version:0.1.12
 
