@@ -36,6 +36,18 @@ struct ConfInt
     estimate::Float64
 end
 
+function getindex(a::ConfInt, b::Int64)
+    if b == 1
+        return a.lower
+    elseif b == 2
+        return a.upper
+    elseif b == 3
+        return a.estimate
+    else
+        throw(ArgumentError("Index should be in 1:3"))
+    end    
+end
+
 struct NCA
     result::DataFrame
     elimination::DataFrame

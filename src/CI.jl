@@ -15,6 +15,10 @@ module CI
     export oneProp, oneMeans, twoProp, twoMeans, cmh
 
     function oneProp(x::Int, n::Int; alpha=0.05, method=:wilson)
+        if alpha >= 1.0 || alpha <= 0.0
+            @warn "Alpha >= 1.0 or <= 0.0"
+            return ConfInt(0,0,x/n)
+        end
         if method==:wilson
             return propWilsonCI(x, n, alpha)
         elseif method==:wilsoncc
@@ -45,6 +49,7 @@ module CI
     end
 
     function twoProp(x1::Int, n1::Int, x2::Int, n2::Int; alpha=0.05, type::Symbol, method::Symbol)::ConfInt
+        if alpha >= 1.0 || alpha <= 0.0 throw(ArgumentError("Alpha shold be > 0.0 and < 1.0")) end
         if type==:diff
             if method ==:nhs
                 return propDiffNHSCI(x1, n1, x2, n2, alpha)
@@ -407,12 +412,27 @@ module CI
     end
     =#
     function propDiffMNCI(x1::Int, n1::Int, x2::Int, n2::Int, alpha::Float64)::ConfInt
+        ci       = propDiffNHSCCCI(x1, n1, x2, n2, alpha) #approx zero bounds
         p1       = x1/n1
         p2       = x2/n2
         estimate = p1 - p2
         z        = quantile(Chisq(1), 1-alpha)
         fmnd(x)  = mndiffval(p1, n1, p2, n2, estimate, x) - z
-        return ConfInt(find_zero(fmnd, (-1.0+1e-6, estimate-1e-6)), find_zero(fmnd, ( estimate+1e-6, 1.0-1e-6)), estimate)
+        if fmnd(ci.lower)*fmnd(estimate-1e-8) < 0.0
+            ll = ci.lower
+            lu = estimate-1e-8
+        else
+            ll = -1.0+1e-8
+            lu = ci.lower
+        end
+        if fmnd(ci.upper)*fmnd(estimate+1e-8) < 0.0
+            ul = estimate+1e-8
+            uu = ci.upper
+        else
+            ul = ci.upper
+            uu = 1.0-1e-8
+        end
+        return ConfInt(find_zero(fmnd, (ll, lu), atol=1E-6), find_zero(fmnd, (ul, uu), atol=1E-6), estimate)
     end
     @inline function mndiffval(p1::Float64, n1::Int, p2::Float64, n2::Int, estimate::Float64, Δ::Float64)::Float64
         return (estimate-Δ)^2/((n1+n2)/(n1+n2-1)*mlemndiff(p1, n1, p2, n2, Δ))
@@ -441,8 +461,8 @@ module CI
         estimate = p1 - p2
         z        = quantile(Chisq(1), 1-alpha)
         f(x)     = fmpval(p1, n1, p2, n2, estimate, x) - z
-        return ConfInt(find_zero(f, (-1.0+1e-6, estimate-1e-6), atol=1E-5),
-                       find_zero(f, (estimate+1e-6, 1.0-1e-6), atol=1E-5), estimate)
+        return ConfInt(find_zero(f, (-1.0+1e-8, estimate-1e-8), atol=1E-6),
+                       find_zero(f, (estimate+1e-8, 1.0-1e-8), atol=1E-6), estimate)
     end
     @inline function fmpval(p1::Float64, n1::Int, p2::Float64, n2::Int, estimate::Float64, Δ::Float64)
         return abs((estimate-Δ)^2/mlemndiff(p1, n1, p2, n2, Δ))
@@ -452,7 +472,7 @@ module CI
         p2   = x2/n2
         est  = p1 - p2
         f(x) = fmpval2(p1, n1, p2, n2, est, x) - alpha
-        return ConfInt(find_zero(f, (-1.0+1e-6, est-1e-6)), find_zero(f, ( est+1e-6, 1.0-1e-6)), est)
+        return ConfInt(find_zero(f, (-1.0+1e-8, est-1e-8), atol=1E-6), find_zero(f, ( est+1e-6, 1.0-1e-6), atol=1E-6), est)
     end
     @inline function fmpval2(p1, n1, p2, n2, est, delta)::Float64
         z = (est-delta)/sqrt(mlemndiff(p1, n1, p2, n2, delta))
@@ -497,12 +517,12 @@ module CI
         if (x1==0 && x2==0) || (x1==n1 && x2==n2)
             return ConfInt(0.0, Inf, NaN)
         elseif x1==0 || x2==n2
-            return ConfInt(0.0, find_zero(fmnrr, 1e-6, atol=1E-6), 0.0)
+            return ConfInt(0.0, find_zero(fmnrr, 1e-8, atol=1E-6), 0.0)
         elseif x1==n1 || x2 == 0
-            return ConfInt(find_zero(fmnrr, 1e-6, atol=1E-6), Inf, Inf)
+            return ConfInt(find_zero(fmnrr, 1e-8, atol=1E-6), Inf, Inf)
         else
             estimate = (x1/n1)/(x2/n2)
-            return ConfInt(find_zero(fmnrr, 1e-6, atol=1E-6), find_zero(fmnrr, estimate+1e-6, atol=1E-6), estimate)
+            return ConfInt(find_zero(fmnrr, 1e-8, atol=1E-6), find_zero(fmnrr, estimate+1e-6, atol=1E-6), estimate)
         end
     end #propRRMNCI
 
