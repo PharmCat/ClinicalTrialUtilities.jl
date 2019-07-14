@@ -691,8 +691,18 @@ println(" ---------------------------------- ")
     @test ds[1,:geosd]    === NaN
     @test ds[1,:geocv]    === NaN
 
-    ds = ClinicalTrialUtilities.descriptives(df, stats = 1)
+    ds = ClinicalTrialUtilities.descriptives(df, stats = :mmmean)
     @test ds[1,:sem]      ≈ 1.1131 atol=1E-4
+end
+
+println(" ---------------------------------- ")
+@testset "  Frequency           " begin
+    df = CSV.read(IOBuffer(freqdat)) |> DataFrame
+    ctab =  ClinicalTrialUtilities.contab(df, row = :row, col = :col)
+    @test ctab == [9 8; 5 21]
+
+    frtab =  ClinicalTrialUtilities.freque(df; vars=:row, alpha = 0.05)
+    @test frtab[1,2] == 17
 end
 
 println(" ---------------------------------- ")
