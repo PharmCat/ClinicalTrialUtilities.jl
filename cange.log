@@ -1,3 +1,13 @@
+v0.1.13
+
+  - MN DIFF CI optimization
+  - index for ConfInt
+  - change test tolerance
+  - check alpha for CI
+  - descriptives: type fix
+  - freque() test
+  - contab() int + test 
+
 v0.1.12
   - add MOVER OR CI
   - add MN RR CI
@@ -7,6 +17,7 @@ v0.1.12
   - Code cleaning and cosmetics
   - add tests and testdata
   - HTML Export function
+  - Frequency initial commit - alpha
 
 v0.1.11
 
