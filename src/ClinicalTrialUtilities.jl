@@ -27,6 +27,7 @@ end
 
 Base.showerror(io::IO, e::CTUException) = print("CTU Exception code: ", e.n, " Message: ", e.var);
 const ZDIST = Normal()
+const LOG2  = log(2)
 const VERSION = "0.1.12"
 #Exceptions
 
@@ -45,7 +46,7 @@ function getindex(a::ConfInt, b::Int64)
         return a.estimate
     else
         throw(ArgumentError("Index should be in 1:3"))
-    end    
+    end
 end
 
 struct NCA

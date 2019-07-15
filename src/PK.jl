@@ -1,13 +1,13 @@
 module PK
 
-import ..NCA
+import ..NCA, ..LOG2
 
 export nca
 
 using DataFrames
 
     #Makoid C, Vuchetich J, Banakar V. 1996-1999. Basic Pharmacokinetics.
-    function nca(data; conc=:Concentration, time=:Time, sort = NaN, calcm = :lint)
+    function nca(data; conc=:Concentration, time=:Time, sort = NaN, calcm = :lint)::NCA
         columns  = DataFrames.names(data)
         errorlog = ""
         errorn   = 0
@@ -156,7 +156,7 @@ using DataFrames
             if nrow(keldata) > 0
                 rsq, rsqn = findmax(keldata[:Rsq])
                 kel = abs(keldata[rsqn,:a])
-                hl  = 0.6931471805599453/kel
+                hl  = LOG2/kel
                 aucinf = auc + clast/kel
                 aucinfpct = (aucinf - auc) / aucinf * 100.0
             end
@@ -165,7 +165,7 @@ using DataFrames
         return DataFrame(AUClast = [auc], Cmax = [cmax], Tmax = [tmax], AUMClast = [aumc], MRTlast = [mrt], Kel = [kel], HL = [hl], Rsq = [rsq], AUCinf = [aucinf], AUCpct = [aucinfpct]), rsqn, keldata
     end
 
-    function slope(x,y)
+    function slope(x::T, y::T)::Tuple{Float64, Float64, Float64} where T <: Array{F, N} where N where F <: Real
         n   = length(x)
         Σxy = sum(x .* y)
         Σx  = sum(x)
@@ -179,19 +179,19 @@ using DataFrames
         return a, b, r2
     end #end slope
         #Linear trapezoidal auc
-    function linauc(t1, t2, c1, c2)
+    function linauc(t1, t2, c1, c2)::Float64
         return (t2-t1)*(c1+c2)/2
     end
         #Linear trapezoidal aumc
-    function linaumc(t1, t2, c1, c2)
+    function linaumc(t1, t2, c1, c2)::Float64
         return (t2-t1)*(t1*c1+t2*c2)/2
     end
         #Log trapezoidal auc
-    function logauc(t1, t2, c1, c2)
+    function logauc(t1, t2, c1, c2)::Float64
         return  (t2-t1)*(c2-c1)/log(c2/c1)
     end
         #Log trapezoidal aumc
-    function logaumc(t1, t2, c1, c2)
+    function logaumc(t1, t2, c1, c2)::Float64
         return (t2-t1) * (t2*c2-t1*c1) / log(c2/c1) - (t2-t1)^2 * (c2-c1) / log(c2/c1)^2
     end
 end #end module

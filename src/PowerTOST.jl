@@ -20,7 +20,7 @@
 #ci2cv
 
 
-function bePower(;alpha=0.05, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.0, n=0, logscale=true, design=:d2x2, method=:owenq,  out=:num)
+function bePower(;alpha=0.05, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.0, n=0, logscale=true, design=:d2x2, method=:owenq,  out=:num)::Float64
     if n < 2 throw(CTUException(1021,"powerTOST: n can not be < 2")) end
     if cv == 0.0 throw(CTUException(1022,"powerTOST: cv can not be equal to 0"))  end
     if !(0 < alpha < 1) throw(CTUException(1023,"powerTOST: alfa can not be > 1 or < 0")) end
@@ -76,7 +76,7 @@ function powerTOSTint(alpha::Float64,  ltheta1::Float64, ltheta2::Float64, diffm
 end #powerTOST
 
 #.power.TOST
-function powerTOSTOwenQ(alpha,ltheta1,ltheta2,diffm,se,df)
+function powerTOSTOwenQ(alpha::T, ltheta1::T, ltheta2::T, diffm::T, se::T, df::T)::Float64 where T <: Real
     tval::Float64   = quantile(TDist(df), 1-alpha) #qt(1-alpha, df)
     delta1::Float64 = (diffm-ltheta1)/se
     delta2::Float64 = (diffm-ltheta2)/se
@@ -98,7 +98,7 @@ function powerTOSTOwenQ(alpha,ltheta1,ltheta2,diffm,se,df)
         if pwr > 0 return pwr else return 0 end
     elseif df >= 5000
         # approximation via non-central t-distribution
-        return approxPowerTOST(alpha,ltheta1,ltheta2,diffm,se,df)
+        return approxPowerTOST(alpha, ltheta1, ltheta2, diffm, se, df)
     end
     p1  = owensQ(df, tval, delta1, 0.0, R)
     p2  = owensQ(df,-tval, delta2, 0.0, R)
@@ -110,7 +110,7 @@ end #powerTOSTOwenQ
 # 'raw' approximate power function without any error checks,
 # approximation based on non-central t
 # .approx.power.TOST - PowerTOST
-function approxPowerTOST(alpha,ltheta1,ltheta2,diffm,se,df)
+function approxPowerTOST(alpha::T, ltheta1::T, ltheta2::T, diffm::T, se::T, df::T)::Float64 where T <: Real
     tdist           = TDist(df)
     tval::Float64   = quantile(tdist, 1-alpha)
     delta1::Float64 = (diffm-ltheta1)/se
@@ -120,7 +120,7 @@ function approxPowerTOST(alpha,ltheta1,ltheta2,diffm,se,df)
 end #approxPowerTOST
 
 #.power.1TOST
-function power1TOST(alpha,ltheta1,ltheta2,diffm,se,df)
+function power1TOST(alpha::T, ltheta1::T, ltheta2::T, diffm::T, se::T, df::T)::Float64 where T <: Real
     throw(CTUException(1000,"Method not implemented!"))
     #Method ON MULTIVARIATE t AND GAUSS PROBABILITIES IN R not implemented
     # Distributions.MvNormal - in plan
@@ -131,7 +131,7 @@ function power1TOST(alpha,ltheta1,ltheta2,diffm,se,df)
 end
 
 #.approx2.power.TOST
-function approx2PowerTOST(alpha,ltheta1,ltheta2,diffm,se,df)
+function approx2PowerTOST(alpha::T, ltheta1::T, ltheta2::T, diffm::T, se::T, df::T)::Float64 where T <: Real
     tdist           = TDist(df)
     tval::Float64   = quantile(tdist, 1-alpha)
     delta1::Float64 = (diffm-ltheta1)/se
@@ -158,31 +158,40 @@ end
     return sqrt(exp(sd^2)-1)
 end
 
-function designProp(type::Symbol)
+function designProp(type::Symbol)::Tuple{Function, Float64, Int}
     if type == :parallel
-        function f1(n) n - 2 end
-        return f1, 1.0, 2
+        #function f1(n) n - 2 end
+        #return f1, 1.0, 2
+        return x -> x - 2.0, 1.0, 2
     elseif type == :d2x2
-        function f2(n) n - 2 end
-        return f2, 0.5, 2
+        #function f2(n) n - 2 end
+        #return f2, 0.5, 2
+        return x -> x - 2.0, 0.5, 2
     elseif type == :d2x2x3
-        return function f3(n) 2*n - 3 end, 0.375, 2
+        #return function f3(n) 2*n - 3 end, 0.375, 2
+        return x -> 2.0 * x - 3.0, 0.375, 2
     elseif type == :d2x2x4
-        return function f4(n) 3*n - 4 end, 0.25, 2
+        #return function f4(n) 3*n - 4 end, 0.25, 2
+        return x -> 3.0 * x - 4.0, 0.25, 2
     elseif type == :d2x4x4
-        return function f5(n) 3*n - 4 end, 0.0625, 4
+        #return function f5(n) 3*n - 4 end, 0.0625, 4
+        return x -> 3.0 * x - 4.0, 0.0625, 4
     elseif type == :d2x3x3
-        return function f6(n) 2*n - 3 end, 1/6, 3
+        #return function f6(n) 2*n - 3 end, 1/6, 3
+        return x -> 2.0 * x - 3.0, 1/6, 3
     elseif type == :d2x4x2
-        return function f7(n) n - 2 end, 0.5, 4
+        #return function f7(n) n - 2 end, 0.5, 4
+        return x -> x - 2.0, 0.5, 4
     elseif type == :d3x3
-        return function f8(n) 2*n - 4 end, 2/9, 3
+        #return function f8(n) 2*n - 4 end, 2/9, 3
+        return x -> 2.0 * x - 4.0, 2/9, 3
     elseif type == :d3x6x3
-        return function f9(n) 2*n - 4 end, 1/18, 6
+        #return function f9(n) 2*n - 4 end, 1/18, 6
+        return x -> 2.0 * x - 4.0, 1/18, 6
     else throw(CTUException(1031,"designProp: design not known!")) end
 end
 
-function ci2cv(;alpha = 0.05, theta1 = 0.8, theta2 = 1.25, n, design=:d2x2, mso=false, cvms=false)
+function ci2cv(;alpha = 0.05, theta1 = 0.8, theta2 = 1.25, n, design=:d2x2, mso=false, cvms=false)::Union{Float64, Tuple{Float64, Float64}}
     dffunc, bkni, seq = designProp(design)
     df    = dffunc(n)
     if df < 1 throw(CTUException(1051,"ci2cv: df < 1")) end

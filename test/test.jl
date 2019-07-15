@@ -123,14 +123,14 @@ end
     @test ClinicalTrialUtilities.owensQ(1,100.0,40.0,0.0,1.0)  ≈ 0.3718607  atol=1E-7
 end
 @testset "  powerTOSTOwenQ      " begin
-    @test ClinicalTrialUtilities.powerTOSTOwenQ(0.05,0.1,0.4,0.05,0.11,23) ≈ 0.00147511 atol=1E-8
+    @test ClinicalTrialUtilities.powerTOSTOwenQ(0.05,0.1,0.4,0.05,0.11,23.0) ≈ 0.00147511 atol=1E-8
 end
 @testset "  approxPowerTOST     " begin
-    @test ClinicalTrialUtilities.approxPowerTOST(0.05,0.4,0.9,0.05,0.11,23) ≈ 1.076964e-06 atol=1E-12
-    @test ClinicalTrialUtilities.approxPowerTOST(0.05,1.0,1.0,0.5,0.2,100) == 0
+    @test ClinicalTrialUtilities.approxPowerTOST(0.05,0.4,0.9,0.05,0.11,23.0) ≈ 1.076964e-06 atol=1E-12
+    @test ClinicalTrialUtilities.approxPowerTOST(0.05,1.0,1.0,0.5,0.2,100.0) == 0
 end
 @testset "  approx2PowerTOST    " begin
-    @test ClinicalTrialUtilities.approx2PowerTOST(0.05,0.1,1.0,0.5,0.2,1000) ≈ 0.4413917 atol=1E-7
+    @test ClinicalTrialUtilities.approx2PowerTOST(0.05,0.1,1.0,0.5,0.2,1000.0) ≈ 0.4413917 atol=1E-7
 end
 @testset "  owensT              " begin
     @test ClinicalTrialUtilities.owensT(1.0,Inf)   ≈ 0.07932763  atol=1E-8
