@@ -7,7 +7,7 @@ export nca
 using DataFrames
 
     #Makoid C, Vuchetich J, Banakar V. 1996-1999. Basic Pharmacokinetics.
-    function nca(data; conc=:Concentration, time=:Time, sort = NaN, calcm = :lint)::NCA
+    function nca(data::DataFrame; conc=:Concentration, time=:Time, sort = NaN, calcm = :lint, bl::Float64 = NaN, th::Float64 = NaN)::NCA
         columns  = DataFrames.names(data)
         errorlog = ""
         errorn   = 0
@@ -162,7 +162,43 @@ using DataFrames
             end
         end
 
+        # arsq = 1 - (1-rsq)*(rsqn-1)/(rsqn-2)
+
         return DataFrame(AUClast = [auc], Cmax = [cmax], Tmax = [tmax], AUMClast = [aumc], MRTlast = [mrt], Kel = [kel], HL = [hl], Rsq = [rsq], AUCinf = [aucinf], AUCpct = [aucinfpct]), rsqn, keldata
+    end
+
+    function ncapd(data::DataFrame; conc::Symbol, time::Symbol, calcm::Symbol = :lint, bl::T, th::T) where T <: Real
+
+        aucabl = 0
+        aucbbl = 0
+        aucath = 0
+        aucbth = 0
+        aucblth = 0
+        for i = 2:nrow(data)
+
+            if data[i - 1, conc] <= bl && data[i, conc] <= bl
+
+                aucbbl += linauc(data[i - 1, time], data[i, time], data[i - 1, conc], data[i, conc])
+
+            elseif data[i - 1, conc] <= bl &&  data[i, conc] > bl
+
+                tx = predict(data[i - 1, conc], data[i, conc], bl, data[i - 1, time], data[i, time])
+
+                aucbbl += linauc(data[i - 1, time], tx, data[i - 1, conc], bl) + bl * (data[i, time] - tx)
+
+                aucabl += linauc(tx, data[i, time], bl, data[i, conc])
+
+            elseif data[i - 1, conc] > bl &&  data[i, conc] <= bl
+
+                #
+
+            elseif data[i - 1, conc] > bl &&  data[i, conc] > bl
+
+                #
+
+            end
+
+        end
     end
 
     function slope(x::T, y::T)::Tuple{Float64, Float64, Float64} where T <: Array{F, N} where N where F <: Real
@@ -193,5 +229,9 @@ using DataFrames
         #Log trapezoidal aumc
     function logaumc(t1, t2, c1, c2)::Float64
         return (t2-t1) * (t2*c2-t1*c1) / log(c2/c1) - (t2-t1)^2 * (c2-c1) / log(c2/c1)^2
+    end
+
+    function predict(a1::A, a2::B, ax::C, b1::D, b2::E)::Float64 where A <: Real where B <: Real where C <: Real where D <: Real where E <: Real
+        return abs((ax - a1) / (a2 - a1))*(b2 - b1) + b1
     end
 end #end module
