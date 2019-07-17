@@ -6,7 +6,9 @@ v0.1.13
   - check alpha for CI
   - descriptives: type fix
   - freque() test
-  - contab() int + test 
+  - contab() int + test
+  - Randomization
+  - Pharmacodinamic baseline threshold auc
 
 v0.1.12
   - add MOVER OR CI
