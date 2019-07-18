@@ -1,5 +1,5 @@
 # ClinicalTrialUtilities
- Clinical trial related calculation: descriptive statistics, power and sample size calculation, power simulations, confidence interval, pharmacokinetics parameters calculation.
+ Clinical trial related calculation: descriptive statistics, power and sample size calculation, power simulations, confidence interval, pharmacokinetics/pharmacodynamics parameters calculation.
 
 Version:0.1.13
 
