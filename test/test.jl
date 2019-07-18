@@ -644,6 +644,19 @@ println(" ---------------------------------- ")
     @test pk.result.AUClast[1] ≈ 1.43851 atol=1E-5
     @test pk.result.AUMClast[1] ≈ 4.49504 atol=1E-5
 
+    df = CSV.read(IOBuffer(pddata)) |> DataFrame
+    pk = ClinicalTrialUtilities.PK.nca(df; conc=:effect, time=:time, bl = 3.0)
+    @test pk.pd.AUCABL[1] ≈ 7.38571428571429 atol=1E-5
+    @test pk.pd.AUCBBL[1] ≈ 8.73571428571429 atol=1E-5
+
+    pk = ClinicalTrialUtilities.PK.nca(df; conc=:effect, time=:time, bl = 3.0, th = 1.5)
+    @test pk.pd.AUCATH[1] ≈ 13.9595238095238 atol=1E-5
+    @test pk.pd.AUCBTH[1] ≈ 1.80952380952381 atol=1E-5
+    @test pk.pd.TABL[1] ≈ 3.48095238095238 atol=1E-5
+    @test pk.pd.TBBL[1] ≈ 5.51904761904762 atol=1E-5
+    @test pk.pd.TATH[1] ≈ 5.76190476190476 atol=1E-5
+    @test pk.pd.TBTH[1] ≈ 3.23809523809524 atol=1E-5
+
 end
 include("testdata.jl")
 println(" ---------------------------------- ")

@@ -52,6 +52,7 @@ end
 struct NCA
     result::DataFrame
     elimination::DataFrame
+    pd::DataFrame
     settings::DataFrame
     textout::String
     errorlog::String
