@@ -1,5 +1,5 @@
 # Clinical Trial Utilities
-# Version: 0.1.12
+# Version: 0.1.13
 # Author: Vladimir Arnautov aka PharmCat
 # Copyright © 2019 Vladimir Arnautov aka PharmCat (mail@pharmcat.net)
 # OwensQ/PowerTOST functions rewrited from https://github.com/Detlew/PowerTOST by Detlew Labes, Helmut Schuetz, Benjamin Lang
@@ -27,7 +27,8 @@ end
 
 Base.showerror(io::IO, e::CTUException) = print("CTU Exception code: ", e.n, " Message: ", e.var);
 const ZDIST = Normal()
-const VERSION = "0.1.12"
+const LOG2  = log(2)
+const VERSION = "0.1.13"
 #Exceptions
 
 struct ConfInt
@@ -36,9 +37,22 @@ struct ConfInt
     estimate::Float64
 end
 
+function getindex(a::ConfInt, b::Int64)
+    if b == 1
+        return a.lower
+    elseif b == 2
+        return a.upper
+    elseif b == 3
+        return a.estimate
+    else
+        throw(ArgumentError("Index should be in 1:3"))
+    end
+end
+
 struct NCA
     result::DataFrame
     elimination::DataFrame
+    pd::DataFrame
     settings::DataFrame
     textout::String
     errorlog::String

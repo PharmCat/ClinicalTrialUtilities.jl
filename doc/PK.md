@@ -11,7 +11,7 @@ Pharmacokinetics module.
 Non-noncompartment analysis.
 
 ```
-nca(data; conc=:Concentration, time=:Time, sort = NaN, calcm = :lint)
+PK.nca(data::DataFrame; conc=:Concentration, time=:Time, sort = NaN, calcm = :lint, bl::Float64 = NaN, th::Float64 = NaN)
 ```
 
 **conc**::Symbol - concentration column of dataframe data;
@@ -26,6 +26,9 @@ nca(data; conc=:Concentration, time=:Time, sort = NaN, calcm = :lint)
 - :logt - linear trapezoidal before tmax and linear up log down after;
 - :lulg - linear up log down: if c2 >= c1 - linear, else log;
 
+**bl**::Float64 - Baseline for pharmacodynamics;
+
+**th**::Float64 - Threshold for pharmacodynamics;
 
 ### Simple example
 
@@ -40,6 +43,8 @@ data = DataFrame(Concentration = Float64[], Time = Float64[], Subject = String[]
   push!(data, (0.1, 6, "1", "T"))
 
 pk = ClinicalTrialUtilities.PK.nca(data)
+
+pk = ClinicalTrialUtilities.PK.nca(data, conc = :Concentration, time = :Time, bl = 2.5, th = 1.5)
 ```
 
 ### Example with sorting

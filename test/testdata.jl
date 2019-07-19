@@ -1,3 +1,48 @@
+freqdat = """row;col
+q;p
+q;p
+q;p
+q;p
+q;p
+q;p
+q;p
+q;p
+q;p
+q;l
+q;l
+q;l
+q;l
+q;l
+q;l
+q;l
+q;l
+w;p
+w;p
+w;p
+w;p
+w;p
+w;l
+w;l
+w;l
+w;l
+w;l
+w;l
+w;l
+w;l
+w;l
+w;l
+w;l
+w;l
+w;l
+w;l
+w;l
+w;l
+w;l
+w;l
+w;l
+w;l
+w;l"""
+
 negdat = """P1
 2.3
 1.2
@@ -368,3 +413,18 @@ pkdat = """Subject	Formulation	Time	Concentration
 10	R	24	116.508
 10	R	48	45.204
 10	R	72	42.191"""
+
+pddata = """time;effect
+0;0
+1;1
+2;4
+2.5;7
+3;5
+3.3;4
+3.6;3
+4;2
+5;8
+6;1
+7;2
+8;1
+9;1"""

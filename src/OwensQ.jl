@@ -106,13 +106,16 @@ end #OwensQo
 # functions bellow used in owensQ
 #PowerTost owensQ #37 and impl b for #52-54
 @inline function ifun1(x::Float64, nu, t::Float64, delta::Float64; b=0.0::Float64)::Float64
-    return owensTint2(b+x/(1-x), nu, t, delta)*1/(1-x)^2
+    return owensTint2(b + x / (1 - x), nu, t, delta) * 1 / (1 - x) ^ 2
 end
 #.Q.integrand
 @inline function owensTint2(x::Float64, nu, t::Float64, delta::Float64)::Float64
     if x == 0 return 0 end
-    Qconst::Float64 = -((nu/2.0)-1.0)*log(2.0)-lgamma(nu/2.0)
-    return sign(x)^(nu-1)*cdf(ZDIST,t*x/sqrt(nu)-delta)*exp((nu-1)*log(abs(x))-0.5*x^2+Qconst)
+    #Qconst::Float64 = -((nu/2.0)-1.0)*log(2.0)-lgamma(nu/2.0)
+    #return sign(x)^(nu-1)*cdf(ZDIST,t*x/sqrt(nu)-delta)*exp((nu-1)*log(abs(x))-0.5*x^2+Qconst)
+    return sign(x) ^ (nu-1) * cdf(ZDIST, t * x / sqrt(nu) - delta) *
+    exp((nu - 1) * log(abs(x)) - 0.5 * x ^ 2 -
+    ((nu / 2.0) - 1.0) * LOG2 - lgamma(nu / 2.0))
 end
 #-------------------------------------------------------------------------------
 
@@ -122,7 +125,7 @@ end
 # https://people.sc.fsu.edu/~jburkardt/m_src/asa076/asa076.html
 # by J. Burkhardt, license GNU LGPL
 # rewrite from PowerTOST
-function owensT(h::Float64,a::Float64)::Float64
+function owensT(h::Float64, a::Float64)::Float64
     #not implemented
     epsilon = eps()
     # special cases
@@ -132,22 +135,23 @@ function owensT(h::Float64,a::Float64)::Float64
     if abs(a) < epsilon || !isfinite(h) || abs(1-abs(a)) < epsilon || abs(h) < epsilon || !isfinite(abs(a))
         if abs(a)< epsilon return 0 end
         if !isfinite(h) return 0 end
-        if abs(1-abs(a)) < epsilon return sign(a)*0.5*cdf(ZDIST,h)*(1-cdf(ZDIST,h)) end
-        if abs(h)< epsilon return atan(a)/2/pi end
+        if abs(1-abs(a)) < epsilon return sign(a) * 0.5 * cdf(ZDIST, h) * (1 - cdf(ZDIST, h)) end
+        if abs(h) < epsilon return atan(a) / 2 / pi end
         if !isfinite(abs(a))
-            if h<0 tha=cdf(ZDIST,h)/2 else tha = (1-cdf(ZDIST,h))/2 end
-            return sign(a)*tha
+            if h < 0 tha=cdf(ZDIST, h) / 2 else tha = (1 - cdf(ZDIST, h)) / 2 end
+            return sign(a) * tha
         end
     end
     aa::Float64 = abs(a)
     if aa <= 1.0
-        tha::Float64 = tfn(h, a)
-        return tha
+        #tha::Float64 = tfn(h, a)
+        #return tha
+        return tfn(h, a)
     else
         ah::Float64  = aa * h
-        gh::Float64  = cdf(ZDIST,h)
-        gah::Float64 = cdf(ZDIST,ah)
-        tha = 0.5*(gh + gah) - gh*gah - tfn(ah, 1.0/aa)
+        gh::Float64  = cdf(ZDIST, h)
+        gah::Float64 = cdf(ZDIST, ah)
+        tha = 0.5 * (gh + gah) - gh * gah - tfn(ah, 1.0/aa)
     end
     if a < 0.0 return -tha else return tha end
 end #OwensT(h,a)
@@ -161,24 +165,34 @@ end #OwensT(h,a)
 # by J. Burkhardt license GNU LGPL
 # is called as tfn(h, a) if a<=1
 # otherwise as tfn(a*h, 1/a)
-@inline function tfn(x::Float64, fx::Float64)::Float64
+@inline function tfn(x::T, fx::T)::Float64 where T <: Real
     ng  = 5
     r   = Float64[0.1477621, 0.1346334, 0.1095432, 0.0747257, 0.0333357]
     u   = Float64[0.0744372, 0.2166977, 0.3397048, 0.4325317, 0.4869533]
-    tp::Float64  = 1/2/pi
+    #tp::Float64  = 1 / 2 / pi
+    tp::Float64  = 0.15915494309189535
     tv1 = eps();
     tv2::Float64 = tv3::Float64 = 15.0
     tv4::Float64 = 1.0E-05
     if tv2 < abs(x) return 0 end
-    xs::Float64  = -0.5*x*x
+    xs::Float64  = -0.5 * x * x
     x2::Float64  = fx
     fxs::Float64 = fx * fx
-    if tv3 <= (log(1.0 + fxs) - xs*fxs)
+    if tv3 <= (log(1.0 + fxs) - xs * fxs)
         x1::Float64  = 0.5 * fx
         fxs = 0.25 * fxs
+        #=
         while true
             rt  = fxs + 1.0
-            x2  = x1 + (xs*fxs+tv3-log(rt))/(2.0*x1*(1.0/rt-xs))
+            x2  = x1 + (xs * fxs + tv3 - log(rt)) / (2.0 * x1 * (1.0 / rt - xs))
+            fxs = x2 * x2
+            if abs(x2 - x1) < tv4 break end
+            x1 = x2
+        end
+        =#
+        while true
+            rt  = fxs + 1.0
+            x2  = x1 + (xs * fxs + tv3 - log(rt)) / (2.0 * x1 * (1.0 / rt - xs))
             fxs = x2 * x2
             if abs(x2 - x1) < tv4 break end
             x1 = x2
@@ -186,15 +200,24 @@ end #OwensT(h,a)
     end
         # 10 point Gaussian quadrature.
         # original via loop
-        rt::Float64 = r1::Float64 = r2::Float64 = 0
+
+        #rt::Float64 = r1::Float64 = r2::Float64 = 0
+
         #r1::Float64 = 0
         #r2::Float64 = 0
+        #=
         for i in 1:ng
-            r1 = 1.0 + fxs*(0.5 + u[i])^2
-            r2 = 1.0 + fxs*(0.5 - u[i])^2
-            rt = rt + r[i]*(exp(xs*r1)/r1 + exp(xs*r2)/r2)
+            r1 = 1.0 + fxs * (0.5 + u[i]) ^ 2
+            r2 = 1.0 + fxs * (0.5 - u[i]) ^ 2
+            rt = rt + r[i] * (exp(xs * r1) / r1 + exp(xs * r2) / r2)
         end
-    return rt*x2*tp
+        =#
+
+            r1 = 1.0 .+ fxs .* (0.5 .+ u) .^ 2
+            r2 = 1.0 .+ fxs .* (0.5 .- u) .^ 2
+            rt = r .* (exp.(xs .* r1) ./ r1 .+ exp.(xs .* r2) ./ r2)
+
+    return sum(rt)*x2*tp
 end #tfn(x, fx)
 
 """

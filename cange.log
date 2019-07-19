@@ -1,3 +1,16 @@
+v0.1.13
+  - MN DIFF CI optimization
+  - Index for ConfInt
+  - Change test tolerance
+  - Check alpha for CI
+  - descriptives() -  type fix
+  - freque() - add test
+  - contab() - initial commit + test
+  - Randomization - initial commit (alpha)
+  - Pharmacodinamic for nca() -  baseline & threshold AUC, Time
+  - Add test data
+  - Minor changes
+
 v0.1.12
   - add MOVER OR CI
   - add MN RR CI
@@ -7,6 +20,7 @@ v0.1.12
   - Code cleaning and cosmetics
   - add tests and testdata
   - HTML Export function
+  - Frequency initial commit - alpha
 
 v0.1.11
 
