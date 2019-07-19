@@ -2,6 +2,8 @@
 # Copyright © 2019 Vladimir Arnautov aka PharmCat (mail@pharmcat.net)
 using Distributions, Random, DataFrames, CSV, Test
 
+include("testdata.jl")
+
 @testset "  Info:               " begin
     ClinicalTrialUtilities.info()
     ClinicalTrialUtilities.citation()
@@ -660,7 +662,7 @@ println(" ---------------------------------- ")
     @test pk.pd.TBTH[1] ≈ 3.23809523809524 atol=1E-5
 
 end
-include("testdata.jl")
+
 println(" ---------------------------------- ")
 @testset "  descriptives        " begin
 
