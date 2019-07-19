@@ -53,7 +53,7 @@ using DataFrames
             pd   = ncapd(data; conc = conc, time = time, calcm = calcm, bl = bl, th = th)
             nca, rsqn, elim = nca_(data, conc, time, calcm)
         else
-            sortlist = unique(data[sort])
+            sortlist = unique(data[:, sort])
             nca  = DataFrame(AUClast = Float64[], Cmax = Float64[], Tmax = Float64[], AUMClast = Float64[], MRTlast = Float64[], Kel = Float64[], HL = Float64[], Rsq = Float64[], AUCinf = Float64[], AUCpct = Float64[])
             pd   = DataFrame(AUCABL = Float64[], AUCBBL = Float64[], AUCATH = Float64[], AUCBTH = Float64[],  TABL = Float64[], TBBL = Float64[], TATH = Float64[], TBTH = Float64[])
             elim = DataFrame(Start = Int[], End = Int[], b = Float64[], a = Float64[], Rsq = Float64[])
@@ -90,7 +90,7 @@ using DataFrames
         sort!(data, [time])
         pklog *= "Sorting by Time... \n"
         n::Int     = nrow(data)
-        cmax = maximum(data[conc])               #Cmax
+        cmax = maximum(data[:, conc])               #Cmax
         clast =  data[n, conc]
         pklog *= "Cmax = "*string(cmax)*"\n"
         auc   = 0                                  #AUClast
@@ -154,7 +154,7 @@ using DataFrames
         # --- Kel, HL, ets
         if n - tmaxn >= 3
             keldata = DataFrame(Start = Int[], End = Int[], b = Float64[], a = Float64[], Rsq = Float64[])
-            logconc = log.(data[conc])
+            logconc = log.(data[:, conc])
             for i::Int = tmaxn+1:n-2
                 sl = slope(data[i:n,time], logconc[i:n])
                 if sl[2] < 0
@@ -162,7 +162,7 @@ using DataFrames
                 end
             end
             if nrow(keldata) > 0
-                rsq, rsqn = findmax(keldata[:Rsq])
+                rsq, rsqn = findmax(keldata[:, :Rsq])
                 kel = abs(keldata[rsqn,:a])
                 hl  = LOG2/kel
                 aucinf = auc + clast/kel
