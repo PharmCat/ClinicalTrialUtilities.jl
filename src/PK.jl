@@ -70,7 +70,7 @@ using DataFrames
 
                 if bl !== NaN
                     pdres  = ncapd(datai; conc = :Concentration, time = :Time, calcm = calcm, bl = bl, th = th)
-                    append!(pd, pdres[1])
+                    append!(pd, pdres)
                 end
 
             end
