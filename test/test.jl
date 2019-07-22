@@ -105,24 +105,24 @@ println(" ---------------------------------- ")
     @test ClinicalTrialUtilities.tfn(0.1,10E20) > 0 #Not validated with PowerTOST
 end
 @testset "  owensTint2 function " begin
-    @test round(ClinicalTrialUtilities.owensTint2(1.0, 3.0, 20.0, 3.0), digits=7) ≈ 0.4839414
+    @test round(ClinicalTrialUtilities.owenstint2(1.0, 3.0, 20.0, 3.0), digits=7) ≈ 0.4839414
 end
-@testset "  owensQo function    " begin
-    @test ClinicalTrialUtilities.owensQo(1 ,2.0,1.0,1.0;a=0.0) ≈ 0.321429    atol=1E-6
-    @test ClinicalTrialUtilities.owensQo(2 ,1.0,0.5,0.2;a=0.0) ≈ 0.006781741 atol=1E-9
-    @test ClinicalTrialUtilities.owensQo(4 ,2.0,1.0,1.0;a=0.0) ≈ 0.03739024  atol=1E-8
-    @test ClinicalTrialUtilities.owensQo(7 ,2.0,1.0,1.0;a=0.0) ≈ 0.001888241 atol=1E-9
-    @test ClinicalTrialUtilities.owensQo(3 ,2.0,1.0,Inf;a=0.0) ≈ 0.7436299   atol=1E-7
+@testset "  owensqo function    " begin
+    @test ClinicalTrialUtilities.owensqo(1 ,2.0,1.0,1.0;a=0.0) ≈ 0.321429    atol=1E-6
+    @test ClinicalTrialUtilities.owensqo(2 ,1.0,0.5,0.2;a=0.0) ≈ 0.006781741 atol=1E-9
+    @test ClinicalTrialUtilities.owensqo(4 ,2.0,1.0,1.0;a=0.0) ≈ 0.03739024  atol=1E-8
+    @test ClinicalTrialUtilities.owensqo(7 ,2.0,1.0,1.0;a=0.0) ≈ 0.001888241 atol=1E-9
+    @test ClinicalTrialUtilities.owensqo(3 ,2.0,1.0,Inf;a=0.0) ≈ 0.7436299   atol=1E-7
 end
-@testset "  owensQ  function    " begin
-    @test ClinicalTrialUtilities.owensQ(4 ,100.0,40.0,0.0,Inf) ≈ 0.9584071  atol=1E-7
-    @test ClinicalTrialUtilities.owensQ(1 ,1.0,1.0,0.0,Inf)    ≈ 0.42202    atol=1E-5
-    @test ClinicalTrialUtilities.owensQ(4 ,100.0,30.0,0.0,0.8) ≈ 0.02702275 atol=1E-8
-    @test ClinicalTrialUtilities.owensQ(1,100.0,40.0,0.0,1.0)  ≈ 0.3718607  atol=1E-7
-    @test ClinicalTrialUtilities.owensQ(4 ,100.0,40.0,0.0,Inf) ≈ 0.9584071  atol=1E-7
-    @test ClinicalTrialUtilities.owensQ(1 ,1.0,1.0,0.0,Inf)    ≈ 0.42202    atol=1E-5
-    @test ClinicalTrialUtilities.owensQ(4 ,100.0,30.0,0.0,0.8) ≈ 0.02702275 atol=1E-8
-    @test ClinicalTrialUtilities.owensQ(1,100.0,40.0,0.0,1.0)  ≈ 0.3718607  atol=1E-7
+@testset "  owensq  function    " begin
+    @test ClinicalTrialUtilities.owensq(4 ,100.0,40.0,0.0,Inf) ≈ 0.9584071  atol=1E-7
+    @test ClinicalTrialUtilities.owensq(1 ,1.0,1.0,0.0,Inf)    ≈ 0.42202    atol=1E-5
+    @test ClinicalTrialUtilities.owensq(4 ,100.0,30.0,0.0,0.8) ≈ 0.02702275 atol=1E-8
+    @test ClinicalTrialUtilities.owensq(1,100.0,40.0,0.0,1.0)  ≈ 0.3718607  atol=1E-7
+    @test ClinicalTrialUtilities.owensq(4 ,100.0,40.0,0.0,Inf) ≈ 0.9584071  atol=1E-7
+    @test ClinicalTrialUtilities.owensq(1 ,1.0,1.0,0.0,Inf)    ≈ 0.42202    atol=1E-5
+    @test ClinicalTrialUtilities.owensq(4 ,100.0,30.0,0.0,0.8) ≈ 0.02702275 atol=1E-8
+    @test ClinicalTrialUtilities.owensq(1,100.0,40.0,0.0,1.0)  ≈ 0.3718607  atol=1E-7
 end
 @testset "  powerTOSTOwenQ      " begin
     @test ClinicalTrialUtilities.powerTOSTOwenQ(0.05,0.1,0.4,0.05,0.11,23.0) ≈ 0.00147511 atol=1E-8
@@ -134,14 +134,14 @@ end
 @testset "  approx2PowerTOST    " begin
     @test ClinicalTrialUtilities.approx2PowerTOST(0.05,0.1,1.0,0.5,0.2,1000.0) ≈ 0.4413917 atol=1E-7
 end
-@testset "  owensT              " begin
-    @test ClinicalTrialUtilities.owensT(1.0,Inf)   ≈ 0.07932763  atol=1E-8
-    @test ClinicalTrialUtilities.owensT(-1.0,Inf)  ≈ 0.07932763  atol=1E-8
-    @test ClinicalTrialUtilities.owensT(1.0,-Inf)  ≈ -0.07932763 atol=1E-8
-    @test ClinicalTrialUtilities.owensT(-1.0,-Inf) ≈ -0.07932763 atol=1E-8
-    @test ClinicalTrialUtilities.owensT(1.0, 0.5)  ≈ 0.0430647   atol=1E-8
-    @test ClinicalTrialUtilities.owensT(1.0,2.0)   ≈ 0.07846819  atol=1E-8
-    @test ClinicalTrialUtilities.owensT(Inf, 1.0)   == 0
+@testset "  owenst              " begin
+    @test ClinicalTrialUtilities.owenst(1.0,Inf)   ≈ 0.07932763  atol=1E-8
+    @test ClinicalTrialUtilities.owenst(-1.0,Inf)  ≈ 0.07932763  atol=1E-8
+    @test ClinicalTrialUtilities.owenst(1.0,-Inf)  ≈ -0.07932763 atol=1E-8
+    @test ClinicalTrialUtilities.owenst(-1.0,-Inf) ≈ -0.07932763 atol=1E-8
+    @test ClinicalTrialUtilities.owenst(1.0, 0.5)  ≈ 0.0430647   atol=1E-8
+    @test ClinicalTrialUtilities.owenst(1.0,2.0)   ≈ 0.07846819  atol=1E-8
+    @test ClinicalTrialUtilities.owenst(Inf, 1.0)   == 0
 end
 
 println(" ---------------------------------- ")
@@ -720,6 +720,11 @@ println(" ---------------------------------- ")
 
     frtab =  ClinicalTrialUtilities.freque(df; vars=:row, alpha = 0.05)
     @test frtab[1,2] == 17
+end
+
+println(" ---------------------------------- ")
+@testset "  Random              " begin
+    @test ClinicalTrialUtilities.randomtable() == [1,2,2,1,2,1,1,2,2,1]
 end
 
 println(" ---------------------------------- ")

@@ -247,7 +247,7 @@ function beSampleN(;alpha=0.05, beta=0.2, theta0=0.95, theta1=0.8, theta2=1.25, 
     tp = 1 - beta  #target power
     if n0 < 4 n0 = 4 end
     if n0 > 5000 n0 = 5000 end
-    pow = powerTOSTint(alpha,  ltheta1, ltheta2, diffm, sd, n0, design, method)
+    pow = powertostint(alpha,  ltheta1, ltheta2, diffm, sd, n0, design, method)
     np::Int = 2
     powp::Float64 = pow
     if pow > tp
@@ -257,7 +257,7 @@ function beSampleN(;alpha=0.05, beta=0.2, theta0=0.95, theta1=0.8, theta2=1.25, 
             n0 = n0 - 2
             #pow = powerTOST(;alpha=alpha, logscale=false, theta1=ltheta1, theta2=ltheta2, theta0=diffm, cv=se, n=n0, design=design, method=method)
             if n0 < 4 break end #n0, pow end
-            pow = powerTOSTint(alpha,  ltheta1, ltheta2, diffm, sd, n0, design, method)
+            pow = powertostint(alpha,  ltheta1, ltheta2, diffm, sd, n0, design, method)
         end
         estpower = powp
         estn     = np
@@ -267,7 +267,7 @@ function beSampleN(;alpha=0.05, beta=0.2, theta0=0.95, theta1=0.8, theta2=1.25, 
             powp = pow
             n0 = n0 + 2
             #pow = powerTOST(;alpha=alpha, logscale=false, theta1=ltheta1, theta2=ltheta2, theta0=diffm, cv=se, n=n0, design=design, method=method)
-            pow = powerTOSTint(alpha,  ltheta1, ltheta2, diffm, sd, n0, design, method)
+            pow = powertostint(alpha,  ltheta1, ltheta2, diffm, sd, n0, design, method)
             if n0 > 10000  break end # n0, pow end
         end
         estpower = pow
