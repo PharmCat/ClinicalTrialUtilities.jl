@@ -1,3 +1,9 @@
+v0.1.14
+  - Add compat to Project.toml
+  - Julian function names (part)
+  - descriptive_!() -> descriptive_()
+  - randomtable() included and add test
+
 v0.1.13
   - MN DIFF CI optimization
   - Index for ConfInt

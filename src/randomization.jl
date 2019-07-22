@@ -1,6 +1,6 @@
 
 
-function randomtable(;blocksize = 4, subject = 22, group = 2, ratio = [1,1], grseq = [["A", "B"], ["B", "A"]], seed = 1234)
+function randomtable(;blocksize = 4, subject = 10, group = 2, ratio = [1,1], grseq = [["A", "B"], ["B", "A"]], seed = 1234)
 
     rng = MersenneTwister()
     if seed == 0  Random.seed!(rng) else Random.seed!(seed) end
@@ -34,8 +34,8 @@ function randomtable(;blocksize = 4, subject = 22, group = 2, ratio = [1,1], grs
         append!(rand, block[sample(1:last, last, replace=false)])
     end
 
-    seqrand = hcat(grseq[rand]...)
-    
-    return seqrand
+    #seqrand = hcat(grseq[rand]...)
+
+    return rand
 
 end

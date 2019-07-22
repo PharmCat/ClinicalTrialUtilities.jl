@@ -7,7 +7,7 @@
 # CI bounds = Diff +- t(df, alpha)*se
 
 #bePower
-#powerTOSTint
+#powertostint
 #powerTOSTOwenQ
 #approxPowerTOST
 #power1TOST
@@ -44,10 +44,10 @@ function bePower(;alpha=0.05, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.0, n=0,
         sd      = cv;
     end
 
-    return powerTOSTint(alpha,  ltheta1, ltheta2, diffm, sd, n, design, method)
+    return powertostint(alpha,  ltheta1, ltheta2, diffm, sd, n, design, method)
 end #bePower
 
-function powerTOSTint(alpha::Float64,  ltheta1::Float64, ltheta2::Float64, diffm::Float64, sd::Float64, n::Int, design::Symbol, method::Symbol)::Float64
+function powertostint(alpha::Float64,  ltheta1::Float64, ltheta2::Float64, diffm::Float64, sd::Float64, n::Int, design::Symbol, method::Symbol)::Float64
 
     dffunc, bkni, seq = designProp(design) #dffunc if generic funtion with 1 arg return df
     df    = dffunc(n)
@@ -58,7 +58,7 @@ function powerTOSTint(alpha::Float64,  ltheta1::Float64, ltheta2::Float64, diffm
     end
     sef = sqrt(sum(1 ./ sqa)*bkni)
 
-    if df < 1 throw(CTUException(1024,"powerTOSTint: df < 1")) end
+    if df < 1 throw(CTUException(1024,"powertostint: df < 1")) end
 
     se::Float64 = sd*sef
 
@@ -77,10 +77,10 @@ end #powerTOST
 
 #.power.TOST
 function powerTOSTOwenQ(alpha::T, ltheta1::T, ltheta2::T, diffm::T, se::T, df::T)::Float64 where T <: Real
-    tval::Float64   = quantile(TDist(df), 1-alpha) #qt(1-alpha, df)
+    tval::Float64   = quantile(TDist(df), 1 - alpha)
     delta1::Float64 = (diffm-ltheta1)/se
     delta2::Float64 = (diffm-ltheta2)/se
-    R::Float64      = (delta1-delta2)*sqrt(df)/(tval+tval) #not clear R implementation of vector form
+    R::Float64      = (delta1 - delta2) * sqrt(df) / (tval + tval)
     if isnan(R) R   = 0 end
     if R <= 0 R     = Inf end
 
@@ -100,14 +100,13 @@ function powerTOSTOwenQ(alpha::T, ltheta1::T, ltheta2::T, diffm::T, se::T, df::T
         # approximation via non-central t-distribution
         return approxPowerTOST(alpha, ltheta1, ltheta2, diffm, se, df)
     end
-    p1  = owensQ(df, tval, delta1, 0.0, R)
-    p2  = owensQ(df,-tval, delta2, 0.0, R)
+    p1  = owensq(df, tval, delta1, 0.0, R)
+    p2  = owensq(df,-tval, delta2, 0.0, R)
     pwr = p2 - p1
     if pwr > 0 return pwr else return 0 end
 end #powerTOSTOwenQ
 
 #------------------------------------------------------------------------------
-# 'raw' approximate power function without any error checks,
 # approximation based on non-central t
 # .approx.power.TOST - PowerTOST
 function approxPowerTOST(alpha::T, ltheta1::T, ltheta2::T, diffm::T, se::T, df::T)::Float64 where T <: Real

@@ -10,16 +10,16 @@
 
 #pnorm = cdf(ZDIST,  )
 #dnorm = pdf(ZDIST, )
-function owensQ(nu, t::Float64, delta::Float64, a::Float64, b::Float64)::Float64
+function owensq(nu::Real, t::Float64, delta::Float64, a::Float64, b::Float64)::Float64
     if a < 0 return  throw(CTUException(1011,"owensQ: a can not be < 0")) end
     if a==b return(0) end
     if a > b return throw(CTUException(1012,"owensQ: a can not be > b")) end
-    if a > 0 return owensQ(nu, t, delta, 0, b) - owensQ(nu, t, delta, 0, a)  end #not effective - double integration
+    if a > 0 return owensq(nu, t, delta, 0, b) - owensQ(nu, t, delta, 0, a)  end #not effective - double integration
     if nu < 29 && abs(delta) > 37.62
         if isinf(b)
             return quadgk(x -> ifun1(x, nu, t, delta), 0, 1, rtol=1.0E-8)[1]
         else
-            return owensQo(nu,t,delta,b)
+            return owensqo(nu,t,delta,b)
         end
     else
         if isinf(b)
@@ -43,7 +43,7 @@ end #owensQ
 # Port from PowerTOST - dlabes Mar 2012
 
 #OwensQOwen
-function owensQo(nu,t::Float64,delta::Float64,b::Float64;a::Float64=0.0)::Float64
+function owensqo(nu::Real, t::Float64, delta::Float64, b::Float64; a::Float64=0.0)::Float64
     if nu < 1  throw(CTUException(1001,"owensQo: nu can not be < 1")) end
     if a != 0.0 throw(CTUException(1002,"owensQo: a can not be not 0")) end
     if isinf(b) return cdf(NoncentralT(nu,delta),t) end
@@ -88,9 +88,9 @@ function owensQo(nu,t::Float64,delta::Float64,b::Float64;a::Float64=0.0)::Float6
                 sumt = sumt + M[i+1] + H[i+1]
             end
         end
-        qv = cdf(ZDIST, b) - 2*owensT(b,A-delta/b) -
-                        2*owensT(delta*sB, (delta*A*B-b)/B/delta) +
-                        2*owensT(delta*sB, A) - (delta>=0) + 2*sumt
+        qv = cdf(ZDIST, b) - 2*owenst(b,A-delta/b) -
+                        2*owenst(delta*sB, (delta*A*B-b)/B/delta) +
+                        2*owenst(delta*sB, A) - (delta>=0) + 2*sumt
     else
         if upr>=0
             for i = 0:2:upr
@@ -105,16 +105,16 @@ end #OwensQo
 #-------------------------------------------------------------------------------
 # functions bellow used in owensQ
 #PowerTost owensQ #37 and impl b for #52-54
-@inline function ifun1(x::Float64, nu, t::Float64, delta::Float64; b=0.0::Float64)::Float64
-    return owensTint2(b + x / (1 - x), nu, t, delta) * 1 / (1 - x) ^ 2
+@inline function ifun1(x::Float64, nu::Real, t::Float64, delta::Float64; b=0.0::Float64)::Float64
+    return owenstint2(b + x / (1 - x), nu, t, delta) * 1 / (1 - x) ^ 2
 end
 #.Q.integrand
-@inline function owensTint2(x::Float64, nu, t::Float64, delta::Float64)::Float64
+@inline function owenstint2(x::Float64, nu::Real, t::Float64, delta::Float64)::Float64
     if x == 0 return 0 end
     #Qconst::Float64 = -((nu/2.0)-1.0)*log(2.0)-lgamma(nu/2.0)
     #return sign(x)^(nu-1)*cdf(ZDIST,t*x/sqrt(nu)-delta)*exp((nu-1)*log(abs(x))-0.5*x^2+Qconst)
-    return sign(x) ^ (nu-1) * cdf(ZDIST, t * x / sqrt(nu) - delta) *
-    exp((nu - 1) * log(abs(x)) - 0.5 * x ^ 2 -
+    return sign(x) ^ (nu - 1.0) * cdf(ZDIST, t * x / sqrt(nu) - delta) *
+    exp((nu - 1.0) * log(abs(x)) - 0.5 * x ^ 2 -
     ((nu / 2.0) - 1.0) * LOG2 - lgamma(nu / 2.0))
 end
 #-------------------------------------------------------------------------------
@@ -125,7 +125,7 @@ end
 # https://people.sc.fsu.edu/~jburkardt/m_src/asa076/asa076.html
 # by J. Burkhardt, license GNU LGPL
 # rewrite from PowerTOST
-function owensT(h::Float64, a::Float64)::Float64
+function owenst(h::Float64, a::Float64)::Float64
     #not implemented
     epsilon = eps()
     # special cases
@@ -165,12 +165,12 @@ end #OwensT(h,a)
 # by J. Burkhardt license GNU LGPL
 # is called as tfn(h, a) if a<=1
 # otherwise as tfn(a*h, 1/a)
-@inline function tfn(x::T, fx::T)::Float64 where T <: Real
+@inline function tfn(x::Real, fx::Real)::Float64
     ng  = 5
     r   = Float64[0.1477621, 0.1346334, 0.1095432, 0.0747257, 0.0333357]
     u   = Float64[0.0744372, 0.2166977, 0.3397048, 0.4325317, 0.4869533]
     #tp::Float64  = 1 / 2 / pi
-    tp::Float64  = 0.15915494309189535
+    #tp::Float64  = 0.15915494309189535
     tv1 = eps();
     tv2::Float64 = tv3::Float64 = 15.0
     tv4::Float64 = 1.0E-05
@@ -181,15 +181,6 @@ end #OwensT(h,a)
     if tv3 <= (log(1.0 + fxs) - xs * fxs)
         x1::Float64  = 0.5 * fx
         fxs = 0.25 * fxs
-        #=
-        while true
-            rt  = fxs + 1.0
-            x2  = x1 + (xs * fxs + tv3 - log(rt)) / (2.0 * x1 * (1.0 / rt - xs))
-            fxs = x2 * x2
-            if abs(x2 - x1) < tv4 break end
-            x1 = x2
-        end
-        =#
         while true
             rt  = fxs + 1.0
             x2  = x1 + (xs * fxs + tv3 - log(rt)) / (2.0 * x1 * (1.0 / rt - xs))
@@ -213,23 +204,10 @@ end #OwensT(h,a)
         end
         =#
 
-            r1 = 1.0 .+ fxs .* (0.5 .+ u) .^ 2
-            r2 = 1.0 .+ fxs .* (0.5 .- u) .^ 2
-            rt = r .* (exp.(xs .* r1) ./ r1 .+ exp.(xs .* r2) ./ r2)
+        #Vectorized:
+    r1 = 1.0 .+ fxs .* (0.5 .+ u) .^ 2
+    r2 = 1.0 .+ fxs .* (0.5 .- u) .^ 2
+    rt = r .* (exp.(xs .* r1) ./ r1 .+ exp.(xs .* r2) ./ r2)
 
-    return sum(rt)*x2*tp
+    return sum(rt) * x2 * PI2INV
 end #tfn(x, fx)
-
-"""
-#-------------------------------------------------------------------------------
-#                        DEPRECATED
-#OT_integrand
-function owensTint(x, h)
-    return exp(-0.5*h^2*(1+x^2))/(1+x^2)/2/π
-end
-#OwensT_old
-function owensTo(h, a)
-    return quadgk(x -> owensTint(x, h),0, a)[1]
-end
-#-------------------------------------------------------------------------------
-"""

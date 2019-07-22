@@ -1,5 +1,4 @@
 # Clinical Trial Utilities
-# Version: 0.1.13
 # Author: Vladimir Arnautov aka PharmCat
 # Copyright © 2019 Vladimir Arnautov aka PharmCat (mail@pharmcat.net)
 # OwensQ/PowerTOST functions rewrited from https://github.com/Detlew/PowerTOST by Detlew Labes, Helmut Schuetz, Benjamin Lang
@@ -14,7 +13,7 @@
 # If you want to check and get R code you can find some here: http://powerandsamplesize.com/Calculators/
 __precompile__(true)
 module ClinicalTrialUtilities
-using Distributions, StatsBase, Statistics
+using Distributions, StatsBase, Statistics, Random
 using QuadGK
 using DataFrames
 import SpecialFunctions.lgamma
@@ -26,9 +25,11 @@ struct CTUException <: Exception
 end
 
 Base.showerror(io::IO, e::CTUException) = print("CTU Exception code: ", e.n, " Message: ", e.var);
-const ZDIST = Normal()
-const LOG2  = log(2)
-const VERSION = "0.1.13"
+const ZDIST  = Normal()
+const LOG2   = log(2)
+const PI2    = π * 2.0
+const PI2INV = 1.0 / (π * 2.0)
+const VERSION = "0.1.14"
 #Exceptions
 
 struct ConfInt
@@ -62,13 +63,13 @@ end
 export CTUException, ConfInt, NCA
 
 #Owen function calc: owensQ, owensQo, ifun1, owensTint2, owensT, tfn
-include("OwensQ.jl")
-#powerTOST calc: powerTOST, powerTOSTint, powerTOSTOwenQ, approxPowerTOST, power1TOST, approx2PowerTOST, cv2se, designProp
-include("PowerTOST.jl")
+include("owensq.jl")
+#powerTOST calc: powerTOST, powertostint, powerTOSTOwenQ, approxPowerTOST, power1TOST, approx2PowerTOST, cv2se, designProp
+include("powertost.jl")
 #Sample sise and Power atomic functions
-include("PowerSampleSize.jl")
+include("powersamplesize.jl")
 #Main sample size and power functions: sampleSize, ctPower, beSampleN
-include("SampleSize.jl")
+include("samplesize.jl")
 #Confidence interval calculation
 include("CI.jl")
 #Simulations
@@ -76,13 +77,15 @@ include("SIM.jl")
 #PK
 include("PK.jl")
 #info function
-include("Info.jl")
+include("info.jl")
 #Descriptive statistics
-include("Descriptives.jl")
+include("descriptives.jl")
 #Frequency
-include("Freque.jl")
+include("freque.jl")
 #Export
 include("Export.jl")
+#Randomization
+include("randomization.jl")
 
 #Sample size
 export ctSampleN, beSampleN
