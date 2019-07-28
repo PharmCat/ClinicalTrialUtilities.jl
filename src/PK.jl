@@ -233,7 +233,7 @@ using DataFrames
         return DataFrame(AUCABL = [aucabl], AUCBBL = [aucbbl], AUCATH = [aucath], AUCBTH = [aucbth],  TABL = [tabl], TBBL = [tbbl], TATH = [tath], TBTH = [tbth])
     end
 
-    function slope(x::T, y::T)::Tuple{Float64, Float64, Float64} where T <: Array{F, N} where N where F <: Real
+    function slope(x::Array{S, 1}, y::Array{T, 1})::Tuple{Float64, Float64, Float64} where S <: Real where T <: Real
         n   = length(x)
         Σxy = sum(x .* y)
         Σx  = sum(x)

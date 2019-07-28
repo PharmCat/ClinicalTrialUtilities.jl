@@ -74,7 +74,7 @@ module CI
             elseif method == :cli || method == :walters
                 return propRRCLICI(x1, n1, x2, n2, alpha)
             elseif method == :li || method == :katz
-                return propRRkatzCI(x1, n1, x2, n2, alpha)
+                return proprrkatzci(x1, n1, x2, n2, alpha)
             elseif method ==:mover
                 return  propRRMOVERCI(x1, n1, x2, n2, alpha)
             end
@@ -527,7 +527,7 @@ module CI
     end #propRRMNCI
 
     #Katz D, Baptista J, Azen SP and Pike MC. Obtaining confidence intervals for the risk ratio in cohort studies. Biometrics 1978; 34: 469–474
-    function propRRkatzCI(x1::Int, n1::Int, x2::Int, n2::Int, alpha::Float64)::ConfInt
+    function proprrkatzci(x1::Int, n1::Int, x2::Int, n2::Int, alpha::Float64)::ConfInt
         estimate  = (x1/n1)/(x2/n2)
         estI      = log(estimate)
         stderrlog = sqrt(1/x2+1/x1-1/n2-1/n1)
