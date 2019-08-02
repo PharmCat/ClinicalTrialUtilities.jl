@@ -164,6 +164,19 @@ module Export
                 end
             end
         end
+        for c = 2:coln
+            for r = 1:rown
+                if tablematrix[r, c] > tablematrix[r, c - 1]
+                    for i = 1:tablematrix[r, c] - 1
+                        if tablematrix[r + i, c - 1] > tablematrix[r + i, c]
+                            tablematrix[r + i, c] = tablematrix[r, c] - i
+                            tablematrix[r, c] = i
+                            break
+                        end
+                    end
+                end
+            end
+        end
         #print(tablematrix)
 
         for r = 1:rown
