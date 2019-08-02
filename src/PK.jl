@@ -7,12 +7,11 @@ export nca
 using DataFrames
 
     #Makoid C, Vuchetich J, Banakar V. 1996-1999. Basic Pharmacokinetics.
-    function nca(data::DataFrame; conc=:Concentration, effect = NaN, time=:Time, sort = NaN, calcm = :lint, bl::Float64 = NaN, th::Float64 = NaN)::NCA
+    function nca(data::DataFrame; conc = NaN, effect = NaN, time=:Time, sort = NaN, calcm = :lint, bl::Float64 = NaN, th::Float64 = NaN)::NCA
         columns  = DataFrames.names(data)
         errorlog = ""
         errorn   = 0
         errors   = Int[]
-
         if typeof(findfirst(x ->  x  == conc, columns)) == Nothing && typeof(findfirst(x ->  x  == effect, columns)) == Nothing
             errorn+=1
             errorlog *= string(errorn)*": Concentration column not found\n"
@@ -43,26 +42,27 @@ using DataFrames
                 push!(errors, 5)
             end
         end
-        if errorn > 0 return NCA(DataFrame(), DataFrame(), DataFrame(), DataFrame(), "", errorlog, errors) end
-
+        if errorn > 0 return NCA(DataFrame(), DataFrame(), DataFrame(), "", errorlog, errors) end
         if isa(conc, String)  conc = Symbol(conc) end
         if isa(time, String)  time = Symbol(time) end
-        nca  = DataFrame()
+
+        res  = DataFrame()
         elim = DataFrame()
-        pd   = DataFrame()
+
+
         if sort === NaN
             if effect !== NaN
-                pd   = ncapd(data; conc = effect, time = time, calcm = calcm, bl = bl, th = th)
-            else
-                nca, rsqn, elim = nca_(data, conc, time, calcm)
+                res   = ncapd(data; conc = effect, time = time, calcm = calcm, bl = bl, th = th)
+            elseif conc !== NaN
+                res, rsqn, elim = nca_(data, conc, time, calcm)
             end
         else
-            sortlist = unique(data[:, sort])
-            pd   = DataFrame(AUCABL = Float64[], AUCBBL = Float64[], AUCATH = Float64[], AUCBTH = Float64[],  TABL = Float64[], TBBL = Float64[], TATH = Float64[], TBTH = Float64[])
-            nca  = DataFrame(AUClast = Float64[], Cmax = Float64[], Tmax = Float64[], AUMClast = Float64[], MRTlast = Float64[], Kel = Float64[], HL = Float64[], Rsq = Float64[], AUCinf = Float64[], AUCpct = Float64[])
-            elim = DataFrame(Start = Int[], End = Int[], b = Float64[], a = Float64[], Rsq = Float64[])
-            for i = 1:size(sortlist, 1) #For each line in sortlist
-                if effect === NaN
+            #PK NCA
+            if conc !== NaN
+                sortlist = unique(data[:, sort])
+                res  = DataFrame(AUClast = Float64[], Cmax = Float64[], Tmax = Float64[], AUMClast = Float64[], MRTlast = Float64[], Kel = Float64[], HL = Float64[], Rsq = Float64[], AUCinf = Float64[], AUCpct = Float64[])
+                elim = DataFrame(Start = Int[], End = Int[], b = Float64[], a = Float64[], Rsq = Float64[])
+                for i = 1:size(sortlist, 1) #For each line in sortlist
                     datai = DataFrame(Concentration = Float64[], Time = Float64[])
                     for c = 1:size(data, 1) #For each line in data
                         if data[c, sort] == sortlist[i,:]
@@ -70,21 +70,24 @@ using DataFrames
                         end
                     end
                     ncares = nca_(datai, :Concentration, :Time, calcm)
-                    append!(nca, ncares[1])
+                    append!(res, ncares[1])
                     append!(elim, DataFrame(ncares[3][ncares[2],:]))
-                else
+                end
+                res  = hcat(sortlist, res)
+                elim = hcat(sortlist, elim)
+            #PD NCA
+            elseif effect !== NaN
+                sortlist = unique(data[:, sort])
+                res   = DataFrame(AUCABL = Float64[], AUCBBL = Float64[], AUCATH = Float64[], AUCBTH = Float64[],  TABL = Float64[], TBBL = Float64[], TATH = Float64[], TBTH = Float64[])
+                for i = 1:size(sortlist, 1) #For each line in sortlist
                     if bl !== NaN
                         pdres  = ncapd(datai; conc = :Concentration, time = :Time, calcm = calcm, bl = bl, th = th)
-                        append!(pd, pdres)
+                        append!(res, pdres)
                     end
                 end
             end
-            if effect === NaN
-                nca  = hcat(sortlist, nca)
-                elim = hcat(sortlist, elim)
-            end
         end
-        return NCA(nca, elim, pd, DataFrame(), "", "", [0])
+        return NCA(res, elim, DataFrame(), "", "", [0])
     end
 
     function nca_(data::DataFrame, conc::Symbol, time::Symbol, calcm = :lint)
@@ -120,8 +123,6 @@ using DataFrames
                 break
             end
         end
-
-
         pklog *= "AUC calculation:\n"
         # --- AUC AUMC ---
         for i = 2:nrow(data)

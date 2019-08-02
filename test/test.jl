@@ -625,46 +625,46 @@ println(" ---------------------------------- ")
     push!(data, (0.2, 5, "1", "R"))
     push!(data, (0.1, 6, "1", "R"))
 
-    pk = ClinicalTrialUtilities.PK.nca(data; sort=[:Formulation, :Subject])
+    pk = ClinicalTrialUtilities.PK.nca(data; conc = :Concentration, sort=[:Formulation, :Subject])
     @test pk.result.AUCinf[1] ≈ 1.63205 atol=1E-5
     @test pk.result.Cmax[1] ≈ 0.4 atol=1E-5
     @test pk.result.MRTlast[1] ≈ 3.10345 atol=1E-5
     @test pk.result.Tmax[1] ≈ 3.0 atol=1E-5
 
-    pk = ClinicalTrialUtilities.PK.nca(data; sort=[:Formulation, :Subject], bl = 2.0)
+    pk = ClinicalTrialUtilities.PK.nca(data; conc = :Concentration, sort=[:Formulation, :Subject], bl = 2.0)
 
-    pk = ClinicalTrialUtilities.PK.nca(data[1:7,:]; sort=[:Formulation, :Subject])
+    pk = ClinicalTrialUtilities.PK.nca(data[1:7,:]; conc = :Concentration, sort=[:Formulation, :Subject])
     @test pk.result.AUCinf[1] ≈ 1.63205 atol=1E-5
     @test pk.result.Cmax[1] ≈ 0.4 atol=1E-5
     @test pk.result.MRTlast[1] ≈ 3.10345 atol=1E-5
     @test pk.result.Tmax[1] ≈ 3.0 atol=1E-5
 
-    pk = ClinicalTrialUtilities.PK.nca(data[1:7,:])
+    pk = ClinicalTrialUtilities.PK.nca(data[1:7,:]; conc = :Concentration)
     @test pk.result.AUCinf[1] ≈ 1.63205 atol=1E-5
     @test pk.result.Cmax[1] ≈ 0.4 atol=1E-5
     @test pk.result.MRTlast[1] ≈ 3.10345 atol=1E-5
     @test pk.result.Tmax[1] ≈ 3.0 atol=1E-5
 
-    pk = ClinicalTrialUtilities.PK.nca(data; sort=[:Formulation, :Subject], calcm = :logt)
+    pk = ClinicalTrialUtilities.PK.nca(data; conc = :Concentration, sort=[:Formulation, :Subject], calcm = :logt)
     @test pk.result.AUClast[1] ≈ 1.43851 atol=1E-5
     @test pk.result.AUMClast[1] ≈ 4.49504 atol=1E-5
 
-    pk = ClinicalTrialUtilities.PK.nca(data; sort=[:Formulation, :Subject], calcm = :luld)
+    pk = ClinicalTrialUtilities.PK.nca(data; conc = :Concentration, sort=[:Formulation, :Subject], calcm = :luld)
     @test pk.result.AUClast[1] ≈ 1.43851 atol=1E-5
     @test pk.result.AUMClast[1] ≈ 4.49504 atol=1E-5
 
     df = CSV.read(IOBuffer(pddata)) |> DataFrame
     pk = ClinicalTrialUtilities.PK.nca(df; effect=:effect, time=:time, bl = 3.0)
-    @test pk.pd.AUCABL[1] ≈ 7.38571428571429 atol=1E-5
-    @test pk.pd.AUCBBL[1] ≈ 8.73571428571429 atol=1E-5
+    @test pk.result.AUCABL[1] ≈ 7.38571428571429 atol=1E-5
+    @test pk.result.AUCBBL[1] ≈ 8.73571428571429 atol=1E-5
 
     pk = ClinicalTrialUtilities.PK.nca(df; effect=:effect, time=:time, bl = 3.0, th = 1.5)
-    @test pk.pd.AUCATH[1] ≈ 13.9595238095238 atol=1E-5
-    @test pk.pd.AUCBTH[1] ≈ 1.80952380952381 atol=1E-5
-    @test pk.pd.TABL[1] ≈ 3.48095238095238 atol=1E-5
-    @test pk.pd.TBBL[1] ≈ 5.51904761904762 atol=1E-5
-    @test pk.pd.TATH[1] ≈ 5.76190476190476 atol=1E-5
-    @test pk.pd.TBTH[1] ≈ 3.23809523809524 atol=1E-5
+    @test pk.result.AUCATH[1] ≈ 13.9595238095238 atol=1E-5
+    @test pk.result.AUCBTH[1] ≈ 1.80952380952381 atol=1E-5
+    @test pk.result.TABL[1] ≈ 3.48095238095238 atol=1E-5
+    @test pk.result.TBBL[1] ≈ 5.51904761904762 atol=1E-5
+    @test pk.result.TATH[1] ≈ 5.76190476190476 atol=1E-5
+    @test pk.result.TBTH[1] ≈ 3.23809523809524 atol=1E-5
 
 end
 
@@ -735,7 +735,7 @@ end
 println(" ---------------------------------- ")
 @testset "  Scenario            " begin
     #Pharmacokinetics statistics
-    res = ClinicalTrialUtilities.descriptive(ClinicalTrialUtilities.PK.nca((CSV.read(IOBuffer(pkdat)) |> DataFrame); sort=[:Subject, :Formulation]).result, sort=[:Formulation], vars = [:AUClast, :Cmax])
+    res = ClinicalTrialUtilities.descriptive(ClinicalTrialUtilities.PK.nca((CSV.read(IOBuffer(pkdat)) |> DataFrame); conc = :Concentration, sort=[:Subject, :Formulation]).result, sort=[:Formulation], vars = [:AUClast, :Cmax])
     @test res.mean[1] ≈ 7431.283916666667
     @test res.mean[2] ≈ 8607.09
     html = ClinicalTrialUtilities.Export.htmlExport(res)
