@@ -128,7 +128,7 @@ module Export
         <TR CLASS=cell>
             <TD COLSPAN="""*string(coln)*""" CLASS=title>
                 <P ALIGN=CENTER CLASS=cell>
-                <FONT CLASS=title><B>"""*title*"""</B></FONT></P>
+                <FONT CLASS=title><B> """*title*""" </B></FONT></P>
             </TD>
         </TR>"""
 
@@ -139,7 +139,7 @@ module Export
             out *= """
         <TD CLASS=hcell>
             <P ALIGN=CENTER CLASS=cell>
-            <FONT CLASS=cell>"""*string(cnames[c])*"""</FONT></P>
+            <FONT CLASS=cell> """*string(cnames[c])*""" </FONT></P>
         </TD>"""
         end
 
@@ -182,7 +182,7 @@ module Export
 
         for r in rowlist
             out *="""
-        <TR CLASS=cell>"""*r*"""
+        <TR CLASS=cell> """*r*"""
         </TR>"""
         end
 
@@ -208,6 +208,9 @@ module Export
     end
 
     function cellformat(val)
+        if val === missing return "missing" end
+        if val === NaN return "NaN" end
+        if val === nothing return "NaN" end
         if isa(val, AbstractFloat)
             return round(val, digits=3)
         else
