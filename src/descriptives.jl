@@ -1,5 +1,5 @@
 
-function descriptives(data::DataFrame;
+function descriptive(data::DataFrame;
     sort::Union{Symbol, Array{Symbol, 1}, Nothing} = nothing,
     vars::Union{Symbol, Array{Symbol, 1}, Nothing} = nothing,
     stats::Union{Symbol, Array{Symbol, 1}} = [:n, :mean, :sd, :sem, :uq, :median, :lq])::DataFrame
@@ -72,7 +72,7 @@ function descriptives(data::DataFrame;
             deleteat!(data[:, v], findall(x->x === NaN || x === nothing, data[:, v]))
             if length(data[:, v]) > 1
                 push!(sarray, v)
-                append!(sarray, descriptives_(data[:, v], stats))
+                append!(sarray, descriptive_(data[:, v], stats))
                 push!(dfs, sarray)
             end
         end
@@ -97,7 +97,7 @@ function descriptives(data::DataFrame;
             end
             deleteat!(sdata[:, v], findall(x->x === NaN || x === nothing, sdata[:, v]))
             if length(sdata[:, v]) > 1
-                append!(sarray, descriptives_(sdata[:, v], stats))
+                append!(sarray, descriptive_(sdata[:, v], stats))
                 #print(sarray)
                 push!(dfs, sarray)
             end
@@ -107,7 +107,7 @@ function descriptives(data::DataFrame;
 end
 
 #Statistics calculation
-function descriptives_(data::Array{T,1}, stats::Union{Tuple{Vararg{Symbol}}, Array{Symbol,1}}) where T <: Real
+function descriptive_(data::Array{T,1}, stats::Union{Tuple{Vararg{Symbol}}, Array{Symbol,1}}) where T <: Real
     sarray = Array{Real,1}(undef, 0)
     dn         = nothing
     dmin       = nothing
@@ -142,6 +142,8 @@ function descriptives_(data::Array{T,1}, stats::Union{Tuple{Vararg{Symbol}}, Arr
         if s == :n
             if dn === nothing dn = length(data) end
             push!(sarray, dn)
+        elseif s == :sum
+            push!(sarray, sum(data))
         elseif s == :min
             if dmin === nothing dmin = minimum(data) end
             push!(sarray, dmin)
@@ -215,4 +217,14 @@ function descriptives_(data::Array{T,1}, stats::Union{Tuple{Vararg{Symbol}}, Arr
         end
     end
     return sarray
+end
+
+function ses(data::AbstractVector)
+    n = length(data)
+    return sqrt(6 * n *(n - 1) / ((n - 2) * (n + 1) * (n + 3)))
+end
+
+function sek(data::AbstractVector; ses::T = ses(data)) where T <: Real
+    n = length(data)
+    return 2 * ses(data) * sqrt((n * n - 1)/((n - 3) * (n + 5)))
 end

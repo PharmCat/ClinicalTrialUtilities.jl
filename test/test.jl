@@ -281,7 +281,7 @@ end
 
 println(" ---------------------------------- ")
 @testset "  CI Test             " begin
-
+    # ONE PROPORTION
     ci = ClinicalTrialUtilities.CI.oneProp(38, 100, alpha=0.05, method=:wald)
     @test ci.lower    ≈ 0.284866005121432 atol=1E-6
     @test ci.upper    ≈ 0.47513399487856794 atol=1E-6
@@ -420,7 +420,7 @@ println(" ---------------------------------- ")
     @test ci.upper    ≈  0.00251508905 atol=1E-6
     @test ci.estimate ≈ -0.14444444444 atol=1E-6
 
-    #---- rr
+    #---- RR
     #-- mn
 
     ci = ClinicalTrialUtilities.CI.twoProp(30, 100, 40, 90; alpha=0.05, type=:rr, method=:mn)
@@ -458,6 +458,11 @@ println(" ---------------------------------- ")
     ci = ClinicalTrialUtilities.CI.twoProp(30, 100, 40, 90; alpha=0.05, type=:rr, method=:mover)
     @test ci.lower    ≈ 0.4634443 atol=1E-6
     @test ci.upper    ≈ 0.9808807 atol=1E-6
+    @test ci.estimate ≈ 0.675     atol=1E-4
+    #katz
+    ci = ClinicalTrialUtilities.CI.twoProp(30, 100, 40, 90; alpha=0.05, type=:rr, method=:katz)
+    @test ci.lower    ≈ 0.4624671 atol=1E-6
+    @test ci.upper    ≈ 0.9852050 atol=1E-6
     @test ci.estimate ≈ 0.675     atol=1E-4
 
     #----
@@ -667,7 +672,7 @@ println(" ---------------------------------- ")
 @testset "  descriptives        " begin
 
     df = CSV.read(IOBuffer(descriptivedat)) |> DataFrame
-    ds = ClinicalTrialUtilities.descriptives(df, stats = :all, sort = [:C1, :C2], vars=[:P1, :P2])
+    ds = ClinicalTrialUtilities.descriptive(df, stats = :all, sort = [:C1, :C2], vars=[:P1, :P2])
     @test ds[1,:n]        ≈ 20 atol=1E-5
     @test ds[1,:min]      ≈ 11.30162773 atol=1E-5
     @test ds[1,:max]      ≈ 13561.95328 atol=1E-5
@@ -690,25 +695,25 @@ println(" ---------------------------------- ")
     @test ds[1,:iqr]      ≈ 1099.139804875 atol=1E-5 #Same as above
     @test ds[1,:mode]     ≈ 645.8072989 atol=1E-5
 
-    ds = ClinicalTrialUtilities.descriptives(df, stats = [:mean, :geomean, :geocv])
+    ds = ClinicalTrialUtilities.descriptive(df, stats = [:mean, :geomean, :geocv])
     @test ds[1,:mean]     ≈ 2181.5170114224 atol=1E-5
     @test ds[1,:geomean]  ≈ 4.86763332369581 atol=1E-5
     @test ds[1,:geocv]    ≈ 124574201599.317 atol=1E-2
 
-    ds = ClinicalTrialUtilities.descriptives(df, sort=[:C3])
+    ds = ClinicalTrialUtilities.descriptive(df, sort=[:C3])
     @test ds[1,:mean]     ≈ 51.35 atol=1E-5
     @test ds[1,:sem]      ≈ 48.65 atol=1E-5
     @test ds[1,:median]   ≈ 51.35 atol=1E-3
 
     df = CSV.read(IOBuffer(negdat)) |> DataFrame
-    ds = ClinicalTrialUtilities.descriptives(df, stats = :all)
+    ds = ClinicalTrialUtilities.descriptive(df, stats = :all)
     @test ds[1,:harmmean] === NaN
     @test ds[1,:geomean]  === NaN
     @test ds[1,:geovar]   === NaN
     @test ds[1,:geosd]    === NaN
     @test ds[1,:geocv]    === NaN
 
-    ds = ClinicalTrialUtilities.descriptives(df, stats = :mmmean)
+    ds = ClinicalTrialUtilities.descriptive(df, stats = :mmmean)
     @test ds[1,:sem]      ≈ 1.1131 atol=1E-4
 end
 
@@ -730,7 +735,7 @@ end
 println(" ---------------------------------- ")
 @testset "  Scenario            " begin
     #Pharmacokinetics statistics
-    res = ClinicalTrialUtilities.descriptives(ClinicalTrialUtilities.PK.nca((CSV.read(IOBuffer(pkdat)) |> DataFrame); sort=[:Subject, :Formulation]).result, sort=[:Formulation], vars = [:AUClast, :Cmax])
+    res = ClinicalTrialUtilities.descriptive(ClinicalTrialUtilities.PK.nca((CSV.read(IOBuffer(pkdat)) |> DataFrame); sort=[:Subject, :Formulation]).result, sort=[:Formulation], vars = [:AUClast, :Cmax])
     @test res.mean[1] ≈ 7431.283916666667
     @test res.mean[2] ≈ 8607.09
     html = ClinicalTrialUtilities.Export.htmlExport(res)

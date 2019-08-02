@@ -28,8 +28,8 @@ Base.showerror(io::IO, e::CTUException) = print("CTU Exception code: ", e.n, " M
 const ZDIST  = Normal()
 const LOG2   = log(2)
 const PI2    = π * 2.0
-const PI2INV = 1.0 / (π * 2.0)
-const VERSION = "0.1.14"
+const PI2INV = 0.5 / π
+const VERSION = "0.1.15"
 #Exceptions
 
 struct ConfInt
@@ -94,7 +94,7 @@ export ctPower, bePower
 #Utils
 export ci2cv, pooledCV
 #Other
-export descriptives, owensQ, owensT
+export descriptive, freque, contab, owensQ, owensT
 #Mudules
 export SIM, CI, PK
 
