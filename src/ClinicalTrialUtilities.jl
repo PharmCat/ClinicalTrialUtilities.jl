@@ -29,7 +29,7 @@ const ZDIST  = Normal()
 const LOG2   = log(2)
 const PI2    = π * 2.0
 const PI2INV = 0.5 / π
-const VERSION = "0.1.15"
+const VERSION = "0.1.16"
 #Exceptions
 
 struct ConfInt

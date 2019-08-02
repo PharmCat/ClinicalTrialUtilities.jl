@@ -1,10 +1,14 @@
+v0.1.16
+
+  - Split PK/PD
+
 v0.1.15
 
   - Add RR CI Katz Test
   - Julian function names (part)
   - Rename descriptives -> descriptive
   - export freque, contab
-  - minor changes, bugfix, code cleaning 
+  - minor changes, bugfix, code cleaning
 
 
 v0.1.14
