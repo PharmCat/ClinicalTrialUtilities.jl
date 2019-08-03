@@ -739,10 +739,15 @@ end
 println(" ---------------------------------- ")
 @testset "  Scenario            " begin
     #Pharmacokinetics statistics
-    res = ClinicalTrialUtilities.descriptive(ClinicalTrialUtilities.PK.nca((CSV.read(IOBuffer(pkdat)) |> DataFrame); conc = :Concentration, sort=[:Subject, :Formulation]).result, sort=[:Formulation], vars = [:AUClast, :Cmax])
+    pk  = ClinicalTrialUtilities.PK.nca((CSV.read(IOBuffer(pkdat)) |> DataFrame); conc = :Concentration, sort=[:Subject, :Formulation]).result
+    res = ClinicalTrialUtilities.descriptive(pk, sort=[:Formulation], vars = [:AUClast, :Cmax])
     @test res.mean[1] ≈ 7431.283916666667
     @test res.mean[2] ≈ 8607.09
     html = ClinicalTrialUtilities.Export.htmlExport(res)
+
+    pd  = ClinicalTrialUtilities.PK.nca((CSV.read(IOBuffer(pkdat)) |> DataFrame); effect = :Concentration, sort=[:Subject, :Formulation], bl = 1.0).result
+    res = ClinicalTrialUtilities.descriptive(pd, sort=[:Formulation], stats = :all)
+    html = ClinicalTrialUtilities.Export.htmlExport(res; dict = :pd)
 end
 
 println(" ---------------------------------- ")

@@ -73,19 +73,24 @@ using DataFrames
                     append!(res, ncares[1])
                     append!(elim, DataFrame(ncares[3][ncares[2],:]))
                 end
-                res  = hcat(sortlist, res)
                 elim = hcat(sortlist, elim)
             #PD NCA
-            elseif effect !== NaN
+            elseif effect !== NaN && bl !== NaN
                 sortlist = unique(data[:, sort])
-                res   = DataFrame(AUCABL = Float64[], AUCBBL = Float64[], AUCATH = Float64[], AUCBTH = Float64[],  TABL = Float64[], TBBL = Float64[], TATH = Float64[], TBTH = Float64[])
+                res      = DataFrame(AUCABL = Float64[], AUCBBL = Float64[], AUCATH = Float64[], AUCBTH = Float64[], AUCBLNET = Float64[], AUCTHNET = Float64[], AUCDBLTH = Float64[], TABL = Float64[], TBBL = Float64[], TATH = Float64[], TBTH = Float64[])
                 for i = 1:size(sortlist, 1) #For each line in sortlist
-                    if bl !== NaN
-                        pdres  = ncapd(datai; conc = :Concentration, time = :Time, calcm = calcm, bl = bl, th = th)
-                        append!(res, pdres)
+                    datai = DataFrame(Concentration = Float64[], Time = Float64[])
+                    for c = 1:size(data, 1) #For each line in data
+                        if data[c, sort] == sortlist[i,:]
+                            #println(conc, time)
+                            push!(datai, [data[c, effect], data[c, time]])
+                        end
                     end
+                    pdres  = ncapd(datai; conc = :Concentration, time = :Time, calcm = calcm, bl = bl, th = th)
+                    append!(res, pdres)
                 end
             end
+            res  = hcat(sortlist, res)
         end
         return NCA(res, elim, DataFrame(), "", "", [0])
     end
