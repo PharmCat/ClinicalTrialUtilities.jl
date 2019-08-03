@@ -1,5 +1,5 @@
 module Export
-    function htmlExport(data; sort=NaN, rspan=:all, title="Title", dict = NaN, file=NaN)
+    function htmlExport(data; sort = NaN, rspan=:all, title="Title", dict::Union{Symbol, Dict} = :undef, file=NaN)
         rowlist = Array{String,1}(undef, 0)
         cnames  = names(data)
         if isa(sort, Array)
@@ -16,6 +16,30 @@ module Export
         else
             rspan = sort
         end
+
+        if dict == :pd
+            dict = Dict(
+            :AUCABL   => "AUC above BL",
+            :AUCBBL   => "AUC below BL",
+            :AUCATH   => "AUC above TH",
+            :AUCBTH   => "AUC below TH",
+            :AUCBLNET => "AUC BL NET",
+            :AUCTHNET => "AUC TH NET",
+            :AUCDBLTH => "AUC between BL/TH",
+            :TABL     => "Time above BL",
+            :TBBL     => "Time below BL",
+            :TATH     => "Time above TH",
+            :TBTH     => "Time below TH")
+        elseif dict == :pk
+        end
+
+        function dictnames(name::Any, dict::Union{Symbol, Dict})
+            if !isa(dict, Dict) return name end
+            dlist = keys(dict)
+            if !(typeof(name) <: eltype(dlist)) return name end
+            if name in dlist return dict[name] else return name end
+        end
+
         out = ""
         html_h = """<!DOCTYPE HTML PUBLIC "-//W3C//DTD HTML 4.0 Transitional//EN">
 <HTML>
@@ -139,7 +163,7 @@ module Export
             out *= """
         <TD CLASS=hcell>
             <P ALIGN=CENTER CLASS=cell>
-            <FONT CLASS=cell> """*string(cnames[c])*""" </FONT></P>
+            <FONT CLASS=cell> """*string(dictnames(cnames[c], dict))*""" </FONT></P>
         </TD>"""
         end
 
