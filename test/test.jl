@@ -666,6 +666,10 @@ println(" ---------------------------------- ")
     @test pk.result.TATH[1] ≈ 5.76190476190476 atol=1E-5
     @test pk.result.TBTH[1] ≈ 3.23809523809524 atol=1E-5
 
+    @test pk.result.AUCBLNET[1] ≈ -1.35 atol=1E-5
+    @test pk.result.AUCTHNET[1] ≈ 12.15 atol=1E-5
+
+
 end
 
 println(" ---------------------------------- ")

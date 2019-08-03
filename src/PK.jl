@@ -189,6 +189,7 @@ using DataFrames
         aucbbl = 0
         aucath = 0
         aucbth = 0
+        aucdblth = 0
         tabl   = 0
         tbbl   = 0
         tath   = 0
@@ -217,28 +218,33 @@ using DataFrames
             end
             #THRESHOLD
             if th !== NaN
-            if data[i - 1, conc] <= th && data[i, conc] <= th
-                tbth   += data[i, time] - data[i - 1, time]
-                aucbth += linauc(data[i - 1, time], data[i, time], th - data[i - 1, conc], th - data[i, conc])
-            elseif data[i - 1, conc] <= th &&  data[i, conc] > th
-                tx      = linpredict(data[i - 1, conc], data[i, conc], th, data[i - 1, time], data[i, time])
-                tbth   += tx - data[i - 1, time]
-                tath   += data[i, time] - tx
-                aucbth += (tx - data[i - 1, time]) * (th - data[i - 1, conc]) / 2
-                aucath += (data[i, time] - tx) * (data[i, conc] - th) / 2 #Ok
-            elseif data[i - 1, conc] > th &&  data[i, conc] <= th
-                tx      = linpredict(data[i - 1, conc], data[i, conc], th, data[i - 1, time], data[i, time])
-                tbth   += data[i, time] - tx
-                tath   += tx - data[i - 1, time]
-                aucbth += (data[i, time] - tx) * (th - data[i, conc]) / 2
-                aucath += (tx - data[i - 1, time]) * (data[i - 1, conc] - th) / 2
-            elseif data[i - 1, conc] > th &&  data[i, conc] > th
-                tath   += data[i, time] - data[i - 1, time]
-                aucath += linauc(data[i - 1, time], data[i, time], data[i - 1, conc] - th, data[i, conc] - th)
-            end
+                if data[i - 1, conc] <= th && data[i, conc] <= th
+                    tbth   += data[i, time] - data[i - 1, time]
+                    aucbth += linauc(data[i - 1, time], data[i, time], th - data[i - 1, conc], th - data[i, conc])
+                elseif data[i - 1, conc] <= th &&  data[i, conc] > th
+                    tx      = linpredict(data[i - 1, conc], data[i, conc], th, data[i - 1, time], data[i, time])
+                    tbth   += tx - data[i - 1, time]
+                    tath   += data[i, time] - tx
+                    aucbth += (tx - data[i - 1, time]) * (th - data[i - 1, conc]) / 2
+                    aucath += (data[i, time] - tx) * (data[i, conc] - th) / 2 #Ok
+                elseif data[i - 1, conc] > th &&  data[i, conc] <= th
+                    tx      = linpredict(data[i - 1, conc], data[i, conc], th, data[i - 1, time], data[i, time])
+                    tbth   += data[i, time] - tx
+                    tath   += tx - data[i - 1, time]
+                    aucbth += (data[i, time] - tx) * (th - data[i, conc]) / 2
+                    aucath += (tx - data[i - 1, time]) * (data[i - 1, conc] - th) / 2
+                elseif data[i - 1, conc] > th &&  data[i, conc] > th
+                    tath   += data[i, time] - data[i - 1, time]
+                    aucath += linauc(data[i - 1, time], data[i, time], data[i - 1, conc] - th, data[i, conc] - th)
+                end
             end
         end
-        return DataFrame(AUCABL = [aucabl], AUCBBL = [aucbbl], AUCATH = [aucath], AUCBTH = [aucbth],  TABL = [tabl], TBBL = [tbbl], TATH = [tath], TBTH = [tbth])
+        if bl > th
+            aucdblth = aucath - aucabl
+        elseif bl < th
+            aucdblth = aucabl - aucdth
+        end
+        return DataFrame(AUCABL = [aucabl], AUCBBL = [aucbbl], AUCATH = [aucath], AUCBTH = [aucbth], AUCBLNET = [aucabl-aucbbl], AUCTHNET = [aucath-aucbth], AUCDBLTH = [aucdblth], TABL = [tabl], TBBL = [tbbl], TATH = [tath], TBTH = [tbth])
     end
 
     function slope(x::Array{S, 1}, y::Array{T, 1})::Tuple{Float64, Float64, Float64} where S <: Real where T <: Real
