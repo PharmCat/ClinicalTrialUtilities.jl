@@ -7,17 +7,15 @@ export nca
 using DataFrames
 
     #Makoid C, Vuchetich J, Banakar V. 1996-1999. Basic Pharmacokinetics.
-    function nca(data::DataFrame; conc=:Concentration, time=:Time, sort = NaN, calcm = :lint, bl::Float64 = NaN, th::Float64 = NaN)::NCA
+    function nca(data::DataFrame; conc = NaN, effect = NaN, time=:Time, sort = NaN, calcm = :lint, bl::Float64 = NaN, th::Float64 = NaN)::NCA
         columns  = DataFrames.names(data)
         errorlog = ""
         errorn   = 0
         errors   = Int[]
-
-        if typeof(findfirst(x ->  x  == conc, columns)) == Nothing
+        if typeof(findfirst(x ->  x  == conc, columns)) == Nothing && typeof(findfirst(x ->  x  == effect, columns)) == Nothing
             errorn+=1
             errorlog *= string(errorn)*": Concentration column not found\n"
             push!(errors, 1)
-
         end
         if typeof(findfirst(x ->  x  == time, columns)) == Nothing
             errorn+=1
@@ -44,40 +42,57 @@ using DataFrames
                 push!(errors, 5)
             end
         end
-        if errorn > 0 return NCA(DataFrame(), DataFrame(), DataFrame(), DataFrame(), "", errorlog, errors) end
-
+        if errorn > 0 return NCA(DataFrame(), DataFrame(), DataFrame(), "", errorlog, errors) end
         if isa(conc, String)  conc = Symbol(conc) end
         if isa(time, String)  time = Symbol(time) end
 
+        res  = DataFrame()
+        elim = DataFrame()
+
+
         if sort === NaN
-            pd   = ncapd(data; conc = conc, time = time, calcm = calcm, bl = bl, th = th)
-            nca, rsqn, elim = nca_(data, conc, time, calcm)
-        else
-            sortlist = unique(data[:, sort])
-            nca  = DataFrame(AUClast = Float64[], Cmax = Float64[], Tmax = Float64[], AUMClast = Float64[], MRTlast = Float64[], Kel = Float64[], HL = Float64[], Rsq = Float64[], AUCinf = Float64[], AUCpct = Float64[])
-            pd   = DataFrame(AUCABL = Float64[], AUCBBL = Float64[], AUCATH = Float64[], AUCBTH = Float64[],  TABL = Float64[], TBBL = Float64[], TATH = Float64[], TBTH = Float64[])
-            elim = DataFrame(Start = Int[], End = Int[], b = Float64[], a = Float64[], Rsq = Float64[])
-            for i = 1:size(sortlist, 1) #For each line in sortlist
-                datai = DataFrame(Concentration = Float64[], Time = Float64[])
-                for c = 1:size(data, 1) #For each line in data
-                    if data[c, sort] == sortlist[i,:]
-                        push!(datai, [data[c, conc], data[c, time]])
-                    end
-                end
-                ncares = nca_(datai, :Concentration, :Time, calcm)
-                append!(nca, ncares[1])
-                append!(elim, DataFrame(ncares[3][ncares[2],:]))
-
-                if bl !== NaN
-                    pdres  = ncapd(datai; conc = :Concentration, time = :Time, calcm = calcm, bl = bl, th = th)
-                    append!(pd, pdres)
-                end
-
+            if effect !== NaN
+                res   = ncapd(data; conc = effect, time = time, calcm = calcm, bl = bl, th = th)
+            elseif conc !== NaN
+                res, rsqn, elim = nca_(data, conc, time, calcm)
             end
-            nca  = hcat(sortlist, nca)
-            elim = hcat(sortlist, elim)
+        else
+            #PK NCA
+            if conc !== NaN
+                sortlist = unique(data[:, sort])
+                res  = DataFrame(AUClast = Float64[], Cmax = Float64[], Tmax = Float64[], AUMClast = Float64[], MRTlast = Float64[], Kel = Float64[], HL = Float64[], Rsq = Float64[], AUCinf = Float64[], AUCpct = Float64[])
+                elim = DataFrame(Start = Int[], End = Int[], b = Float64[], a = Float64[], Rsq = Float64[])
+                for i = 1:size(sortlist, 1) #For each line in sortlist
+                    datai = DataFrame(Concentration = Float64[], Time = Float64[])
+                    for c = 1:size(data, 1) #For each line in data
+                        if data[c, sort] == sortlist[i,:]
+                            push!(datai, [data[c, conc], data[c, time]])
+                        end
+                    end
+                    ncares = nca_(datai, :Concentration, :Time, calcm)
+                    append!(res, ncares[1])
+                    append!(elim, DataFrame(ncares[3][ncares[2],:]))
+                end
+                elim = hcat(sortlist, elim)
+            #PD NCA
+            elseif effect !== NaN && bl !== NaN
+                sortlist = unique(data[:, sort])
+                res      = DataFrame(AUCABL = Float64[], AUCBBL = Float64[], AUCATH = Float64[], AUCBTH = Float64[], AUCBLNET = Float64[], AUCTHNET = Float64[], AUCDBLTH = Float64[], TABL = Float64[], TBBL = Float64[], TATH = Float64[], TBTH = Float64[])
+                for i = 1:size(sortlist, 1) #For each line in sortlist
+                    datai = DataFrame(Concentration = Float64[], Time = Float64[])
+                    for c = 1:size(data, 1) #For each line in data
+                        if data[c, sort] == sortlist[i,:]
+                            #println(conc, time)
+                            push!(datai, [data[c, effect], data[c, time]])
+                        end
+                    end
+                    pdres  = ncapd(datai; conc = :Concentration, time = :Time, calcm = calcm, bl = bl, th = th)
+                    append!(res, pdres)
+                end
+            end
+            res  = hcat(sortlist, res)
         end
-        return NCA(nca, elim, pd, DataFrame(), "", "", [0])
+        return NCA(res, elim, DataFrame(), "", "", [0])
     end
 
     function nca_(data::DataFrame, conc::Symbol, time::Symbol, calcm = :lint)
@@ -113,8 +128,6 @@ using DataFrames
                 break
             end
         end
-
-
         pklog *= "AUC calculation:\n"
         # --- AUC AUMC ---
         for i = 2:nrow(data)
@@ -181,6 +194,7 @@ using DataFrames
         aucbbl = 0
         aucath = 0
         aucbth = 0
+        aucdblth = 0
         tabl   = 0
         tbbl   = 0
         tath   = 0
@@ -209,28 +223,33 @@ using DataFrames
             end
             #THRESHOLD
             if th !== NaN
-            if data[i - 1, conc] <= th && data[i, conc] <= th
-                tbth   += data[i, time] - data[i - 1, time]
-                aucbth += linauc(data[i - 1, time], data[i, time], th - data[i - 1, conc], th - data[i, conc])
-            elseif data[i - 1, conc] <= th &&  data[i, conc] > th
-                tx      = linpredict(data[i - 1, conc], data[i, conc], th, data[i - 1, time], data[i, time])
-                tbth   += tx - data[i - 1, time]
-                tath   += data[i, time] - tx
-                aucbth += (tx - data[i - 1, time]) * (th - data[i - 1, conc]) / 2
-                aucath += (data[i, time] - tx) * (data[i, conc] - th) / 2 #Ok
-            elseif data[i - 1, conc] > th &&  data[i, conc] <= th
-                tx      = linpredict(data[i - 1, conc], data[i, conc], th, data[i - 1, time], data[i, time])
-                tbth   += data[i, time] - tx
-                tath   += tx - data[i - 1, time]
-                aucbth += (data[i, time] - tx) * (th - data[i, conc]) / 2
-                aucath += (tx - data[i - 1, time]) * (data[i - 1, conc] - th) / 2
-            elseif data[i - 1, conc] > th &&  data[i, conc] > th
-                tath   += data[i, time] - data[i - 1, time]
-                aucath += linauc(data[i - 1, time], data[i, time], data[i - 1, conc] - th, data[i, conc] - th)
-            end
+                if data[i - 1, conc] <= th && data[i, conc] <= th
+                    tbth   += data[i, time] - data[i - 1, time]
+                    aucbth += linauc(data[i - 1, time], data[i, time], th - data[i - 1, conc], th - data[i, conc])
+                elseif data[i - 1, conc] <= th &&  data[i, conc] > th
+                    tx      = linpredict(data[i - 1, conc], data[i, conc], th, data[i - 1, time], data[i, time])
+                    tbth   += tx - data[i - 1, time]
+                    tath   += data[i, time] - tx
+                    aucbth += (tx - data[i - 1, time]) * (th - data[i - 1, conc]) / 2
+                    aucath += (data[i, time] - tx) * (data[i, conc] - th) / 2 #Ok
+                elseif data[i - 1, conc] > th &&  data[i, conc] <= th
+                    tx      = linpredict(data[i - 1, conc], data[i, conc], th, data[i - 1, time], data[i, time])
+                    tbth   += data[i, time] - tx
+                    tath   += tx - data[i - 1, time]
+                    aucbth += (data[i, time] - tx) * (th - data[i, conc]) / 2
+                    aucath += (tx - data[i - 1, time]) * (data[i - 1, conc] - th) / 2
+                elseif data[i - 1, conc] > th &&  data[i, conc] > th
+                    tath   += data[i, time] - data[i - 1, time]
+                    aucath += linauc(data[i - 1, time], data[i, time], data[i - 1, conc] - th, data[i, conc] - th)
+                end
             end
         end
-        return DataFrame(AUCABL = [aucabl], AUCBBL = [aucbbl], AUCATH = [aucath], AUCBTH = [aucbth],  TABL = [tabl], TBBL = [tbbl], TATH = [tath], TBTH = [tbth])
+        if bl > th
+            aucdblth = aucath - aucabl
+        elseif bl < th
+            aucdblth = aucabl - aucath
+        end
+        return DataFrame(AUCABL = [aucabl], AUCBBL = [aucbbl], AUCATH = [aucath], AUCBTH = [aucbth], AUCBLNET = [aucabl-aucbbl], AUCTHNET = [aucath-aucbth], AUCDBLTH = [aucdblth], TABL = [tabl], TBBL = [tbbl], TATH = [tath], TBTH = [tbth])
     end
 
     function slope(x::Array{S, 1}, y::Array{T, 1})::Tuple{Float64, Float64, Float64} where S <: Real where T <: Real
