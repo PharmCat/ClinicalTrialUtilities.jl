@@ -665,10 +665,14 @@ println(" ---------------------------------- ")
     @test pk.result.TBBL[1] ≈ 5.51904761904762 atol=1E-5
     @test pk.result.TATH[1] ≈ 5.76190476190476 atol=1E-5
     @test pk.result.TBTH[1] ≈ 3.23809523809524 atol=1E-5
-
     @test pk.result.AUCBLNET[1] ≈ -1.35 atol=1E-5
     @test pk.result.AUCTHNET[1] ≈ 12.15 atol=1E-5
 
+    pd = ClinicalTrialUtilities.PK.nca(data; effect = :Concentration, sort=[:Formulation, :Subject], bl=0.2, th=0.3).result
+    @test pd[2, :AUCDBLTH] ≈ 0.3416666666666665 atol=1E-5
+
+    pd = ClinicalTrialUtilities.PK.nca(data; effect = :Concentration, sort=[:Formulation, :Subject], bl=0.3, th=0.2).result
+    @test pd[3, :AUCDBLTH] ≈ 0.3428571428571429 atol=1E-5
 
 end
 

@@ -247,7 +247,7 @@ using DataFrames
         if bl > th
             aucdblth = aucath - aucabl
         elseif bl < th
-            aucdblth = aucabl - aucdth
+            aucdblth = aucabl - aucath
         end
         return DataFrame(AUCABL = [aucabl], AUCBBL = [aucbbl], AUCATH = [aucath], AUCBTH = [aucbth], AUCBLNET = [aucabl-aucbbl], AUCTHNET = [aucath-aucbth], AUCDBLTH = [aucdblth], TABL = [tabl], TBBL = [tbbl], TATH = [tath], TBTH = [tbth])
     end
