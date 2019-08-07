@@ -50,7 +50,7 @@ function descriptive(data::DataFrame;
     if stats == :all
         stats = [:n, :min, :max, :range, :mean, :var, :sd, :sem, :cv, :harmmean, :geomean, :geovar, :geosd, :geocv, :skew, :kurt, :uq, :median, :lq, :iqr, :mode]
     elseif isa(stats, Array)
-        filter!(x->x in [:n, :min, :max, :range, :mean, :var, :sd, :sem, :cv, :harmmean, :geomean, :geovar, :geosd, :geocv, :skew, :kurt, :uq, :median, :lq, :iqr, :mode], stats)
+        filter!(x->x in [:n, :min, :max, :range, :mean, :var, :sd, :sem, :cv, :harmmean, :geomean, :geovar, :geosd, :geocv, :skew, :ses, :kurt, :sek, :uq, :median, :lq, :iqr, :mode], stats)
         if length(stats) == 0
             stats = [:n, :mean, :sd, :sem, :uq, :median, :lq]
             @warn "Error in stats, default used."
@@ -107,7 +107,7 @@ function descriptive(data::DataFrame;
 end
 
 #Statistics calculation
-function descriptive_(data::Array{T,1}, stats::Union{Tuple{Vararg{Symbol}}, Array{Symbol,1}}) where T <: Real
+function descriptive_(data::Array{T,1}, stats::Union{Tuple{Vararg{Symbol}}, Array{Symbol,1}})::Array{Float64,1} where T <: Real
     sarray = Array{Real,1}(undef, 0)
     dn         = nothing
     dmin       = nothing
@@ -125,6 +125,8 @@ function descriptive_(data::Array{T,1}, stats::Union{Tuple{Vararg{Symbol}}, Arra
     dharmmean  = nothing
     duq        = nothing
     dlq        = nothing
+    sesv       = nothing
+    sekv       = nothing
     #dirq       = nothing
     #dmode      = nothing
 
@@ -198,8 +200,17 @@ function descriptive_(data::Array{T,1}, stats::Union{Tuple{Vararg{Symbol}}, Arra
             push!(sarray, dgeocv)
         elseif s == :skew
             push!(sarray, skewness(data))
+        elseif s == :ses
+            if dn === nothing dn = length(data) end
+            sesv = ses(dn)
+            push!(sarray, sesv)
         elseif s == :kurt
             push!(sarray, kurtosis(data))
+        elseif s == :sek
+            if dn === nothing dn = length(data) end
+            if sesv === nothing sesv = ses(dn) end
+            sekv = sek(dn; ses = sesv)
+            push!(sarray, sekv)
         elseif s == :uq
             if duq  === nothing duq  = percentile(data, 75) end
             push!(sarray, duq)
@@ -219,12 +230,18 @@ function descriptive_(data::Array{T,1}, stats::Union{Tuple{Vararg{Symbol}}, Arra
     return sarray
 end
 
-function ses(data::AbstractVector)
+function ses(data::AbstractVector)::Float64
     n = length(data)
+    ses(n)
+end
+function ses(n::Int)::Float64
     return sqrt(6 * n *(n - 1) / ((n - 2) * (n + 1) * (n + 3)))
 end
 
-function sek(data::AbstractVector; ses::T = ses(data)) where T <: Real
+function sek(data::AbstractVector; ses::T = ses(data))::Float64 where T <: Real
     n = length(data)
-    return 2 * ses(data) * sqrt((n * n - 1)/((n - 3) * (n + 5)))
+    sek(n; ses = ses)
+end
+function sek(n::Int; ses::T = ses(n))::Float64 where T <: Real
+    return 2 * ses * sqrt((n * n - 1)/((n - 3) * (n + 5)))
 end

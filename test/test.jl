@@ -708,6 +708,10 @@ println(" ---------------------------------- ")
     @test ds[1,:geomean]  ≈ 4.86763332369581 atol=1E-5
     @test ds[1,:geocv]    ≈ 124574201599.317 atol=1E-2
 
+    ds = ClinicalTrialUtilities.descriptive(df, stats = [:n, :ses, :sek])
+    @test ds[3,:ses]  ≈ 0.171925 atol=1E-6
+    @test ds[3,:sek]  ≈ 0.342202 atol=1E-6
+
     ds = ClinicalTrialUtilities.descriptive(df, sort=[:C3])
     @test ds[1,:mean]     ≈ 51.35 atol=1E-5
     @test ds[1,:sem]      ≈ 48.65 atol=1E-5
@@ -721,6 +725,8 @@ println(" ---------------------------------- ")
     @test ds[1,:geosd]    === NaN
     @test ds[1,:geocv]    === NaN
 
+    ds = ClinicalTrialUtilities.descriptive(df, stats = [:nnn])
+    @test ds[1,:sem]      ≈ 1.1131 atol=1E-4
     ds = ClinicalTrialUtilities.descriptive(df, stats = :mmmean)
     @test ds[1,:sem]      ≈ 1.1131 atol=1E-4
 end
