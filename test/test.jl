@@ -703,6 +703,9 @@ println(" ---------------------------------- ")
     @test ds[1,:iqr]      ≈ 1099.139804875 atol=1E-5 #Same as above
     @test ds[1,:mode]     ≈ 645.8072989 atol=1E-5
 
+    ds = ClinicalTrialUtilities.descriptive(df, stats = [:geosd], sort = [:C1, :C2], vars=[:P1, :P2])
+    @test ds[1,:geosd]    ≈ 2.21606283235676 atol=1E-5
+
     ds = ClinicalTrialUtilities.descriptive(df, stats = [:mean, :geomean, :geocv])
     @test ds[1,:mean]     ≈ 2181.5170114224 atol=1E-5
     @test ds[1,:geomean]  ≈ 4.86763332369581 atol=1E-5

@@ -1,8 +1,8 @@
 
 function descriptive(data::DataFrame;
-    sort::Union{Symbol, Array{Symbol, 1}, Nothing} = nothing,
-    vars::Union{Symbol, Array{Symbol, 1}, Nothing} = nothing,
-    stats::Union{Symbol, Array{Symbol, 1}} = [:n, :mean, :sd, :sem, :uq, :median, :lq])::DataFrame
+    sort::Union{Symbol, Array{T, 1}, Nothing} = nothing,
+    vars::Union{Symbol, Array{T, 1},  Nothing} = nothing,
+    stats::Union{Symbol, Array{T, 1}} = [:n, :mean, :sd, :sem, :uq, :median, :lq])::DataFrame where T <: Union{Symbol, String}
     #Filtering
     dfnames = names(data) # Col names of dataframe
     if isa(sort, Array)
@@ -50,6 +50,7 @@ function descriptive(data::DataFrame;
     if stats == :all
         stats = [:n, :min, :max, :range, :mean, :var, :sd, :sem, :cv, :harmmean, :geomean, :geovar, :geosd, :geocv, :skew, :kurt, :uq, :median, :lq, :iqr, :mode]
     elseif isa(stats, Array)
+        stats = Symbol.(stats)
         filter!(x->x in [:n, :min, :max, :range, :mean, :var, :sd, :sem, :cv, :harmmean, :geomean, :geovar, :geosd, :geocv, :skew, :ses, :kurt, :sek, :uq, :median, :lq, :iqr, :mode], stats)
         if length(stats) == 0
             stats = [:n, :mean, :sd, :sem, :uq, :median, :lq]
@@ -96,11 +97,8 @@ function descriptive(data::DataFrame;
             for c in sort
                 push!(sarray, sortlist[i, c])
             end
-            #deleteat!(sdata[:, v], findall(x->x === NaN || x === nothing, sdata[:, v]))
-            #if length(sdata[:, v]) > 1
             append!(sarray, descriptive_(sdata[:, v], stats))
             push!(dfs, sarray)
-            #end
         end
     end
     return dfs
@@ -142,7 +140,7 @@ function descriptive_(data::Array{T,1}, stats::Union{Tuple{Vararg{Symbol}}, Arra
         return sarray .= NaN
     end
 
-    if any(x -> (x == :geomean || x == :geomeancv || x == :geomeansd), stats)
+    if any(x -> (x == :geomean || x == :geocv || x == :geosd || x == :geovar), stats)
         if any(x -> (x <= 0), data)
             dgeomean   = NaN
             dgeovar    = NaN
