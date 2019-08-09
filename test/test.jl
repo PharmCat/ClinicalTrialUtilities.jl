@@ -751,12 +751,14 @@ println(" ---------------------------------- ")
     #Pharmacokinetics statistics
     pk  = ClinicalTrialUtilities.PK.nca((CSV.read(IOBuffer(pkdat)) |> DataFrame); conc = :Concentration, sort=[:Subject, :Formulation]).result
     res = ClinicalTrialUtilities.descriptive(pk, sort=[:Formulation], vars = [:AUClast, :Cmax])
+    sort!(res, tuple(:vars, :Formulation))
     @test res.mean[1] ≈ 7431.283916666667
     @test res.mean[2] ≈ 8607.09
     html = ClinicalTrialUtilities.Export.htmlExport(res)
 
     pd  = ClinicalTrialUtilities.PK.nca((CSV.read(IOBuffer(pkdat)) |> DataFrame); effect = :Concentration, sort=[:Subject, :Formulation], bl = 1.0).result
     res = ClinicalTrialUtilities.descriptive(pd, sort=[:Formulation], stats = :all, vars = [:AUCABL, :AUCBBL, :TABL, :TATH])
+    sort!(res, tuple(:vars, :Formulation))
     @test res.mean[5] ≈ 71.9845013481999
     @test res.mean[6] ≈ 71.85794338696802
     html = ClinicalTrialUtilities.Export.htmlExport(res; dict = :pd)

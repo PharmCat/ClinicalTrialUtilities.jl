@@ -82,14 +82,15 @@ function descriptive(data::DataFrame;
     #If sort exist
     sortlist = unique(data[:, sort])
     sort!(sortlist, tuple(sort))
-    for v in vars #For each variable in list
-        for i = 1:size(sortlist, 1) #For each line in sortlist
+    #for v in vars #For each variable in list
+    for i = 1:size(sortlist, 1) #For each line in sortlist
             if size(sdata, 1) > 0 deleterows!(sdata, 1:size(sdata, 1)) end
             for c = 1:size(data, 1) #For each line in data
                 if data[c, sort] == sortlist[i,:]
                     push!(sdata, data[c, vars])
                 end
             end
+        for v in vars #For each variable in list
             sarray = Array{Any,1}(undef, 0)
             push!(sarray, v)
             for c in sort
@@ -98,7 +99,6 @@ function descriptive(data::DataFrame;
             deleteat!(sdata[:, v], findall(x->x === NaN || x === nothing, sdata[:, v]))
             if length(sdata[:, v]) > 1
                 append!(sarray, descriptive_(sdata[:, v], stats))
-                #print(sarray)
                 push!(dfs, sarray)
             end
         end
