@@ -96,11 +96,11 @@ function descriptive(data::DataFrame;
             for c in sort
                 push!(sarray, sortlist[i, c])
             end
-            deleteat!(sdata[:, v], findall(x->x === NaN || x === nothing, sdata[:, v]))
-            if length(sdata[:, v]) > 1
-                append!(sarray, descriptive_(sdata[:, v], stats))
-                push!(dfs, sarray)
-            end
+            #deleteat!(sdata[:, v], findall(x->x === NaN || x === nothing, sdata[:, v]))
+            #if length(sdata[:, v]) > 1
+            append!(sarray, descriptive_(sdata[:, v], stats))
+            push!(dfs, sarray)
+            #end
         end
     end
     return dfs
@@ -108,7 +108,8 @@ end
 
 #Statistics calculation
 function descriptive_(data::Array{T,1}, stats::Union{Tuple{Vararg{Symbol}}, Array{Symbol,1}})::Array{Float64,1} where T <: Real
-    sarray = Array{Real,1}(undef, 0)
+    deleteat!(data, findall(x->x === NaN || x === nothing || x === missing, data))
+
     dn         = nothing
     dmin       = nothing
     dmax       = nothing
@@ -129,6 +130,17 @@ function descriptive_(data::Array{T,1}, stats::Union{Tuple{Vararg{Symbol}}, Arra
     sekv       = nothing
     #dirq       = nothing
     #dmode      = nothing
+    if length(data) > 0
+        sarray = Array{Real,1}(undef, 0)
+    elseif length(data) <= 2
+        sesv = NaN
+        sekv = NaN
+    elseif length(data) <= 3
+        sekv = NaN
+    elseif length(data) == 0
+        sarray = Array{Real,1}(undef, length(stats))
+        return sarray .= NaN
+    end
 
     if any(x -> (x == :geomean || x == :geomeancv || x == :geomeansd), stats)
         if any(x -> (x <= 0), data)

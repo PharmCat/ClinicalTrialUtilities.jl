@@ -713,9 +713,9 @@ println(" ---------------------------------- ")
     @test ds[3,:sek]  ≈ 0.342202 atol=1E-6
 
     ds = ClinicalTrialUtilities.descriptive(df, sort=[:C3])
-    @test ds[1,:mean]     ≈ 51.35 atol=1E-5
-    @test ds[1,:sem]      ≈ 48.65 atol=1E-5
-    @test ds[1,:median]   ≈ 51.35 atol=1E-3
+    @test ds[3,:mean]     ≈ 51.35 atol=1E-5
+    @test ds[3,:sem]      ≈ 48.65 atol=1E-5
+    @test ds[3,:median]   ≈ 51.35 atol=1E-3
 
     df = CSV.read(IOBuffer(negdat)) |> DataFrame
     ds = ClinicalTrialUtilities.descriptive(df, stats = :all)
