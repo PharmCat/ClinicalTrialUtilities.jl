@@ -1,10 +1,131 @@
-
+abstract type AbstractData end
+abstract type AbstractDataSet end
+"""
+    Descriptive statistics type
+"""
+struct Descriptive <: AbstractData
+    var::Union{Symbol, Nothing}
+    varname::Union{String, Nothing}
+    sortval::Union{Tuple{Vararg{Any}}, Nothing}
+    #data::NamedTuple{}
+    data::NamedTuple{S,T} where S where T <: Tuple{Vararg{U}} where U <: Real
+end
+function Base.show(io::IO, obj::Descriptive)
+    println(io, "Descriptive statistics")
+    for k in keys(obj.data)
+        println(io, string(k), " => ", string(obj.data[k]))
+    end
+end
+function Base.getindex(a::Descriptive, s::Symbol)::Real
+    return a.data[s]
+end
+struct DataSet{T <: AbstractData}
+    data::Tuple{Vararg{T}}
+end
+function Base.show(io::IO, obj::DataSet{Descriptive})
+    println(io, "Descriptive statistics set")
+    for d in obj.data
+        print(io, string(d.var), " ")
+        if d.sortval !== nothing println(io, "=> ", string(d.sortval)) end
+    end
+end
+function Base.getindex(a::DataSet{Descriptive}, i::Int64)::Descriptive
+    return a.data[i]
+end
+function Base.getindex(a::DataSet{Descriptive}, i::Int64, s::Symbol)::Real
+    return a.data[i].data[s]
+end
+"""
+    Descriptive statistics
+"""
 function descriptive(data::DataFrame;
+    sort::Union{Symbol, AbstractArray{T,1}, Nothing} = nothing,
+    vars::Union{Symbol, AbstractArray{T,1}},
+    stats::Union{Symbol, AbstractVector, Tuple} = :default)::DataSet{Descriptive} where T <: Union{Symbol, String, Int}
+
+    stats = checkstats(stats)
+
+    if isa(vars, Symbol) vars = [vars] end
+    if eltype(vars) <: String vars = Symbol.(vars) end
+
+    d = Array{Descriptive, 1}(undef, 0) # Temp Descriptive array
+    if sort === nothing
+        pushvardescriptive!(d, vars, Matrix(data[:,vars]), nothing, stats)
+        return DataSet(Tuple(d))
+    end
+
+    if isa(sort, Symbol) sort = [sort] end
+    if eltype(sort) <: String sort = Symbol.(sort) end
+
+    sortlist = unique(data[:, sort])
+    sort!(sortlist, sort)
+
+    for i = 1:size(sortlist, 1)
+        sortval = Tuple(sortlist[i,:])
+        mx = getsortedmatrix(data; datacol=vars, sortcol=sort, sortval=sortval)
+        pushvardescriptive!(d, vars, mx, sortval, stats)  #push variable descriprives for mx
+    end
+    return DataSet(Tuple(d))
+end
+function descriptive(data::Array{T, 1}; stats::Union{Symbol, AbstractVector, Tuple} = :default, var = nothing, varname = nothing, sortval = nothing)::Descriptive where T <: Real
+    stats = checkstats(stats)
+    return Descriptive(var, varname, sortval, NamedTuple{stats}(Tuple(descriptive_(data, stats))))
+end
+"""
+    Check if all statistics in allstat list. return stats tuple
+"""
+@inline function checkstats(stats::Union{Symbol, AbstractVector, Tuple})::Tuple{Vararg{Symbol}}
+    allstat = (:n, :min, :max, :range, :mean, :var, :sd, :sem, :cv, :harmmean, :geomean, :geovar, :geosd, :geocv, :skew, :ses, :kurt, :sek, :uq, :median, :lq, :iqr, :mode)
+    if isa(stats, Symbol)
+        if stats == :default stats = (:n, :mean, :sd, :sem, :uq, :median, :lq)
+        elseif stats == :all stats = allstat
+        else stats = Tuple(stats) end
+    end
+    stats = Tuple(Symbol.(stats))
+    if any(x -> x  ∉  allstat, stats) throw(ArgumentError("stats element not in allstat list")) end
+    return stats
+end
+"""
+    Push in d Descriptive obj in mx vardata
+"""
+@inline function pushvardescriptive!(d::Array{Descriptive, 1}, vars::Array{T, 1}, mx::Union{DataFrame, Matrix}, sortval::Union{Tuple{Vararg{Any}}, Nothing}, stats::Tuple{Vararg{Symbol}}) where T <: Union{Symbol, Int}
+    for v  = 1:length(vars)  #For each variable in list
+        push!(d, Descriptive(vars[v], nothing, sortval, NamedTuple{stats}(Tuple(descriptive_(mx[:, v], stats)))))
+    end
+end
+"""
+    Check if data row sortcol equal sortval
+"""
+@inline function checksort(data::DataFrame, row::Int, sortcol::Array{Symbol, 1}, sortval::Tuple{Vararg{Any}})::Bool
+    for i = 1:length(sortcol)
+        if data[row, sortcol[i]] != sortval[i] return false end
+    end
+    return true
+end
+"""
+    Return matrix of filtered data (datacol) by sortcol with sortval
+"""
+@inline function getsortedmatrix(data::DataFrame; datacol::Array{T,1}, sortcol::Array{T,1}, sortval::Tuple{Vararg{Any}})::Matrix where T <: Union{Symbol,Int}
+    result  = Array{Real, 1}(undef, 0)
+    for c = 1:size(data, 1) #For each line in data
+        if checksort(data, c, sortcol, sortval)
+            for i = 1:length(datacol)
+                @inbounds push!(result, data[c, datacol[i]])
+            end
+        end
+    end
+    return Matrix(reshape(result, length(datacol), :)')
+end
+
+
+
+function descriptive_deprecated(data::DataFrame;
     sort::Union{Symbol, Array{T, 1}, Nothing} = nothing,
     vars::Union{Symbol, Array{T, 1},  Nothing} = nothing,
     stats::Union{Symbol, Array{T, 1}} = [:n, :mean, :sd, :sem, :uq, :median, :lq])::DataFrame where T <: Union{Symbol, String}
     #Filtering
     dfnames = names(data) # Col names of dataframe
+    #Filter sort
     if isa(sort, Array)
         sort = Symbol.(sort)
         filter!(x->x in dfnames, sort)
@@ -18,7 +139,7 @@ function descriptive(data::DataFrame;
     else
         sort =  nothing
     end
-
+    #Filters vars
     if isa(vars, Symbol) vars = [vars] end
     if isa(vars, Array)
         vars = Symbol.(vars)
@@ -38,14 +159,6 @@ function descriptive(data::DataFrame;
         if sort !== nothing filter!(x-> !(x in sort), vars) end
         if length(vars) == 0 error("Real[] columns not found!") end
     end
-    #End filtering
-    dfs   = DataFrame(vars = Symbol[]) #Init DataFrames
-    sdata = DataFrame()                #Temp dataset for sorting
-    if isa(sort, Array)
-        for i in sort                  #if sort - make sort columns in dataset
-            dfs[:, i] = eltype(data[:, i])[]
-        end
-    end
     #Filter statistics array
     if stats == :all
         stats = [:n, :min, :max, :range, :mean, :var, :sd, :sem, :cv, :harmmean, :geomean, :geovar, :geosd, :geocv, :skew, :kurt, :uq, :median, :lq, :iqr, :mode]
@@ -60,14 +173,24 @@ function descriptive(data::DataFrame;
         stats = [:n, :mean, :sd, :sem, :uq, :median, :lq]
         @warn "Unknown stats, default used."
     end
+    #End filtering
 
+    #construct datasets
+    dfs   = DataFrame(vars = Symbol[]) #Init DataFrames
+    sdata = DataFrame()                #Temp dataset for sorting
+
+    if isa(sort, Array)
+        for i in sort                  #if sort - make sort columns in dataset
+            dfs[:, i] = eltype(data[:, i])[]
+        end
+    end
     for i in stats                     #make columns for statistics
         dfs[:, i] = Real[]
     end
     for i in vars                      #var columns for temp dataset
         sdata[:, i] = Real[]
     end
-    if !isa(sort, Array)               #if no sort
+    if !isa(sort, Array)               #if no sort - for vars without sorting
         for v in vars
             sarray = Array{Any,1}(undef, 0)
             deleteat!(data[:, v], findall(x->x === NaN || x === nothing, data[:, v]))
@@ -83,12 +206,11 @@ function descriptive(data::DataFrame;
     #If sort exist
     sortlist = unique(data[:, sort])
     sort!(sortlist, tuple(sort))
-    #for v in vars #For each variable in list
     for i = 1:size(sortlist, 1) #For each line in sortlist
             if size(sdata, 1) > 0 deleterows!(sdata, 1:size(sdata, 1)) end
             for c = 1:size(data, 1) #For each line in data
                 if data[c, sort] == sortlist[i,:]
-                    push!(sdata, data[c, vars])
+                    push!(sdata, data[c, vars])  #tmp ds constructing
                 end
             end
         for v in vars #For each variable in list
@@ -105,10 +227,11 @@ function descriptive(data::DataFrame;
 end
 
 #Statistics calculation
-function descriptive_(data::Array{T,1}, stats::Union{Tuple{Vararg{Symbol}}, Array{Symbol,1}})::Array{Float64,1} where T <: Real
+@inline function descriptive_(data::Array{T,1}, stats::Union{Tuple{Vararg{Symbol}}, Array{Symbol,1}})::Array{Float64,1} where T <: Real
     deleteat!(data, findall(x->x === NaN || x === nothing || x === missing, data))
 
     dn         = nothing
+    #if (@isdefined dn) end
     dmin       = nothing
     dmax       = nothing
     drange     = nothing
@@ -240,11 +363,11 @@ function descriptive_(data::Array{T,1}, stats::Union{Tuple{Vararg{Symbol}}, Arra
     return sarray
 end
 
-function ses(data::AbstractVector)::Float64
+@inline function ses(data::AbstractVector)::Float64
     n = length(data)
     ses(n)
 end
-function ses(n::Int)::Float64
+@inline function ses(n::Int)::Float64
     return sqrt(6 * n *(n - 1) / ((n - 2) * (n + 1) * (n + 3)))
 end
 

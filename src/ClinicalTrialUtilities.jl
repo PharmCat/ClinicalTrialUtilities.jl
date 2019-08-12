@@ -17,6 +17,8 @@ using Distributions, StatsBase, Statistics, Random
 using QuadGK
 using DataFrames
 import SpecialFunctions.lgamma
+import Base.show
+import Base.getindex
 
 #Exceptions
 struct CTUException <: Exception
