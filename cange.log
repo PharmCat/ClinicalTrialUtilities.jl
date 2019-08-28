@@ -1,3 +1,12 @@
+v0.1.17
+
+  - DataSet type
+  - Descriptive type
+  - descriptive rewriting
+  - Descriptive stats add SES and SEK
+  - Descriptive performance 
+  - Minor changes, bugfix, code cleaning
+
 v0.1.16
 
   - Split PK/PD

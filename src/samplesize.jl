@@ -6,7 +6,7 @@
 #main sample size function
 function ctSampleN(;param=:notdef, type=:notdef, group=:notdef, alpha=0.05, beta=0.2, diff=0, sd=0, a=0, b=0, k=1, logdiff=false, out=:num)
     if alpha >= 1 || alpha <= 0 || beta >= 1 || beta <= 0  throw(CTUException(1201,"sampleSize: alpha and beta sould be > 0 and < 1.")) end
-    if (type == :ei || type == :ns) && diff == 0  throw(CTUException(1202,"sampleSize: diff cannot be 0")) end
+    #if (type == :ei || type == :ns) && diff == 0  throw(CTUException(1202,"sampleSize: diff cannot be 0")) end
     if param == :prop && !(group == :one || group == :two || type == :mcnm)  throw(CTUException(1203,"sampleSize: group should be defined or mcnm type.")) end
     if sd == 0 && param == :mean throw(CTUException(1204,"sampleSize: sd cannot be 0.")) end
     if k <= 0 throw(CTUException(1205,"sampleSize: k cannot be <= 0")) end
