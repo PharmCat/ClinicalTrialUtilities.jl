@@ -17,7 +17,7 @@ The package is designed to perform calculations related to the planning and anal
 - [Basic functions](#Basic)
 - [Usage](#Usage)
   - [descriptives](#descriptives)
-  - [ctSampleN](#ctSampleN)
+  - [ctsamplen](#ctsamplen)
   - [ctpower](#ctpower)
   - [besamplen](#besamplen)
   - [bepower](#bepower)
@@ -63,7 +63,7 @@ Pkg.test("ClinicalTrialUtilities");
 
 - [Descriptive statistics](#descriptives)
 
-- [Clinical trial sample size estimation](#ctSampleN)
+- [Clinical trial sample size estimation](#ctsamplen)
 
 - [Clinical trial power estimation](#ctpower)
 
@@ -91,12 +91,12 @@ Descriptive statistics.
 descriptives(data::DataFrame; sort = NaN, vars = NaN, stats = [:n, :mean, :sd, :sem, :uq, :median, :lq])::DataFrame
 ```
 
-### <a name="ctSampleN">ctSampleN</a>
+### <a name="ctsamplen">ctsamplen</a>
 
 Sample size estimation for clinical trial.
 
 ```
-ctsamplen(;param=:notdef, type=:notdef, group=:notdef, alpha=0.05, beta=0.2, diff=0, sd=0, a=0, b=0, k=1, logdiff=false, out=:num)
+ctsamplen(;param=:notdef, type=:notdef, group=:notdef, alpha=0.05, beta=0.2, diff=0, sd=0, a=0, b=0, k=1, logdiff=false)
 ```
 
 **param (Parameter type):**
@@ -132,18 +132,12 @@ ctsamplen(;param=:notdef, type=:notdef, group=:notdef, alpha=0.05, beta=0.2, dif
 - false (default, diff would be transformed)
 - true
 
-**out** - output type:
-- :num   - numeric (default);
-- :str   - String variable with text output;
-- :vstr  - numeric and String variable;
-- :print - print to console;
-
 ### <a name="ctpower">ctpower</a>
 
 Power estimation for clinical trials.
 
 ```
-ctpower(;param=:notdef, type=:notdef, group=:notdef, alpha=0.05, logdiff=false, diff=0, sd=0, a=0, b=0, n=0, k=1,  out=:num)
+ctpower(;param=:notdef, type=:notdef, group=:notdef, alpha=0.05, logdiff=false, diff=0, sd=0, a=0, b=0, n=0, k=1)
 ```
 
 **param (Parameter type):**
@@ -179,18 +173,12 @@ ctpower(;param=:notdef, type=:notdef, group=:notdef, alpha=0.05, logdiff=false, 
 - false (default, diff would be transformed)
 - true
 
-**out** - output type:
-- :num   - numeric (default);
-- :str   - String variable with text output;
-- :vstr  - numeric and String variable;
-- :print - print to console;
-
 ### <a name="besamplen">besamplen</a>
 
 Sample size estimation for bioequivalence study (iterative procedure).
 
 ```
-besamplen(;alpha=0.05, beta=0.2, theta0=0.95, theta1=0.8, theta2=1.25, cv=0.0, logscale=true, design=:d2x2, method=:owenq,  out=:num)
+besamplen(;alpha=0.05, beta=0.2, theta0=0.95, theta1=0.8, theta2=1.25, cv=0.0, logscale=true, design=:d2x2, method=:owenq)
 ```
 
 **alpha** - Alpha (o < alpha < 1)  (default=0.05);
@@ -222,18 +210,12 @@ besamplen(;alpha=0.05, beta=0.2, theta0=0.95, theta1=0.8, theta2=1.25, cv=0.0, l
 - :nct
 - :shifted
 
-**out** - output type:
-- :num   - numeric (default);
-- :str   - String variable with text output;
-- :vstr  - numeric and String variable;
-- :print - print to console;
-
 ### <a name="bepower">bepower</a>
 
 Power estimation for bioequivalence trials.
 
 ```
-bepower(;alpha=0.05, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.0, n=0, logscale=true, design=:d2x2, method=:owenq,  out=:num)
+bepower(;alpha=0.05, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.0, n=0, logscale=true, design=:d2x2, method=:owenq)
 ```
 
 **alpha** - Alpha (0 < alpha < 1)  (default=0.05);
@@ -264,12 +246,6 @@ bepower(;alpha=0.05, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.0, n=0, logscale
 - :owenq (default)
 - :nct
 - :shifted
-
-**out** - output type:
-- :num   - numeric (default);
-- :str   - String variable with text output;
-- :vstr  - numeric and String variable;
-- :print - print to console;
 
 ### <a name="ci2cv">ci2cv</a>
 
@@ -395,9 +371,9 @@ ctpower(param=:mean, type=:ea, group=:one, a=1.5, b=2, sd=1,n=32, alpha=0.05)
 #Bioequivalence sample size
 besamplen(alpha=0.05,  theta1=0.8, theta2=1.25, theta0=0.95, cv=0.15, method=:owenq)
 besamplen(cv=0.20, method=:nct)
-besamplen(cv=0.347, design=:parallel,  out=:print)
+besamplen(cv=0.347, design=:parallel)
 besamplen(cv=0.40)
-n, p, s = besamplen(cv=0.347, design=:d2x2x4, method=:nct, out=:vstr)
+besamplen(cv=0.347, design=:d2x2x4, method=:nct)
 
 #Bioequivalence power for 2x2 design, default method - OwensQ
 bepower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=20, design=:d2x2, method=:owenq)
