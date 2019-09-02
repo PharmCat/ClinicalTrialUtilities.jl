@@ -32,6 +32,17 @@ struct PowerTask <: Task
     k
     logdiff
 end
+struct TOSTSampleSizeTask <: Task
+    alpha
+    beta
+    gmr
+    llim
+    ulim
+    cv
+    logscale
+    design
+    method
+end
 struct TaskResult{T <: Task}
     task::T
     result
@@ -254,13 +265,15 @@ function ctpower(;param=:notdef, type=:notdef, group=:notdef, alpha=0.05, logdif
     =#
 end #ctpower
 #-------------------------------------------------------------------------------
-function besamplen(;alpha=0.05, beta=0.2, theta0=0.95, theta1=0.8, theta2=1.25, cv=0.0, logscale=true, design=:d2x2, method=:owenq,  out=:num)
+function besamplen(;alpha=0.05, beta=0.2, theta0=0.95, theta1=0.8, theta2=1.25, cv=0.0, logscale=true, design=:d2x2, method=:owenq)::TaskResult{TOSTSampleSizeTask}
 
     theta0 = convert(Float64, theta0); theta1 = convert(Float64, theta1); theta2 = convert(Float64, theta2); cv = convert(Float64, cv); alpha  = convert(Float64, alpha); beta = convert(Float64, beta)
 
     if cv <= 0 throw(CTUException(1041,"besamplen: cv can not be <= 0")) end
     if theta1 >= theta2  throw(CTUException(1042,"besamplen: theta1 should be < theta2")) end
     if alpha >= 1 || alpha <= 0 || beta >= 1 || beta <= 0 throw(CTUException(1043,"besamplen: alpha and beta shold be > 0 and < 1")) end
+
+    task = TOSTSampleSizeTask(alpha, beta, theta0, theta1, theta2, cv, logscale, design, method)
 
     if logscale
         if theta1 < 0 || theta2 < 0 || theta0 < 0 throw(CTUException(1044,"besamplen: theta0, theta1, theta2 shold be > 0 and ")) end
@@ -314,6 +327,8 @@ function besamplen(;alpha=0.05, beta=0.2, theta0=0.95, theta1=0.8, theta2=1.25, 
         estpower = pow
         estn     = n0
     end
+    return TaskResult(task, estn)
+    #=
     if out == :num return estn, estpower
     else
         output  = "----------------------------------------\n"
@@ -342,4 +357,5 @@ function besamplen(;alpha=0.05, beta=0.2, theta0=0.95, theta1=0.8, theta2=1.25, 
     elseif out == :vstr
         return estn, estpower, output
     end
+    =#
 end

@@ -5,6 +5,9 @@ function Base.show(io::IO, obj::TaskResult)
         println(io,"         Sample Size Estimation         ")
         elseif isa(obj.task, PowerTask)
         println(io,"            Power Estimation            ")
+        elseif isa(obj.task, TOSTSampleSizeTask)
+        swowtost(io, obj)
+        return nothing
         end
         println(io,"----------------------------------------")
         showmod1(io, obj)
@@ -60,4 +63,22 @@ function showmod4(io, obj::TaskResult{SampleSizeTask})
 end
 function showmod4(io, obj::TaskResult{PowerTask})
         println(io,"  Power estimate: ", round(obj.result, sigdigits = 6))
+end
+
+function swowtost(io, obj)
+        println(io,"           TOST sample size             ")
+        println(io,"----------------------------------------")
+        println(io,"  Design: ", obj.task.design)
+        println(io,"  Method: ", obj.task.method)
+        println(io,"  Logscale: ", obj.task.logscale)
+        println(io,"----------------------------------------")
+        println(io,"  Alpha: ", obj.task.alpha)
+        println(io,"  Beta: ", obj.task.beta)
+        println(io,"----------------------------------------")
+        println(io,"  Lower limit: ", obj.task.llim)
+        println(io,"  Upper limit: ", obj.task.ulim)
+        println(io,"  GMR: ", obj.task.gmr)
+        println(io,"  CV: ", obj.task.cv)
+        println(io,"----------------------------------------")
+        println(io,"  Sample Size: ", obj.result)
 end
