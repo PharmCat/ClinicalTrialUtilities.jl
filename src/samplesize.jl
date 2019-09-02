@@ -7,41 +7,41 @@
 abstract type Task end
 
 struct SampleSizeTask <: Task
-    param
-    type
-    group
-    alpha
-    beta
-    diff
-    sd
-    a
-    b
-    k
-    logdiff
+    param::Symbol
+    type::Symbol
+    group::Symbol
+    alpha::Real
+    beta::Real
+    diff::Real
+    sd::Real
+    a::Real
+    b::Real
+    k::Real
+    logdiff::Bool
 end
 struct PowerTask <: Task
-    param
-    type
-    group
-    alpha
-    n
-    diff
-    sd
-    a
-    b
-    k
-    logdiff
+    param::Symbol
+    type::Symbol
+    group::Symbol
+    alpha::Real
+    n::Real
+    diff::Real
+    sd::Real
+    a::Real
+    b::Real
+    k::Real
+    logdiff::Bool
 end
 struct TOSTSampleSizeTask <: Task
-    alpha
-    beta
-    gmr
-    llim
-    ulim
-    cv
-    logscale
-    design
-    method
+    alpha::Real
+    beta::Real
+    gmr::Real
+    llim::Real
+    ulim::Real
+    cv::Real
+    logscale::Bool
+    design::Symbol
+    method::Symbol
 end
 struct TaskResult{T <: Task}
     task::T
