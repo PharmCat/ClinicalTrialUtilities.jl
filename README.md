@@ -20,7 +20,7 @@ The package is designed to perform calculations related to the planning and anal
   - [ctSampleN](#ctSampleN)
   - [ctpower](#ctpower)
   - [besamplen](#besamplen)
-  - [bePower](#bePower)
+  - [bepower](#bepower)
   - [ci2cv](#ci2cv)
   - [pooledCV](#pooledCV)
 - [Submodules](#Submodules)
@@ -33,7 +33,7 @@ The package is designed to perform calculations related to the planning and anal
   - [PK](https://github.com/PharmCat/ClinicalTrialUtilities.jl/blob/master/doc/PK.md)
     - [nca](https://github.com/PharmCat/ClinicalTrialUtilities.jl/blob/master/doc/PK.md#nca)
   - [SIM](https://github.com/PharmCat/ClinicalTrialUtilities.jl/blob/master/doc/SIM.md)
-    - [bePower](https://github.com/PharmCat/ClinicalTrialUtilities.jl/blob/master/doc/SIM.md#bePower)
+    - [bepower](https://github.com/PharmCat/ClinicalTrialUtilities.jl/blob/master/doc/SIM.md#bepower)
     - [ctPropPower](https://github.com/PharmCat/ClinicalTrialUtilities.jl/blob/master/doc/SIM.md#ctPropPower)
     - [ctPropSampleN](https://github.com/PharmCat/ClinicalTrialUtilities.jl/blob/master/doc/SIM.md#ctPropSampleN)
     - [ctMeansPower](https://github.com/PharmCat/ClinicalTrialUtilities.jl/blob/master/doc/SIM.md#ctMeansPower)
@@ -69,7 +69,7 @@ Pkg.test("ClinicalTrialUtilities");
 
 - [Iterative sample size estimation for bioequivalence trials](#besamplen)
 
-- [Power estimation for bioequivalence trials](#bePower)
+- [Power estimation for bioequivalence trials](#bepower)
 
 - [CV from CI for bioequivalence trials](#ci2cv)
 
@@ -228,12 +228,12 @@ besamplen(;alpha=0.05, beta=0.2, theta0=0.95, theta1=0.8, theta2=1.25, cv=0.0, l
 - :vstr  - numeric and String variable;
 - :print - print to console;
 
-### <a name="bePower">bePower</a>
+### <a name="bepower">bepower</a>
 
 Power estimation for bioequivalence trials.
 
 ```
-bePower(;alpha=0.05, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.0, n=0, logscale=true, design=:d2x2, method=:owenq,  out=:num)
+bepower(;alpha=0.05, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.0, n=0, logscale=true, design=:d2x2, method=:owenq,  out=:num)
 ```
 
 **alpha** - Alpha (0 < alpha < 1)  (default=0.05);
@@ -345,8 +345,8 @@ pooledCV(data::DataFrame; cv=:cv, df=:df, alpha=0.05, returncv=true)::ConfInt
   * nca
 
 * Simulations - [Doc](https://github.com/PharmCat/ClinicalTrialUtilities.jl/blob/master/doc/SIM.md)
-  * bePower
-  * bePowerSIM
+  * bepower
+  * bepowerSIM
   * ctPropPower
   * ctPropSampleN
   * ctMeansPower
@@ -400,16 +400,16 @@ besamplen(cv=0.40)
 n, p, s = besamplen(cv=0.347, design=:d2x2x4, method=:nct, out=:vstr)
 
 #Bioequivalence power for 2x2 design, default method - OwensQ
-bePower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=20, design=:d2x2, method=:owenq)
+bepower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=20, design=:d2x2, method=:owenq)
 #Same
-bePower(alpha=0.05, cv=0.2, n=20, design=:d2x2)
+bepower(alpha=0.05, cv=0.2, n=20, design=:d2x2)
 #Bioequivalence power for cv 14%, 21 subjects, default OwensQ method, logscale false
-bePower(alpha=0.1, logscale=false, theta1=-0.1, theta2=0.1, theta0=0, cv=0.14, n=21)
+bepower(alpha=0.1, logscale=false, theta1=-0.1, theta2=0.1, theta0=0, cv=0.14, n=21)
 #Bioequivalence power for cv 14%, 21 subjects, shifted method, logscale false
-bePower(alpha=0.1, logscale=false, theta1=-0.1, theta2=0.1, theta0=0, cv=0.14, n=21, method=:shifted)
+bepower(alpha=0.1, logscale=false, theta1=-0.1, theta2=0.1, theta0=0, cv=0.14, n=21, method=:shifted)
 #Simple notations
-bePower(cv=0.4, n=35, design=:d2x4x4)
-bePower(cv=0.14, n=21)
+bepower(cv=0.4, n=35, design=:d2x4x4)
+bepower(cv=0.14, n=21)
 
 #CV from CI
 ci2cv(;alpha = 0.05, theta1 = 0.9, theta2 = 1.25, n=30, design=:d2x2x4)

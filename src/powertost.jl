@@ -6,7 +6,7 @@
 # se_diff = se = sd * sqrt((1/N1 + ... + 1/Nn)*bkni) = sqrt(ms*(1/N1 + ... + 1/Nn)*bkni)
 # CI bounds = Diff +- t(df, alpha)*se
 
-#bePower
+#bepower
 #powertostint
 #powerTOSTOwenQ
 #approxPowerTOST
@@ -20,7 +20,7 @@
 #ci2cv
 
 
-function bePower(;alpha=0.05, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.0, n=0, logscale=true, design=:d2x2, method=:owenq,  out=:num)::Float64
+function bepower(;alpha=0.05, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.0, n=0, logscale=true, design=:d2x2, method=:owenq,  out=:num)::Float64
     if n < 2 throw(CTUException(1021,"powerTOST: n can not be < 2")) end
     if cv == 0.0 throw(CTUException(1022,"powerTOST: cv can not be equal to 0"))  end
     if !(0 < alpha < 1) throw(CTUException(1023,"powerTOST: alfa can not be > 1 or < 0")) end
@@ -45,7 +45,7 @@ function bePower(;alpha=0.05, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.0, n=0,
     end
 
     return powertostint(alpha,  ltheta1, ltheta2, diffm, sd, n, design, method)
-end #bePower
+end #bepower
 
 function powertostint(alpha::Float64,  ltheta1::Float64, ltheta2::Float64, diffm::Float64, sd::Float64, n::Int, design::Symbol, method::Symbol)::Float64
 

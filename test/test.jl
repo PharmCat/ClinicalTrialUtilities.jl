@@ -204,42 +204,42 @@ println(" ---------------------------------- ")
 end
 
 println(" ---------------------------------- ")
-@testset "  bePower Test      " begin
+@testset "  bepower Test      " begin
     #parallel
-    @test ClinicalTrialUtilities.bePower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.3, n=31, design=:parallel, method=:owenq) ≈ 0.2949476 atol=1E-7
-    @test ClinicalTrialUtilities.bePower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.3, n=32, design=:parallel, method=:owenq) ≈ 0.3166927 atol=1E-7
+    @test ClinicalTrialUtilities.bepower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.3, n=31, design=:parallel, method=:owenq) ≈ 0.2949476 atol=1E-7
+    @test ClinicalTrialUtilities.bepower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.3, n=32, design=:parallel, method=:owenq) ≈ 0.3166927 atol=1E-7
     #2x2
-    @test ClinicalTrialUtilities.bePower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=20, design=:d2x2, method=:owenq)         ≈ 0.8346802 atol=1E-7
-    @test ClinicalTrialUtilities.bePower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=10, design=:d2x2, method=:nct)           ≈ 0.4316618 atol=1E-7
-    @test ClinicalTrialUtilities.bePower(alpha=0.1, logscale=false, theta1=-0.1, theta2=0.1, theta0=0.0, cv=0.14, n=21, design=:d2x2, method=:shifted)       ≈ 0.6626132 atol=1E-7
-    @test ClinicalTrialUtilities.bePower(alpha=0.05, logscale=false, theta1=-0.1, theta2=0.1, theta0=0.0, cv=0.14, n=30, design=:d2x2, method=:nct)          ≈ 0.7079951 atol=1E-7
-    @test ClinicalTrialUtilities.bePower(alpha=0.0000001, logscale=false, theta1=-0.1, theta2=0.1, theta0=0.0, cv=1.0, n=10000, design=:d2x2, method=:owenq) ≈ 0.9380914 atol=1E-7
-    @test ClinicalTrialUtilities.bePower(alpha=0.0001, logscale=false, theta1=-0.1, theta2=0.1, theta0=0.0, cv=1.0, n=3500, design=:d2x2, method=:owenq)     ≈ 0.3545904 atol=1E-7
-    @test ClinicalTrialUtilities.bePower(alpha=0.00000005, logscale=false, theta1=-0.1, theta2=0.1, theta0=0.0, cv=1.5, n=20000, design=:d2x2, method=:owenq) ≈ 0.8197361 atol=1E-7
-    @test ClinicalTrialUtilities.bePower(alpha=0.1, logscale=false, theta1=-0.1, theta2=0.1, theta0=0.0, cv=0.14, n=4, design=:d2x2, method=:shifted) ≈ 0.0
-    @test ClinicalTrialUtilities.bePower(alpha=0.1, logscale=false, theta1=-0.1, theta2=0.1, theta0=0.0, cv=0.02, n=3, design=:d2x2, method=:shifted) ≈ 0.7738659 atol=1E-7
+    @test ClinicalTrialUtilities.bepower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=20, design=:d2x2, method=:owenq)         ≈ 0.8346802 atol=1E-7
+    @test ClinicalTrialUtilities.bepower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=10, design=:d2x2, method=:nct)           ≈ 0.4316618 atol=1E-7
+    @test ClinicalTrialUtilities.bepower(alpha=0.1, logscale=false, theta1=-0.1, theta2=0.1, theta0=0.0, cv=0.14, n=21, design=:d2x2, method=:shifted)       ≈ 0.6626132 atol=1E-7
+    @test ClinicalTrialUtilities.bepower(alpha=0.05, logscale=false, theta1=-0.1, theta2=0.1, theta0=0.0, cv=0.14, n=30, design=:d2x2, method=:nct)          ≈ 0.7079951 atol=1E-7
+    @test ClinicalTrialUtilities.bepower(alpha=0.0000001, logscale=false, theta1=-0.1, theta2=0.1, theta0=0.0, cv=1.0, n=10000, design=:d2x2, method=:owenq) ≈ 0.9380914 atol=1E-7
+    @test ClinicalTrialUtilities.bepower(alpha=0.0001, logscale=false, theta1=-0.1, theta2=0.1, theta0=0.0, cv=1.0, n=3500, design=:d2x2, method=:owenq)     ≈ 0.3545904 atol=1E-7
+    @test ClinicalTrialUtilities.bepower(alpha=0.00000005, logscale=false, theta1=-0.1, theta2=0.1, theta0=0.0, cv=1.5, n=20000, design=:d2x2, method=:owenq) ≈ 0.8197361 atol=1E-7
+    @test ClinicalTrialUtilities.bepower(alpha=0.1, logscale=false, theta1=-0.1, theta2=0.1, theta0=0.0, cv=0.14, n=4, design=:d2x2, method=:shifted) ≈ 0.0
+    @test ClinicalTrialUtilities.bepower(alpha=0.1, logscale=false, theta1=-0.1, theta2=0.1, theta0=0.0, cv=0.02, n=3, design=:d2x2, method=:shifted) ≈ 0.7738659 atol=1E-7
     #
-    @test ClinicalTrialUtilities.bePower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=27, design=:d2x2, method=:owenq) ≈ 0.9264365737448076
-    @test ClinicalTrialUtilities.bePower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=29, design=:d2x2, method=:owenq) ≈ 0.941900827163551
-    @test ClinicalTrialUtilities.bePower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=31, design=:d2x2, method=:owenq) ≈ 0.9542152686694777
+    @test ClinicalTrialUtilities.bepower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=27, design=:d2x2, method=:owenq) ≈ 0.9264365737448076
+    @test ClinicalTrialUtilities.bepower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=29, design=:d2x2, method=:owenq) ≈ 0.941900827163551
+    @test ClinicalTrialUtilities.bepower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=31, design=:d2x2, method=:owenq) ≈ 0.9542152686694777
 
     #2x2x4
-    @test ClinicalTrialUtilities.bePower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.4, n=35, design=:d2x2x4) ≈ 0.829747  atol=1E-6
-    @test ClinicalTrialUtilities.bePower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=1, n=35, design=:d2x2x4) ≈ 0.014249535210231756  atol=1E-6
+    @test ClinicalTrialUtilities.bepower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.4, n=35, design=:d2x2x4) ≈ 0.829747  atol=1E-6
+    @test ClinicalTrialUtilities.bepower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=1, n=35, design=:d2x2x4) ≈ 0.014249535210231756  atol=1E-6
     #2x4x4
-    @test ClinicalTrialUtilities.bePower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.4, n=35, design=:d2x4x4) ≈ 0.8291076  atol=1E-7
-    @test ClinicalTrialUtilities.bePower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.4, n=34, design=:d2x4x4) ≈ 0.8180596  atol=1E-7
-    @test ClinicalTrialUtilities.bePower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.4, n=33, design=:d2x4x4) ≈ 0.8069565  atol=1E-7
+    @test ClinicalTrialUtilities.bepower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.4, n=35, design=:d2x4x4) ≈ 0.8291076  atol=1E-7
+    @test ClinicalTrialUtilities.bepower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.4, n=34, design=:d2x4x4) ≈ 0.8180596  atol=1E-7
+    @test ClinicalTrialUtilities.bepower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.4, n=33, design=:d2x4x4) ≈ 0.8069565  atol=1E-7
     #2x3x3
-    @test ClinicalTrialUtilities.bePower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.4, n=32, design=:d2x3x3) ≈ 0.5976873  atol=1E-7
-    @test ClinicalTrialUtilities.bePower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.4, n=31, design=:d2x3x3) ≈ 0.579468  atol=1E-6
-    @test ClinicalTrialUtilities.bePower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.4, n=30, design=:d2x3x3) ≈ 0.5614358  atol=1E-7
+    @test ClinicalTrialUtilities.bepower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.4, n=32, design=:d2x3x3) ≈ 0.5976873  atol=1E-7
+    @test ClinicalTrialUtilities.bepower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.4, n=31, design=:d2x3x3) ≈ 0.579468  atol=1E-6
+    @test ClinicalTrialUtilities.bepower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.4, n=30, design=:d2x3x3) ≈ 0.5614358  atol=1E-7
     #3x3
-    @test ClinicalTrialUtilities.bePower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.4, n=30, design=:d3x3) ≈ 0.3847067  atol=1E-7
+    @test ClinicalTrialUtilities.bepower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.4, n=30, design=:d3x3) ≈ 0.3847067  atol=1E-7
     #3x6x3
-    @test ClinicalTrialUtilities.bePower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.4, n=30, design=:d3x6x3) ≈ 0.3847067  atol=1E-7
+    @test ClinicalTrialUtilities.bepower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.4, n=30, design=:d3x6x3) ≈ 0.3847067  atol=1E-7
     #2x4x2
-    @test ClinicalTrialUtilities.bePower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.4, n=30, design=:d2x4x2) ≈ 0.0001785665  atol=1E-10
+    @test ClinicalTrialUtilities.bepower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.4, n=30, design=:d2x4x2) ≈ 0.0001785665  atol=1E-10
 
 end
 
@@ -586,11 +586,11 @@ end
 println(" ---------------------------------- ")
 @testset "  Simulations         " begin
 
-    @test ClinicalTrialUtilities.SIM.bePower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=20, simnum=4, seed=1111) ≈ 0.8346
-    @test ClinicalTrialUtilities.SIM.bePower(alpha=0.1, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=29, simnum=4, seed=1111) ≈ 0.9744
+    @test ClinicalTrialUtilities.SIM.bepower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=20, simnum=4, seed=1111) ≈ 0.8346
+    @test ClinicalTrialUtilities.SIM.bepower(alpha=0.1, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=29, simnum=4, seed=1111) ≈ 0.9744
 
     #!
-    ClinicalTrialUtilities.SIM.bePower(alpha=0.1, logscale=false, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=29, simnum=4, seed=1111)
+    ClinicalTrialUtilities.SIM.bepower(alpha=0.1, logscale=false, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=29, simnum=4, seed=1111)
 
     @test ClinicalTrialUtilities.SIM.ctPropPower(0.5, 100, 0.5, 100, 0.6; alpha=0.05, type=:ns, citype=:or, method=:mn, seed=123, simnum=4) ≈ 0.4131
     ClinicalTrialUtilities.SIM.ctPropPower(0.5, 100, 0.5, 100, [0.3, 3.0]; alpha=0.05, type=:ei, citype=:or, method=:mn, seed=123, simnum=4) ≈ 0.9562
@@ -788,7 +788,7 @@ println(" ---------------------------------- ")
     @test en ≈ 1031
     en = 0
     try
-        ClinicalTrialUtilities.bePower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=0,  method=:mvt)
+        ClinicalTrialUtilities.bepower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=0,  method=:mvt)
     catch e
         if isa(e, ClinicalTrialUtilities.CTUException) en = e.n end
     end
@@ -796,7 +796,7 @@ println(" ---------------------------------- ")
 
     en = 0
     try
-        ClinicalTrialUtilities.bePower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0, n=10,  method=:mvt)
+        ClinicalTrialUtilities.bepower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0, n=10,  method=:mvt)
     catch e
         if isa(e, ClinicalTrialUtilities.CTUException) en = e.n end
     end
@@ -804,28 +804,28 @@ println(" ---------------------------------- ")
 
     en = 0
     try
-        ClinicalTrialUtilities.bePower(alpha=1.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=10,  method=:mvt)
+        ClinicalTrialUtilities.bepower(alpha=1.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=10,  method=:mvt)
     catch e
         if isa(e, ClinicalTrialUtilities.CTUException) en = e.n end
     end
     @test en ≈ 1023
     en = 0
     try
-        ClinicalTrialUtilities.bePower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=2,  method=:mvt)
+        ClinicalTrialUtilities.bepower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=2,  method=:mvt)
     catch e
         if isa(e, ClinicalTrialUtilities.CTUException) en = e.n end
     end
     @test en ≈ 1024
     en = 0
     try
-        ClinicalTrialUtilities.bePower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=20,  method=:mmvt)
+        ClinicalTrialUtilities.bepower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=20,  method=:mmvt)
     catch e
         if isa(e, ClinicalTrialUtilities.CTUException) en = e.n end
     end
     @test en ≈ 1025
     en = 0
     try
-        ClinicalTrialUtilities.bePower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=20, design=:d2x2, method=:mvt)
+        ClinicalTrialUtilities.bepower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=20, design=:d2x2, method=:mvt)
     catch e
         if isa(e, ClinicalTrialUtilities.CTUException) en = e.n end
     end

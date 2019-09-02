@@ -93,7 +93,7 @@ include("deprecated.jl")
 #Sample size
 export ctsamplen, besamplen
 #Power
-export ctpower, bePower
+export ctpower, bepower
 #Utils
 export ci2cv, pooledCV
 #Other
