@@ -91,9 +91,9 @@ module SIM
         if type == :notdef || citype == :notdef || method == :notdef throw(CTUException(1116,"ctPropSampleN: type or method not defined.")) end
             st::Int = sn::Int = 10
         if citype == :diff
-            st = sn = ceil(ctsamplen(param=:prop, type=type, group=:two, alpha=alpha, beta=beta, diff=ref, a=p1, b=p2))
+            st = sn = ceil(ctsamplen(param=:prop, type=type, group=:two, alpha=alpha, beta=beta, diff=ref, a=p1, b=p2).result)
         elseif citype == :or
-            st = sn = ceil(ctsamplen(param=:or, type=type, group=:two, alpha=alpha/2, beta=beta, diff=ref, a=p1, b=p2, logdiff = false))
+            st = sn = ceil(ctsamplen(param=:or, type=type, group=:two, alpha=alpha/2, beta=beta, diff=ref, a=p1, b=p2, logdiff = false).result)
         end
 
         pow = ctPropPower(p1, sn, p2, sn, ref; alpha=alpha, type=type, citype=citype, method=method, simnum=simnum, seed=seed)

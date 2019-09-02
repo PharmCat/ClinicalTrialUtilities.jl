@@ -18,6 +18,7 @@ using QuadGK
 using DataFrames
 import SpecialFunctions.lgamma
 import Base.show
+import Base.showerror
 import Base.getindex
 
 #Exceptions
@@ -61,7 +62,7 @@ struct NCA
     errors::Array
 end
 
-export CTUException, ConfInt, NCA
+export CTUException, ConfInt, NCA, showerror
 
 #Owen function calc: owensQ, owensQo, ifun1, owensTint2, owensT, tfn
 include("owensq.jl")
@@ -87,6 +88,8 @@ include("freque.jl")
 include("Export.jl")
 #Randomization
 include("randomization.jl")
+#Show
+include("show.jl")
 #Deprecated
 include("deprecated.jl")
 
