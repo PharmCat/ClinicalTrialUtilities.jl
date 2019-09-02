@@ -87,9 +87,11 @@ include("freque.jl")
 include("Export.jl")
 #Randomization
 include("randomization.jl")
+#Deprecated
+include("deprecated.jl")
 
 #Sample size
-export ctSampleN, beSampleN
+export ctsamplen, beSampleN
 #Power
 export ctPower, bePower
 #Utils

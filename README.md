@@ -96,7 +96,7 @@ descriptives(data::DataFrame; sort = NaN, vars = NaN, stats = [:n, :mean, :sd, :
 Sample size estimation for clinical trial.
 
 ```
-ctSampleN(;param=:notdef, type=:notdef, group=:notdef, alpha=0.05, beta=0.2, diff=0, sd=0, a=0, b=0, k=1, logdiff=false, out=:num)
+ctsamplen(;param=:notdef, type=:notdef, group=:notdef, alpha=0.05, beta=0.2, diff=0, sd=0, a=0, b=0, k=1, logdiff=false, out=:num)
 ```
 
 **param (Parameter type):**
@@ -381,13 +381,13 @@ end
 
 ```
 #Sample size for one proportion equality
-ctSampleN(param=:prop, type=:ea, group=:one, a=0.3, b=0.5)
+ctsamplen(param=:prop, type=:ea, group=:one, a=0.3, b=0.5)
 #Equivalence for two means
-ctSampleN(param=:mean, type=:ei, group=:two, diff=0.3, sd=1, a=0.3, b=0.5)
+ctsamplen(param=:mean, type=:ei, group=:two, diff=0.3, sd=1, a=0.3, b=0.5)
 #Odd ratio non-inferiority
-ctSampleN(param=:or, type=:ns, diff=-0.1, a=0.3, b=0.5, k=2)
+ctsamplen(param=:or, type=:ns, diff=-0.1, a=0.3, b=0.5, k=2)
 #Odd ratio equality
-ctSampleN(param=:or, type=:ea, a=0.3, b=0.5, k=2)
+ctsamplen(param=:or, type=:ea, a=0.3, b=0.5, k=2)
 
 #Power
 ctPower(param=:mean, type=:ea, group=:one, a=1.5, b=2, sd=1,n=32, alpha=0.05)

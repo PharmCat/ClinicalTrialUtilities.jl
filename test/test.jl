@@ -16,53 +16,49 @@ println(" ---------------------------------- ")
 println(" ---------------------------------- ")
 
 
-@testset "#1  ctSampleN Test      " begin
+@testset "#1  ctsamplen Test      " begin
     #1
-    @test ceil(ClinicalTrialUtilities.ctSampleN(param=:mean, type=:ea, group=:one, alpha=0.05, beta=0.2, sd=1, a=1.5, b=2, k=1)) == 32
+    @test ceil(ClinicalTrialUtilities.ctsamplen(param=:mean, type=:ea, group=:one, alpha=0.05, beta=0.2, sd=1, a=1.5, b=2, k=1)) == 32
     #2
-    @test ceil(ClinicalTrialUtilities.ctSampleN(param=:mean, type=:ei, group=:one, alpha=0.05, beta=0.2, sd=0.1, diff=0.05, a=2, b=2, k=1)) == 35
+    @test ceil(ClinicalTrialUtilities.ctsamplen(param=:mean, type=:ei, group=:one, alpha=0.05, beta=0.2, sd=0.1, diff=0.05, a=2, b=2, k=1)) == 35
     #3
-    @test ceil(ClinicalTrialUtilities.ctSampleN(param=:mean, type=:ns, group=:one, alpha=0.05, beta=0.2, sd=1, diff=-0.5, a=1.5, b=2, k=1)) == 7
+    @test ceil(ClinicalTrialUtilities.ctsamplen(param=:mean, type=:ns, group=:one, alpha=0.05, beta=0.2, sd=1, diff=-0.5, a=1.5, b=2, k=1)) == 7
     #4
-    @test ceil(ClinicalTrialUtilities.ctSampleN(param=:mean, type=:ea, group=:two, alpha=0.05, beta=0.2, sd=10, a=5, b=10, k=1)) == 63
+    @test ceil(ClinicalTrialUtilities.ctsamplen(param=:mean, type=:ea, group=:two, alpha=0.05, beta=0.2, sd=10, a=5, b=10, k=1)) == 63
     #5
-    @test ceil(ClinicalTrialUtilities.ctSampleN(param=:mean, type=:ei, group=:two, alpha=0.05, beta=0.2, sd=10, diff=5, a=5, b=4, k=1)) == 108
+    @test ceil(ClinicalTrialUtilities.ctsamplen(param=:mean, type=:ei, group=:two, alpha=0.05, beta=0.2, sd=10, diff=5, a=5, b=4, k=1)) == 108
     #6
-    @test ceil(ClinicalTrialUtilities.ctSampleN(param=:mean, type=:ns, group=:two, alpha=0.05, beta=0.2, sd=10, diff=5, a=5, b=5, k=1)) == 50
+    @test ceil(ClinicalTrialUtilities.ctsamplen(param=:mean, type=:ns, group=:two, alpha=0.05, beta=0.2, sd=10, diff=5, a=5, b=5, k=1)) == 50
     #7
-    @test ceil(ClinicalTrialUtilities.ctSampleN(param=:prop, type=:ea, group=:one, alpha=0.05, beta=0.2, a=0.3, b=0.5)) == 50
+    @test ceil(ClinicalTrialUtilities.ctsamplen(param=:prop, type=:ea, group=:one, alpha=0.05, beta=0.2, a=0.3, b=0.5)) == 50
     #8
-    @test ceil(ClinicalTrialUtilities.ctSampleN(param=:prop, type=:ei, group=:one, alpha=0.05, beta=0.2, diff=0.2, a=0.6, b=0.6)) == 52
+    @test ceil(ClinicalTrialUtilities.ctsamplen(param=:prop, type=:ei, group=:one, alpha=0.05, beta=0.2, diff=0.2, a=0.6, b=0.6)) == 52
     #9
-    @test ceil(ClinicalTrialUtilities.ctSampleN(param=:prop, type=:ns, group=:one, alpha=0.05, beta=0.2, diff=-0.1, a=0.3, b=0.5)) == 18
+    @test ceil(ClinicalTrialUtilities.ctsamplen(param=:prop, type=:ns, group=:one, alpha=0.05, beta=0.2, diff=-0.1, a=0.3, b=0.5)) == 18
     #10
-    @test ceil(ClinicalTrialUtilities.ctSampleN(param=:prop, type=:ea, group=:two, alpha=0.05, beta=0.2, a=0.65, b=0.85)) == 70
+    @test ceil(ClinicalTrialUtilities.ctsamplen(param=:prop, type=:ea, group=:two, alpha=0.05, beta=0.2, a=0.65, b=0.85)) == 70
     #11
-    @test ceil(ClinicalTrialUtilities.ctSampleN(param=:prop, type=:ei, group=:two, alpha=0.05, beta=0.2, diff=0.05, a=0.65, b=0.85)) == 136
+    @test ceil(ClinicalTrialUtilities.ctsamplen(param=:prop, type=:ei, group=:two, alpha=0.05, beta=0.2, diff=0.05, a=0.65, b=0.85)) == 136
     #12
-    @test ceil(ClinicalTrialUtilities.ctSampleN(param=:prop, type=:ns, group=:two, alpha=0.05, beta=0.2, diff=-0.1, a=0.85, b=0.65)) == 25
+    @test ceil(ClinicalTrialUtilities.ctsamplen(param=:prop, type=:ns, group=:two, alpha=0.05, beta=0.2, diff=-0.1, a=0.85, b=0.65)) == 25
     #13
-    @test ceil(ClinicalTrialUtilities.ctSampleN(param=:or, type=:ea,  alpha=0.05, beta=0.2, a=0.4, b=0.25, logdiff=true)) == 156
+    @test ceil(ClinicalTrialUtilities.ctsamplen(param=:or, type=:ea,  alpha=0.05, beta=0.2, a=0.4, b=0.25, logdiff=true)) == 156
     #14
-    @test ceil(ClinicalTrialUtilities.ctSampleN(param=:or, type=:ei,  alpha=0.05, beta=0.2, diff=0.5, a=0.25, b=0.25, logdiff=true)) == 366
+    @test ceil(ClinicalTrialUtilities.ctsamplen(param=:or, type=:ei,  alpha=0.05, beta=0.2, diff=0.5, a=0.25, b=0.25, logdiff=true)) == 366
     #15
-    @test ceil(ClinicalTrialUtilities.ctSampleN(param=:or, type=:ns,  alpha=0.05, beta=0.2, diff=0.2, a=0.4, b=0.25, logdiff=true)) == 242
+    @test ceil(ClinicalTrialUtilities.ctsamplen(param=:or, type=:ns,  alpha=0.05, beta=0.2, diff=0.2, a=0.4, b=0.25, logdiff=true)) == 242
     #16
-    @test ceil(ClinicalTrialUtilities.ctSampleN(param=:prop, type=:mcnm, a=0.45, b=0.05)) == 23
+    @test ceil(ClinicalTrialUtilities.ctsamplen(param=:prop, type=:mcnm, a=0.45, b=0.05)) == 23
     #17
-    @test ClinicalTrialUtilities.ctSampleN(param=:mean, type=:ns, group=:two, alpha=0.05, beta=0.2, diff=1, sd=20, a=1, b=2) ≈ 1236.511446403953 atol=1E-12
+    @test ClinicalTrialUtilities.ctsamplen(param=:mean, type=:ns, group=:two, alpha=0.05, beta=0.2, diff=1, sd=20, a=1, b=2) ≈ 1236.511446403953 atol=1E-12
     #18
-    @test ClinicalTrialUtilities.ctSampleN(param=:mean, type=:ns, group=:two, alpha=0.05, beta=0.2, diff=1, sd=20, a=1, b=2, out=:vstr)[1] ≈ 1236.511446403953 atol=1E-12
+    @test ClinicalTrialUtilities.ctsamplen(param=:mean, type=:ns, group=:two, alpha=0.05, beta=0.2, diff=1, sd=20, a=1, b=2, out=:vstr)[1] ≈ 1236.511446403953 atol=1E-12
     #19
-    @test ClinicalTrialUtilities.ctSampleN(param=:prop, type=:ei, group=:one, alpha=0.1, beta=0.2, diff=0.1, a=0.65, b=0.6, out=:vstr)[1] ≈ 630.6717754175304 atol=1E-12
+    @test ClinicalTrialUtilities.ctsamplen(param=:prop, type=:ei, group=:one, alpha=0.1, beta=0.2, diff=0.1, a=0.65, b=0.6, out=:vstr)[1] ≈ 630.6717754175304 atol=1E-12
     #20
-    str1 = ClinicalTrialUtilities.ctSampleN(param=:mean, type=:ea, group=:two, alpha=0.05, beta=0.2, sd=10, a=5, b=10, k=2, out=:str);
-    str2 = ClinicalTrialUtilities.ctSampleN(param=:mean, type=:ea, group=:two, alpha=0.05, beta=0.2, sd=10, a=5, b=10, k=2, out=:vstr)[2];
+    str1 = ClinicalTrialUtilities.ctsamplen(param=:mean, type=:ea, group=:two, alpha=0.05, beta=0.2, sd=10, a=5, b=10, k=2, out=:str);
+    str2 = ClinicalTrialUtilities.ctsamplen(param=:mean, type=:ea, group=:two, alpha=0.05, beta=0.2, sd=10, a=5, b=10, k=2, out=:vstr)[2];
     @test str1 == str2
-end
-
-@testset "  ctSampleN Atomic    " begin
-    @test ceil(ClinicalTrialUtilities.ClinicalTrialUtilities.mcnm(0.45, 0.05)) == 23
 end
 
 println(" ---------------------------------- ")
@@ -824,35 +820,35 @@ println(" ---------------------------------- ")
 
     en = 0
     try
-        ClinicalTrialUtilities.ctSampleN(param=:mean, type=:ea, group=:one, alpha=2, beta=0.2, diff=1, sd=1, a=1, b=1, k=1)
+        ClinicalTrialUtilities.ctsamplen(param=:mean, type=:ea, group=:one, alpha=2, beta=0.2, diff=1, sd=1, a=1, b=1, k=1)
     catch e
         if isa(e, ClinicalTrialUtilities.CTUException) en = e.n end
     end
     @test en ≈ 1201
     #en = 0
     #try
-    #    ClinicalTrialUtilities.ctSampleN(param=:mean, type=:ei, group=:one, alpha=0.5, beta=0.2, diff=0, sd=1, a=1, b=1, k=1)
+    #    ClinicalTrialUtilities.ctsamplen(param=:mean, type=:ei, group=:one, alpha=0.5, beta=0.2, diff=0, sd=1, a=1, b=1, k=1)
     #catch e
     #    if isa(e, ClinicalTrialUtilities.CTUException) en = e.n end
     #end
     #@test en ≈ 1202
     en = 0
     try
-        ClinicalTrialUtilities.ctSampleN(param=:prop, type=:ea, group=:oone, alpha=0.05, beta=0.2, diff=1, a=0.5, b=0.5, k=1)
+        ClinicalTrialUtilities.ctsamplen(param=:prop, type=:ea, group=:oone, alpha=0.05, beta=0.2, diff=1, a=0.5, b=0.5, k=1)
     catch e
         if isa(e, ClinicalTrialUtilities.CTUException) en = e.n end
     end
     @test en ≈ 1203
     en = 0
     try
-        ClinicalTrialUtilities.ctSampleN(param=:mean, type=:ns, group=:one, alpha=0.5, beta=0.2, diff=1, sd=0, a=1, b=1, k=1)
+        ClinicalTrialUtilities.ctsamplen(param=:mean, type=:ns, group=:one, alpha=0.5, beta=0.2, diff=1, sd=0, a=1, b=1, k=1)
     catch e
         if isa(e, ClinicalTrialUtilities.CTUException) en = e.n end
     end
     @test en ≈ 1204
     en = 0
     try
-        ClinicalTrialUtilities.ctSampleN(param=:mean, type=:ea, group=:one, alpha=0.05, beta=0.2, diff=1, sd=1, a=0, b=0, k=0)
+        ClinicalTrialUtilities.ctsamplen(param=:mean, type=:ea, group=:one, alpha=0.05, beta=0.2, diff=1, sd=1, a=0, b=0, k=0)
     catch e
         if isa(e, ClinicalTrialUtilities.CTUException) en = e.n end
     end
@@ -866,16 +862,16 @@ println(" ---------------------------------- ")
     end
     @test en ≈ 1301
 
-    @test !ClinicalTrialUtilities.ctSampleN(param=:mean, type=:ea, group=:oone, alpha=0.5, beta=0.2, diff=1, sd=1, a=1, b=1, k=1)
-    @test !ClinicalTrialUtilities.ctSampleN(param=:mean, type=:eea, group=:one, alpha=0.5, beta=0.2, diff=1, sd=1, a=1, b=1, k=1)
-    @test !ClinicalTrialUtilities.ctSampleN(param=:mean, type=:eea, group=:two, alpha=0.5, beta=0.2, diff=1, sd=1, a=1, b=1, k=1)
-    @test !ClinicalTrialUtilities.ctSampleN(param=:pprop, type=:eea, group=:one, alpha=0.5, beta=0.2, diff=1, sd=1, a=1, b=1, k=1)
-    @test !ClinicalTrialUtilities.ctSampleN(param=:prop, type=:eea, group=:one, alpha=0.05, beta=0.2, diff=1, a=0.5, b=0.5, k=1)
-    @test !ClinicalTrialUtilities.ctSampleN(param=:prop, type=:eea, group=:two, alpha=0.05, beta=0.2, diff=1, a=0.5, b=0.5, k=1)
+    @test !ClinicalTrialUtilities.ctsamplen(param=:mean, type=:ea, group=:oone, alpha=0.5, beta=0.2, diff=1, sd=1, a=1, b=1, k=1)
+    @test !ClinicalTrialUtilities.ctsamplen(param=:mean, type=:eea, group=:one, alpha=0.5, beta=0.2, diff=1, sd=1, a=1, b=1, k=1)
+    @test !ClinicalTrialUtilities.ctsamplen(param=:mean, type=:eea, group=:two, alpha=0.5, beta=0.2, diff=1, sd=1, a=1, b=1, k=1)
+    @test !ClinicalTrialUtilities.ctsamplen(param=:pprop, type=:eea, group=:one, alpha=0.5, beta=0.2, diff=1, sd=1, a=1, b=1, k=1)
+    @test !ClinicalTrialUtilities.ctsamplen(param=:prop, type=:eea, group=:one, alpha=0.05, beta=0.2, diff=1, a=0.5, b=0.5, k=1)
+    @test !ClinicalTrialUtilities.ctsamplen(param=:prop, type=:eea, group=:two, alpha=0.05, beta=0.2, diff=1, a=0.5, b=0.5, k=1)
 
-    @test !ClinicalTrialUtilities.ctSampleN(param=:prop, type=:ea, group=:one, alpha=0.05, beta=0.2, diff=1, sd=1, a=-1, b=0, k=1)
-    @test !ClinicalTrialUtilities.ctSampleN(param=:prop, type=:ei, group=:one, alpha=0.05, beta=0.2, diff=1, sd=1, a=0.4, b=2, k=1)
-    @test !ClinicalTrialUtilities.ctSampleN(param=:or, type=:eea, group=:oone,  diff=1, a=0.5, b=0.5, k=1)
+    @test !ClinicalTrialUtilities.ctsamplen(param=:prop, type=:ea, group=:one, alpha=0.05, beta=0.2, diff=1, sd=1, a=-1, b=0, k=1)
+    @test !ClinicalTrialUtilities.ctsamplen(param=:prop, type=:ei, group=:one, alpha=0.05, beta=0.2, diff=1, sd=1, a=0.4, b=2, k=1)
+    @test !ClinicalTrialUtilities.ctsamplen(param=:or, type=:eea, group=:oone,  diff=1, a=0.5, b=0.5, k=1)
     data = DataFrame(Concentration = Float64[], Time = Float64[], Subject = String[], Formulation = String[])
     pk = ClinicalTrialUtilities.PK.nca(data; conc = :c, time = :t,  sort=[:Formulatio, :Subjec], calcm = :logtt)
     @test length(pk.errors) == 5
@@ -887,7 +883,7 @@ println(" ---------------------------------- ")
 @testset "  Print test          " begin
     #io = open("out.txt", "w")
     #redirect_stdout(io)
-    ClinicalTrialUtilities.ctSampleN(param=:mean, type=:ea, group=:one, alpha=0.05, beta=0.2, sd=1, a=1.5, b=2, k=1, out=:print)
+    ClinicalTrialUtilities.ctsamplen(param=:mean, type=:ea, group=:one, alpha=0.05, beta=0.2, sd=1, a=1.5, b=2, k=1, out=:print)
     ClinicalTrialUtilities.ctPower(param=:prop, type=:ns, group=:two, a=0.85, b=0.65, diff=-0.1, n=25, alpha=0.05, out=:print)
     ClinicalTrialUtilities.beSampleN(;theta0=0.95, theta1=0.8, theta2=1.25, cv=0.2, alpha=0.05, beta=0.2, logscale=true, method=:owenq, out=:print)
     #redirect_stdout(stdout)
