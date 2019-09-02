@@ -115,7 +115,7 @@ function ctsamplen(;param=:notdef, type=:notdef, group=:notdef, alpha=0.05, beta
 end #sampleSize
 
 #clinical trial power main function
-function ctPower(;param=:notdef, type=:notdef, group=:notdef, alpha=0.05, logdiff=false, diff=0, sd=0, a=0, b=0, n=0, k=1,  out=:num)
+function ctpower(;param=:notdef, type=:notdef, group=:notdef, alpha=0.05, logdiff=false, diff=0, sd=0, a=0, b=0, n=0, k=1,  out=:num)
     if alpha >= 1 || alpha <= 0  return false end
     #if (type == :ei || type == :ns) && diff == 0 return false end
     if param == :prop && !(group == :one || group == :two || type == :mcnm)  return false end
@@ -215,7 +215,7 @@ function ctPower(;param=:notdef, type=:notdef, group=:notdef, alpha=0.05, logdif
             return pow, output
         end
     end
-end #ctPower
+end #ctpower
 #-------------------------------------------------------------------------------
 function besamplen(;alpha=0.05, beta=0.2, theta0=0.95, theta1=0.8, theta2=1.25, cv=0.0, logscale=true, design=:d2x2, method=:owenq,  out=:num)
 

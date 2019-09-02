@@ -18,7 +18,7 @@ The package is designed to perform calculations related to the planning and anal
 - [Usage](#Usage)
   - [descriptives](#descriptives)
   - [ctSampleN](#ctSampleN)
-  - [ctPower](#ctPower)
+  - [ctpower](#ctpower)
   - [besamplen](#besamplen)
   - [bePower](#bePower)
   - [ci2cv](#ci2cv)
@@ -65,7 +65,7 @@ Pkg.test("ClinicalTrialUtilities");
 
 - [Clinical trial sample size estimation](#ctSampleN)
 
-- [Clinical trial power estimation](#ctPower)
+- [Clinical trial power estimation](#ctpower)
 
 - [Iterative sample size estimation for bioequivalence trials](#besamplen)
 
@@ -138,12 +138,12 @@ ctsamplen(;param=:notdef, type=:notdef, group=:notdef, alpha=0.05, beta=0.2, dif
 - :vstr  - numeric and String variable;
 - :print - print to console;
 
-### <a name="ctPower">ctPower</a>
+### <a name="ctpower">ctpower</a>
 
 Power estimation for clinical trials.
 
 ```
-ctPower(;param=:notdef, type=:notdef, group=:notdef, alpha=0.05, logdiff=false, diff=0, sd=0, a=0, b=0, n=0, k=1,  out=:num)
+ctpower(;param=:notdef, type=:notdef, group=:notdef, alpha=0.05, logdiff=false, diff=0, sd=0, a=0, b=0, n=0, k=1,  out=:num)
 ```
 
 **param (Parameter type):**
@@ -390,7 +390,7 @@ ctsamplen(param=:or, type=:ns, diff=-0.1, a=0.3, b=0.5, k=2)
 ctsamplen(param=:or, type=:ea, a=0.3, b=0.5, k=2)
 
 #Power
-ctPower(param=:mean, type=:ea, group=:one, a=1.5, b=2, sd=1,n=32, alpha=0.05)
+ctpower(param=:mean, type=:ea, group=:one, a=1.5, b=2, sd=1,n=32, alpha=0.05)
 
 #Bioequivalence sample size
 besamplen(alpha=0.05,  theta1=0.8, theta2=1.25, theta0=0.95, cv=0.15, method=:owenq)

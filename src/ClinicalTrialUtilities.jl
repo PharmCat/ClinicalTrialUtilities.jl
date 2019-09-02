@@ -69,7 +69,7 @@ include("owensq.jl")
 include("powertost.jl")
 #Sample sise and Power atomic functions
 include("powersamplesize.jl")
-#Main sample size and power functions: sampleSize, ctPower, besamplen
+#Main sample size and power functions: sampleSize, ctpower, besamplen
 include("samplesize.jl")
 #Confidence interval calculation
 include("CI.jl")
@@ -93,7 +93,7 @@ include("deprecated.jl")
 #Sample size
 export ctsamplen, besamplen
 #Power
-export ctPower, bePower
+export ctpower, bePower
 #Utils
 export ci2cv, pooledCV
 #Other
