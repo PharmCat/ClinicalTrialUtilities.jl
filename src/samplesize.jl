@@ -43,6 +43,17 @@ struct TOSTSampleSizeTask <: Task
     design::Symbol
     method::Symbol
 end
+struct TOSTPowerTask <: Task
+    alpha::Real
+    n::Real
+    gmr::Real
+    llim::Real
+    ulim::Real
+    cv::Real
+    logscale::Bool
+    design::Symbol
+    method::Symbol
+end
 struct TaskResult{T <: Task}
     task::T
     result
