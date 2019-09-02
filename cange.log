@@ -1,10 +1,15 @@
-v0.1.17
+v0.2.0
 
+  - Task types for sample size and power functions
+  - Sample size and power functions now return TaskResult{T <: Task}
+  - out keyword removed. Otput via Base.show(io::IO, obj::TaskResult)
+  - changes in error messages. Now throw(ArgumentError(msg))
   - DataSet type
   - Descriptive type
   - descriptive rewriting
   - Descriptive stats add SES and SEK
-  - Descriptive performance 
+  - Descriptive performance
+  - Test procedures restructured
   - Minor changes, bugfix, code cleaning
 
 v0.1.16
