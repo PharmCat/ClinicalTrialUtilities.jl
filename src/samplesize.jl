@@ -217,16 +217,16 @@ function ctPower(;param=:notdef, type=:notdef, group=:notdef, alpha=0.05, logdif
     end
 end #ctPower
 #-------------------------------------------------------------------------------
-function beSampleN(;alpha=0.05, beta=0.2, theta0=0.95, theta1=0.8, theta2=1.25, cv=0.0, logscale=true, design=:d2x2, method=:owenq,  out=:num)
+function besamplen(;alpha=0.05, beta=0.2, theta0=0.95, theta1=0.8, theta2=1.25, cv=0.0, logscale=true, design=:d2x2, method=:owenq,  out=:num)
 
     theta0 = convert(Float64, theta0); theta1 = convert(Float64, theta1); theta2 = convert(Float64, theta2); cv = convert(Float64, cv); alpha  = convert(Float64, alpha); beta = convert(Float64, beta)
 
-    if cv <= 0 throw(CTUException(1041,"beSampleN: cv can not be <= 0")) end
-    if theta1 >= theta2  throw(CTUException(1042,"beSampleN: theta1 should be < theta2")) end
-    if alpha >= 1 || alpha <= 0 || beta >= 1 || beta <= 0 throw(CTUException(1043,"beSampleN: alpha and beta shold be > 0 and < 1")) end
+    if cv <= 0 throw(CTUException(1041,"besamplen: cv can not be <= 0")) end
+    if theta1 >= theta2  throw(CTUException(1042,"besamplen: theta1 should be < theta2")) end
+    if alpha >= 1 || alpha <= 0 || beta >= 1 || beta <= 0 throw(CTUException(1043,"besamplen: alpha and beta shold be > 0 and < 1")) end
 
     if logscale
-        if theta1 < 0 || theta2 < 0 || theta0 < 0 throw(CTUException(1044,"beSampleN: theta0, theta1, theta2 shold be > 0 and ")) end
+        if theta1 < 0 || theta2 < 0 || theta0 < 0 throw(CTUException(1044,"besamplen: theta0, theta1, theta2 shold be > 0 and ")) end
         ltheta1 = log(theta1)
         ltheta2 = log(theta2)
         diffm   = log(theta0)

@@ -9,7 +9,7 @@
 
 1031: designProp
 
-104*: beSampleN
+104*: besamplen
 
 1051: cv2ci
 

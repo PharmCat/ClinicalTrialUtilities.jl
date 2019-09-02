@@ -19,7 +19,7 @@ The package is designed to perform calculations related to the planning and anal
   - [descriptives](#descriptives)
   - [ctSampleN](#ctSampleN)
   - [ctPower](#ctPower)
-  - [beSampleN](#beSampleN)
+  - [besamplen](#besamplen)
   - [bePower](#bePower)
   - [ci2cv](#ci2cv)
   - [pooledCV](#pooledCV)
@@ -67,7 +67,7 @@ Pkg.test("ClinicalTrialUtilities");
 
 - [Clinical trial power estimation](#ctPower)
 
-- [Iterative sample size estimation for bioequivalence trials](#beSampleN)
+- [Iterative sample size estimation for bioequivalence trials](#besamplen)
 
 - [Power estimation for bioequivalence trials](#bePower)
 
@@ -185,12 +185,12 @@ ctPower(;param=:notdef, type=:notdef, group=:notdef, alpha=0.05, logdiff=false, 
 - :vstr  - numeric and String variable;
 - :print - print to console;
 
-### <a name="beSampleN">beSampleN</a>
+### <a name="besamplen">besamplen</a>
 
 Sample size estimation for bioequivalence study (iterative procedure).
 
 ```
-beSampleN(;alpha=0.05, beta=0.2, theta0=0.95, theta1=0.8, theta2=1.25, cv=0.0, logscale=true, design=:d2x2, method=:owenq,  out=:num)
+besamplen(;alpha=0.05, beta=0.2, theta0=0.95, theta1=0.8, theta2=1.25, cv=0.0, logscale=true, design=:d2x2, method=:owenq,  out=:num)
 ```
 
 **alpha** - Alpha (o < alpha < 1)  (default=0.05);
@@ -393,11 +393,11 @@ ctsamplen(param=:or, type=:ea, a=0.3, b=0.5, k=2)
 ctPower(param=:mean, type=:ea, group=:one, a=1.5, b=2, sd=1,n=32, alpha=0.05)
 
 #Bioequivalence sample size
-beSampleN(alpha=0.05,  theta1=0.8, theta2=1.25, theta0=0.95, cv=0.15, method=:owenq)
-beSampleN(cv=0.20, method=:nct)
-beSampleN(cv=0.347, design=:parallel,  out=:print)
-beSampleN(cv=0.40)
-n, p, s = beSampleN(cv=0.347, design=:d2x2x4, method=:nct, out=:vstr)
+besamplen(alpha=0.05,  theta1=0.8, theta2=1.25, theta0=0.95, cv=0.15, method=:owenq)
+besamplen(cv=0.20, method=:nct)
+besamplen(cv=0.347, design=:parallel,  out=:print)
+besamplen(cv=0.40)
+n, p, s = besamplen(cv=0.347, design=:d2x2x4, method=:nct, out=:vstr)
 
 #Bioequivalence power for 2x2 design, default method - OwensQ
 bePower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=20, design=:d2x2, method=:owenq)

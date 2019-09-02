@@ -231,47 +231,47 @@ println(" ---------------------------------- ")
 end
 
 println(" ---------------------------------- ")
-@testset "  beSampleN Test      " begin
-    n, p = ClinicalTrialUtilities.beSampleN(;theta0=0.95, theta1=0.8, theta2=1.25, cv=0.2, alpha=0.05, beta=0.2, logscale=true, method=:owenq)
+@testset "  besamplen Test      " begin
+    n, p = ClinicalTrialUtilities.besamplen(;theta0=0.95, theta1=0.8, theta2=1.25, cv=0.2, alpha=0.05, beta=0.2, logscale=true, method=:owenq)
     @test n == 20 && round(p, digits=7) == 0.8346802
-    n, p = ClinicalTrialUtilities.beSampleN(;theta0=0.95, theta1=0.8, theta2=1.25, cv=0.3, alpha=0.05, beta=0.2, logscale=true, method=:owenq)
+    n, p = ClinicalTrialUtilities.besamplen(;theta0=0.95, theta1=0.8, theta2=1.25, cv=0.3, alpha=0.05, beta=0.2, logscale=true, method=:owenq)
     @test n == 40 && round(p, digits=7) == 0.8158453
-    n, p = ClinicalTrialUtilities.beSampleN(;theta0=1.0, theta1=0.8, theta2=1.25, cv=0.3, alpha=0.05, beta=0.1, logscale=true, method=:owenq)
+    n, p = ClinicalTrialUtilities.besamplen(;theta0=1.0, theta1=0.8, theta2=1.25, cv=0.3, alpha=0.05, beta=0.1, logscale=true, method=:owenq)
     @test n == 40 && round(p, digits=7) == 0.9095603
-    n, p = ClinicalTrialUtilities.beSampleN(;theta0=1.05, theta1=0.8, theta2=1.25, cv=0.4, alpha=0.05, beta=0.15, logscale=true, method=:nct)
+    n, p = ClinicalTrialUtilities.besamplen(;theta0=1.05, theta1=0.8, theta2=1.25, cv=0.4, alpha=0.05, beta=0.15, logscale=true, method=:nct)
     @test n == 74 && round(p, digits=7) == 0.8558178
-    n, p = ClinicalTrialUtilities.beSampleN(;theta0=1.05, theta1=0.9, theta2=1.25, cv=0.4, alpha=0.05, beta=0.15, logscale=true, method=:nct)
+    n, p = ClinicalTrialUtilities.besamplen(;theta0=1.05, theta1=0.9, theta2=1.25, cv=0.4, alpha=0.05, beta=0.15, logscale=true, method=:nct)
     @test n == 108 && round(p, digits=7) == 0.8506248
-    n, p = ClinicalTrialUtilities.beSampleN(;theta0=1.05, theta1=0.8, theta2=1.2, cv=0.5, alpha=0.05, beta=0.2, logscale=true, method=:nct)
+    n, p = ClinicalTrialUtilities.besamplen(;theta0=1.05, theta1=0.8, theta2=1.2, cv=0.5, alpha=0.05, beta=0.2, logscale=true, method=:nct)
     @test n == 158 && round(p, digits=7) == 0.8039191
-    n, p = ClinicalTrialUtilities.beSampleN(;theta0=1.05, theta1=0.8, theta2=1.25, cv=0.8, alpha=0.05, beta=0.2, logscale=true, method=:shifted)
+    n, p = ClinicalTrialUtilities.besamplen(;theta0=1.05, theta1=0.8, theta2=1.25, cv=0.8, alpha=0.05, beta=0.2, logscale=true, method=:shifted)
     @test n == 210 && round(p, digits=7) == 0.8012471
-    n, p = ClinicalTrialUtilities.beSampleN(;theta0=0.0, theta1=-0.2, theta2=0.2, cv=0.5, alpha=0.05, beta=0.2, logscale=false, method=:owenq)
+    n, p = ClinicalTrialUtilities.besamplen(;theta0=0.0, theta1=-0.2, theta2=0.2, cv=0.5, alpha=0.05, beta=0.2, logscale=false, method=:owenq)
     @test n == 110 && round(p, digits=7) == 0.8074124
-    n, p = ClinicalTrialUtilities.beSampleN(;theta0=0.0, theta1=-0.2, theta2=0.2, cv=2.0, alpha=0.05, beta=0.2, logscale=false, method=:owenq)
+    n, p = ClinicalTrialUtilities.besamplen(;theta0=0.0, theta1=-0.2, theta2=0.2, cv=2.0, alpha=0.05, beta=0.2, logscale=false, method=:owenq)
     @test n == 1716 && round(p, digits=7) == 0.8005618
-    n, p = ClinicalTrialUtilities.beSampleN(;theta0=0.0, theta1=-0.2, theta2=0.2, cv=2.0, alpha=0.001, beta=0.2, logscale=false, method=:owenq)
+    n, p = ClinicalTrialUtilities.besamplen(;theta0=0.0, theta1=-0.2, theta2=0.2, cv=2.0, alpha=0.001, beta=0.2, logscale=false, method=:owenq)
     @test n == 3828 && round(p, digits=7) == 0.8001454
-    n, p = ClinicalTrialUtilities.beSampleN(;theta0=0, theta1=-0.2, theta2=0.2, cv=2, alpha=0.01, beta=0.01, logscale=false, method=:owenq)
+    n, p = ClinicalTrialUtilities.besamplen(;theta0=0, theta1=-0.2, theta2=0.2, cv=2, alpha=0.01, beta=0.01, logscale=false, method=:owenq)
     @test n == 4810 && round(p, digits=7) == 0.9900151
-    n, p = ClinicalTrialUtilities.beSampleN(cv=0.347)
+    n, p = ClinicalTrialUtilities.besamplen(cv=0.347)
     @test n == 52 && round(p, digits=7) == 0.8136415
 
-    n, p = ClinicalTrialUtilities.beSampleN(;theta0=1.05, theta1=0.9, theta2=1.25, cv=0.0001, alpha=0.05, beta=0.15, logscale=true, method=:nct, design=:parallel)
+    n, p = ClinicalTrialUtilities.besamplen(;theta0=1.05, theta1=0.9, theta2=1.25, cv=0.0001, alpha=0.05, beta=0.15, logscale=true, method=:nct, design=:parallel)
     @test n == 4 && p ≈ 1.0
-    n, p = ClinicalTrialUtilities.beSampleN(;theta0=1.0, theta1=0.95, theta2=1.5, cv=0.8, alpha=0.0000001, beta=0.0001, logscale=true, method=:shifted, design=:d2x2x4)
+    n, p = ClinicalTrialUtilities.besamplen(;theta0=1.0, theta1=0.95, theta2=1.5, cv=0.8, alpha=0.0000001, beta=0.0001, logscale=true, method=:shifted, design=:d2x2x4)
     @test n == 10002 && p ≈ 0.9818179411719451
 
-    st = ClinicalTrialUtilities.beSampleN(cv=0.347, out=:str)
+    st = ClinicalTrialUtilities.besamplen(cv=0.347, out=:str)
 
-    n, p, s = ClinicalTrialUtilities.beSampleN(cv=0.347, out=:vstr)
+    n, p, s = ClinicalTrialUtilities.besamplen(cv=0.347, out=:vstr)
     @test n == 52 && round(p, digits=7) == 0.8136415
     @test st == s
 
-    n, p = ClinicalTrialUtilities.beSampleN(;theta0=1.05, theta1=0.8, theta2=1.25, cv=0.8, alpha=0.05, beta=0.2, logscale=true, method=:shifted, design=:d2x2x4)
+    n, p = ClinicalTrialUtilities.besamplen(;theta0=1.05, theta1=0.8, theta2=1.25, cv=0.8, alpha=0.05, beta=0.2, logscale=true, method=:shifted, design=:d2x2x4)
     @test n == 106 && p ≈ 0.8060551186037984
 
-    n, p = ClinicalTrialUtilities.beSampleN(;theta0=0.95, theta1=0.8, theta2=1.25, cv=0.35, alpha=0.1, beta=0.1, logscale=true, method=:shifted, design=:parallel)
+    n, p = ClinicalTrialUtilities.besamplen(;theta0=0.95, theta1=0.8, theta2=1.25, cv=0.35, alpha=0.1, beta=0.1, logscale=true, method=:shifted, design=:parallel)
     @test n == 106 && p ≈ 0.9013894463164578
 end
 
@@ -885,7 +885,7 @@ println(" ---------------------------------- ")
     #redirect_stdout(io)
     ClinicalTrialUtilities.ctsamplen(param=:mean, type=:ea, group=:one, alpha=0.05, beta=0.2, sd=1, a=1.5, b=2, k=1, out=:print)
     ClinicalTrialUtilities.ctPower(param=:prop, type=:ns, group=:two, a=0.85, b=0.65, diff=-0.1, n=25, alpha=0.05, out=:print)
-    ClinicalTrialUtilities.beSampleN(;theta0=0.95, theta1=0.8, theta2=1.25, cv=0.2, alpha=0.05, beta=0.2, logscale=true, method=:owenq, out=:print)
+    ClinicalTrialUtilities.besamplen(;theta0=0.95, theta1=0.8, theta2=1.25, cv=0.2, alpha=0.05, beta=0.2, logscale=true, method=:owenq, out=:print)
     #redirect_stdout(stdout)
     #close(io)
     @test true
