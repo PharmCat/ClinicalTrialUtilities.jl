@@ -16,6 +16,10 @@ module SIM
     import ..TaskResult
 
     abstract type VarData end
+    abstract type Hypothesis end
+    struct Equivalence <: Hypothesis end
+    struct Equality <: Hypothesis end
+    struct Superiority <: Hypothesis end
 
     struct Proportion{T <: Union{Int, Float64}} <: VarData
         x::T
@@ -32,6 +36,7 @@ module SIM
         llim::Real
         ulim::Real
         alpha::Real
+        hyp::Hypothesis
         tail::Symbol
     end
 
@@ -62,7 +67,7 @@ module SIM
         return twoprop(p[1].x, p[1].n, p[2].x, p[2].n; alpha=alpha, type=:diff, method = method)
     end
 
-    function ctpowersim(task::SimPowerTask; simnum=5, seed=0)
+    function ctpowersim(task::SimPowerTask; simnum=5, seed=0, f = (cl, tl, cu, tu) -> cl > tl && cu < tu)
         rng     = MersenneTwister(1234)
         if seed == 0  Random.seed!(rng) else Random.seed!(seed) end
         pow     = 0
@@ -71,7 +76,7 @@ module SIM
         for i=1:nsim
             x = randvar(d)
             ci = confint(x; alpha = task.alpha)
-            if (ci.lower > task.llim && ci.upper < task.ulim) pow += 1 end
+            if f(ci.lower, task.llim, ci.upper, task.ulim) pow += 1 end
         end
         return TaskResult(task, pow/nsim)
     end
