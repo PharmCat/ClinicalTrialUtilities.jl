@@ -8,11 +8,77 @@ module SIM
     import ..designProp
     import ..cv2ms
     import ..ZDIST
+    import ..ConfInt
     import ..CTUException
-    import ..CI.twoProp
+    import ..CI.twoprop
     import ..CI.twoMeans
+    import ..Task
+    import ..TaskResult
+
+    abstract type VarData end
+
+    struct Proportion{T <: Union{Int, Float64}} <: VarData
+        x::T
+        n::Int
+    end
+    struct Mean <: VarData
+        m::Real
+        sd::Real
+        n::Real
+    end
+
+    struct SimPowerTask <: Task
+        param::Tuple{Vararg{VarData}}
+        llim::Real
+        ulim::Real
+        alpha::Real
+        tail::Symbol
+    end
 
     export bepower, ctPropPower, ctPropSampleN, ctMeansPower, ctMeansPowerFS
+
+    function simdist(var::Proportion)
+        return Binomial(var.n, var.x/var.n)
+    end
+    function simdist(var::Tuple{Vararg{VarData}})
+        return Tuple(simdist.(var))
+    end
+
+    function randvar(dist::Binomial)
+        return Proportion(rand(dist), dist.n)
+    end
+    function randvar(dist::Tuple{Vararg{Binomial}})
+        a = Array{Proportion, 1}(undef, length(dist))
+        for i = 1:length(dist)
+            a[i] = Proportion(rand(dist[i]), dist[i].n)
+        end
+        return Tuple(a)
+    end
+
+    function confint(p1::Proportion, p2::Proportion; alpha = 0.05, method=:wald)
+        return twoprop(p1.x, p1.n, p2.x, p2.n; alpha=alpha, type=:diff, method = method)
+    end
+    function confint(p::Tuple{Proportion, Proportion}; alpha = 0.05, method=:wald)
+        return twoprop(p[1].x, p[1].n, p[2].x, p[2].n; alpha=alpha, type=:diff, method = method)
+    end
+
+    function ctpowersim(task::SimPowerTask; simnum=5, seed=0)
+        rng     = MersenneTwister(1234)
+        if seed == 0  Random.seed!(rng) else Random.seed!(seed) end
+        pow     = 0
+        nsim    = 10^simnum
+        d       = simdist(task.param)
+        for i=1:nsim
+            x = randvar(d)
+            ci = confint(x; alpha = task.alpha)
+            if (ci.lower > task.llim && ci.upper < task.ulim) pow += 1 end
+        end
+        return TaskResult(task, pow/nsim)
+    end
+
+
+
+
 
     function bepower(;alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.0, n=0, simnum=5, seed=0)
         if alpha <= 0.0 || alpha >= 1.0  throw(CTUException(1111,"SIM.bepower: alpha should be > 0 and < 1")) end
@@ -37,7 +103,7 @@ module SIM
     end
 
     function bepowerSIM(theta1, theta2, ms, mean, df, sef, nsim, alpha; seed=0)
-        rng = MersenneTwister(1234)
+        rng  = MersenneTwister(1234)
         if seed == 0  Random.seed!(rng) else Random.seed!(seed) end
         CHSQ    = Chisq(df)
         tval    = quantile(TDist(df), 1-alpha)
@@ -77,7 +143,7 @@ module SIM
         for i=1:nsim
             x1 = rand(BIN1)
             x2 = rand(BIN2)
-            ci = twoProp(x1, n1, x2, n2; alpha=alpha, type=citype, method=method)
+            ci = twoprop(x1, n1, x2, n2; alpha=alpha, type=citype, method=method)
             if type == :ns
                 if ci.lower > ref pow += 1 end
             elseif type == :ei
@@ -119,6 +185,7 @@ module SIM
 
     function ctMeansPower(m1, s1, n1, m2, s2, n2, ref; alpha=0.05, method=:notdef, simnum=5, seed=0)
         #if type == :notdef || method == :notdef throw(CTUException(1115,"ctPropPower: type or method not defined.")) end
+
         rng = MersenneTwister(1234)
         if seed == 0  Random.seed!(rng) else Random.seed!(seed) end
         se1    = sqrt(s1/(n1-1))

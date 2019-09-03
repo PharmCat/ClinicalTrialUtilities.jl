@@ -1,6 +1,6 @@
 
 
-function Base.show(io::IO, obj::TaskResult)
+function Base.show(io::IO, obj::TaskResult{T}) where T <: Union{SampleSizeTask, PowerTask, TOSTSampleSizeTask}
         if isa(obj.task, SampleSizeTask)
         println(io,"         Sample Size Estimation         ")
         elseif isa(obj.task, PowerTask)
