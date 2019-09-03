@@ -45,7 +45,7 @@ CI.oneProp(x::Int, n::Int; alpha=0.05, method=:wilson)
 Confidence interval calculation for two proportion.
 
 ```
- CI.twoProp(x1::Int, n1::Int, x2::Int, n2::Int; alpha=0.05, type=[:diff|:rr|:or], method::Symbol)
+ CI.twoprop(x1::Int, n1::Int, x2::Int, n2::Int; alpha=0.05, type=[:diff|:rr|:or], method::Symbol)
  ```
 
  **x1** - number of positive outcomes in group 1;
@@ -200,9 +200,9 @@ ci = ClinicalTrialUtilities.CI.cmh(data, alpha = 0.1)
 ```
 ClinicalTrialUtilities.CI.oneProp(81, 263, alpha=0.05, method=:wilson)
 
-ClinicalTrialUtilities.CI.twoProp(7, 34, 1, 34; alpha=0.05, type=:diff, method=:nhs)
+ClinicalTrialUtilities.CI.twoprop(7, 34, 1, 34; alpha=0.05, type=:diff, method=:nhs)
 
-ClinicalTrialUtilities.CI.twoProp(2, 14, 1, 11; alpha=0.05, type=:or, method=:woolf)
+ClinicalTrialUtilities.CI.twoprop(2, 14, 1, 11; alpha=0.05, type=:or, method=:woolf)
 
 ClinicalTrialUtilities.CI.twoMeans(30, 10, 30, 40, 12, 35, alpha=0.05, method=:ev)
 
