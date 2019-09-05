@@ -2,7 +2,7 @@
 # Author: Vladimir Arnautov aka PharmCat
 # Copyright © 2019 Vladimir Arnautov aka PharmCat (mail@pharmcat.net)
 
-#ctsamplen, ctpower, besamplen
+#ctsamplen, ctpower, besamplen, bepower
 
 abstract type AbstractT{T <: Int} end
 abstract type AbstractTask end
@@ -133,7 +133,8 @@ struct CTask{T <: AbstractParameter, H <: AbstractHypothesis, O <: AbstractObjec
         new{T,H,O}(param, llim, ulim, alpha, hyp, k, objective)::CTask{T,H,O}
     end
 end
-
+#-------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 #main sample size function
 function ctsamplen(;param=:notdef, type=:notdef, group=:notdef, alpha=0.05, beta=0.2, diff=0, sd=0, a=0, b=0, k=1, logscale=true)::TaskResult
     if alpha >= 1 || alpha <= 0 || beta >= 1 || beta <= 0  throw(CTUException(1201,"sampleSize: alpha and beta sould be > 0 and < 1.")) end
@@ -208,62 +209,12 @@ function ctsamplen(;param=:notdef, type=:notdef, group=:notdef, alpha=0.05, beta
     else throw(ArgumentError("Keyword param unknown!")) end
 
     return TaskResult(task, :chow, n)
-    #=
-    if out == :num return n
-    else
-        let params::String end #string parameter type
-        if param == :mean params = "Mean" elseif param== :prop params = "Proportion" elseif param == :or params = "Odd Ration" end
-        if group == :one groups = "One" elseif  group == :two groups = "Two" else groups = "NA" end
-        if type == :ea hyps = "Equality" elseif type == :ei hyps = "Equivalence" elseif type == :ns hyps = "Non-Inferiority/Superiority" elseif type == :mcnm hyps = "McNemar's Equality test" end
-        output  = "----------------------------------------\n"
-        output *= "         Sample Size Estimation        \n"
-        output *= "----------------------------------------\n"
-        output *= "  Parameter type: "*params*"\n"
-        output *= "  Groups: "*groups*"\n"
-        output *= "  Hypothesis: "*hyps*"\n"
-        output *= "----------------------------------------\n"
-        output *= "  Alpha: "*string(alpha)*" Beta: "*string(beta)*"\n"
-        if group == :two output *= "  Constant k: "*string(k)*"\n" end
-        output *= "----------------------------------------\n"
-        if param == :mean
-            output *= "  SD: "*string(sd)*"\n"
-        end
-        if group == :one
-            output *= "  Null Value: "*string(a)*" "
-            output *= "Test Value: "*string(b)*"\n"
-        else
-            output *= "  Group A Value: "*string(a)*" "
-            output *= "Group B Value: "*string(b)*"\n"
-        end
-        if (type == :ei || type == :ns)
-            output *= "  Difference: "*string(diff)*"\n"
-        end
-        output *= "----------------------------------------\n"
-        if group == :one
-            output *= "  Estimate: "*string(ceil(n))*"\n"
-        else
-            output *= "  Group A: "*string(ceil(n*k))*"  "
-            output *= "Group B: "*string(ceil(n))*"\n"
-            output *= "  Total: "*string(ceil(n)+ceil(n*k))*"\n"
-        end
-        #output *= "Estimate group A: "*string(ceil(n))*"\n"
-        #output *= "Total: "*string(ceil(n))*"\n"
-        output *= "----------------------------------------\n"
-        if out == :str
-            return output
-        elseif out == :print
-            print(output)
-            return
-        elseif out == :vstr
-            return n, output
-        end
-    end
-    =#
 end #sampleSize
 function ctsamplen(t::CTask{T, H, O}) where T <: Mean where H <: Equality where O <: SampleSize
     return TaskResult(t, :chow, oneSampleMeanEquality(t.param.m, t.llim, t.param.sd, alpha=t.alpha, beta=t.objective.val))
 end
-
+#-------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 #clinical trial power main function
 function ctpower(;param=:notdef, type=:notdef, group=:notdef, alpha=0.05, logdiff=false, diff=0, sd=0, a=0, b=0, n=0, k=1)::TaskResult{PowerTask}
     if alpha >= 1 || alpha <= 0  throw(ArgumentError("Keyword alpha out of the range!")) end
@@ -325,51 +276,8 @@ function ctpower(;param=:notdef, type=:notdef, group=:notdef, alpha=0.05, logdif
 
     task2 = PowerTask(param, type, group, alpha, n, diff, sd, a, b, k, logdiff)
     return TaskResult(task2, :chow, pow)
-    #=
-    if out == :num return pow
-    else
-        let params::String end #string parameter type
-        if param == :mean params = "Mean" elseif param== :prop params = "Proportion" elseif param == :or params = "Odd Ration" end
-        if group == :one groups = "One" elseif  group == :two groups = "Two" else groups = "NA" end
-        if type == :ea hyps = "Equality" elseif type == :ei hyps = "Equivalence" elseif type == :ns hyps = "Non-Inferiority/Superiority" elseif type == :mcnm hyps = "McNemar's Equality test" end
-        output  = "----------------------------------------\n"
-        output *= "            Power Estimation            \n"
-        output *= "----------------------------------------\n"
-        output *= "  Parameter type: "*params*"\n"
-        output *= "  Groups: "*groups*"\n"
-        output *= "  Hypothesis: "*hyps*"\n"
-        output *= "----------------------------------------\n"
-        output *= "  Alpha: "*string(alpha)*" N: "*string(n)*"\n"
-        if group == :two output *= "  Constant k: "*string(k)*"\n" end
-        output *= "----------------------------------------\n"
-        if param == :mean
-            output *= "  SD: "*string(sd)*"\n"
-        end
-        if group == :one
-            output *= "  Null Value: "*string(a)*" "
-            output *= "Test Value: "*string(b)*"\n"
-        else
-            output *= "  Group A Value: "*string(a)*" "
-            output *= "Group B Value: "*string(b)*"\n"
-        end
-        if (type == :ei || type == :ns)
-            output *= "  Difference: "*string(diff)*"\n"
-        end
-        output *= "----------------------------------------\n"
-        output *= "  Power: "*string(pow)*"\n"
-        #output *= "Estimate group A: "*string(ceil(n))*"\n"
-        #output *= "Total: "*string(ceil(n))*"\n"
-        output *= "----------------------------------------\n"
-        if out == :str
-            return output
-        elseif out == :print
-            print(output)
-        elseif out == :vstr
-            return pow, output
-        end
-    end
-    =#
 end #ctpower
+#-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
 function besamplen(;alpha=0.05, beta=0.2, theta0=0.95, theta1=0.8, theta2=1.25, cv=0.0, logscale=true, design=:d2x2, method=:owenq)::TaskResult{TOSTSampleSizeTask}
 
@@ -434,34 +342,32 @@ function besamplen(;alpha=0.05, beta=0.2, theta0=0.95, theta1=0.8, theta2=1.25, 
         estn     = n0
     end
     return TaskResult(task, :chow, estn)
-    #=
-    if out == :num return estn, estpower
-    else
-        output  = "----------------------------------------\n"
-        output *= "     (Bio)equivalence sample size       \n"
-        output *= "----------------------------------------\n"
-        output *= "  Design: "*string(design)*"\n"
-        output *= "  Method: "*string(method)*"\n"
-        output *= "  Logscale: "*string(logscale)*"\n"
-        output *= "----------------------------------------\n"
-        output *= "  Alpha: "*string(alpha)*"\n"
-        output *= "  Beta: "*string(beta)*"\n"
-        output *= "----------------------------------------\n"
-        output *= "  Lower limit: "*string(theta1)*"\n"
-        output *= "  Upper limit: "*string(theta2)*"\n"
-        output *= "  GMR: "*string(theta0)*"\n"
-        output *= "  CV: "*string(cv)*"\n"
-        output *= "----------------------------------------\n"
-        output *= "  Sample Size: "*string(estn)*"\n"
-        output *= "  Power: "*string(estpower)*"\n"
-        output *= "----------------------------------------\n"
-    end
-    if out == :str
-        return output
-    elseif out == :print
-        println(output)
-    elseif out == :vstr
-        return estn, estpower, output
-    end
-    =#
 end
+#-------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
+function bepower(;alpha=0.05, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.0, n=0, logscale=true, design=:d2x2, method=:owenq,  out=:num)::Float64
+    if n < 2 throw(CTUException(1021,"powerTOST: n can not be < 2")) end
+    if cv == 0.0 throw(CTUException(1022,"powerTOST: cv can not be equal to 0"))  end
+    if !(0 < alpha < 1) throw(CTUException(1023,"powerTOST: alfa can not be > 1 or < 0")) end
+    theta0   = convert(Float64, theta0)
+    theta1   = convert(Float64, theta1)
+    theta2   = convert(Float64, theta2)
+    logscale = convert(Bool, logscale)
+    cv       = convert(Float64, cv)
+    n        = convert(Int, n)
+    alpha    = convert(Float64, alpha)
+
+    if logscale
+        ltheta1 = log(theta1)
+        ltheta2 = log(theta2)
+        diffm   = log(theta0)
+        sd      = cv2sd(cv)    # sqrt(ms)
+    else
+        ltheta1 = theta1;
+        ltheta2 = theta2;
+        diffm   = theta0;
+        sd      = cv;
+    end
+
+    return powertostint(alpha,  ltheta1, ltheta2, diffm, sd, n, design, method)
+end #bepower

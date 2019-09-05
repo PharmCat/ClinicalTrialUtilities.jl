@@ -6,7 +6,7 @@
 # se_diff = se = sd * sqrt((1/N1 + ... + 1/Nn)*bkni) = sqrt(ms*(1/N1 + ... + 1/Nn)*bkni)
 # CI bounds = Diff +- t(df, alpha)*se
 
-#bepower
+
 #powertostint
 #powerTOSTOwenQ
 #approxPowerTOST
@@ -19,33 +19,6 @@
 #designProp
 #ci2cv
 
-
-function bepower(;alpha=0.05, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.0, n=0, logscale=true, design=:d2x2, method=:owenq,  out=:num)::Float64
-    if n < 2 throw(CTUException(1021,"powerTOST: n can not be < 2")) end
-    if cv == 0.0 throw(CTUException(1022,"powerTOST: cv can not be equal to 0"))  end
-    if !(0 < alpha < 1) throw(CTUException(1023,"powerTOST: alfa can not be > 1 or < 0")) end
-    theta0   = convert(Float64, theta0)
-    theta1   = convert(Float64, theta1)
-    theta2   = convert(Float64, theta2)
-    logscale = convert(Bool, logscale)
-    cv       = convert(Float64, cv)
-    n        = convert(Int, n)
-    alpha    = convert(Float64, alpha)
-
-    if logscale
-        ltheta1 = log(theta1)
-        ltheta2 = log(theta2)
-        diffm   = log(theta0)
-        sd      = cv2sd(cv)    # sqrt(ms)
-    else
-        ltheta1 = theta1;
-        ltheta2 = theta2;
-        diffm   = theta0;
-        sd      = cv;
-    end
-
-    return powertostint(alpha,  ltheta1, ltheta2, diffm, sd, n, design, method)
-end #bepower
 
 function powertostint(alpha::Float64,  ltheta1::Float64, ltheta2::Float64, diffm::Float64, sd::Float64, n::Int, design::Symbol, method::Symbol)::Float64
 
@@ -83,7 +56,6 @@ function powerTOSTOwenQ(alpha::T, ltheta1::T, ltheta2::T, diffm::T, se::T, df::T
     R::Float64      = (delta1 - delta2) * sqrt(df) / (tval + tval)
     if isnan(R) R   = 0 end
     if R <= 0 R     = Inf end
-
     # to avoid numerical errors in OwensQ implementation
     # 'shifted' normal approximation Jan 2015
     # former Julious formula (57)/(58) doesn't work
@@ -140,6 +112,12 @@ function approx2PowerTOST(alpha::T, ltheta1::T, ltheta2::T, diffm::T, se::T, df:
     pow = cdf(tdist,-tval-delta2) - cdf(tdist,tval-delta1)
     if pow > 0 return pow else return 0 end
 end #approx2PowerTOST
+
+#-------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
+#                             UTILITIES
+#-------------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
 
 #CV2se
 @inline function cv2sd(cv::Float64)::Float64
