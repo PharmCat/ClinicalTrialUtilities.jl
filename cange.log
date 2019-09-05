@@ -1,16 +1,29 @@
 v0.2.0
 
-  - Task types for sample size and power functions
-  - Sample size and power functions now return TaskResult{T <: Task}
-  - out keyword removed. Otput via Base.show(io::IO, obj::TaskResult)
-  - changes in error messages. Now throw(ArgumentError(msg))
-  - DataSet type
-  - Descriptive type
-  - descriptive rewriting
-  - Descriptive stats add SES and SEK
-  - Descriptive performance
-  - Test procedures restructured
-  - Minor changes, bugfix, code cleaning
+  Breaking changes(!):
+
+  - Renamed exported functions: ctsamplen, ctpower, besamplen, bepower (now in lower case).
+  - Changes in ctsamplen() in one group estimation. In version 0.1.x test mean/proportion denoted as parameter/keyword  "a" was a "Reference".
+  This situation was inconsistent with two group analysis where "a" - T, "b" - R. Now everywhere "a" means "Test group", "b" means "Reference group".
+  Hypothesis testing for difference is A-B everywhere.
+  - Keyword "logdiff" removed in ctsamplen(), because this was inconsistent with bepower/besamplen, new parameter logscale using instead.
+  - Keyword "out" removed everywhere. Output via Base.show(io::IO, obj::TaskResult);
+
+  Major changes:
+
+  - Task types for many functions (sample size, power functions, random ets.);
+  - Sample size and power functions now return TaskResult{T <: CTask};
+  - descriptive() rewrited;
+  - DataSet type;
+  - Descriptive type;
+
+  Other changes:
+
+  - Changes in error messages. Now throw(ArgumentError(msg));
+  - Descriptive stats add SES and SEK;
+  - Descriptive performance;
+  - Test procedures restructured;
+  - Minor changes, bugfix, code cleaning, cosmetics.
 
 v0.1.16
 

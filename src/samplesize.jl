@@ -28,8 +28,8 @@ struct SampleSize <: AbstractObjective
     end
 end
 
-struct Proportion{T <: Union{Int, Float64}} <: AbstractProportion
-    x::T
+struct Proportion <: AbstractProportion
+    x::Int
     n::Int
 end
 #=
