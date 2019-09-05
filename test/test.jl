@@ -4,17 +4,18 @@ using Distributions, Random, DataFrames, CSV, Test
 
 include("testdata.jl")
 
+io = IOBuffer();
+
 @testset "  Info:                 " begin
     ClinicalTrialUtilities.info()
-    ClinicalTrialUtilities.citation()
-    ClinicalTrialUtilities.licence()
+    ClinicalTrialUtilities.citation(io = io)
+    ClinicalTrialUtilities.licence(io = io)
 end
 
 println(" ---------------------------------- ")
 println(" ---------   START TEST   --------- ")
 println(" ---------------------------------- ")
 println(" ---------------------------------- ")
-io = IOBuffer();
 
 @testset "#1  ctsamplen Test      " begin
     #Sample Size Calculations in Clinical Research, Second Edition, Shein-Chung Chow, Ph.D., 2008, International Standard Book Number‑13: 978‑1‑58488‑982‑3
