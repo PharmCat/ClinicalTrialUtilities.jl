@@ -4,7 +4,6 @@
 
 #ctsamplen, ctpower, besamplen, bepower
 
-abstract type AbstractT{T <: Int} end
 abstract type AbstractTask end
 abstract type AbstractParameter end
 abstract type AbstractProportion  <:  AbstractParameter end
@@ -12,7 +11,12 @@ abstract type AbstractTwoProportion <: AbstractProportion end
 abstract type AbstractObjective end
 abstract type AbstractHypothesis end
 
-struct Equivalence <: AbstractHypothesis end
+struct Equivalence <: AbstractHypothesis
+    bio::Bool
+    function Equivalence(;bio::Bool = false)
+        new(bio)::Equivalence
+    end
+end
 struct Equality <: AbstractHypothesis end
 struct Superiority <: AbstractHypothesis end
 struct McNemars <: AbstractHypothesis end

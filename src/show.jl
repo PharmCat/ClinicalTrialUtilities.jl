@@ -1,4 +1,13 @@
 
+function Base.show(io::IO, obj::CTask)
+        println(io, obj.param)
+        println(io, obj.llim)
+        println(io, obj.ulim)
+        println(io, obj.alpha)
+        println(io, obj.hyp)
+        println(io, obj.k)
+        println(io, obj.objective)
+end
 
 function Base.show(io::IO, obj::TaskResult{CT}) where CT <:  CTask{T, H, O} where T where H where O <: Union{SampleSize, Power}
         println(io, objectivename(obj.task.objective))
@@ -9,7 +18,7 @@ function Base.show(io::IO, obj::TaskResult{CT}) where CT <:  CTask{T, H, O} wher
         println(io,"  Upper limit: ", round(obj.task.ulim, sigdigits = 4))
         println(io,"  Alpha: ", obj.task.alpha)
         showobjective(io, obj.task.objective)
-        print(io, obj.task.param)
+        println(io, obj.task.param)
         println(io,"-----------------------------------------")
         showresult(io, obj)
 end
@@ -78,15 +87,15 @@ function swowtost(io, obj)
 end
 
 function Base.show(io::IO, p::Proportion)
-        println(io,"  Proportion: ", p.x, "/", p.n)
+        print(io,"  Proportion: ", p.x, "/", p.n)
 end
 function Base.show(io::IO, p::Probability)
-        println(io,"  Probability: ", p.p)
+        print(io,"  Probability: ", p.p)
 end
 
 function Base.show(io::IO, dp::DiffProportion{Probability})
         println(io, "  A: ", dp.a.p)
-        println(io, "  B: ", dp.b.p)
+        print(io, "  B: ", dp.b.p)
 end
 #=
 function Base.show(io, dp::DiffProportion{Proportion})::String
@@ -96,32 +105,32 @@ end
 =#
 function Base.show(io::IO, dp::T) where T <: Union{DiffProportion{P}, OddRatio{P}, RiskRatio{P}} where P <: Proportion
         println(io,"  A: ", dp.a.x,"/",dp.a.n)
-        println(io,"  B: ", dp.b.x,"/",dp.b.n)
+        print(io,"  B: ", dp.b.x,"/",dp.b.n)
 end
 function Base.show(io::IO, dp::T) where T <: Union{DiffProportion{P}, OddRatio{P}, RiskRatio{P}} where P <: Probability
         println(io,"  A: ", dp.a.p)
-        println(io,"  B: ", dp.b.p)
+        print(io,"  B: ", dp.b.p)
 end
 function Base.show(io::IO, dm::DiffMean)
         println(io,"  A: ", dm.a.m, " ± ", dm.a.sd)
-        println(io,"  B: ", dm.b.m, " ± ", dm.b.sd)
+        print(io,"  B: ", dm.b.m, " ± ", dm.b.sd)
 end
 function Base.show(io::IO, m::Mean{Nothing})
-        println(io,"  Mean(SD): ", m.m, " ± ", m.sd)
+        print(io,"  Mean(SD): ", m.m, " ± ", m.sd)
 end
 
 function Base.show(io::IO, h::Equality)
         println(io,"  Equality (Two-Sided):")
         println(io,"  H₀: A = B")
-        println(io,"  Hₐ: A ≠ B")
+        print(io,"  Hₐ: A ≠ B")
 end
 function Base.show(io::IO, h::Equivalence)
         println(io,"  Equivalence (One-Sided):")
         println(io,"  H₀: |A − B| ≥ δ")
-        println(io,"  Hₐ: |A − B| < δ")
+        print(io,"  Hₐ: |A − B| < δ")
 end
 function Base.show(io::IO, h::Superiority)
         println(io,"  Superiority/Non-Inferiority (One-Sided):")
         println(io,"  H₀: A − B ≤ δ")
-        println(io,"  Hₐ: A − B > δ")
+        print(io,"  Hₐ: A − B > δ")
 end
