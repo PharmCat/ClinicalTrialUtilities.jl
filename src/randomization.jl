@@ -1,4 +1,8 @@
-
+struct RandomTable
+    seq
+    table
+    t
+end
 
 function randomtable(;blocksize = 4, subject = 10, group = 2, ratio = [1,1], grseq = [["A", "B"], ["B", "A"]], seed = 1234)
 

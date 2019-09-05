@@ -4,6 +4,7 @@
 module SIM
     using Distributions
     using Random
+
     import ..ctsamplen
     import ..designProp
     import ..cv2ms
@@ -12,41 +13,14 @@ module SIM
     import ..CTUException
     import ..CI.twoprop
     import ..CI.twoMeans
-    import ..Task
+    import ..AbstractTask, ..CTask, ..AbstractParameter, ..AbstractObjective, ..AbstractHypothesis, ..SampleSize, ..Power, ..Proportion, ..Probability, ..DiffProportion
     import ..TaskResult
 
-    abstract type VarData end
-    abstract type Hypothesis end
-    struct Equivalence <: Hypothesis end
-    struct Equality <: Hypothesis end
-    struct Superiority <: Hypothesis end
-
-    struct Proportion{T <: Union{Int, Float64}} <: VarData
-        x::T
-        n::Int
-    end
-    struct Mean <: VarData
-        m::Real
-        sd::Real
-        n::Real
-    end
-
-    struct SimPowerTask <: Task
-        param::Tuple{Vararg{VarData}}
-        llim::Real
-        ulim::Real
-        alpha::Real
-        hyp::Hypothesis
-        tail::Symbol
-    end
 
     export bepower, ctPropPower, ctPropSampleN, ctMeansPower, ctMeansPowerFS
 
-    function simdist(var::Proportion)
-        return Binomial(var.n, var.x/var.n)
-    end
-    function simdist(var::Tuple{Vararg{VarData}})
-        return Tuple(simdist.(var))
+    function simdist(t::CTask{DiffProportion{Probability}, H, O}) where H <: AbstractHypothesis where O <: AbstractObjective
+        return (Binomial(t.objective.val, t.param.a.p), Binomial(t.objective.val, t.param.b.p))
     end
 
     function randvar(dist::Binomial)
@@ -67,18 +41,18 @@ module SIM
         return twoprop(p[1].x, p[1].n, p[2].x, p[2].n; alpha=alpha, type=:diff, method = method)
     end
 
-    function ctpowersim(task::SimPowerTask; simnum=5, seed=0, f = (cl, tl, cu, tu) -> cl > tl && cu < tu)
+    function ctpowersim(task::T; simnum=5, seed=0, f = (cl, tl, cu, tu) -> cl > tl && cu < tu) where T <: Task
         rng     = MersenneTwister(1234)
         if seed == 0  Random.seed!(rng) else Random.seed!(seed) end
         pow     = 0
         nsim    = 10^simnum
-        d       = simdist(task.param)
+        d       = simdist(task)
         for i=1:nsim
             x = randvar(d)
             ci = confint(x; alpha = task.alpha)
             if f(ci.lower, task.llim, ci.upper, task.ulim) pow += 1 end
         end
-        return TaskResult(task, pow/nsim)
+        return TaskResult(task, :sim, pow/nsim)
     end
 
 
@@ -164,7 +138,7 @@ module SIM
         if citype == :diff
             st = sn = ceil(ctsamplen(param=:prop, type=type, group=:two, alpha=alpha, beta=beta, diff=ref, a=p1, b=p2).result)
         elseif citype == :or
-            st = sn = ceil(ctsamplen(param=:or, type=type, group=:two, alpha=alpha/2, beta=beta, diff=ref, a=p1, b=p2, logdiff = false).result)
+            st = sn = ceil(ctsamplen(param=:or, type=type, group=:two, alpha=alpha/2, beta=beta, diff=ref, a=p1, b=p2).result)
         end
 
         pow = ctPropPower(p1, sn, p2, sn, ref; alpha=alpha, type=type, citype=citype, method=method, simnum=simnum, seed=seed)

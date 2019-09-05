@@ -169,9 +169,9 @@ ctpower(;param=:notdef, type=:notdef, group=:notdef, alpha=0.05, logdiff=false, 
 
 **k** - Na/Nb (after sample size estimation second group size: Na=k*Nb, only for two sample design) (default=1);
 
-**logdiff** - diff is log transformed for OR:
-- false (default, diff would be transformed)
-- true
+**logscale** - diff is log transformed for OR:
+- true  - diff is already in log-scale, no transformation required (default);
+- false - diff is not in log-scale, will be transformed;
 
 ### <a name="besamplen">besamplen</a>
 

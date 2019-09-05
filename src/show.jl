@@ -1,68 +1,62 @@
 
 
-function Base.show(io::IO, obj::TaskResult{T}) where T <: Union{SampleSizeTask, PowerTask, TOSTSampleSizeTask}
-        if isa(obj.task, SampleSizeTask)
-        println(io,"         Sample Size Estimation         ")
-        elseif isa(obj.task, PowerTask)
-        println(io,"            Power Estimation            ")
-        elseif isa(obj.task, TOSTSampleSizeTask)
-        swowtost(io, obj)
-        return nothing
-        end
-        println(io,"----------------------------------------")
-        showmod1(io, obj)
-        println(io,"----------------------------------------")
-        showmod2(io, obj)
-        println(io,"----------------------------------------")
-        showmod3(io, obj)
-        println(io,"----------------------------------------")
-        showmod4(io, obj)
+function Base.show(io::IO, obj::TaskResult{CT}) where CT <:  CTask{T, H, O} where T where H where O <: Union{SampleSize, Power}
+        println(io, objectivename(obj.task.objective))
+        println(io,"-----------------------------------------")
+        println(io,"  Parameter type: ",  paramname(obj.task.param))
+        println(io,"  Hypothesis: ", hypname(obj.task.hyp))
+        println(io,"  Lower limit: ", round(obj.task.llim, sigdigits = 4))
+        println(io,"  Upper limit: ", round(obj.task.ulim, sigdigits = 4))
+        println(io,"  Alpha: ", obj.task.alpha)
+        showobjective(io, obj.task.objective)
+        print(io, obj.task.param)
+        println(io,"-----------------------------------------")
+        showresult(io, obj)
 end
 
-function showmod1(io, obj)
-        str::String = ""
-        if obj.task.param == :mean str = "Mean" elseif obj.task.param == :prop str = "Proportion" elseif obj.task.param == :or str = "Odd Ratio" end
-        println(io,"  Parameter type: ", str)
-        if obj.task.group == :one str = "One" elseif  obj.task.group == :two str = "Two" else str = "NA" end
-        println(io,"  Groups: ", str)
-        if obj.task.type == :ea str = "Equality" elseif obj.task.type == :ei str = "Equivalence" elseif obj.task.type == :ns str = "Non-Inferiority/Superiority" elseif obj.task.type == :mcnm str = "McNemar's Equality test" elseif obj.task.type == :co str = "Crossover" end
-        println(io,"  Hypothesis: ", str)
+
+function objectivename(o::O)::String where O <: AbstractObjective
+        if isa(o, SampleSize) return "         Sample Size Estimation         "
+        elseif isa(o, Power)  return "            Power Estimation            "
+        else return "NA" end
+
 end
-function showmod2(io, obj::TaskResult{SampleSizeTask})
-        println(io,"  Alpha: ", obj.task.alpha, " Beta: ", obj.task.beta)
-        if obj.task.group == :two
-        println(io,"  Constant k: ", obj.task.k)
-        end
+function showobjective(io, o::SampleSize)
+        println(io, "  Beta: $(o.val) (Power: $((1-o.val)*100)%)")
 end
-function showmod2(io, obj::TaskResult{PowerTask})
-        println(io,"  Alpha: ", obj.task.alpha, " N: ", obj.task.n)
-        if obj.task.group == :two
-        println(io,"  Constant k: ", obj.task.k)
-        end
+function showobjective(io, o::Power)
+        println(io, "  N: ", o.val)
 end
-function showmod3(io, obj)
-        if obj.task.param == :mean
-        println(io,"  SD: ",obj.task.sd)
-        end
-        if obj.task.group == :one
-        println(io,"  Null Value: ", obj.task.a, " Test Value: ", obj.task.b)
-        else
-        println(io,"  Group A Value: ", obj.task.a, " Group B Value: ", obj.task.b)
-        end
-        if (obj.task.type == :ei || obj.task.type == :ns)
-        println(io,"  Difference: ", obj.task.diff)
-        end
+function hypname(h::T)::String where T <: AbstractHypothesis
+        if isa(h, Equivalence) return "Equivalence"
+        elseif isa(h, Equality) return "Equality"
+        elseif isa(h, Superiority) return "Superiority/Non-Inferiority"
+        elseif isa(h, McNemars) return "McNemar's Equality test"
+        else return "NA" end
 end
-function showmod4(io, obj::TaskResult{SampleSizeTask})
-        if obj.task.group == :one
-        println(io,"  Number estimate: ", ceil(obj.result))
-        else
-        println(io,"  Group A: ", ceil(obj.result * obj.task.k), "  Group B: ", ceil(obj.result))
-        println(io,"  Total: ", (ceil(obj.result) + ceil(obj.result*obj.task.k)))
-        end
+function paramname(p::T)::String where T <: AbstractParameter
+        if isa(p, DiffProportion) return "Proportion Difference"
+        elseif isa(p, OddRatio) return "Odd Ratio"
+        elseif isa(p, RiskRatio) return "Risk Ratio"
+        elseif isa(p, DiffMean) return "Mean Difference"
+        elseif isa(p, Mean) return "One Mean"
+        elseif isa(p, Probability) return "One Proportion"
+        else return "NA" end
 end
-function showmod4(io, obj::TaskResult{PowerTask})
-        println(io,"  Power estimate: ", round(obj.result, sigdigits = 6))
+
+function showresult(io, obj)
+        println(io, "Estimate: ")
+        if isa(obj.task.objective, SampleSize)
+                if typeof(obj.task.param) <: AbstractTwoProportion || isa(obj.task.param, DiffMean)
+                        println(io,"  K: ", obj.task.k)
+                        println(io,"  Group A: ", ceil(obj.result * obj.task.k), "  Group B: ", ceil(obj.result))
+                        print(io,"  Total: ", (ceil(obj.result) + ceil(obj.result*obj.task.k)))
+                else
+                        print(io,"  Total: ", ceil(obj.result))
+                end
+        elseif  isa(obj.task.objective, Power)
+                println(io, "Estimate: ", round(obj.result, sigdigits = 6))
+        end
 end
 
 function swowtost(io, obj)
@@ -81,4 +75,53 @@ function swowtost(io, obj)
         println(io,"  CV: ", obj.task.cv)
         println(io,"----------------------------------------")
         println(io,"  Sample Size: ", obj.result)
+end
+
+function Base.show(io::IO, p::Proportion)
+        println(io,"  Proportion: ", p.x, "/", p.n)
+end
+function Base.show(io::IO, p::Probability)
+        println(io,"  Probability: ", p.p)
+end
+
+function Base.show(io::IO, dp::DiffProportion{Probability})
+        println(io, "  A: ", dp.a.p)
+        println(io, "  B: ", dp.b.p)
+end
+#=
+function Base.show(io, dp::DiffProportion{Proportion})::String
+        println(io,"  A: ", dp.a.x,"/",dp.a.n)
+        println(io,"  B: ", dp.b.x,"/",dp.b.n)
+end
+=#
+function Base.show(io::IO, dp::T) where T <: Union{DiffProportion{P}, OddRatio{P}, RiskRatio{P}} where P <: Proportion
+        println(io,"  A: ", dp.a.x,"/",dp.a.n)
+        println(io,"  B: ", dp.b.x,"/",dp.b.n)
+end
+function Base.show(io::IO, dp::T) where T <: Union{DiffProportion{P}, OddRatio{P}, RiskRatio{P}} where P <: Probability
+        println(io,"  A: ", dp.a.p)
+        println(io,"  B: ", dp.b.p)
+end
+function Base.show(io::IO, dm::DiffMean)
+        println(io,"  A: ", dm.a.m, " ± ", dm.a.sd)
+        println(io,"  B: ", dm.b.m, " ± ", dm.b.sd)
+end
+function Base.show(io::IO, m::Mean{Nothing})
+        println(io,"  Mean(SD): ", m.m, " ± ", m.sd)
+end
+
+function Base.show(io::IO, h::Equality)
+        println(io,"  Equality (Two-Sided):")
+        println(io,"  H₀: A = B")
+        println(io,"  Hₐ: A ≠ B")
+end
+function Base.show(io::IO, h::Equivalence)
+        println(io,"  Equivalence (One-Sided):")
+        println(io,"  H₀: |A − B| ≥ δ")
+        println(io,"  Hₐ: |A − B| < δ")
+end
+function Base.show(io::IO, h::Superiority)
+        println(io,"  Superiority/Non-Inferiority (One-Sided):")
+        println(io,"  H₀: A − B ≤ δ")
+        println(io,"  Hₐ: A − B > δ")
 end
