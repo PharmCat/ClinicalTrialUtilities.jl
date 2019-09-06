@@ -64,7 +64,7 @@ function showresult(io, obj)
                         print(io,"  Total: ", ceil(obj.result))
                 end
         elseif  isa(obj.task.objective, Power)
-                println(io, "Estimate: ", round(obj.result, sigdigits = 6))
+                println(io, "Power: ", round(obj.result, sigdigits = 6))
         end
 end
 

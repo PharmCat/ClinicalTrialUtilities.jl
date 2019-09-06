@@ -1,12 +1,21 @@
+
+
+μ₀ - Test Mean
+μ₁ - Reference Mean
+p₀ - Test Proportion
+p₁ - Reference Proportion
+σ  - SD
+δ  - Margin Difference
+α  - Alpha (Type I Error)
+β  - Beta  (Type II Error)
+
 # Sample Size
 
 ## Means
 
 ### One Sample Means
 
-m0 = μ0 - null H; m1 = μT - Test Group
-
-oneSampleMeanEquality(m0, m1, sd; alpha=0.05, beta=0.2)::Float64
+one_mean_equality(μ₀::Real, μ₁::Real, σ::Real, α::Float64, β::Float64)::Float64
 
 oneSampleMeanEquivalence(m0, m1, sd, diff; alpha=0.05, beta=0.2)
 
@@ -14,7 +23,6 @@ oneSampleMeanNS(m0, m1, sd, diff; alpha=0.05, beta=0.2) #Non-inferiority / Super
 
 ### Two Sample Means
 
-m0 = μA - Group A; m1 = μB - Group B
 
 twoSampleMeanEquality(m0, m1, sd; alpha=0.05, beta=0.2, k=1)
 
@@ -26,7 +34,7 @@ twoSampleMeanNS(m0, m1, sd, diff; alpha=0.05, beta=0.2, k=1) #Non-inferiority / 
 
 ### One Sample Proportion
 
-oneProportionEquality(p0, p1; alpha=0.05, beta=0.2)
+one_proportion_equality(p0, p1; alpha=0.05, beta=0.2)
 
 oneProportionEquivalence(p0, p1, diff; alpha=0.05, beta=0.2)
 

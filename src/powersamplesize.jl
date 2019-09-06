@@ -12,15 +12,15 @@
 # μ₀ = m₀ = Test
 # m₁ = Reference value
 # σ  = SD - Standart deviation
-# δ  = difference
-function oneSampleMeanEquality(m₀::Real, m₁::Real, σ::Real; alpha::Float64=0.05, beta::Float64=0.2)::Float64
-    return ((quantile(ZDIST, 1 - alpha / 2) + quantile(ZDIST, 1-beta)) * σ / (m₀ - m₁))^2
+# δ  = difference μ
+function one_mean_equality(μ₀::Real, μ₁::Real, σ::Real, α::Float64, β::Float64)::Float64
+    return ((quantile(ZDIST, 1 - α / 2) + quantile(ZDIST, 1 - β)) * σ / (μ₀ - μ₁))^2
 end
-function oneSampleMeanEquivalence(m₀::Real, m₁::Real, σ::Real, δ::Real; alpha::Float64=0.05, beta::Float64=0.2)::Float64
-    return (σ*(quantile(ZDIST, 1 - alpha) + quantile(ZDIST, 1 - beta/2))/(δ - abs(m₀ - m₁)))^2
+function oneSampleMeanEquivalence(μ₀::Real, μ₁::Real, σ::Real, δ::Real, α::Float64, β::Float64)::Float64
+    return (σ*(quantile(ZDIST, 1 - α) + quantile(ZDIST, 1 - β/2))/(δ - abs(μ₀ - μ₁)))^2
 end
-function oneSampleMeanNS(m₀::Real, m₁::Real, σ::Real, δ::Real; alpha::Float64=0.05, beta::Float64=0.2)::Float64 #Non-inferiority / Superiority
-    return (σ*(quantile(ZDIST, 1-alpha) + quantile(ZDIST, 1 - beta))/(m₀ - m₁ - δ))^2
+function oneSampleMeanNS(μ₀::Real, μ₁::Real, σ::Real, δ::Real, α::Float64, β::Float64)::Float64 #Non-inferiority / Superiority
+    return (σ*(quantile(ZDIST, 1 - α) + quantile(ZDIST, 1 - β))/(μ₀ - μ₁ - δ))^2
 end
 #Two Sample
 # m0 = μA - Group A; m1 = μB - Group B
@@ -35,8 +35,8 @@ function twoSampleMeanNS(m0, m1, sd, diff; alpha=0.05, beta=0.2, k=1) #Non-infer
 end
 #Compare Proportion
 #One Sample
-function oneProportionEquality(p0, p1; alpha=0.05, beta=0.2)
-    return p0*(1-p0)*((quantile(ZDIST, 1-alpha/2)+quantile(ZDIST, 1 - beta))/(p0-p1))^2
+function one_proportion_equality(p₀::Float64, p₁::Float64, α::Float64, β::Float64)::Float64
+    return p₀*(1-p₀)*((quantile(ZDIST, 1-α/2)+quantile(ZDIST, 1 - β))/(p₀-p₁))^2
 end
 function oneProportionEquivalence(p0, p1, diff; alpha=0.05, beta=0.2)
     return p0*(1-p0)*((quantile(ZDIST, 1-alpha)+quantile(ZDIST, 1 - beta/2))/(abs(p0-p1)-diff))^2
@@ -59,13 +59,11 @@ function orEquality(p0, p1; alpha=0.05, beta=0.2, k=1)
     OR=p0*(1-p1)/p1/(1-p0)
     return (1/k/p0/(1-p0)+1/p1/(1-p1))*((quantile(ZDIST, 1-alpha/2)+quantile(ZDIST, 1 - beta))/log(OR))^2
 end
-function orEquivalence(p0, p1, diff; alpha=0.05, beta=0.2, k=1, logscale::Bool)
-    if !logscale diff=log(diff) end
+function orEquivalence(p0, p1, diff; alpha=0.05, beta=0.2, k=1)
     OR=p0*(1-p1)/p1/(1-p0)
     return (1/k/p0/(1-p0)+1/p1/(1-p1))*((quantile(ZDIST, 1-alpha)+quantile(ZDIST, 1 - beta/2))/(log(OR)-diff))^2
 end
-function orNS(p0, p1, diff; alpha=0.05, beta=0.2, k=1, logscale::Bool)
-    if !logscale diff=log(diff) end
+function orNS(p0, p1, diff; alpha=0.05, beta=0.2, k=1)
     OR=p0*(1-p1)/p1/(1-p0)
     return (1/k/p0/(1-p0)+1/p1/(1-p1))*((quantile(ZDIST, 1-alpha)+quantile(ZDIST, 1 - beta))/(log(OR)-diff))^2
 end
@@ -149,14 +147,12 @@ function orEqualityP(p0, p1, n; alpha=0.05, k=1)
     z=log(OR)*sqrt(n)/sqrt(1/(k*p0*(1-p0))+1/(p1*(1-p1)))
     return cdf(ZDIST, z - quantile(ZDIST, 1-alpha/2)) + cdf(ZDIST, - z - quantile(ZDIST, 1-alpha/2))
 end
-function orEquivalenceP(p0, p1, diff, n; alpha=0.05, k=1, logdiff=true)
-    if !logdiff diff=log(diff) end
+function orEquivalenceP(p0, p1, diff, n; alpha=0.05, k=1)
     OR=p0*(1-p1)/p1/(1-p0)
     z=(abs(log(OR))-diff)*sqrt(n)/sqrt(1/(k*p0*(1-p0))+1/(p1*(1-p1)))
     return  2*(cdf(ZDIST,z-quantile(ZDIST,1-alpha)) + cdf(ZDIST,-z-quantile(ZDIST,1-alpha)))-1
 end
-function orNSP(p0, p1, diff, n; alpha=0.05, k=1, logdiff=true)
-    if !logdiff diff=log(diff) end
+function orNSP(p0, p1, diff, n; alpha=0.05, k=1)
     OR=p0*(1-p1)/p1/(1-p0)
     z=(log(OR)-diff)*sqrt(n)/sqrt(1/(k*p0*(1-p0))+1/(p1*(1-p1)))
     return cdf(ZDIST, z-quantile(ZDIST, 1-alpha)) + cdf(ZDIST, -z-quantile(ZDIST, 1 - alpha))
