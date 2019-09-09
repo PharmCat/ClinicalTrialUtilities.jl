@@ -152,14 +152,14 @@ function ctsamplen(;param=:notdef, type=:notdef, group=:notdef, alpha=0.05, beta
                 n = two_mean_equivalence(a, b, sd, diff, alpha, beta, k)
                 task = CTask(DiffMean(Mean(a, sd), Mean(b, sd)), -diff, diff, alpha, Equivalence(), k, SampleSize(beta))
             elseif type == :ns
-                n = twoSampleMeanNS(a, b, sd, diff, alpha=alpha, beta=beta, k=k)
+                n = two_mean_superiority(a, b, sd, diff, alpha, beta, k)
                 task = CTask(DiffMean(Mean(a, sd), Mean(b, sd)), diff, Inf, alpha, Superiority(), k, SampleSize(beta))
             else throw(ArgumentError("Keyword type unknown!")) end
         else throw(ArgumentError("Keyword group unknown!")) end
     elseif param == :prop
         if 1 < a || a < 0 || 1 < b || b < 0 throw(ArgumentError("Keyword a or b out of the range!")) end
         if type == :mcnm
-            n = mcnm(a, b; alpha=alpha, beta=beta)
+            n = mcnm(a, b, alpha, beta)
             task = CTask(DiffProportion(Probability(a), Probability(b)), 0, 0, alpha, McNemars(), k, SampleSize(beta))
         else
             if group == :one
@@ -167,36 +167,36 @@ function ctsamplen(;param=:notdef, type=:notdef, group=:notdef, alpha=0.05, beta
                     n = one_proportion_equality(a, b, alpha, beta)
                     task = CTask(Probability(a), b, b, alpha, Equality(), 1, SampleSize(beta))
                 elseif type == :ei
-                    n = oneProportionEquivalence(a, b, diff; alpha=alpha, beta=beta)
+                    n = one_proportion_equivalence(a, b, diff, alpha, beta)
                     task = CTask(Probability(a), b-diff, b+diff, alpha, Equivalence(), 1, SampleSize(beta))
                 elseif type == :ns
-                    n = oneProportionNS(a, b, diff; alpha=alpha, beta=beta)
+                    n = one_proportion_superiority(a, b, diff, alpha, beta)
                     task = CTask(Probability(a), b+diff, Inf, alpha, Superiority(), 1, SampleSize(beta))
                 else throw(ArgumentError("Keyword type unknown!")) end
             elseif group == :two
                 if type == :ea
-                    n = twoProportionEquality(a, b; alpha=alpha, beta=beta, k=k)
+                    n = two_proportion_equality(a, b, alpha, beta, k)
                     task = CTask(DiffProportion(Probability(a), Probability(b)), 0, 0, alpha, Equality(), k, SampleSize(beta))
                 elseif type == :ei
-                    n = twoProportionEquivalence(a, b, diff; alpha=alpha, beta=beta, k=k)
+                    n = two_proportion_equivalence(a, b, diff, alpha, beta, k)
                     task = CTask(DiffProportion(Probability(a), Probability(b)), -diff, diff, alpha, Equivalence(), k, SampleSize(beta))
                 elseif type == :ns
-                    n = twoProportionNS(a, b, diff; alpha=alpha, beta=beta, k=k)
+                    n = two_proportion_superiority(a, b, diff, alpha, beta, k)
                     task = CTask(DiffProportion(Probability(a), Probability(b)), diff, Inf, alpha, Superiority(), k, SampleSize(beta))
                 else throw(ArgumentError("Keyword type unknown!")) end
             else throw(ArgumentError("Keyword group unknown!")) end
         end
     elseif param == :or
         if type == :ea
-            n = orEquality(a, b; alpha=alpha, beta=beta, k=k)
+            n = or_equality(a, b, alpha, beta, k)
             task = CTask(OddRatio(Probability(a), Probability(b)), 0, 0, alpha, Equality(), k, SampleSize(beta))
         elseif type == :ei
             if !logscale diff = log(diff) end
-            n = orEquivalence(a, b, diff; alpha=alpha, beta=beta, k=k)
+            n = or_equivalence(a, b, diff, alpha, beta, k)
             task = CTask(OddRatio(Probability(a), Probability(b)), -diff, diff, alpha, Equivalence(), k, SampleSize(beta))
         elseif type == :ns
             if !logscale diff = log(diff) end
-            n = orNS(a, b, diff; alpha=alpha, beta=beta, k=k)
+            n = or_superiority(a, b, diff, alpha, beta, k)
             task = CTask(OddRatio(Probability(a), Probability(b)), diff, Inf, alpha, Superiority(), k, SampleSize(beta))
         else throw(ArgumentError("Keyword type unknown!")) end
     else throw(ArgumentError("Keyword param unknown!")) end
@@ -217,68 +217,68 @@ function ctpower(;param=:notdef, type=:notdef, group=:notdef, alpha=0.05, logsca
     if param == :mean
         if group == :one
             if type == :ea
-                pow =  oneSampleMeanEqualityP(a, b, sd, n, alpha=alpha)
+                pow =  one_mean_equality_pow(a, b, sd, n, alpha)
                 task = CTask(Mean(a, sd), b, b, alpha, Equality(), 1, Power(n))
             elseif type == :ei
-                pow =  oneSampleMeanEquivalenceP(a, b, sd, diff, n, alpha=alpha)
+                pow =  one_mean_equivalence_pow(a, b, sd, diff, n, alpha)
                 task = CTask(Mean(a, sd), b-diff, b+diff, alpha, Equivalence(), 1, Power(n))
             elseif type == :ns
-                pow =  oneSampleMeanNSP(a, b, sd, diff, n, alpha=alpha)
+                pow =  one_mean_superiority_pow(a, b, sd, diff, n, alpha)
                 task = CTask(Mean(a, sd), b+diff, Inf, alpha, Superiority(), 1, Power(n))
             else throw(ArgumentError("Keyword type unknown!")) end
         elseif group == :two
             if type == :ea
-                pow =  twoSampleMeanEqualityP(a, b, sd, n, alpha=alpha, k=k)
+                pow =  two_mean_equality_pow(a, b, sd, n, alpha, k)
                 task = CTask(DiffMean(Mean(a, sd), Mean(b, sd)), 0, 0, alpha, Equality(), k, Power(n))
             elseif type == :ei
-                pow =  twoSampleMeanEquivalenceP(a, b, sd, diff, n, alpha=alpha, k=k)
+                pow =  two_mean_equivalence_pow(a, b, sd, diff, n, alpha, k)
                 task = CTask(DiffMean(Mean(a, sd), Mean(b, sd)), -diff, diff, alpha, Equivalence(), k, Power(n))
             elseif type == :ns
-                pow =  twoSampleMeanNSP(a, b, sd, diff, n, alpha=alpha, k=k)
+                pow =  two_mean_superiority_pow(a, b, sd, diff, n, alpha, k)
                 task = CTask(DiffMean(Mean(a, sd), Mean(b, sd)), diff, Inf, alpha, Superiority(), k, Power(n))
             else throw(ArgumentError("Keyword type unknown!")) end
         else throw(ArgumentError("Keyword group unknown!")) end
     elseif param == :prop
         if 1 < a || a < 0 || 1 < b || b < 0 throw(ArgumentError("Keyword a or b out of the range!")) end
         if type == :mcnm
-            pow =  mcnmP(a, b, n; alpha=alpha)
+            pow =  mcnm_pow(a, b, n, alpha)
             task = CTask(DiffProportion(Probability(a), Probability(b)), 0, 0, alpha, McNemars(), k, Power(n))
         else
             if group == :one
                 if type == :ea
-                    pow =  oneProportionEqualityP(a, b, n; alpha=alpha)
+                    pow =  one_proportion_equality_pow(a, b, n, alpha)
                     task = CTask(Probability(a), b, b, alpha, Equality(), 1, Power(n))
                 elseif type == :ei
-                    pow =  oneProportionEquivalenceP(a, b, diff, n; alpha=alpha)
+                    pow =  oneProportionEquivalenceP(a, b, diff, n, alpha)
                     task = CTask(Probability(a), b-diff, b+diff, alpha, Equivalence(), 1, Power(n))
                 elseif type == :ns
-                    pow =  oneProportionNSP(a, b, diff, n; alpha=alpha)
+                    pow =  one_proportion_superiority_pow(a, b, diff, n, alpha)
                     task = CTask(Probability(a), b-diff, Inf, alpha, Superiority(), 1, Power(n))
                 else throw(ArgumentError("Keyword type unknown!")) end
             elseif group == :two
                 if type == :ea
-                    pow =  twoProportionEqualityP(a, b, n; alpha=alpha, k=k)
+                    pow =  two_proportion_equality_pow(a, b, n, alpha, k)
                     task = CTask(DiffProportion(Probability(a), Probability(b)), 0, 0, alpha, Equality(), k, Power(n))
                 elseif type == :ei
-                    pow =  twoProportionEquivalenceP(a, b, diff, n; alpha=alpha, k=k)
+                    pow =  two_proportion_equivalence_pow(a, b, diff, n, alpha, k)
                     task = CTask(DiffProportion(Probability(a), Probability(b)), -diff, +diff, alpha, Equivalence(), k, Power(n))
                 elseif type == :ns
-                    pow =  twoProportionNSP(a, b, diff, n; alpha=alpha, k=k)
+                    pow =  two_proportion_superiority_pow(a, b, diff, n, alpha, k)
                     task = CTask(DiffProportion(Probability(a), Probability(b)), diff, Inf, alpha, Superiority(), k, Power(n))
                 else throw(ArgumentError("Keyword type unknown!")) end
             else throw(ArgumentError("Keyword group unknown!")) end
         end
     elseif param == :or
         if type == :ea
-            pow =  orEqualityP(a, b, n; alpha=alpha, k=k)
+            pow =  or_equality_pow(a, b, n, alpha, k)
             task = CTask(OddRatio(Probability(a), Probability(b)), 0, 0, alpha, Equality(), k, Power(n))
         elseif type == :ei
             if !logscale diff = log(diff) end
-            pow =  orEquivalenceP(a, b, diff, n; alpha=alpha, k=k)
+            pow =  or_equivalence_pow(a, b, diff, n, alpha, k)
             task = CTask(OddRatio(Probability(a), Probability(b)), -diff, +diff, alpha, Equivalence(), k, Power(n))
         elseif type == :ns
             if !logscale diff = log(diff) end
-            pow = orNSP(a, b, diff, n; alpha=alpha, k=k)
+            pow = or_superiority_pow(a, b, diff, n, alpha, k)
             task = CTask(OddRatio(Probability(a), Probability(b)), diff, Inf, alpha, Equivalence(), k, Power(n))
         else throw(ArgumentError("Keyword type unknown!")) end
     else throw(ArgumentError("Keyword param unknown!")) end
@@ -286,7 +286,7 @@ function ctpower(;param=:notdef, type=:notdef, group=:notdef, alpha=0.05, logsca
 end #ctpower
 
 function ctpower(t::CTask{T, H, O}) where T <: Mean where H <: Equality where O <: Power
-    return TaskResult(t, :chow,  oneSampleMeanEqualityP(t.param.m, t.llim, t.param.sd, t.objective.val, alpha=t.alpha))
+    return TaskResult(t, :chow,  one_mean_equality_pow(t.param.m, t.llim, t.param.sd, t.objective.val, t.alpha))
 end
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------

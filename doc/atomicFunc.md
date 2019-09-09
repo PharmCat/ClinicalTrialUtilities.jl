@@ -28,7 +28,7 @@ two_mean_equality(m0, m1, sd; alpha=0.05, beta=0.2, k=1)
 
 two_mean_equivalence(m0, m1, sd, diff; alpha=0.05, beta=0.2, k=1)
 
-twoSampleMeanNS(m0, m1, sd, diff; alpha=0.05, beta=0.2, k=1) #Non-inferiority / Superiority
+two_mean_superiority(m0, m1, sd, diff; alpha=0.05, beta=0.2, k=1) #Non-inferiority / Superiority
 
 ## Compare Proportion
 
@@ -36,25 +36,25 @@ twoSampleMeanNS(m0, m1, sd, diff; alpha=0.05, beta=0.2, k=1) #Non-inferiority / 
 
 one_proportion_equality(p0, p1; alpha=0.05, beta=0.2)
 
-oneProportionEquivalence(p0, p1, diff; alpha=0.05, beta=0.2)
+one_proportion_equivalence(p0, p1, diff; alpha=0.05, beta=0.2)
 
-oneProportionNS(p0, p1, diff; alpha=0.05, beta=0.2)
+one_proportion_superiority(p0, p1, diff; alpha=0.05, beta=0.2)
 
 ### Two Sample Proportion
 
-twoProportionEquality(p0, p1; alpha=0.05, beta=0.2, k=1)
+two_proportion_equality(p0, p1; alpha=0.05, beta=0.2, k=1)
 
-twoProportionEquivalence(p0, p1, diff; alpha=0.05, beta=0.2, k=1)
+two_proportion_equivalence(p0, p1, diff; alpha=0.05, beta=0.2, k=1)
 
-twoProportionNS(p0, p1, diff; alpha=0.05, beta=0.2, k=1)
+two_proportion_superiority(p0, p1, diff; alpha=0.05, beta=0.2, k=1)
 
 ## Odd ratio
 
-orEquality(p0, p1; alpha=0.05, beta=0.2, k=1)
+or_equality(p0, p1; alpha=0.05, beta=0.2, k=1)
 
-orEquivalence(p0, p1, diff; alpha=0.05, beta=0.2, k=1, logdiff=true)
+or_equivalence(p0, p1, diff; alpha=0.05, beta=0.2, k=1, logdiff=true)
 
-orNS(p0, p1, diff; alpha=0.05, beta=0.2, k=1, logdiff=true)
+or_superiority(p0, p1, diff; alpha=0.05, beta=0.2, k=1, logdiff=true)
 
 
 ## McNemar's Equality test
@@ -68,46 +68,46 @@ mcnm(p10, p01; alpha=0.05, beta=0.2)
 
 ### One Sample Means
 
-oneSampleMeanEqualityP(m0,m1,sd, n; alpha=0.05)
+one_mean_equality_pow(m0,m1,sd, n; alpha=0.05)
 
-oneSampleMeanEquivalenceP(m0, m1, sd, diff, n; alpha=0.05)
+one_mean_equivalence_pow(m0, m1, sd, diff, n; alpha=0.05)
 
-oneSampleMeanNSP(m0, m1, sd, diff, n; alpha=0.05) #Non-inferiority / Superiority
+one_mean_superiority_pow(m0, m1, sd, diff, n; alpha=0.05) #Non-inferiority / Superiority
 
 ### Two Sample Means
 
-twoSampleMeanEqualityP(m0, m1, sd, n; alpha=0.05, k=1)
+two_mean_equality_pow(m0, m1, sd, n; alpha=0.05, k=1)
 
-twoSampleMeanEquivalenceP(m0, m1, sd, diff, n; alpha=0.05, k=1)
+two_mean_equivalence_pow(m0, m1, sd, diff, n, 0.05, 1)
 
-twoSampleMeanNSP(m0, m1, sd, diff, n; alpha=0.05, k=1) #Non-inferiority / Superiority
+two_mean_superiority_pow(m0, m1, sd, diff, n; alpha=0.05, k=1) #Non-inferiority / Superiority
 
 ## Compare Proportion
 
 ### One Sample proportion
 
-oneProportionEqualityP(p0, p1, n; alpha=0.05)
+one_proportion_equality_pow(p0, p1, n; alpha=0.05)
 
 oneProportionEquivalenceP(p0, p1, diff, n; alpha=0.05)
 
-oneProportionNSP(p0, p1, diff, n; alpha=0.05)
+one_proportion_superiority_pow(p0, p1, diff, n; alpha=0.05)
 
 ### Two Sample Proportion
 
-twoProportionEqualityP(p0, p1, n; alpha=0.05, k=1)
+two_proportion_equality_pow(p0, p1, n; alpha=0.05, k=1)
 
-twoProportionEquivalenceP(p0, p1, diff, n; alpha=0.05, k=1)
+two_proportion_equivalence_pow(p0, p1, diff, n; alpha=0.05, k=1)
 
-twoProportionNSP(p0, p1, diff, n; alpha=0.05, k=1)
+two_proportion_superiority_pow(p0, p1, diff, n; alpha=0.05, k=1)
 
 ## Odd Ratio
 
-orEqualityP(p0, p1, n; alpha=0.05, k=1)
+or_equality_pow(p0, p1, n; alpha=0.05, k=1)
 
-orEquivalenceP(p0, p1, diff, n; alpha=0.05, k=1, logdiff=true)
+or_equivalence_pow(p0, p1, diff, n; alpha=0.05, k=1, logdiff=true)
 
-orNSP(p0, p1, diff, n; alpha=0.05, k=1, logdiff=true)
+or_superiority_pow(p0, p1, diff, n; alpha=0.05, k=1, logdiff=true)
 
 ## McNemar's Equality test
 
-mcnmP(p10, p01, n; alpha=0.05)
+mcnm_pow(p10, p01, n; alpha=0.05)
