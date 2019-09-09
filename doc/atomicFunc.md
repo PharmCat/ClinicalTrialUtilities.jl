@@ -17,16 +17,16 @@ p₁ - Reference Proportion
 
 one_mean_equality(μ₀::Real, μ₁::Real, σ::Real, α::Float64, β::Float64)::Float64
 
-oneSampleMeanEquivalence(m0, m1, sd, diff; alpha=0.05, beta=0.2)
+one_mean_equivalence(m0, m1, sd, diff; alpha=0.05, beta=0.2)
 
-oneSampleMeanNS(m0, m1, sd, diff; alpha=0.05, beta=0.2) #Non-inferiority / Superiority
+one_mean_superiority(m0, m1, sd, diff; alpha=0.05, beta=0.2) #Non-inferiority / Superiority
 
 ### Two Sample Means
 
 
-twoSampleMeanEquality(m0, m1, sd; alpha=0.05, beta=0.2, k=1)
+two_mean_equality(m0, m1, sd; alpha=0.05, beta=0.2, k=1)
 
-twoSampleMeanEquivalence(m0, m1, sd, diff; alpha=0.05, beta=0.2, k=1)
+two_mean_equivalence(m0, m1, sd, diff; alpha=0.05, beta=0.2, k=1)
 
 twoSampleMeanNS(m0, m1, sd, diff; alpha=0.05, beta=0.2, k=1) #Non-inferiority / Superiority
 

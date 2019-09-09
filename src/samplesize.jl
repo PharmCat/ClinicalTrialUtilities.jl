@@ -138,18 +138,18 @@ function ctsamplen(;param=:notdef, type=:notdef, group=:notdef, alpha=0.05, beta
                 n = one_mean_equality(a, b, sd, alpha, beta)
                 task = CTask(Mean(a, sd), b, b, alpha, Equality(), k, SampleSize(beta))
             elseif type == :ei
-                n = oneSampleMeanEquivalence(a, b, sd, diff, alpha, beta)
+                n = one_mean_equivalence(a, b, sd, diff, alpha, beta)
                 task = CTask(Mean(a, sd), b-diff, b+diff, alpha, Equivalence(), k, SampleSize(beta))
             elseif type == :ns
-                n = oneSampleMeanNS(a, b, sd, diff, alpha, beta)
+                n = one_mean_superiority(a, b, sd, diff, alpha, beta)
                 task = CTask(Mean(a, sd), b + diff, Inf, alpha, Superiority(), k, SampleSize(beta))
             else throw(ArgumentError("Keyword type unknown!")) end
         elseif group == :two
             if type == :ea
-                n = twoSampleMeanEquality(a, b, sd, alpha=alpha, beta=beta, k=k)
+                n = two_mean_equality(a, b, sd, alpha, beta, k)
                 task = CTask(DiffMean(Mean(a, sd), Mean(b, sd)), 0, 0, alpha, Equality(), k, SampleSize(beta))
             elseif type == :ei
-                n = twoSampleMeanEquivalence(a, b, sd, diff, alpha=alpha, beta=beta, k=k)
+                n = two_mean_equivalence(a, b, sd, diff, alpha, beta, k)
                 task = CTask(DiffMean(Mean(a, sd), Mean(b, sd)), -diff, diff, alpha, Equivalence(), k, SampleSize(beta))
             elseif type == :ns
                 n = twoSampleMeanNS(a, b, sd, diff, alpha=alpha, beta=beta, k=k)
@@ -319,7 +319,7 @@ function besamplen(;alpha=0.05, beta=0.2, theta0=0.95, theta1=0.8, theta2=1.25, 
     #if rd <= 0 return false end
     d0 = diffm - td
     #approximate n
-    n0::Int = convert(Int, ceil(twoSampleMeanEquivalence(0, d0, sd, rd, alpha=alpha, beta=beta)/2)*2)
+    n0::Int = convert(Int, ceil(two_mean_equivalence(0, d0, sd, rd, alpha, beta, 1)/2)*2)
     tp = 1 - beta  #target power
     if n0 < 4 n0 = 4 end
     if n0 > 5000 n0 = 5000 end
