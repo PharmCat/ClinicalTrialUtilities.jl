@@ -75,13 +75,13 @@ function or_superiority(p₀::Float64, p₁::Float64, δ::Real, α::Float64, β:
 end
 
 #Connor R. J. 1987. Sample size for testing differences in proportions for the paired-sample design. Biometrics 43(1):207-211. page 209.
-function mcnm(p10, p01, α::Float64, β::Float64)::Float64
+function mcnm(p10::Float64, p01::Float64, α::Float64, β::Float64)::Float64
     pdisc=p10+p01
     pdiff=p10-p01
     return ((quantile(ZDIST, 1-α/2)*sqrt(pdisc)+quantile(ZDIST, 1 - β)*sqrt(pdisc-pdiff^2))/pdiff)^2
 end
 
-function mcnm_pow(p10, p01, n, α::Float64)::Float64
+function mcnm_pow(p10::Float64, p01::Float64, n::Int, α::Float64)::Float64
     pdisc=p10+p01
     pdiff=p10-p01
     x1=(pdiff*sqrt(n)-quantile(ZDIST, 1-α/2)*sqrt(pdisc))/sqrt(pdisc-pdiff^2);
@@ -123,7 +123,7 @@ function one_proportion_equality_pow(p₀::Float64, p₁::Float64, n::Int, α::F
     z=(p₀-p₁)/sqrt(p₀*(1-p₀)/n)
     return cdf(ZDIST, z - quantile(ZDIST, 1-α/2)) + cdf(ZDIST, - z - quantile(ZDIST, 1-α/2))
 end
-function oneProportionEquivalenceP(p₀::Float64, p₁::Float64, δ::Real, n::Int, α::Float64)::Float64
+function one_proportion_equivalence_pow(p₀::Float64, p₁::Float64, δ::Real, n::Int, α::Float64)::Float64
     z=(abs(p₀-p₁)-δ)/sqrt(p₀*(1-p₀)/n)
     return 2*(cdf(ZDIST,z-quantile(ZDIST,1-α))+cdf(ZDIST,-z-quantile(ZDIST,1-α)))-1
 end

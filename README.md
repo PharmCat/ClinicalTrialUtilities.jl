@@ -96,7 +96,7 @@ descriptives(data::DataFrame; sort = NaN, vars = NaN, stats = [:n, :mean, :sd, :
 Sample size estimation for clinical trial.
 
 ```
-ctsamplen(;param=:notdef, type=:notdef, group=:notdef, alpha=0.05, beta=0.2, diff=0, sd=0, a=0, b=0, k=1, logdiff=false)
+ctsamplen(;param=:notdef, type=:notdef, group=:notdef, alpha=0.05, beta=0.2, diff=0, sd=0, a=0, b=0, k=1, logscale=false)
 ```
 
 **param (Parameter type):**
@@ -114,23 +114,23 @@ ctsamplen(;param=:notdef, type=:notdef, group=:notdef, alpha=0.05, beta=0.2, dif
 - :one - One sample;
 - :two - Two sample, result is for one group, second group size = n * k;
 
-**alpha** - Alpha (o < alpha < 1)  (default=0.05);
+**alpha** - Alpha (o < α < 1)  (default=0.05);
 
-**beta** - Beta (o < beta < 1) (default=0.2); power = 1 - beta;
+**beta** - Beta (o < β < 1) (default=0.2); power = 1 - β;
 
 **diff** - difference/equivalence margin/non-inferiority/superiority margin;
 
 **sd** - Standard deviation (σ, for Means only);
 
-**a** - Null Hypothesis mean (μ0), Group A;
+**a** -  Group A  (μ₀/p₀) - Test group;
 
-**b** - True mean (μ) for one sample / Group B for two sample design;
+**b** -  Group B (μ₁/p₁) - Reference group or reference value;
 
 **k** - Na/Nb (after sample size estimation second group size: Na=k*Nb, only for two sample design) (default=1);
 
-**logdiff** - diff is log transformed for OR:
-- false (default, diff would be transformed)
-- true
+**logscale** - diff is log transformed for OR:
+- true  - diff is already in log-scale, no transformation required (default);
+- false - diff is not in log-scale, will be transformed;
 
 ### <a name="ctpower">ctpower</a>
 
@@ -155,7 +155,7 @@ ctpower(;param=:notdef, type=:notdef, group=:notdef, alpha=0.05, logdiff=false, 
 - :one - one sample;
 - :two - Two sample;
 
-**alpha** - Alpha (0<alpha<1)  (default=0.05);
+**alpha** - Alpha (0 < α < 1)  (default=0.05);
 
 **n** - Subjects number;
 
@@ -163,9 +163,9 @@ ctpower(;param=:notdef, type=:notdef, group=:notdef, alpha=0.05, logdiff=false, 
 
 **sd** - Standard deviation (σ, for Means only);
 
-**a** - Null Hypothesis mean (μ0), Group A;
+**a** -  Group A  (μ₀/p₀) - Test group;
 
-**b** - True mean (μ) for one sample / Group B for two sample design;
+**b** -  Group B (μ₁/p₁) - Reference group or reference value;
 
 **k** - Na/Nb (after sample size estimation second group size: Na=k*Nb, only for two sample design) (default=1);
 
@@ -181,9 +181,9 @@ Sample size estimation for bioequivalence study (iterative procedure).
 besamplen(;alpha=0.05, beta=0.2, theta0=0.95, theta1=0.8, theta2=1.25, cv=0.0, logscale=true, design=:d2x2, method=:owenq)
 ```
 
-**alpha** - Alpha (o < alpha < 1)  (default=0.05);
+**alpha** - Alpha (o < α < 1)  (default=0.05);
 
-**beta** - Beta (o < beta < 1) (default=0.2); power = 1 - beta;
+**beta** - Beta (o < β < 1) (default=0.2); power = 1 - β;
 
 **theta0** - T/R Ratio (default=0.95);
 
@@ -218,7 +218,7 @@ Power estimation for bioequivalence trials.
 bepower(;alpha=0.05, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.0, n=0, logscale=true, design=:d2x2, method=:owenq)
 ```
 
-**alpha** - Alpha (0 < alpha < 1)  (default=0.05);
+**alpha** - Alpha (0 < α < 1)  (default=0.05);
 
 **theta1** - Lower Level (default=0.8);
 

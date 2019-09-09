@@ -249,7 +249,7 @@ function ctpower(;param=:notdef, type=:notdef, group=:notdef, alpha=0.05, logsca
                     pow =  one_proportion_equality_pow(a, b, n, alpha)
                     task = CTask(Probability(a), b, b, alpha, Equality(), 1, Power(n))
                 elseif type == :ei
-                    pow =  oneProportionEquivalenceP(a, b, diff, n, alpha)
+                    pow =  one_proportion_equivalence_pow(a, b, diff, n, alpha)
                     task = CTask(Probability(a), b-diff, b+diff, alpha, Equivalence(), 1, Power(n))
                 elseif type == :ns
                     pow =  one_proportion_superiority_pow(a, b, diff, n, alpha)
