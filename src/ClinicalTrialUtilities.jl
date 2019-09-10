@@ -21,13 +21,6 @@ import Base.show
 import Base.showerror
 import Base.getindex
 
-#Exceptions
-struct CTUException <: Exception
-    n::Int
-    var::String
-end
-
-Base.showerror(io::IO, e::CTUException) = print("CTU Exception code: ", e.n, " Message: ", e.var);
 const ZDIST  = Normal()
 const LOG2   = log(2)
 const PI2    = π * 2.0
@@ -64,6 +57,9 @@ end
 
 export CTUException, ConfInt, NCA, showerror
 
+#Deprecated
+include("deprecated.jl")
+
 #Owen function calc: owensQ, owensQo, ifun1, owensTint2, owensT, tfn
 include("owensq.jl")
 #powerTOST calc: powerTOST, powertostint, powerTOSTOwenQ, approxPowerTOST, power1TOST, approx2PowerTOST, cv2se, designProp
@@ -90,8 +86,7 @@ include("Export.jl")
 include("randomization.jl")
 #Show
 include("show.jl")
-#Deprecated
-include("deprecated.jl")
+
 
 #Sample size
 export ctsamplen, besamplen

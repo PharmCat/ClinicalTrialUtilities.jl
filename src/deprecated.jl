@@ -1,3 +1,11 @@
+#Exceptions
+struct CTUException <: Exception
+    n::Int
+    var::String
+end
+
+Base.showerror(io::IO, e::CTUException) = print("CTU Exception code: ", e.n, " Message: ", e.var);
+
 #Descriptives
 function descriptive_deprecated(data::DataFrame;
     sort::Union{Symbol, Array{T, 1}, Nothing} = nothing,

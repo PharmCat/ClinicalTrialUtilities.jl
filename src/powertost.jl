@@ -165,7 +165,7 @@ function designProp(type::Symbol)::Tuple{Function, Float64, Int}
     elseif type == :d3x6x3
         #return function f9(n) 2*n - 4 end, 1/18, 6
         return x -> 2.0 * x - 4.0, 1/18, 6
-    else throw(CTUException(1031,"designProp: design not known!")) end
+    else throw(ArgumentError("Design not known!")) end
 end
 
 function ci2cv(;alpha = 0.05, theta1 = 0.8, theta2 = 1.25, n, design=:d2x2, mso=false, cvms=false)::Union{Float64, Tuple{Float64, Float64}}
