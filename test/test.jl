@@ -69,15 +69,15 @@ println(" ---------------------------------- ")
     Base.show(io, t)
     #13    p.108
     t = ClinicalTrialUtilities.ctsamplen(param=:or, type=:ea,  alpha=0.05, beta=0.2, a=0.4, b=0.25)
-    @test ceil(t.result) == 156
+    @test ceil(t.result) == ceil(ClinicalTrialUtilities.ctsamplen(t.task).result) == 156
     Base.show(io, t)
     #14.1    p.109
     t = ClinicalTrialUtilities.ctsamplen(param=:or, type=:ei,  alpha=0.05, beta=0.2, diff=0.5, a=0.25, b=0.25)
-    @test ceil(t.result) == 366
+    @test ceil(t.result) == ceil(ClinicalTrialUtilities.ctsamplen(t.task).result) == 366
     Base.show(io, t)
     #15.1    p.108
     t = ClinicalTrialUtilities.ctsamplen(param=:or, type=:ns,  alpha=0.05, beta=0.2, diff=0.2, a=0.4, b=0.25)
-    @test ceil(t.result) == 242
+    @test ceil(t.result) == ceil(ClinicalTrialUtilities.ctsamplen(t.task).result) == 242
     Base.show(io, t)
     #14.2
     t = ClinicalTrialUtilities.ctsamplen(param=:or, type=:ei,  alpha=0.05, beta=0.2, diff=exp(0.5), a=0.25, b=0.25, logscale = false)
@@ -89,7 +89,7 @@ println(" ---------------------------------- ")
     Base.show(io, t)
     #16
     t = ClinicalTrialUtilities.ctsamplen(param=:prop, type=:mcnm, a=0.45, b=0.05)
-    @test ceil(t.result) == 23
+    @test ceil(t.result) == ceil(ClinicalTrialUtilities.ctsamplen(t.task).result) == 23
     Base.show(io, t)
 
     #Additional

@@ -10,6 +10,8 @@ abstract type AbstractParameter end
 abstract type AbstractProportion  <:  AbstractParameter end
 abstract type AbstractMean  <:  AbstractParameter end
 
+abstract type AbstractSimpleProportion <:  AbstractProportion end
+
 abstract type AbstractCompositeProportion{T}  <:  AbstractProportion end
 abstract type AbstractCompositeMean{T}  <:  AbstractMean end
 
@@ -37,16 +39,22 @@ struct SampleSize <: AbstractObjective
     end
 end
 
-struct Proportion <: AbstractProportion
+struct Proportion <: AbstractSimpleProportion
     x::Int
     n::Int
 end
-struct Probability <: AbstractProportion
+struct Probability <: AbstractSimpleProportion
     p::Float64
     function Probability(p::Float64)
         if p ≥ 1.0 || p ≤ 0.0 throw(ArgumentError("Probability can't be ≥ 1.0 or ≤ 0.0!")) end
         new(p::Float64)::Probability
     end
+end
+function getval(p::Proportion)::Float64
+    return p.x/p.n
+end
+function getval(p::Probability)::Float64
+    return p.p
 end
 #=
 struct Probability{T<: Float64, N <: Union{Int, Nothing}} <: AbstractParameter
@@ -81,15 +89,15 @@ struct DiffMean{T <: Union{Mean, Real}} <: AbstractCompositeMean{T}
     a::Mean
     b::T
 end
-struct DiffProportion{S <: Union{Proportion, Probability}, T <: Union{Proportion, Probability, Real}}  <: AbstractCompositeProportion{T}
+struct DiffProportion{S <: AbstractSimpleProportion, T <: Union{Proportion, Probability, Real}}  <: AbstractCompositeProportion{T}
     a::S
     b::T
 end
-struct OddRatio{T <: Union{Proportion, Probability}} <: AbstractCompositeProportion{T}
+struct OddRatio{T <: AbstractSimpleProportion} <: AbstractCompositeProportion{T}
     a::T
     b::T
 end
-struct RiskRatio{T <: Union{Proportion, Probability}} <: AbstractCompositeProportion{T}
+struct RiskRatio{T <: AbstractSimpleProportion} <: AbstractCompositeProportion{T}
     a::T
     b::T
 end
@@ -244,28 +252,39 @@ function ctsamplen(t::CTask{T, H, O}) where T <: DiffMean{M} where M <: Abstract
     return TaskResult(t, :chow, two_mean_superiority(t.param.a.m, t.param.b.m, t.param.a.sd, t.diff, t.alpha, t.objective.val, t.k))
 end
 #------
-function ctsamplen(t::CTask{T, H, O}) where T <: DiffProportion{Probability, R} where R <: Real where H <: Equality where O <: SampleSize
-    return TaskResult(t, :chow, one_proportion_equality(t.param.a.p, t.param.b, t.alpha, t.objective.val))
+function ctsamplen(t::CTask{T, H, O}) where T <: DiffProportion{P, R} where P <: AbstractSimpleProportion where R <: Real where H <: Equality where O <: SampleSize
+    return TaskResult(t, :chow, one_proportion_equality(getval(t.param.a), t.param.b, t.alpha, t.objective.val))
 end
-function ctsamplen(t::CTask{T, H, O}) where T <: DiffProportion{Probability, R} where R <: Real where H <: Equivalence where O <: SampleSize
-    return TaskResult(t, :chow, one_proportion_equivalence(t.param.a.p, t.param.b, t.diff, t.alpha, t.objective.val))
+function ctsamplen(t::CTask{T, H, O}) where T <: DiffProportion{P, R} where P <: AbstractSimpleProportion where R <: Real where H <: Equivalence where O <: SampleSize
+    return TaskResult(t, :chow, one_proportion_equivalence(getval(t.param.a), t.param.b, t.diff, t.alpha, t.objective.val))
 end
-function ctsamplen(t::CTask{T, H, O}) where T <: DiffProportion{Probability, R} where R <: Real where H <: Superiority where O <: SampleSize
-    return TaskResult(t, :chow, one_proportion_superiority(t.param.a.p, t.param.b, t.diff, t.alpha, t.objective.val))
+function ctsamplen(t::CTask{T, H, O}) where T <: DiffProportion{P, R} where P <: AbstractSimpleProportion where R <: Real where H <: Superiority where O <: SampleSize
+    return TaskResult(t, :chow, one_proportion_superiority(getval(t.param.a), t.param.b, t.diff, t.alpha, t.objective.val))
 end
 #---
-function ctsamplen(t::CTask{T, H, O}) where T <: DiffProportion{Probability, P} where P <: AbstractProportion where H <: Equality where O <: SampleSize
-    return TaskResult(t, :chow, two_proportion_equality(t.param.a.p, t.param.b.p, t.alpha, t.objective.val, t.k))
+function ctsamplen(t::CTask{T, H, O}) where T <: DiffProportion{P, P} where P <: AbstractSimpleProportion where H <: Equality where O <: SampleSize
+    return TaskResult(t, :chow, two_proportion_equality(getval(t.param.a), getval(t.param.b), t.alpha, t.objective.val, t.k))
 end
-function ctsamplen(t::CTask{T, H, O}) where T <: DiffProportion{Probability, P} where P <: AbstractProportion where H <: Equivalence where O <: SampleSize
-    return TaskResult(t, :chow, two_proportion_equivalence(t.param.a.p, t.param.b.p, t.diff, t.alpha, t.objective.val, t.k))
+function ctsamplen(t::CTask{T, H, O}) where T <: DiffProportion{P, P} where P <: AbstractSimpleProportion where H <: Equivalence where O <: SampleSize
+    return TaskResult(t, :chow, two_proportion_equivalence(getval(t.param.a), getval(t.param.b), t.diff, t.alpha, t.objective.val, t.k))
 end
-function ctsamplen(t::CTask{T, H, O}) where T <: DiffProportion{Probability, P} where P <: AbstractProportion where H <: Superiority where O <: SampleSize
-    return TaskResult(t, :chow, two_proportion_superiority(t.param.a.p, t.param.b.p, t.diff, t.alpha, t.objective.val, t.k))
+function ctsamplen(t::CTask{T, H, O}) where T <: DiffProportion{P, P} where P <: AbstractSimpleProportion where H <: Superiority where O <: SampleSize
+    return TaskResult(t, :chow, two_proportion_superiority(getval(t.param.a), getval(t.param.b), t.diff, t.alpha, t.objective.val, t.k))
 end
 #------
-
-
+function ctsamplen(t::CTask{T, H, O}) where T <: OddRatio{P} where P <:  AbstractSimpleProportion where H <: Equality where O <: SampleSize
+    return TaskResult(t, :chow, or_equality(getval(t.param.a), getval(t.param.b), t.alpha, t.objective.val, t.k))
+end
+function ctsamplen(t::CTask{T, H, O}) where T <: OddRatio{P} where P <:  AbstractSimpleProportion where H <: Equivalence where O <: SampleSize
+    return TaskResult(t, :chow, or_equivalence(getval(t.param.a), getval(t.param.b), t.diff, t.alpha, t.objective.val, t.k))
+end
+function ctsamplen(t::CTask{T, H, O}) where T <: OddRatio{P} where P <:  AbstractSimpleProportion where H <: Superiority where O <: SampleSize
+    return TaskResult(t, :chow, or_superiority(getval(t.param.a), getval(t.param.b), t.diff, t.alpha, t.objective.val, t.k))
+end
+#------------
+function ctsamplen(t::CTask{T, H, O}) where T <: DiffProportion{P, P} where P <: AbstractProportion where H <: McNemars where O <: SampleSize
+    return TaskResult(t, :chow, mcnm(getval(t.param.a), getval(t.param.b), t.alpha, t.objective.val))
+end
 
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
