@@ -150,7 +150,7 @@ struct CTask{T <: AbstractParameter, H <: AbstractHypothesis, O <: AbstractObjec
         new{T,H,O}(param, llim, ulim, diff, alpha, hyp, k, objective)::CTask{T,H,O}
     end
     function CTask(param::T, llim::Real, ulim::Real, alpha::Real, hyp::H, k::Real, objective::O) where T <: AbstractParameter where H <: AbstractHypothesis where O <: AbstractObjective
-        return CTask(param, llim, ulim, 0, alpha, hyp, k, objective)
+        return CTask(param, llim, ulim, NaN, alpha, hyp, k, objective)
     end
 end
 #-------------------------------------------------------------------------------
@@ -298,82 +298,126 @@ function ctpower(;param=:notdef, type=:notdef, group=:notdef, alpha=0.05, logsca
     if param == :mean
         if group == :one
             if type == :ea
-                pow =  one_mean_equality_pow(a, b, sd, n, alpha)
-                task = CTask(Mean(a, sd), b, b, alpha, Equality(), 1, Power(n))
+                pow =  one_mean_equality_pow(a, b, sd, alpha, n)
+                task = CTask(DiffMean(Mean(a, sd), b), b, b, alpha, Equality(), 1, Power(n))
             elseif type == :ei
-                pow =  one_mean_equivalence_pow(a, b, sd, diff, n, alpha)
-                task = CTask(Mean(a, sd), b-diff, b+diff, diff, alpha, Equivalence(), 1, Power(n))
+                pow =  one_mean_equivalence_pow(a, b, sd, diff, alpha, n)
+                task = CTask(DiffMean(Mean(a, sd), b), b-diff, b+diff, diff, alpha, Equivalence(), 1, Power(n))
             elseif type == :ns
-                pow =  one_mean_superiority_pow(a, b, sd, diff, n, alpha)
-                task = CTask(Mean(a, sd), b+diff, Inf, diff, alpha, Superiority(), 1, Power(n))
+                pow =  one_mean_superiority_pow(a, b, sd, diff, alpha, n)
+                task = CTask(DiffMean(Mean(a, sd), b), b+diff, Inf, diff, alpha, Superiority(), 1, Power(n))
             else throw(ArgumentError("Keyword type unknown!")) end
         elseif group == :two
             if type == :ea
-                pow =  two_mean_equality_pow(a, b, sd, n, alpha, k)
+                pow =  two_mean_equality_pow(a, b, sd, alpha, n, k)
                 task = CTask(DiffMean(Mean(a, sd), Mean(b, sd)), 0, 0, alpha, Equality(), k, Power(n))
             elseif type == :ei
-                pow =  two_mean_equivalence_pow(a, b, sd, diff, n, alpha, k)
+                pow =  two_mean_equivalence_pow(a, b, sd, diff, alpha, n, k)
                 task = CTask(DiffMean(Mean(a, sd), Mean(b, sd)), -diff, diff, diff, alpha, Equivalence(), k, Power(n))
             elseif type == :ns
-                pow =  two_mean_superiority_pow(a, b, sd, diff, n, alpha, k)
-                task = CTask(DiffMean(Mean(a, sd), Mean(b, sd)), diff, Inf, alpha, Superiority(), k, Power(n))
+                pow =  two_mean_superiority_pow(a, b, sd, diff, alpha, n, k)
+                task = CTask(DiffMean(Mean(a, sd), Mean(b, sd)), diff, Inf, diff, alpha, Superiority(), k, Power(n))
             else throw(ArgumentError("Keyword type unknown!")) end
         else throw(ArgumentError("Keyword group unknown!")) end
     elseif param == :prop
         if 1 < a || a < 0 || 1 < b || b < 0 throw(ArgumentError("Keyword a or b out of the range!")) end
         if type == :mcnm
-            pow =  mcnm_pow(a, b, n, alpha)
+            pow =  mcnm_pow(a, b, alpha, n)
             task = CTask(DiffProportion(Probability(a), Probability(b)), 0, 0, alpha, McNemars(), k, Power(n))
         else
             if group == :one
                 if type == :ea
-                    pow =  one_proportion_equality_pow(a, b, n, alpha)
-                    task = CTask(Probability(a), b, b, alpha, Equality(), 1, Power(n))
+                    pow =  one_proportion_equality_pow(a, b, alpha, n)
+                    task = CTask(DiffProportion(Probability(a), b), b, b, alpha, Equality(), 1, Power(n))
                 elseif type == :ei
-                    pow =  one_proportion_equivalence_pow(a, b, diff, n, alpha)
-                    task = CTask(Probability(a), b-diff, b+diff, diff, alpha, Equivalence(), 1, Power(n))
+                    pow =  one_proportion_equivalence_pow(a, b, diff, alpha, n)
+                    task = CTask(DiffProportion(Probability(a), b), b-diff, b+diff, diff, alpha, Equivalence(), 1, Power(n))
                 elseif type == :ns
-                    pow =  one_proportion_superiority_pow(a, b, diff, n, alpha)
-                    task = CTask(Probability(a), b-diff, Inf, alpha, Superiority(), 1, Power(n))
+                    pow =  one_proportion_superiority_pow(a, b, diff, alpha, n)
+                    task = CTask(DiffProportion(Probability(a), b), b-diff, Inf, diff, alpha, Superiority(), 1, Power(n))
                 else throw(ArgumentError("Keyword type unknown!")) end
             elseif group == :two
                 if type == :ea
-                    pow =  two_proportion_equality_pow(a, b, n, alpha, k)
+                    pow =  two_proportion_equality_pow(a, b, alpha, n, k)
                     task = CTask(DiffProportion(Probability(a), Probability(b)), 0, 0, alpha, Equality(), k, Power(n))
                 elseif type == :ei
-                    pow =  two_proportion_equivalence_pow(a, b, diff, n, alpha, k)
+                    pow =  two_proportion_equivalence_pow(a, b, diff, alpha, n, k)
                     task = CTask(DiffProportion(Probability(a), Probability(b)), -diff, +diff, diff, alpha, Equivalence(), k, Power(n))
                 elseif type == :ns
-                    pow =  two_proportion_superiority_pow(a, b, diff, n, alpha, k)
+                    pow =  two_proportion_superiority_pow(a, b, diff, alpha, n, k)
                     task = CTask(DiffProportion(Probability(a), Probability(b)), diff, Inf, diff, alpha, Superiority(), k, Power(n))
                 else throw(ArgumentError("Keyword type unknown!")) end
             else throw(ArgumentError("Keyword group unknown!")) end
         end
     elseif param == :or
         if type == :ea
-            pow =  or_equality_pow(a, b, n, alpha, k)
+            pow =  or_equality_pow(a, b, alpha, n, k)
             task = CTask(OddRatio(Probability(a), Probability(b)), 0, 0, alpha, Equality(), k, Power(n))
         elseif type == :ei
             if !logscale diff = log(diff) end
-            pow =  or_equivalence_pow(a, b, diff, n, alpha, k)
+            pow =  or_equivalence_pow(a, b, diff, alpha, n, k)
             task = CTask(OddRatio(Probability(a), Probability(b)), -diff, +diff, diff, alpha, Equivalence(), k, Power(n))
         elseif type == :ns
             if !logscale diff = log(diff) end
-            pow = or_superiority_pow(a, b, diff, n, alpha, k)
-            task = CTask(OddRatio(Probability(a), Probability(b)), diff, Inf, diff, alpha, Equivalence(), k, Power(n))
+            pow = or_superiority_pow(a, b, diff, alpha, n, k)
+            task = CTask(OddRatio(Probability(a), Probability(b)), diff, Inf, diff, alpha, Superiority(), k, Power(n))
         else throw(ArgumentError("Keyword type unknown!")) end
     else throw(ArgumentError("Keyword param unknown!")) end
     return TaskResult(task, :chow, pow)
 end #ctpower
-
-function ctpower(t::CTask{T, H, O}) where T <: Mean where H <: Equality where O <: Power
-    return TaskResult(t, :chow,  one_mean_equality_pow(t.param.m, t.llim, t.param.sd, t.objective.val, t.alpha))
+#---
+function ctpower(t::CTask{T, H, O}) where T <: DiffMean{R} where R <: Real where H <: Equality where O <: Power
+    return TaskResult(t, :chow,  one_mean_equality_pow(t.param.a.m, t.param.b, t.param.a.sd, t.alpha, t.objective.val))
 end
-function ctpower(t::CTask{T, H, O}) where T <: Mean where H <: Equivalence where O <: Power
-    return TaskResult(t, :chow,  one_mean_equivalence_pow(t.param.m, (t.llim + t.ulim)/2, t.param.sd, (t.ulim - t.llim)/2, t.objective.val, t.alpha))
+function ctpower(t::CTask{T, H, O}) where T <: DiffMean{R} where R <: Real where H <: Equivalence where O <: Power
+    return TaskResult(t, :chow,  one_mean_equivalence_pow(t.param.a.m, t.param.b, t.param.a.sd, t.diff, t.alpha, t.objective.val))
 end
-function ctpower(t::CTask{T, H, O}) where T <: Mean where H <: Superiority where O <: Power
-    return TaskResult(t, :chow,  one_mean_superiority_pow(t.param.m, t.llim - t.diff, t.param.sd, t.diff, t.objective.val, t.alpha))
+function ctpower(t::CTask{T, H, O}) where T <: DiffMean{R} where R <: Real where H <: Superiority where O <: Power
+    return TaskResult(t, :chow,  one_mean_superiority_pow(t.param.a.m, t.param.b, t.param.a.sd, t.diff, t.alpha, t.objective.val))
+end
+#------
+function ctpower(t::CTask{T, H, O}) where T <: DiffMean{M} where M <: AbstractMean where H <: Equality where O <: Power
+    return TaskResult(t, :chow, two_mean_equality_pow(t.param.a.m, t.param.b.m, t.param.a.sd, t.alpha, t.objective.val, t.k))
+end
+function ctpower(t::CTask{T, H, O}) where T <: DiffMean{M} where M <: AbstractMean where H <: Equivalence where O <: Power
+    return TaskResult(t, :chow, two_mean_equivalence_pow(t.param.a.m, t.param.b.m, t.param.a.sd, t.diff, t.alpha, t.objective.val, t.k))
+end
+function ctpower(t::CTask{T, H, O}) where T <: DiffMean{M} where M <: AbstractMean where H <: Superiority where O <: Power
+    return TaskResult(t, :chow, two_mean_superiority_pow(t.param.a.m, t.param.b.m, t.param.a.sd, t.diff, t.alpha, t.objective.val, t.k))
+end
+#---
+function ctpower(t::CTask{T, H, O}) where T <: DiffProportion{P, R} where P <: AbstractSimpleProportion where R <: Real where H <: Equality where O <: Power
+    return TaskResult(t, :chow, one_proportion_equality_pow(getval(t.param.a), t.param.b, t.alpha, t.objective.val))
+end
+function ctpower(t::CTask{T, H, O}) where T <: DiffProportion{P, R} where P <: AbstractSimpleProportion where R <: Real where H <: Equivalence where O <: Power
+    return TaskResult(t, :chow, one_proportion_equivalence_pow(getval(t.param.a), t.param.b, t.diff, t.alpha, t.objective.val))
+end
+function ctpower(t::CTask{T, H, O}) where T <: DiffProportion{P, R} where P <: AbstractSimpleProportion where R <: Real where H <: Superiority where O <: Power
+    return TaskResult(t, :chow, one_proportion_superiority_pow(getval(t.param.a), t.param.b, t.diff, t.alpha, t.objective.val))
+end
+#---
+function ctpower(t::CTask{T, H, O}) where T <: DiffProportion{P, P} where P <: AbstractSimpleProportion where H <: Equality where O <: Power
+    return TaskResult(t, :chow, two_proportion_equality_pow(getval(t.param.a), getval(t.param.b), t.alpha, t.objective.val, t.k))
+end
+function ctpower(t::CTask{T, H, O}) where T <: DiffProportion{P, P} where P <: AbstractSimpleProportion where H <: Equivalence where O <: Power
+    return TaskResult(t, :chow, two_proportion_equivalence_pow(getval(t.param.a), getval(t.param.b), t.diff, t.alpha, t.objective.val, t.k))
+end
+function ctpower(t::CTask{T, H, O}) where T <: DiffProportion{P, P} where P <: AbstractSimpleProportion where H <: Superiority where O <: Power
+    return TaskResult(t, :chow, two_proportion_superiority_pow(getval(t.param.a), getval(t.param.b), t.diff, t.alpha, t.objective.val, t.k))
+end
+#------
+function ctpower(t::CTask{T, H, O}) where T <: OddRatio{P} where P <:  AbstractSimpleProportion where H <: Equality where O <: Power
+    return TaskResult(t, :chow, or_equality_pow(getval(t.param.a), getval(t.param.b), t.alpha, t.objective.val, t.k))
+end
+function ctpower(t::CTask{T, H, O}) where T <: OddRatio{P} where P <:  AbstractSimpleProportion where H <: Equivalence where O <: Power
+    return TaskResult(t, :chow, or_equivalence_pow(getval(t.param.a), getval(t.param.b), t.diff, t.alpha, t.objective.val, t.k))
+end
+function ctpower(t::CTask{T, H, O}) where T <: OddRatio{P} where P <:  AbstractSimpleProportion where H <: Superiority where O <: Power
+    return TaskResult(t, :chow, or_superiority_pow(getval(t.param.a), getval(t.param.b), t.diff, t.alpha, t.objective.val, t.k))
+end
+#------------
+function ctpower(t::CTask{T, H, O}) where T <: DiffProportion{P, P} where P <: AbstractProportion where H <: McNemars where O <: Power
+    return TaskResult(t, :chow, mcnm_pow(getval(t.param.a), getval(t.param.b), t.alpha, t.objective.val))
 end
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
