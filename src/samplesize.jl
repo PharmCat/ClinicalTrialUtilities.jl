@@ -18,10 +18,25 @@ abstract type AbstractCompositeMean{T}  <:  AbstractMean end
 abstract type AbstractObjective end
 abstract type AbstractHypothesis end
 
+abstract type AbstractDesign end
+
+struct Parallel <: AbstractDesign end
+struct Crossover <: AbstractDesign
+    type::Symbol
+    replicate::Bool
+    function Crossover(type::Symbol; replicate::Bool = false)
+        new(type, replicate)::Crossover
+    end
+end
+
 struct Equivalence <: AbstractHypothesis
     bio::Bool
+    design::AbstractDesign
     function Equivalence(;bio::Bool = false)
-        new(bio)::Equivalence
+        new(bio, Parallel())::Equivalence
+    end
+    function Equivalence(design::AbstractDesign;bio::Bool = false)
+        new(bio, design)::Equivalence
     end
 end
 struct Equality <: AbstractHypothesis end
@@ -102,17 +117,6 @@ struct RiskRatio{T <: AbstractSimpleProportion} <: AbstractCompositeProportion{T
     b::T
 end
 
-struct TOSTSampleSizeTask <: AbstractTask
-    alpha::Real
-    beta::Real
-    gmr::Real
-    llim::Real
-    ulim::Real
-    cv::Real
-    logscale::Bool
-    design::Symbol
-    method::Symbol
-end
 struct TOSTPowerTask <: AbstractTask
     alpha::Real
     n::Real
@@ -421,15 +425,12 @@ function ctpower(t::CTask{T, H, O}) where T <: DiffProportion{P, P} where P <: A
 end
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
-function besamplen(;alpha=0.05, beta=0.2, theta0=0.95, theta1=0.8, theta2=1.25, cv=0.0, logscale=true, design=:d2x2, method=:owenq)::TaskResult{TOSTSampleSizeTask}
+function besamplen(;alpha=0.05, beta=0.2, theta0=0.95, theta1=0.8, theta2=1.25, cv=0.0, sd = 0.0, logscale=true, design=:d2x2, method=:owenq)::TaskResult
 
     theta0 = convert(Float64, theta0); theta1 = convert(Float64, theta1); theta2 = convert(Float64, theta2); cv = convert(Float64, cv); alpha  = convert(Float64, alpha); beta = convert(Float64, beta)
 
     if cv <= 0 throw(ArgumentError("besamplen: cv can not be <= 0")) end
     if theta1 >= theta2  throw(ArgumentError("besamplen: theta1 should be < theta2")) end
-    if alpha >= 1 || alpha <= 0 || beta >= 1 || beta <= 0 throw(ArgumentError("besamplen: alpha and beta shold be > 0 and < 1")) end
-
-    task = TOSTSampleSizeTask(alpha, beta, theta0, theta1, theta2, cv, logscale, design, method)
 
     if logscale
         if theta1 < 0 || theta2 < 0 || theta0 < 0 throw(ArgumentError("besamplen: theta0, theta1, theta2 shold be > 0 and ")) end
@@ -443,6 +444,9 @@ function besamplen(;alpha=0.05, beta=0.2, theta0=0.95, theta1=0.8, theta2=1.25, 
         diffm   = theta0
         sd      = cv
     end
+
+    task = CTask(DiffMean(Mean(0, cv), Mean(theta0, cv)), theta1, theta2, alpha, Equivalence(bio=true), 1, SampleSize(beta))
+
     #values for approximate n
     td = (ltheta1 + ltheta2)/2
     rd = abs((ltheta1 - ltheta2)/2)
