@@ -7,6 +7,7 @@ module SIM
 
     import ..ctsamplen
     import ..cv2ms
+    import ..sediv
     import ..Design
     import ..ZDIST
     import ..ConfInt
@@ -67,12 +68,8 @@ module SIM
 
         d     = Design(:d2x2)                                   #dffunc if generic funtion with 1 arg return df
         df    = d.df(n)
-        sqa   = Array{Float64, 1}(undef, d.sq)
-        sqa  .= n÷d.sq
-        for i = 1:n%d.sq
-            sqa[i] += 1
-        end
-        sef   = sqrt(sum(1 ./ sqa)*d.bkni)                                        #for se
+
+        sef   = sediv(d, n)                                 #for se
         #ms    = log(1+cv^2)
         if logscale
             ltheta1 = log(theta1); ltheta2 = log(theta2); diffm = log(theta0); ms = log(1+cv^2);

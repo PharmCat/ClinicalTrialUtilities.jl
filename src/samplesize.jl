@@ -70,6 +70,15 @@ function Design(type::Symbol)::AbstractDesign
     else throw(ArgumentError("Design type not known!")) end
 end
 
+@inline function sediv(d::AbstractDesign, n::Int)
+    sqa   = Array{Float64, 1}(undef, d.sq)
+    sqa  .= n÷d.sq
+    for i = 1:n%d.sq
+        sqa[i] += 1
+    end
+    return sqrt(sum(1 ./ sqa)*d.bkni)
+end
+
 struct Equivalence <: AbstractHypothesis
     llim::Real          #Lower lmit for Test group
     ulim::Real          #Upper lmit for Test group

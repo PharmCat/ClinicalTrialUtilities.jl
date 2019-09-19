@@ -36,7 +36,7 @@ module CI
         elseif method==:waldcc
             return propWaldCICC(x, n, alpha)
         else
-            throw(CTUException(1301,"oneProp: no such method."))
+            throw(ArgumentError("unknown method!"))
         end
     end
 

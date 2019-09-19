@@ -63,30 +63,30 @@ function samplentostint(alpha, ltheta1, ltheta2, diffm, sd, beta, design, method
     return estn, estpower
 end
 
-function powertostint(alpha::Real,  ltheta1::Real, ltheta2::Real, diffm::Real, sd::Real, n::Int, design::Symbol, method::Symbol)::Float64
+#  δ  - difference/theta0
+#  σ  - SD
+#  σ̵ₓ - SE/SEM
+#  α  - alpha
+#  θ₁ - theta1
+#  θ₂ - theta2
+function powertostint(α::Real,  θ₁::Real, θ₂::Real, δ::Real, σ::Real, n::Int, design::Symbol, method::Symbol)::Float64
     d     = Design(design) #dffunc if generic funtion with 1 arg return df
     df    = d.df(n)
-    sqa   = Array{Float64, 1}(undef, d.sq)
-    sqa  .= n÷d.sq
-    for i = 1:n%d.sq
-        sqa[i] += 1
-    end
-    sef = sqrt(sum(1 ./ sqa)*d.bkni)
 
-    if df < 1 throw(CTUException(1024,"powertostint: df < 1")) end
+    if df < 1 throw(ArgumentError("powertostint: df < 1")) end
 
-    se::Float64 = sd*sef
+    σ̵ₓ::Float64 = σ*sediv(d, n)
 
     if method     == :owenq
-        return powertost_owenq(alpha,ltheta1,ltheta2,diffm,se,df)
+        return   powertost_owenq(α, θ₁, θ₂, δ, σ̵ₓ, df)
     elseif method == :nct
-        return powertost_nct(alpha,ltheta1,ltheta2,diffm,se,df)
+        return     powertost_nct(α, θ₁, θ₂, δ, σ̵ₓ, df)
     elseif method == :mvt
-        return powertost_mvt(alpha,ltheta1,ltheta2,diffm,se,df) #not implemented
+        return     powertost_mvt(α, θ₁, θ₂, δ, σ̵ₓ, df) #not implemented
     elseif method == :shifted
-        return powertost_shifted(alpha,ltheta1,ltheta2,diffm,se,df)
+        return powertost_shifted(α, θ₁, θ₂, δ, σ̵ₓ, df)
     else
-         throw(CTUException(1025,"powerTOST: method not known!"))
+         throw(ArgumentError("method not known!"))
     end
 end #powerTOST
 
@@ -103,12 +103,12 @@ function powertost_owenq(alpha::Real, ltheta1::Real, ltheta2::Real, diffm::Real,
     # former Julious formula (57)/(58) doesn't work
     if df > 10000
         #tval = qnorm(1-alpha)
-        tval  = quantile(ZDIST, 1-alpha)
+        tval  = quantile(ZDIST, 1 - alpha)
         #p1   = pnorm(tval-delta1)
-        p1    = cdf(ZDIST, tval-delta1)
+        p1    = cdf(ZDIST,  tval - delta1)
         #p2   = pnorm(-tval-delta2)
-        p2    = cdf(ZDIST, -tval-delta2)
-        pwr   = p2-p1
+        p2    = cdf(ZDIST, -tval - delta2)
+        pwr   = p2 - p1
         if pwr > 0 return pwr else return 0 end
     elseif df >= 5000
         # approximation via non-central t-distribution
@@ -133,8 +133,8 @@ function powertost_nct(alpha::Real, ltheta1::Real, ltheta2::Real, diffm::Real, s
 end #approxPowerTOST
 
 #.power.1TOST
-function powertost_mvt(alpha::T, ltheta1::T, ltheta2::T, diffm::T, se::T, df::T)::Float64 where T <: Real
-    throw(CTUException(1000,"Method not implemented!"))
+function powertost_mvt(alpha::Real, ltheta1::Real, ltheta2::Real, diffm::Real, se::Real, df::Real)::Float64
+    throw(ArgumentError("Method not implemented!"))
     #Method ON MULTIVARIATE t AND GAUSS PROBABILITIES IN R not implemented
     # Distributions.MvNormal - in plan
     # see  Distributions.jl/src/multivariate/mvtdist.jl
@@ -151,7 +151,7 @@ function powertost_shifted(alpha::Real, ltheta1::Real, ltheta2::Real, diffm::Rea
     delta2::Float64 = (diffm-ltheta2)/se
     if isnan(delta1) delta1 = 0 end
     if isnan(delta2) delta2 = 0 end
-    pow = cdf(tdist,-tval-delta2) - cdf(tdist,tval-delta1)
+    pow = cdf(tdist,-tval-delta2) - cdf(tdist, tval-delta1)
     if pow > 0 return pow else return 0 end
 end #approx2PowerTOST
 
@@ -181,13 +181,10 @@ function ci2cv(;alpha = 0.05, theta1 = 0.8, theta2 = 1.25, n, design=:d2x2, mso=
     d     = Design(design)
     df    = d.df(n)
     if df < 1 throw(ArgumentError("df < 1, check n!")) end
-    sqa   = Array{Float64, 1}(undef, d.sq)
-    sqa  .= n÷d.sq
-    for i = 1:n%d.sq
-        sqa[i] += 1
-    end
-    sef = sum(1 ./ sqa)*d.bkni
-    ms = ((log(theta2/theta1)/2/quantile(TDist(df), 1-alpha))^2)/sef
+
+    sef = sediv(d, n)
+
+    ms = ((log(theta2/theta1)/2/quantile(TDist(df), 1-alpha))/sef)^2
     if cvms return ms2cv(ms), ms end
     if mso return ms end
     return ms2cv(ms)
