@@ -19,9 +19,51 @@
 #designProp
 #ci2cv
 
+function samplentostint(alpha, ltheta1, ltheta2, diffm, sd, beta, design, method)
+    #values for approximate n
+    td = (ltheta1 + ltheta2)/2
+    rd = abs((ltheta1 - ltheta2)/2)
 
-function powertostint(alpha::Float64,  ltheta1::Float64, ltheta2::Float64, diffm::Float64, sd::Float64, n::Int, design::Symbol, method::Symbol)::Float64
+    #if rd <= 0 return false end
+    d0 = diffm - td
+    #approximate n
+    n0::Int = convert(Int, ceil(two_mean_equivalence(0, d0, sd, rd, alpha, beta, 1)/2)*2)
+    tp = 1 - beta  #target power
+    if n0 < 4 n0 = 4 end
+    if n0 > 5000 n0 = 5000 end
+    pow = powertostint(alpha,  ltheta1, ltheta2, diffm, sd, n0, design, method)
+    np::Int = 2
+    powp::Float64 = pow
+    if pow > tp
+        while (pow > tp)
+            np = n0
+            powp = pow
+            n0 = n0 - 2
+            #pow = powerTOST(;alpha=alpha, logscale=false, theta1=ltheta1, theta2=ltheta2, theta0=diffm, cv=se, n=n0, design=design, method=method)
+            if n0 < 4 break end #n0, pow end
+            pow = powertostint(alpha,  ltheta1, ltheta2, diffm, sd, n0, design, method)
+        end
+        estpower = powp
+        estn     = np
+    elseif pow < tp
+        while (pow < tp)
+            np = n0
+            powp = pow
+            n0 = n0 + 2
+            #pow = powerTOST(;alpha=alpha, logscale=false, theta1=ltheta1, theta2=ltheta2, theta0=diffm, cv=se, n=n0, design=design, method=method)
+            pow = powertostint(alpha,  ltheta1, ltheta2, diffm, sd, n0, design, method)
+            if n0 > 10000  break end # n0, pow end
+        end
+        estpower = pow
+        estn     = n0
+    else
+        estpower = pow
+        estn     = n0
+    end
+    return estn, estpower
+end
 
+function powertostint(alpha::Real,  ltheta1::Real, ltheta2::Real, diffm::Real, sd::Real, n::Int, design::Symbol, method::Symbol)::Float64
     dffunc, bkni, seq = designProp(design) #dffunc if generic funtion with 1 arg return df
     df    = dffunc(n)
     sqa   = Array{Float64, 1}(undef, seq)
@@ -36,20 +78,20 @@ function powertostint(alpha::Float64,  ltheta1::Float64, ltheta2::Float64, diffm
     se::Float64 = sd*sef
 
     if method     == :owenq
-        return powerTOSTOwenQ(alpha,ltheta1,ltheta2,diffm,se,df)
+        return powertost_owenq(alpha,ltheta1,ltheta2,diffm,se,df)
     elseif method == :nct
-        return approxPowerTOST(alpha,ltheta1,ltheta2,diffm,se,df)
+        return powertost_nct(alpha,ltheta1,ltheta2,diffm,se,df)
     elseif method == :mvt
-        return power1TOST(alpha,ltheta1,ltheta2,diffm,se,df) #not implemented
+        return powertost_mvt(alpha,ltheta1,ltheta2,diffm,se,df) #not implemented
     elseif method == :shifted
-        return approx2PowerTOST(alpha,ltheta1,ltheta2,diffm,se,df)
+        return powertost_shifted(alpha,ltheta1,ltheta2,diffm,se,df)
     else
          throw(CTUException(1025,"powerTOST: method not known!"))
     end
 end #powerTOST
 
 #.power.TOST
-function powerTOSTOwenQ(alpha::T, ltheta1::T, ltheta2::T, diffm::T, se::T, df::T)::Float64 where T <: Real
+function powertost_owenq(alpha::Real, ltheta1::Real, ltheta2::Real, diffm::Real, se::Real, df::Real)::Float64
     tval::Float64   = quantile(TDist(df), 1 - alpha)
     delta1::Float64 = (diffm-ltheta1)/se
     delta2::Float64 = (diffm-ltheta2)/se
@@ -70,7 +112,7 @@ function powerTOSTOwenQ(alpha::T, ltheta1::T, ltheta2::T, diffm::T, se::T, df::T
         if pwr > 0 return pwr else return 0 end
     elseif df >= 5000
         # approximation via non-central t-distribution
-        return approxPowerTOST(alpha, ltheta1, ltheta2, diffm, se, df)
+        return powertost_nct(alpha, ltheta1, ltheta2, diffm, se, df)
     end
     p1  = owensq(df, tval, delta1, 0.0, R)
     p2  = owensq(df,-tval, delta2, 0.0, R)
@@ -81,7 +123,7 @@ end #powerTOSTOwenQ
 #------------------------------------------------------------------------------
 # approximation based on non-central t
 # .approx.power.TOST - PowerTOST
-function approxPowerTOST(alpha::T, ltheta1::T, ltheta2::T, diffm::T, se::T, df::T)::Float64 where T <: Real
+function powertost_nct(alpha::T, ltheta1::T, ltheta2::T, diffm::T, se::T, df::T)::Float64 where T <: Real
     tdist           = TDist(df)
     tval::Float64   = quantile(tdist, 1-alpha)
     delta1::Float64 = (diffm-ltheta1)/se
@@ -91,7 +133,7 @@ function approxPowerTOST(alpha::T, ltheta1::T, ltheta2::T, diffm::T, se::T, df::
 end #approxPowerTOST
 
 #.power.1TOST
-function power1TOST(alpha::T, ltheta1::T, ltheta2::T, diffm::T, se::T, df::T)::Float64 where T <: Real
+function powertost_mvt(alpha::T, ltheta1::T, ltheta2::T, diffm::T, se::T, df::T)::Float64 where T <: Real
     throw(CTUException(1000,"Method not implemented!"))
     #Method ON MULTIVARIATE t AND GAUSS PROBABILITIES IN R not implemented
     # Distributions.MvNormal - in plan
@@ -102,7 +144,7 @@ function power1TOST(alpha::T, ltheta1::T, ltheta2::T, diffm::T, se::T, df::T)::F
 end
 
 #.approx2.power.TOST
-function approx2PowerTOST(alpha::T, ltheta1::T, ltheta2::T, diffm::T, se::T, df::T)::Float64 where T <: Real
+function powertost_shifted(alpha::Real, ltheta1::Real, ltheta2::Real, diffm::Real, se::Real, df::Real)::Float64
     tdist           = TDist(df)
     tval::Float64   = quantile(tdist, 1-alpha)
     delta1::Float64 = (diffm-ltheta1)/se
@@ -120,18 +162,18 @@ end #approx2PowerTOST
 #-------------------------------------------------------------------------------
 
 #CV2se
-@inline function cv2sd(cv::Float64)::Float64
+@inline function cv2sd(cv::Real)::Float64
     return sqrt(cv2ms(cv))
 end
 
-@inline function cv2ms(cv::Float64)::Float64
+@inline function cv2ms(cv::Real)::Float64
      return log(1+cv^2)
 end
-@inline function ms2cv(ms::Float64)::Float64
+@inline function ms2cv(ms::Real)::Float64
     return sqrt(exp(ms)-1)
 end
 #CV2se
-@inline function sd2cv(sd::Float64)::Float64
+@inline function sd2cv(sd::Real)::Float64
     return sqrt(exp(sd^2)-1)
 end
 
@@ -184,7 +226,7 @@ function ci2cv(;alpha = 0.05, theta1 = 0.8, theta2 = 1.25, n, design=:d2x2, mso=
     return ms2cv(ms)
 end
 
-function pooledCV(data::DataFrame; cv=:cv, df=:df, alpha=0.05, returncv=true)::ConfInt
+function pooledcv(data::DataFrame; cv=:cv, df=:df, alpha=0.05, returncv=true)::ConfInt
     if isa(cv, String)  cv = Symbol(cv) end
     if isa(df, String)  df = Symbol(df) end
     tdf = sum(data[:, df])

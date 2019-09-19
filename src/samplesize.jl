@@ -35,6 +35,7 @@ struct Equivalence <: AbstractHypothesis
     bio::Bool
     #diff::Real          #Margin difference
     function Equivalence(llim, ulim; bio::Bool = false)
+        if llim == ulim throw(ArgumentError("llim == ulim!")) end
         new(llim, ulim, bio)::Equivalence
     end
 end
@@ -426,97 +427,56 @@ function ctpower(t::CTask{T, D, H, O}) where T <: DiffProportion{P, P} where P <
 end
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
-function besamplen(;alpha=0.05, beta=0.2, theta0=0.95, theta1=0.8, theta2=1.25, cv=0.0, sd = 0.0, logscale=true, design=:d2x2, method=:owenq)::TaskResult
-
-    theta0 = convert(Float64, theta0); theta1 = convert(Float64, theta1); theta2 = convert(Float64, theta2); cv = convert(Float64, cv); alpha  = convert(Float64, alpha); beta = convert(Float64, beta)
-
-    if cv <= 0 throw(ArgumentError("besamplen: cv can not be <= 0")) end
-    if theta1 >= theta2  throw(ArgumentError("besamplen: theta1 should be < theta2")) end
+function besamplen(;alpha::Real=0.05, beta::Real=0.2, theta0::Real=0.95, theta1::Real=0.8, theta2::Real=1.25, cv::Real=0.0, sd::Real=0.0, logscale::Bool=true, design::Symbol=:d2x2, method::Symbol=:owenq)::TaskResult
+    if !(0 < beta < 1) throw(ArgumentError("Beta ≥ 1.0 or ≤ 0.0!")) end
+    if !(0 < alpha < 1) throw(ArgumentError("Alfa ≥ 1.0 or ≤ 0.0!")) end
+    if theta1 ≥ theta2  throw(ArgumentError("theta1 ≥ theta2!")) end
+    if !logscale && cv > 0.0 && sd ≤ 0.0 throw(ArgumentError("Use sd instead cv for non-logscale parameters!")) end
+    if !logscale && sd ≤ 0.0 throw(ArgumentError("sd ≤ 0.0!")) end
+    if !logscale && cv > 0.0 @warn "sd and cv provided for non-logscale parameters, only sd used!" end
+    if logscale && cv ≤ 0.0 && sd > 0.0 throw(ArgumentError("Use cv instead sd for non-logscale parameters!")) end
+    if logscale && cv ≤ 0.0 throw(ArgumentError("cv ≤ 0"))  end
+    if logscale && sd > 0.0 @warn "sd and cv provided for logscale parameters, only cv used!" end
 
     if logscale
-        if theta1 < 0 || theta2 < 0 || theta0 < 0 throw(ArgumentError("besamplen: theta0, theta1, theta2 shold be > 0 and ")) end
-        ltheta1 = log(theta1)
-        ltheta2 = log(theta2)
-        diffm   = log(theta0)
-        sd      = cv2sd(cv)
-    else
-        ltheta1 = theta1
-        ltheta2 = theta2
-        diffm   = theta0
-        sd      = cv
+        if theta1 ≤ 0 || theta2 ≤ 0 || theta0 ≤ 0 throw(ArgumentError("theta0 or theta1 or theta2 ≤ 0!")) end
+        theta1 = log(theta1)
+        theta2 = log(theta2)
+        theta0 = log(theta0)
+        sd     = cv2sd(cv)
     end
-
-    #Make design
 
     task = CTask(DiffMean(Mean(0, sd), Mean(theta0, sd)), Crossover(design), Equivalence(theta1, theta2, bio=true), SampleSize(beta), alpha)
 
-    #values for approximate n
-    td = (ltheta1 + ltheta2)/2
-    rd = abs((ltheta1 - ltheta2)/2)
-
-    #if rd <= 0 return false end
-    d0 = diffm - td
-    #approximate n
-    n0::Int = convert(Int, ceil(two_mean_equivalence(0, d0, sd, rd, alpha, beta, 1)/2)*2)
-    tp = 1 - beta  #target power
-    if n0 < 4 n0 = 4 end
-    if n0 > 5000 n0 = 5000 end
-    pow = powertostint(alpha,  ltheta1, ltheta2, diffm, sd, n0, design, method)
-    np::Int = 2
-    powp::Float64 = pow
-    if pow > tp
-        while (pow > tp)
-            np = n0
-            powp = pow
-            n0 = n0 - 2
-            #pow = powerTOST(;alpha=alpha, logscale=false, theta1=ltheta1, theta2=ltheta2, theta0=diffm, cv=se, n=n0, design=design, method=method)
-            if n0 < 4 break end #n0, pow end
-            pow = powertostint(alpha,  ltheta1, ltheta2, diffm, sd, n0, design, method)
-        end
-        estpower = powp
-        estn     = np
-    elseif pow < tp
-        while (pow < tp)
-            np = n0
-            powp = pow
-            n0 = n0 + 2
-            #pow = powerTOST(;alpha=alpha, logscale=false, theta1=ltheta1, theta2=ltheta2, theta0=diffm, cv=se, n=n0, design=design, method=method)
-            pow = powertostint(alpha,  ltheta1, ltheta2, diffm, sd, n0, design, method)
-            if n0 > 10000  break end # n0, pow end
-        end
-        estpower = pow
-        estn     = n0
-    else
-        estpower = pow
-        estn     = n0
-    end
+    estn, estpow = samplentostint(alpha, theta1, theta2, theta0, sd, beta, design, method)
     return TaskResult(task, :chow, estn)
 end
+
+function besamplen(t::CTask)
+
+end
+
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
-function bepower(;alpha=0.05, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.0, n=0, logscale=true, design=:d2x2, method=:owenq,  out=:num)::Float64
-    if n < 2 throw(ArgumentError("powerTOST: n can't be < 2")) end
-    if cv == 0.0 throw(ArgumentError("powerTOST: cv can't be equal to 0"))  end
-    if !(0 < alpha < 1) throw(ArgumentError("powerTOST: alfa can't be > 1 or < 0")) end
-    theta0   = convert(Float64, theta0)
-    theta1   = convert(Float64, theta1)
-    theta2   = convert(Float64, theta2)
-    logscale = convert(Bool, logscale)
-    cv       = convert(Float64, cv)
-    n        = convert(Int, n)
-    alpha    = convert(Float64, alpha)
+function bepower(;alpha::Real=0.05, theta1::Real=0.8, theta2::Real=1.25, theta0::Real=0.95, cv::Real=0.0, sd::Real=0.0, n::Int=0, logscale::Bool=true, design::Symbol=:d2x2, method::Symbol=:owenq,  out::Symbol=:num)::Float64
+    if n < 2 throw(ArgumentError("n < 2")) end
+
+    if !(0 < alpha < 1) throw(ArgumentError("Alfa ≥ 1.0 or ≤ 0.0")) end
+    if !logscale && cv > 0.0 && sd ≤ 0.0 throw(ArgumentError("Use sd instead cv for non-logscale parameters!")) end
+    if !logscale && sd ≤ 0.0 throw(ArgumentError("sd ≤ 0.0!")) end
+    if !logscale && cv > 0.0 @warn "sd and cv provided for non-logscale parameters, only sd used!" end
+    if logscale && cv ≤ 0.0 && sd > 0.0 throw(ArgumentError("Use cv instead sd for non-logscale parameters!")) end
+    if logscale && cv ≤ 0.0 throw(ArgumentError("cv ≤ 0"))  end
+    if logscale && sd > 0.0 @warn "sd and cv provided for logscale parameters, only cv used!" end
 
     if logscale
-        ltheta1 = log(theta1)
-        ltheta2 = log(theta2)
-        diffm   = log(theta0)
-        sd      = cv2sd(cv)    # sqrt(ms)
-    else
-        ltheta1 = theta1;
-        ltheta2 = theta2;
-        diffm   = theta0;
-        sd      = cv;
+        theta1 = log(theta1)
+        theta2 = log(theta2)
+        theta0 = log(theta0)
+        sd     = cv2sd(cv)    # sqrt(ms)
     end
 
-    return powertostint(alpha,  ltheta1, ltheta2, diffm, sd, n, design, method)
+    task = CTask(DiffMean(Mean(0, sd), Mean(theta0, sd)), Crossover(design), Equivalence(theta1, theta2, bio=true), Power(n), alpha)
+
+    return powertostint(alpha,  theta1, theta2, theta0, sd, n, design, method)
 end #bepower

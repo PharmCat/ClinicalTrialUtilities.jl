@@ -292,7 +292,7 @@ Calculate CV and MS
 Get pooled CV from multiple sources.
 
 ```
-pooledCV(data::DataFrame; cv=:cv, df=:df, alpha=0.05, returncv=true)::ConfInt
+pooledcv(data::DataFrame; cv=:cv, df=:df, alpha=0.05, returncv=true)::ConfInt
 ```
 
 **data**::DataFrame - Dataframe with CV data
@@ -395,7 +395,7 @@ data = DataFrame(cv = Float64[], df = Int[])
 push!(data, (0.12, 12))
 push!(data, (0.2, 20))
 push!(data, (0.25, 30))
-pooledCV(data; cv=:cv, df=:df, alpha=0.05, returncv=true)
+pooledcv(data; cv=:cv, df=:df, alpha=0.05, returncv=true)
 
 ```
 
