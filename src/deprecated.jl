@@ -1,23 +1,34 @@
-function designProp(type::Symbol)
+function designProp(type::Symbol)::Tuple{Function, Float64, Int}
     if type == :parallel
-        return Parallel()
+        #function f1(n) n - 2 end
+        #return f1, 1.0, 2
+        return x -> x - 2.0, 1.0, 2
     elseif type == :d2x2
-        return Crossover(x -> x - 2, 0.5, 2)
+        #function f2(n) n - 2 end
+        #return f2, 0.5, 2
+        return x -> x - 2.0, 0.5, 2
     elseif type == :d2x2x3
-        return Crossover(x -> 2 * x - 3, 0.375, 2)
+        #return function f3(n) 2*n - 3 end, 0.375, 2
+        return x -> 2.0 * x - 3.0, 0.375, 2
     elseif type == :d2x2x4
-        return Crossover(x -> 3 * x - 4, 0.25, 2)
+        #return function f4(n) 3*n - 4 end, 0.25, 2
+        return x -> 3.0 * x - 4.0, 0.25, 2
     elseif type == :d2x4x4
-        return  Crossover(x -> 3 * x - 4, 0.0625, 4)
+        #return function f5(n) 3*n - 4 end, 0.0625, 4
+        return x -> 3.0 * x - 4.0, 0.0625, 4
     elseif type == :d2x3x3
-        return Crossover(x -> 2 * x - 3, 1/6, 3)
+        #return function f6(n) 2*n - 3 end, 1/6, 3
+        return x -> 2.0 * x - 3.0, 1/6, 3
     elseif type == :d2x4x2
-        return Crossover(x -> x - 2, 0.5, 4)
+        #return function f7(n) n - 2 end, 0.5, 4
+        return x -> x - 2.0, 0.5, 4
     elseif type == :d3x3
-        return Crossover(x -> 2 * x - 4, 2/9, 3)
+        #return function f8(n) 2*n - 4 end, 2/9, 3
+        return x -> 2.0 * x - 4.0, 2/9, 3
     elseif type == :d3x6x3
-        return Crossover(x -> 2 * x - 4, 1/18, 6)
-    else throw(ArgumentError("Design type not known!")) end
+        #return function f9(n) 2*n - 4 end, 1/18, 6
+        return x -> 2.0 * x - 4.0, 1/18, 6
+    else throw(CTUException(1031,"designProp: design not known!")) end
 end
 
 #Exceptions
