@@ -6,8 +6,8 @@ module SIM
     using Random
 
     import ..ctsamplen
-    import ..designProp
     import ..cv2ms
+    import ..Design
     import ..ZDIST
     import ..ConfInt
     import ..CTUException
@@ -64,14 +64,15 @@ module SIM
         if cv <= 0.0   throw(CTUException(1112,"SIM.bepower: cv should be > 0")) end
         if n <= 0   throw(CTUException(1113,"SIM.bepower: n should be > 0")) end
         if simnum <= 0   throw(CTUException(1114,"SIM.bepower: simnum should be > 0")) end
-        dffunc, bkni, seq = designProp(:d2x2)                                   #dffunc if generic funtion with 1 arg return df
-        df    = dffunc(n)
-        sqa   = Array{Float64, 1}(undef, seq)
-        sqa  .= n÷seq
-        for i = 1:n%seq
+
+        d     = Design(:d2x2)                                   #dffunc if generic funtion with 1 arg return df
+        df    = d.df(n)
+        sqa   = Array{Float64, 1}(undef, d.sq)
+        sqa  .= n÷d.sq
+        for i = 1:n%d.sq
             sqa[i] += 1
         end
-        sef   = sqrt(sum(1 ./ sqa)*bkni)                                        #for se
+        sef   = sqrt(sum(1 ./ sqa)*d.bkni)                                        #for se
         #ms    = log(1+cv^2)
         if logscale
             ltheta1 = log(theta1); ltheta2 = log(theta2); diffm = log(theta0); ms = log(1+cv^2);

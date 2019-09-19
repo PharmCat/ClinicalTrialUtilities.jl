@@ -64,14 +64,14 @@ function samplentostint(alpha, ltheta1, ltheta2, diffm, sd, beta, design, method
 end
 
 function powertostint(alpha::Real,  ltheta1::Real, ltheta2::Real, diffm::Real, sd::Real, n::Int, design::Symbol, method::Symbol)::Float64
-    dffunc, bkni, seq = designProp(design) #dffunc if generic funtion with 1 arg return df
-    df    = dffunc(n)
-    sqa   = Array{Float64, 1}(undef, seq)
-    sqa  .= n÷seq
-    for i = 1:n%seq
+    d     = Design(design) #dffunc if generic funtion with 1 arg return df
+    df    = d.df(n)
+    sqa   = Array{Float64, 1}(undef, d.sq)
+    sqa  .= n÷d.sq
+    for i = 1:n%d.sq
         sqa[i] += 1
     end
-    sef = sqrt(sum(1 ./ sqa)*bkni)
+    sef = sqrt(sum(1 ./ sqa)*d.bkni)
 
     if df < 1 throw(CTUException(1024,"powertostint: df < 1")) end
 
@@ -123,7 +123,7 @@ end #powerTOSTOwenQ
 #------------------------------------------------------------------------------
 # approximation based on non-central t
 # .approx.power.TOST - PowerTOST
-function powertost_nct(alpha::T, ltheta1::T, ltheta2::T, diffm::T, se::T, df::T)::Float64 where T <: Real
+function powertost_nct(alpha::Real, ltheta1::Real, ltheta2::Real, diffm::Real, se::Real, df::Real)::Float64
     tdist           = TDist(df)
     tval::Float64   = quantile(tdist, 1-alpha)
     delta1::Float64 = (diffm-ltheta1)/se
@@ -177,49 +177,16 @@ end
     return sqrt(exp(sd^2)-1)
 end
 
-function designProp(type::Symbol)::Tuple{Function, Float64, Int}
-    if type == :parallel
-        #function f1(n) n - 2 end
-        #return f1, 1.0, 2
-        return x -> x - 2.0, 1.0, 2
-    elseif type == :d2x2
-        #function f2(n) n - 2 end
-        #return f2, 0.5, 2
-        return x -> x - 2.0, 0.5, 2
-    elseif type == :d2x2x3
-        #return function f3(n) 2*n - 3 end, 0.375, 2
-        return x -> 2.0 * x - 3.0, 0.375, 2
-    elseif type == :d2x2x4
-        #return function f4(n) 3*n - 4 end, 0.25, 2
-        return x -> 3.0 * x - 4.0, 0.25, 2
-    elseif type == :d2x4x4
-        #return function f5(n) 3*n - 4 end, 0.0625, 4
-        return x -> 3.0 * x - 4.0, 0.0625, 4
-    elseif type == :d2x3x3
-        #return function f6(n) 2*n - 3 end, 1/6, 3
-        return x -> 2.0 * x - 3.0, 1/6, 3
-    elseif type == :d2x4x2
-        #return function f7(n) n - 2 end, 0.5, 4
-        return x -> x - 2.0, 0.5, 4
-    elseif type == :d3x3
-        #return function f8(n) 2*n - 4 end, 2/9, 3
-        return x -> 2.0 * x - 4.0, 2/9, 3
-    elseif type == :d3x6x3
-        #return function f9(n) 2*n - 4 end, 1/18, 6
-        return x -> 2.0 * x - 4.0, 1/18, 6
-    else throw(ArgumentError("Design not known!")) end
-end
-
 function ci2cv(;alpha = 0.05, theta1 = 0.8, theta2 = 1.25, n, design=:d2x2, mso=false, cvms=false)::Union{Float64, Tuple{Float64, Float64}}
-    dffunc, bkni, seq = designProp(design)
-    df    = dffunc(n)
-    if df < 1 throw(CTUException(1051,"ci2cv: df < 1")) end
-    sqa   = Array{Float64, 1}(undef, seq)
-    sqa  .= n÷seq
-    for i = 1:n%seq
+    d     = Design(design)
+    df    = d.df(n)
+    if df < 1 throw(ArgumentError("df < 1, check n!")) end
+    sqa   = Array{Float64, 1}(undef, d.sq)
+    sqa  .= n÷d.sq
+    for i = 1:n%d.sq
         sqa[i] += 1
     end
-    sef = sum(1 ./ sqa)*bkni
+    sef = sum(1 ./ sqa)*d.bkni
     ms = ((log(theta2/theta1)/2/quantile(TDist(df), 1-alpha))^2)/sef
     if cvms return ms2cv(ms), ms end
     if mso return ms end

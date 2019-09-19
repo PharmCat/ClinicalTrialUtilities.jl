@@ -1,3 +1,25 @@
+function designProp(type::Symbol)
+    if type == :parallel
+        return Parallel()
+    elseif type == :d2x2
+        return Crossover(x -> x - 2, 0.5, 2)
+    elseif type == :d2x2x3
+        return Crossover(x -> 2 * x - 3, 0.375, 2)
+    elseif type == :d2x2x4
+        return Crossover(x -> 3 * x - 4, 0.25, 2)
+    elseif type == :d2x4x4
+        return  Crossover(x -> 3 * x - 4, 0.0625, 4)
+    elseif type == :d2x3x3
+        return Crossover(x -> 2 * x - 3, 1/6, 3)
+    elseif type == :d2x4x2
+        return Crossover(x -> x - 2, 0.5, 4)
+    elseif type == :d3x3
+        return Crossover(x -> 2 * x - 4, 2/9, 3)
+    elseif type == :d3x6x3
+        return Crossover(x -> 2 * x - 4, 1/18, 6)
+    else throw(ArgumentError("Design type not known!")) end
+end
+
 #Exceptions
 struct CTUException <: Exception
     n::Int

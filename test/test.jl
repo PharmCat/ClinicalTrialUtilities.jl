@@ -285,18 +285,18 @@ end
 end
 
 @testset "  designProp          " begin
-    dff, bkni, seq = ClinicalTrialUtilities.designProp(:parallel)
-    @test dff(30) ≈ 28 && bkni ≈ 1.0 && seq ≈ 2
-    dff, bkni, seq = ClinicalTrialUtilities.designProp(:d2x2)
-    @test dff(31) ≈ 29 && bkni ≈ 0.5 && seq ≈ 2
-    dff, bkni, seq = ClinicalTrialUtilities.designProp(:d2x2x4)
-    @test dff(31) ≈ 89 && bkni ≈ 0.25 && seq ≈ 2
-    dff, bkni, seq = ClinicalTrialUtilities.designProp(:d2x4x4)
-    @test dff(31) ≈ 89 && bkni ≈ 0.0625 && seq ≈ 4
-    dff, bkni, seq = ClinicalTrialUtilities.designProp(:d2x2x3)
-    @test dff(31) ≈ 59 && bkni ≈ 0.375 && seq ≈ 2
-    dff, bkni, seq = ClinicalTrialUtilities.designProp(:d2x3x3)
-    @test dff(31) ≈ 59 && bkni ≈ 1/6 && seq ≈ 3
+    d = ClinicalTrialUtilities.Design(:parallel)
+    @test d.df(30) ≈ 28 && d.bkni ≈ 1.0 && d.sq ≈ 2
+    d = ClinicalTrialUtilities.Design(:d2x2)
+    @test d.df(31) ≈ 29 && d.bkni ≈ 0.5 && d.sq ≈ 2
+    d = ClinicalTrialUtilities.Design(:d2x2x4)
+    @test d.df(31) ≈ 89 && d.bkni ≈ 0.25 && d.sq ≈ 2
+    d = ClinicalTrialUtilities.Design(:d2x4x4)
+    @test d.df(31) ≈ 89 && d.bkni ≈ 0.0625 && d.sq ≈ 4
+    d = ClinicalTrialUtilities.Design(:d2x2x3)
+    @test d.df(31) ≈ 59 && d.bkni ≈ 0.375 && d.sq ≈ 2
+    d = ClinicalTrialUtilities.Design(:d2x3x3)
+    @test d.df(31) ≈ 59 && d.bkni ≈ 1/6 && d.sq ≈ 3
 
     ClinicalTrialUtilities.sd2cv(ClinicalTrialUtilities.cv2sd(0.2)) ≈ 0.2
     ClinicalTrialUtilities.ms2cv(ClinicalTrialUtilities.cv2ms(0.2)) ≈ 0.2
@@ -831,7 +831,7 @@ println(" ---------------------------------- ")
     #ERROR: ArgumentError: Constant k can't be ≤ 0.0!
     @test_throws ArgumentError ClinicalTrialUtilities.ctsamplen(param=:mean, type=:ea, group=:one, alpha=0.05, beta=0.2, diff=1, sd=1, a=0, b=0, k=0)
     #ERROR: ArgumentError: Design not known!
-    @test_throws ArgumentError ClinicalTrialUtilities.designProp(:ddd)
+    @test_throws ArgumentError ClinicalTrialUtilities.Design(:ddd)
     #=
         ClinicalTrialUtilities.bepower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=0,  method=:mvt)
 

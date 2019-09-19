@@ -20,13 +20,54 @@ abstract type AbstractHypothesis end
 
 abstract type AbstractDesign end
 
-struct Parallel <: AbstractDesign end
-struct Onegroup <: AbstractDesign end
-struct Crossover <: AbstractDesign
-    type::Symbol
-    function Crossover(type::Symbol)
-        new(type)::Crossover
+struct Parallel <: AbstractDesign
+    df::Function
+    bkni::Real
+    sq::Int
+    function Parallel()
+        new(x -> x - 2, 1.0, 2)::Parallel
     end
+end
+struct Onegroup <: AbstractDesign
+    df::Function
+    bkni::Real
+    sq::Int
+    function Onegroup()
+        new(x -> x - 1, 1, 1)::Onegroup
+    end
+end
+struct Crossover <: AbstractDesign
+    df::Function
+    bkni::Real
+    sq::Int
+    function Crossover(type::Symbol)
+        return Design(type)
+    end
+    function Crossover(df::Function, bkni::Real, sq::Int)
+        new(df, bkni, sq)::Crossover
+    end
+end
+
+function Design(type::Symbol)::AbstractDesign
+    if type == :parallel
+        return Parallel()
+    elseif type == :d2x2
+        return Crossover(x -> x - 2, 0.5, 2)
+    elseif type == :d2x2x3
+        return Crossover(x -> 2 * x - 3, 0.375, 2)
+    elseif type == :d2x2x4
+        return Crossover(x -> 3 * x - 4, 0.25, 2)
+    elseif type == :d2x4x4
+        return  Crossover(x -> 3 * x - 4, 0.0625, 4)
+    elseif type == :d2x3x3
+        return Crossover(x -> 2 * x - 3, 1/6, 3)
+    elseif type == :d2x4x2
+        return Crossover(x -> x - 2, 0.5, 4)
+    elseif type == :d3x3
+        return Crossover(x -> 2 * x - 4, 2/9, 3)
+    elseif type == :d3x6x3
+        return Crossover(x -> 2 * x - 4, 1/18, 6)
+    else throw(ArgumentError("Design type not known!")) end
 end
 
 struct Equivalence <: AbstractHypothesis
