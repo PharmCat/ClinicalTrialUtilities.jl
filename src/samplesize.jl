@@ -17,6 +17,7 @@ abstract type AbstractCompositeMean{T}  <:  AbstractMean end
 
 abstract type AbstractObjective end
 abstract type AbstractHypothesis end
+abstract type AbstractEquivalenceHypothesis <: AbstractHypothesis end
 
 abstract type AbstractDesign end
 
@@ -79,19 +80,25 @@ end
     return sqrt(sum(1 ./ sqa)*d.bkni)
 end
 
-struct Equivalence <: AbstractHypothesis
+struct Equivalence <:AbstractEquivalenceHypothesis
     llim::Real          #Lower lmit for Test group
     ulim::Real          #Upper lmit for Test group
-    bio::Bool
     #diff::Real          #Margin difference
     function Equivalence(llim, ulim; bio::Bool = false)
         if llim == ulim throw(ArgumentError("llim == ulim!")) end
-        new(llim, ulim, bio)::Equivalence
+        if bio return Bioequivalence(llim, ulim) end
+        new(llim, ulim)::Equivalence
     end
 end
 function mdiff(h::Equivalence)::Float64
     (h.ulim - h.llim)/2
 end
+
+struct Bioequivalence <: AbstractEquivalenceHypothesis
+    llim::Real          #Lower lmit for Test group
+    ulim::Real          #Upper lmit for Test group
+end
+
 struct Equality <: AbstractHypothesis
 end
 struct Superiority <: AbstractHypothesis
@@ -508,7 +515,7 @@ end
 
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
-function bepower(;alpha::Real=0.05, theta1::Real=0.8, theta2::Real=1.25, theta0::Real=0.95, cv::Real=0.0, sd::Real=0.0, n::Int=0, logscale::Bool=true, design::Symbol=:d2x2, method::Symbol=:owenq,  out::Symbol=:num)::Float64
+function bepower(;alpha::Real=0.05, theta1::Real=0.8, theta2::Real=1.25, theta0::Real=0.95, cv::Real=0.0, sd::Real=0.0, n::Int=0, logscale::Bool=true, design::Symbol=:d2x2, method::Symbol=:owenq)::TaskResult
     if n < 2 throw(ArgumentError("n < 2")) end
 
     if !(0 < alpha < 1) throw(ArgumentError("Alfa ≥ 1.0 or ≤ 0.0")) end
@@ -528,5 +535,28 @@ function bepower(;alpha::Real=0.05, theta1::Real=0.8, theta2::Real=1.25, theta0:
 
     task = CTask(DiffMean(Mean(0, sd), Mean(theta0, sd)), Crossover(design), Equivalence(theta1, theta2, bio=true), Power(n), alpha)
 
-    return powertostint(alpha,  theta1, theta2, theta0, sd, n, design, method)
+    pow =  powertostint(alpha,  theta1, theta2, theta0, sd, n, design, method)
+
+    return TaskResult(task, method, pow)
 end #bepower
+
+function bepower(t::CTask; method::Symbol = :owenq)
+    df    = t.design.df(t.objective.val)
+    σ̵ₓ    = t.param.a.sd*sediv(t.design, t.objective.val)
+    α     = t.alpha
+    θ₁    = t.hyp.llim
+    θ₂    = t.hyp.ulim
+    δ     = t.param.b.m - t.param.a.m
+    if method     == :owenq
+        pow =    powertost_owenq(α, θ₁, θ₂, δ, σ̵ₓ, df)
+    elseif method == :nct
+        pow =      powertost_nct(α, θ₁, θ₂, δ, σ̵ₓ, df)
+    elseif method == :mvt
+        pow =      powertost_mvt(α, θ₁, θ₂, δ, σ̵ₓ, df) #not implemented
+    elseif method == :shifted
+        pow =  powertost_shifted(α, θ₁, θ₂, δ, σ̵ₓ, df)
+    else
+         throw(ArgumentError("method not known!"))
+    end
+    return TaskResult(t, method, pow)
+end

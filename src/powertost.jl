@@ -19,46 +19,46 @@
 #designProp
 #ci2cv
 
-function samplentostint(alpha, ltheta1, ltheta2, diffm, sd, beta, design, method)
+function samplentostint(α::Real, θ₁::Real, θ₂::Real, δ::Real, σ::Real, β::Real, design::Symbol, method::Symbol)::Tuple{Float64, Float64}
     #values for approximate n
-    td = (ltheta1 + ltheta2)/2
-    rd = abs((ltheta1 - ltheta2)/2)
+    td = (θ₁ + θ₂)/2
+    rd = abs(θ₁ - θ₂)/2
 
     #if rd <= 0 return false end
-    d0 = diffm - td
+    d0 = δ - td
     #approximate n
-    n0::Int = convert(Int, ceil(two_mean_equivalence(0, d0, sd, rd, alpha, beta, 1)/2)*2)
-    tp = 1 - beta  #target power
-    if n0 < 4 n0 = 4 end
-    if n0 > 5000 n0 = 5000 end
-    pow = powertostint(alpha,  ltheta1, ltheta2, diffm, sd, n0, design, method)
+    n₀::Int = convert(Int, ceil(two_mean_equivalence(0, d0, σ, rd, α, β, 1) / 2) * 2)
+    tp = 1 - β  #target power
+    if n₀ < 4 n₀ = 4 end
+    if n₀ > 5000 n₀ = 5000 end
+    pow = powertostint(α,  θ₁, θ₂, δ, σ, n₀, design, method)
     np::Int = 2
     powp::Float64 = pow
     if pow > tp
         while (pow > tp)
-            np = n0
+            np = n₀
             powp = pow
-            n0 = n0 - 2
+            n₀ = n₀ - 2
             #pow = powerTOST(;alpha=alpha, logscale=false, theta1=ltheta1, theta2=ltheta2, theta0=diffm, cv=se, n=n0, design=design, method=method)
-            if n0 < 4 break end #n0, pow end
-            pow = powertostint(alpha,  ltheta1, ltheta2, diffm, sd, n0, design, method)
+            if n₀ < 4 break end #n0, pow end
+            pow = powertostint(α,  θ₁, θ₂, δ, σ, n₀, design, method)
         end
         estpower = powp
         estn     = np
     elseif pow < tp
         while (pow < tp)
-            np = n0
+            np = n₀
             powp = pow
-            n0 = n0 + 2
+            n₀ = n₀ + 2
             #pow = powerTOST(;alpha=alpha, logscale=false, theta1=ltheta1, theta2=ltheta2, theta0=diffm, cv=se, n=n0, design=design, method=method)
-            pow = powertostint(alpha,  ltheta1, ltheta2, diffm, sd, n0, design, method)
-            if n0 > 10000  break end # n0, pow end
+            pow = powertostint(α,  θ₁, θ₂, δ, σ, n₀, design, method)
+            if n₀ > 10000  break end # n0, pow end
         end
         estpower = pow
-        estn     = n0
+        estn     = n₀
     else
         estpower = pow
-        estn     = n0
+        estn     = n₀
     end
     return estn, estpower
 end
@@ -91,10 +91,10 @@ function powertostint(α::Real,  θ₁::Real, θ₂::Real, δ::Real, σ::Real, n
 end #powerTOST
 
 #.power.TOST
-function powertost_owenq(alpha::Real, ltheta1::Real, ltheta2::Real, diffm::Real, se::Real, df::Real)::Float64
-    tval::Float64   = quantile(TDist(df), 1 - alpha)
-    delta1::Float64 = (diffm-ltheta1)/se
-    delta2::Float64 = (diffm-ltheta2)/se
+function powertost_owenq(α::Real, θ₁::Real, θ₂::Real, δ::Real, σ̵ₓ::Real, df::Real)::Float64
+    tval::Float64   = quantile(TDist(df), 1 - α)
+    delta1::Float64 = (δ - θ₁)/σ̵ₓ
+    delta2::Float64 = (δ - θ₂)/σ̵ₓ
     R::Float64      = (delta1 - delta2) * sqrt(df) / (tval + tval)
     if isnan(R) R   = 0 end
     if R <= 0 R     = Inf end
@@ -103,33 +103,36 @@ function powertost_owenq(alpha::Real, ltheta1::Real, ltheta2::Real, diffm::Real,
     # former Julious formula (57)/(58) doesn't work
     if df > 10000
         #tval = qnorm(1-alpha)
-        tval  = quantile(ZDIST, 1 - alpha)
+        tval  = quantile(ZDIST, 1 - α)
         #p1   = pnorm(tval-delta1)
-        p1    = cdf(ZDIST,  tval - delta1)
+        #p1    = cdf(ZDIST,  tval - delta1)
         #p2   = pnorm(-tval-delta2)
-        p2    = cdf(ZDIST, -tval - delta2)
-        pwr   = p2 - p1
-        if pwr > 0 return pwr else return 0 end
+        #p2    = cdf(ZDIST, -tval - delta2)
+        #pwr   = p2 - p1
+        return max(0, (cdf(ZDIST, -tval - delta2) - cdf(ZDIST,  tval - delta1)))
+        #if pwr > 0 return pwr else return 0 end
     elseif df >= 5000
         # approximation via non-central t-distribution
-        return powertost_nct(alpha, ltheta1, ltheta2, diffm, se, df)
+        return powertost_nct(α, θ₁, θ₂, δ, σ̵ₓ, df)
+    else
+    #p1  = owensq(df, tval, delta1, 0.0, R)
+    #p2  = owensq(df,-tval, delta2, 0.0, R)
+    #pwr = p2 - p1
+    #if pwr > 0 return pwr else return 0 end
+        return max(0, (owensq(df, -tval, delta2, 0.0, R) - owensq(df, tval, delta1, 0.0, R)))
     end
-    p1  = owensq(df, tval, delta1, 0.0, R)
-    p2  = owensq(df,-tval, delta2, 0.0, R)
-    pwr = p2 - p1
-    if pwr > 0 return pwr else return 0 end
 end #powerTOSTOwenQ
 
 #------------------------------------------------------------------------------
 # approximation based on non-central t
 # .approx.power.TOST - PowerTOST
-function powertost_nct(alpha::Real, ltheta1::Real, ltheta2::Real, diffm::Real, se::Real, df::Real)::Float64
+function powertost_nct(α::Real, θ₁::Real, θ₂::Real, δ::Real, σ̵ₓ::Real, df::Real)::Float64
     tdist           = TDist(df)
-    tval::Float64   = quantile(tdist, 1-alpha)
-    delta1::Float64 = (diffm-ltheta1)/se
-    delta2::Float64 = (diffm-ltheta2)/se
-    pow             = cdf(NoncentralT(df,delta2), -tval) - cdf(NoncentralT(df,delta1), tval)
-    if pow > 0 return pow else return 0 end
+    tval::Float64   = quantile(tdist, 1 - α)
+    delta1::Float64 = (δ - θ₁)/σ̵ₓ
+    delta2::Float64 = (δ - θ₂)/σ̵ₓ
+    pow             = cdf(NoncentralT(df, delta2), -tval) - cdf(NoncentralT(df, delta1), tval)
+    return max(0, pow)
 end #approxPowerTOST
 
 #.power.1TOST
@@ -144,15 +147,16 @@ function powertost_mvt(alpha::Real, ltheta1::Real, ltheta2::Real, diffm::Real, s
 end
 
 #.approx2.power.TOST
-function powertost_shifted(alpha::Real, ltheta1::Real, ltheta2::Real, diffm::Real, se::Real, df::Real)::Float64
+function powertost_shifted(α::Real, θ₁::Real, θ₂::Real, δ::Real, σ̵ₓ::Real, df::Real)::Float64
     tdist           = TDist(df)
-    tval::Float64   = quantile(tdist, 1-alpha)
-    delta1::Float64 = (diffm-ltheta1)/se
-    delta2::Float64 = (diffm-ltheta2)/se
+    tval::Float64   = quantile(tdist, 1 - α)
+    delta1::Float64 = (δ - θ₁)/σ̵ₓ
+    delta2::Float64 = (δ - θ₂)/σ̵ₓ
     if isnan(delta1) delta1 = 0 end
     if isnan(delta2) delta2 = 0 end
     pow = cdf(tdist,-tval-delta2) - cdf(tdist, tval-delta1)
-    if pow > 0 return pow else return 0 end
+    return max(0, pow)
+    #if pow > 0 return pow else return 0 end
 end #approx2PowerTOST
 
 #-------------------------------------------------------------------------------

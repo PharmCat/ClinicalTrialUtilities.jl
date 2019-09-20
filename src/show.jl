@@ -23,7 +23,20 @@ function Base.show(io::IO, obj::TaskResult{CT}) where CT <:  CTask{T, D, H, O} w
         println(io,"-----------------------------------------")
         showresult(io, obj)
 end
-
+function Base.show(io::IO, obj::TaskResult{CT}) where CT <:  CTask{T, D, Bioequivalence, O} where T where D where O <: Union{SampleSize, Power}
+        println(io, objectivename(obj.task.objective))
+        println(io,"-----------------------------------------")
+        println(io,"  Parameter type: ",  paramname(obj.task.param))
+        println(io,"  Design: ",  designinfo(obj.task.design))
+        println(io,"  Hypothesis: ", obj.task.hyp)
+        #println(io,"  Lower limit: ", round(obj.task.llim, sigdigits = 4))
+        #println(io,"  Upper limit: ", round(obj.task.ulim, sigdigits = 4))
+        println(io,"  Alpha: ", obj.task.alpha)
+        showobjective(io, obj.task.objective)
+        println(io, obj.task.param)
+        println(io,"-----------------------------------------")
+        showresult(io, obj)
+end
 
 function objectivename(o::O)::String where O <: AbstractObjective
         if isa(o, SampleSize) return "         Sample Size Estimation         "
