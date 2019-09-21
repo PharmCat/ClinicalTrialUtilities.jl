@@ -173,12 +173,12 @@ end
 @inline function cv2ms(cv::Real)::Float64
      return log(1+cv^2)
 end
-@inline function ms2cv(ms::Real)::Float64
-    return sqrt(exp(ms)-1)
+@inline function cvfromvar(σ²::Real)::Float64
+    return sqrt(exp(σ²)-1)
 end
 #CV2se
-@inline function sd2cv(sd::Real)::Float64
-    return sqrt(exp(sd^2)-1)
+@inline function cvfromsd(σ::Real)::Float64
+    return sqrt(exp(σ^2)-1)
 end
 
 function ci2cv(;alpha = 0.05, theta1 = 0.8, theta2 = 1.25, n, design=:d2x2, mso=false, cvms=false)::Union{Float64, Tuple{Float64, Float64}}
@@ -189,9 +189,9 @@ function ci2cv(;alpha = 0.05, theta1 = 0.8, theta2 = 1.25, n, design=:d2x2, mso=
     sef = sediv(d, n)
 
     ms = ((log(theta2/theta1)/2/quantile(TDist(df), 1-alpha))/sef)^2
-    if cvms return ms2cv(ms), ms end
+    if cvms return cvfromvar(ms), ms end
     if mso return ms end
-    return ms2cv(ms)
+    return cvfromvar(ms)
 end
 
 function pooledcv(data::DataFrame; cv=:cv, df=:df, alpha=0.05, returncv=true)::ConfInt
@@ -200,7 +200,7 @@ function pooledcv(data::DataFrame; cv=:cv, df=:df, alpha=0.05, returncv=true)::C
     tdf = sum(data[:, df])
     result = sum(cv2ms.(data[:, cv]) .* data[:, df])/tdf
     CHSQ = Chisq(tdf)
-    if returncv return ConfInt(ms2cv(result*tdf/quantile(CHSQ, 1-alpha/2)), ms2cv(result*tdf/quantile(CHSQ, alpha/2)), ms2cv(result))
+    if returncv return ConfInt(cvfromvar(result*tdf/quantile(CHSQ, 1-alpha/2)), cvfromvar(result*tdf/quantile(CHSQ, alpha/2)), cvfromvar(result))
     else ConfInt(result*tdf/quantile(CHSQ, 1-alpha/2), result*tdf/quantile(CHSQ, alpha/2), result)
     end
 end

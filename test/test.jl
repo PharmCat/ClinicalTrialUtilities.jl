@@ -298,8 +298,8 @@ end
     d = ClinicalTrialUtilities.Design(:d2x3x3)
     @test d.df(31) ≈ 59 && d.bkni ≈ 1/6 && d.sq ≈ 3
 
-    ClinicalTrialUtilities.sd2cv(ClinicalTrialUtilities.cv2sd(0.2)) ≈ 0.2
-    ClinicalTrialUtilities.ms2cv(ClinicalTrialUtilities.cv2ms(0.2)) ≈ 0.2
+    ClinicalTrialUtilities.cvfromsd(ClinicalTrialUtilities.cv2sd(0.2)) ≈ 0.2
+    ClinicalTrialUtilities.cvfromvar(ClinicalTrialUtilities.cv2ms(0.2)) ≈ 0.2
 end
 end
 

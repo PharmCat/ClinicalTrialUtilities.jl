@@ -533,7 +533,7 @@ function bepower(;alpha::Real=0.05, theta1::Real=0.8, theta2::Real=1.25, theta0:
         sd     = cv2sd(cv)    # sqrt(ms)
     end
 
-    task = CTask(DiffMean(Mean(0, sd), Mean(theta0, sd)), Crossover(design), Equivalence(theta1, theta2, bio=true), Power(n), alpha)
+    task = CTask(DiffMean(Mean(theta0, sd), Mean(0, sd)), Crossover(design), Equivalence(theta1, theta2, bio=true), Power(n), alpha)
 
     pow =  powertostint(alpha,  theta1, theta2, theta0, sd, n, design, method)
 
@@ -546,7 +546,7 @@ function bepower(t::CTask; method::Symbol = :owenq)
     α     = t.alpha
     θ₁    = t.hyp.llim
     θ₂    = t.hyp.ulim
-    δ     = t.param.b.m - t.param.a.m
+    δ     = t.param.a.m - t.param.b.m
     if method     == :owenq
         pow =    powertost_owenq(α, θ₁, θ₂, δ, σ̵ₓ, df)
     elseif method == :nct

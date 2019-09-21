@@ -33,7 +33,9 @@ function Base.show(io::IO, obj::TaskResult{CT}) where CT <:  CTask{T, D, Bioequi
         #println(io,"  Upper limit: ", round(obj.task.ulim, sigdigits = 4))
         println(io,"  Alpha: ", obj.task.alpha)
         showobjective(io, obj.task.objective)
-        println(io, obj.task.param)
+        println(io, "  A/B = $(round(exp(obj.task.param.a.m - obj.task.param.b.m), sigdigits = 4))")
+        println(io, "  σ  = $(round(obj.task.param.a.sd, sigdigits = 4))")
+        println(io, "  CV  = $(round(cvfromsd(obj.task.param.a.sd), sigdigits = 4))")
         println(io,"-----------------------------------------")
         showresult(io, obj)
 end
@@ -98,24 +100,6 @@ function showresult(io, obj::TaskResult{CT}) where CT <:  CTask{T, D, H, O} wher
         println(io, "Power: ", round(obj.result, sigdigits = 6))
 end
 
-function swowtost(io, obj)
-        println(io,"           TOST sample size             ")
-        println(io,"----------------------------------------")
-        println(io,"  Design: ", obj.task.design)
-        println(io,"  Method: ", obj.task.method)
-        println(io,"  Logscale: ", obj.task.logscale)
-        println(io,"----------------------------------------")
-        println(io,"  Alpha: ", obj.task.alpha)
-        println(io,"  Beta: ", obj.task.beta)
-        println(io,"----------------------------------------")
-        println(io,"  Lower limit: ", obj.task.llim)
-        println(io,"  Upper limit: ", obj.task.ulim)
-        println(io,"  GMR: ", obj.task.gmr)
-        println(io,"  CV: ", obj.task.cv)
-        println(io,"----------------------------------------")
-        println(io,"  Sample Size: ", obj.result)
-end
-
 function Base.show(io::IO, p::Proportion)
         print(io,"  Proportion: ", p.x, "/", p.n)
 end
@@ -124,13 +108,13 @@ function Base.show(io::IO, p::Probability)
 end
 
 function Base.show(io::IO, dp::DiffProportion{Probability, R}) where R <: Real
-        println(io, "  A: ", dp.a.p)
-        print(io, "  Ref: ", dp.b)
+        println(io, "  A   = ", dp.a.p)
+        print(io,   "  Ref = ", dp.b)
 end
 
 function Base.show(io::IO, dp::DiffProportion{Probability, Probability})
-        println(io, "  A: ", dp.a.p)
-        print(io, "  B: ", dp.b.p)
+        println(io, "  A = ", dp.a.p)
+        print(io,   "  B = ", dp.b.p)
 end
 #=
 function Base.show(io, dp::DiffProportion{Proportion})::String
@@ -167,6 +151,11 @@ function Base.show(io::IO, h::Equivalence)
         println(io,"Equivalence")
         println(io,"  H₀: |A − B| ≥ $(round(mdiff(h), sigdigits = 4))")
         print(io,  "  Hₐ: |A − B| < $(round(mdiff(h), sigdigits = 4))")
+end
+function Base.show(io::IO, h::Bioequivalence)
+        println(io,"BioEquivalence")
+        println(io,"  H₀: A/B ≤ $(round(exp(h.llim), sigdigits = 4)) || A/B ≥ $(round(exp(h.ulim), sigdigits = 4))")
+        print(io,  "  Hₐ: $(round(exp(h.llim), sigdigits = 4)) < A/B < $(round(exp(h.ulim), sigdigits = 4))")
 end
 function Base.show(io::IO, h::Superiority)
         println(io,"Superiority/Non-Inferiority")
