@@ -5,7 +5,6 @@ import ..NCA, ..LOG2
 export nca
 
 using DataFrames
-
     #Makoid C, Vuchetich J, Banakar V. 1996-1999. Basic Pharmacokinetics.
     function nca(data::DataFrame; conc = NaN, effect = NaN, time=:Time, sort = NaN, calcm = :lint, bl::Float64 = NaN, th::Float64 = NaN)::NCA
         columns  = DataFrames.names(data)
@@ -49,7 +48,6 @@ using DataFrames
         res  = DataFrame()
         elim = DataFrame()
 
-
         if sort === NaN
             if effect !== NaN
                 res   = ncapd(data; conc = effect, time = time, calcm = calcm, bl = bl, th = th)
@@ -71,7 +69,11 @@ using DataFrames
                     end
                     ncares = nca_(datai, :Concentration, :Time, calcm)
                     append!(res, ncares[1])
-                    append!(elim, DataFrame(ncares[3][ncares[2],:]))
+                    if ncares[2] !== NaN
+                        append!(elim, DataFrame(ncares[3][ncares[2], :]))
+                    else
+                        append!(elim, DataFrame(Start = [0], End = [0], b = [NaN], a = [NaN], Rsq = [NaN]))
+                    end
                 end
                 elim = hcat(sortlist, elim)
             #PD NCA
@@ -103,6 +105,7 @@ using DataFrames
         pklog *= "Concentration column: "*string(conc)*"\n"
         pklog *= "Time column: "*string(time)*"\n"
         sort!(data, [time])
+        ncarule(data, conc, time)
         pklog *= "Sorting by Time... \n"
         n::Int     = nrow(data)
         cmax = maximum(data[:, conc])               #Cmax
@@ -116,6 +119,7 @@ using DataFrames
         kel   = NaN
         hl    = NaN
         rsq   = NaN
+        rsqn  = NaN
         aucinf = NaN
         aucinfpct = NaN
         mrtlast = NaN
@@ -181,12 +185,24 @@ using DataFrames
                 aucinf = auc + clast/kel
                 aucinfpct = (aucinf - auc) / aucinf * 100.0
             end
+        else
+            keldata = nothing
         end
-
         # arsq = 1 - (1-rsq)*(rsqn-1)/(rsqn-2)
-
         return DataFrame(AUClast = [auc], Cmax = [cmax], Tmax = [tmax], AUMClast = [aumc], MRTlast = [mrt], Kel = [kel], HL = [hl], Rsq = [rsq], AUCinf = [aucinf], AUCpct = [aucinfpct]), rsqn, keldata
     end
+
+    function ncarule(data::DataFrame, conc::Symbol, time::Symbol; start::Int = 2)
+        if start > nrow(data) return end
+        for i = start:nrow(data)
+            if data[i, conc] <= 0
+                deleterows!(data, i)
+                ncarule(data, conc, time; start = i)
+                break
+            end
+        end
+    end
+
 
     function ncapd(data::DataFrame; conc::Symbol, time::Symbol, calcm::Symbol = :lint, bl::T, th::T) where T <: Real
 
@@ -195,11 +211,10 @@ using DataFrames
         aucath = 0
         aucbth = 0
         aucdblth = 0
-        tabl   = 0
-        tbbl   = 0
-        tath   = 0
-        tbth   = 0
-
+        tabl     = 0
+        tbbl     = 0
+        tath     = 0
+        tbth     = 0
         for i = 2:nrow(data)
             #BASELINE
             if data[i - 1, conc] <= bl && data[i, conc] <= bl
