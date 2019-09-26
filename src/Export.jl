@@ -31,6 +31,17 @@ module Export
             :TATH     => "Time above TH",
             :TBTH     => "Time below TH")
         elseif dict == :pk
+            dict = Dict(
+            :AUClast   => "AUClast",
+            :Cmax   => "Cmax",
+            :Tmax   => "Tmax",
+            :AUMClast   => "AUMClast",
+            :MRTlast => "MRTlast",
+            :Kel => "Kel",
+            :HL => "HL",
+            :Rsq     => "Rsq",
+            :AUCinf     => "AUCint",
+            :AUCpct     => "AUC%")
         end
 
         function dictnames(name::Any, dict::Union{Symbol, Dict})

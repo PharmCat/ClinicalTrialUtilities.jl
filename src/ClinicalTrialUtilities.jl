@@ -16,10 +16,14 @@ module ClinicalTrialUtilities
 using Distributions, StatsBase, Statistics, Random
 using QuadGK
 using DataFrames
-import SpecialFunctions.lgamma
+import SpecialFunctions
 import Base.show
 import Base.showerror
 import Base.getindex
+
+function lgamma(x)
+    return SpecialFunctions.logabsgamma(x)[1]
+end
 
 const ZDIST  = Normal()
 const LOG2   = log(2)
