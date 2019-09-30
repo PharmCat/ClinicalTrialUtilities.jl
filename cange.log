@@ -20,6 +20,7 @@ v0.2.0
   Other changes:
 
   - Changes in error messages. Now throw(ArgumentError(msg));
+  - LimitRule for PK
   - Descriptive stats add SES and SEK;
   - Descriptive performance;
   - Test procedures restructured;
