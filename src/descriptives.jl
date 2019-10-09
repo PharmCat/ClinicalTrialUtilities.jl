@@ -1,5 +1,9 @@
 abstract type AbstractData end
 abstract type AbstractDataSet end
+struct DataSort
+    var
+    val
+end
 """
     Descriptive statistics type
 """
