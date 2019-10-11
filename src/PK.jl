@@ -2,20 +2,23 @@ module PK
 
 using DataFrames
 
-import ..NCA, ..LOG2, ..AbstractData, ..DataSet, ..DataSort, Base.push!
+import ..NCA, ..LOG2, ..AbstractData, ..DataSet, ..DataSort, Base.push!, Base.getindex
 
 abstract type AbstractSubject <: AbstractData end
 
 export nca
 
 struct KelData <: AbstractData
-    s::Array
-    e::Array
-    a::Array
-    b::Array
-    r::Array
+    s::Array{Int, 1}
+    e::Array{Int, 1}
+    a::Array{Float64, 1}
+    b::Array{Float64, 1}
+    r::Array{Float64, 1}
     function KelData(s, e, a, b, r)::KelData
         new(s, e, a, b, r)::KelData
+    end
+    function KelData()::KelData
+        new(Array{Int, 1}(undef, 0), Array{Int, 1}(undef, 0), Array{Float64, 1}(undef, 0), Array{Float64, 1}(undef, 0), Array{Float64, 1}(undef, 0))::KelData
     end
 end
 function Base.push!(keldata::KelData, s, e, a, b, r)
@@ -26,33 +29,52 @@ function Base.push!(keldata::KelData, s, e, a, b, r)
     push!(keldata.r, r)
 end
 
-struct ElimRange
-    kelstart
-    kelend
-    kelexcl
+mutable struct ElimRange
+    kelstart::Int
+    kelend::Int
+    kelexcl::Array{Int, 1}
+    function ElimRange(kelstart, kelend, kelexcl)
+        new(kelstart, kelend, kelexcl)::ElimRange
+    end
+    function ElimRange()
+        new(0, 0, Array{Int, 1}(undef, 0))::ElimRange
+    end
 end
+
+mutable struct DoseTime
+    dose::Real
+    time::Real
+    tau::Real
+    function DoseTime(dose, time, tau)
+        new(dose, time, tau)::DoseTime
+    end
+    function DoseTime()
+        new(NaN, NaN, NaN)::DoseTime
+    end
+end
+
+
 mutable struct PKSubject <: AbstractSubject
     time::Array
     conc::Array
     kelauto::Bool
-    kelstart
-    kelend
-    kelexcl
-    keldata
-    sort
-    function PKSubject(time::Vector, conc::Vector, kelauto::Bool, kelstart, kelend, kelexcl, keldata; sort = nothing)
-        new(time, conc, kelauto, kelstart, kelend, kelexcl, keldata, sort)::PKSubject
+    kelrange::ElimRange
+    dosetime::DoseTime
+    keldata::KelData
+    sort::DataSort
+    function PKSubject(time::Vector, conc::Vector, kelauto::Bool, kelrange::ElimRange, dosetime::DoseTime, keldata::KelData; sort = DataSort())
+        new(time, conc, kelauto, kelrange, dosetime, keldata, sort)::PKSubject
     end
-    function PKSubject(time::Vector, conc::Vector, kelauto::Bool, kelstart, kelend, kelexcl; sort = nothing)
-        new(time, conc, kelauto, kelstart, kelend, kelexcl, nothing, sort)::PKSubject
+    function PKSubject(time::Vector, conc::Vector, kelauto::Bool, kelrange, dosetime; sort = DataSort())
+        new(time, conc, kelauto, kelrange, dosetime, KelData(), sort)::PKSubject
     end
-    function PKSubject(time::Vector, conc::Vector; sort = nothing)
-        new(time, conc, true, nothing, nothing, nothing, nothing, sort)::PKSubject
+    function PKSubject(time::Vector, conc::Vector; sort = DataSort())
+        new(time, conc, true, ElimRange(), DoseTime(), KelData(), sort)::PKSubject
     end
-    function PKSubject(data::DataFrame; time::Symbol, conc::Symbol, timesort::Bool = false, sort = nothing)
+    function PKSubject(data::DataFrame; time::Symbol, conc::Symbol, timesort::Bool = false, sort = DataSort())
         if timesort sort!(data, time) end
         #Check double time
-        new(copy(data[!,time]), copy(data[!,conc]), true, nothing, nothing, nothing, nothing, sort)::PKSubject
+        new(copy(data[!,time]), copy(data[!,conc]), true, ElimRange(), DoseTime(), KelData(), sort)::PKSubject
     end
 end
 
@@ -61,12 +83,22 @@ mutable struct PDSubject <: AbstractSubject
     resp::Array
     bl::Real
     th::Real
-    sort
+    sort::DataSort
+    function PDSubject(time, resp, bl, th; sort = DataSort())
+        new(time, resp, bl, th, sort)::PDSubject
+    end
+    function PDSubject(time, resp; sort = DataSort())
+        new(time, resp, 0, NaN, sort)::PDSubject
+    end
 end
 
 struct PKPDProfile{T <: AbstractSubject} <: AbstractData
     subject::T
+    method
     result::Dict
+    function PKPDProfile(subject::T, result; method = nothing) where T <: AbstractSubject
+        new{T}(subject, method, result)
+    end
 end
 
 struct LimitRule
@@ -76,6 +108,19 @@ struct LimitRule
     function LimitRule(lloq, btmax, atmax)
         new(lloq, btmax, atmax)::LimitRule
     end
+    function LimitRule()
+        new(NaN, NaN, NaN)::LimitRule
+    end
+end
+
+function Base.getindex(a::PKPDProfile{T}, s::Symbol)::Real where T <: AbstractSubject
+    return a.result[s]
+end
+function Base.getindex(a::DataSet{PKPDProfile{T}}, i::Int64) where T <: AbstractSubject
+    return a.data[i]
+end
+function Base.getindex(a::DataSet{PKPDProfile{T}}, i::Int64, s::Symbol)::Real where T <: AbstractSubject
+    return a.data[i].result[s]
 end
 
 using DataFrames
@@ -181,7 +226,7 @@ using DataFrames
         pklog *= "Concentration column: "*string(conc)*"\n"
         pklog *= "Time column: "*string(time)*"\n"
         #sort!(data, [time])
-        ncarule(data, conc, time, LimitRule(eps(), 0, NaN))
+        ncarule!(data, conc, time, LimitRule(eps(), 0, NaN))
 
         n::Int     = nrow(data)
         cmax = maximum(data[:, conc])               #Cmax
@@ -260,11 +305,10 @@ using DataFrames
         return DataFrame(AUClast = [auc], Cmax = [cmax], Tmax = [tmax], AUMClast = [aumc], MRTlast = [mrt], Kel = [kel], HL = [hl], Rsq = [rsq], AUCinf = [aucinf], AUCpct = [aucinfpct]), rsqn, keldata
     end
 
-    function ncarule(data::DataFrame, conc::Symbol, time::Symbol, rule::LimitRule)
+    function ncarule!(data::DataFrame, conc::Symbol, time::Symbol, rule::LimitRule)
         sort!(data, [time])
 
         cmax, tmax, tmaxn = ctmax(data, conc, time)
-
         filterv = Array{Int, 1}(undef, 0)
         for i = 1:nrow(data)
             if data[i, conc] < rule.lloq
@@ -397,12 +441,12 @@ using DataFrames
         return (t₂-t₁)*(c₁+c₂)/2
     end
         #Linear trapezoidal aumc
-    function linaumc(t1, t2, c1, c2)::Float64
-        return (t2-t1)*(t1*c1+t2*c2)/2
+    function linaumc(t₁, t₂, c₁, c₂)::Float64
+        return (t₂-t₁)*(t₁*c₁+t₂*c₂)/2
     end
         #Log trapezoidal auc
-    function logauc(t1, t2, c1, c2)::Float64
-        return  (t2-t1)*(c2-c1)/log(c2/c1)
+    function logauc(t₁, t₂, c₁, c₂)::Float64
+        return  (t₂-t₁)*(c₂-c₁)/log(c₂/c₁)
     end
         #Log trapezoidal aumc
     function logaumc(t1, t2, c1, c2)::Float64
@@ -423,7 +467,7 @@ using DataFrames
 
 
     #---------------------------------------------------------------------------
-    function obsnum(data::PKSubject)
+    function obsnum(data::T) where T <:  AbstractSubject
         return length(data.time)
     end
     function  obsnum(keldata::KelData)
@@ -431,9 +475,10 @@ using DataFrames
     end
 
     function nca!(data::PKSubject; calcm = :lint)
-        result           = Dict(:Obsnum => 0, :Cmax => NaN, :Tmax => NaN, :Tmaxn => 0, :Tlast => NaN, :Clast => NaN, :AUClast => 0, :AUMClast => 0, :MRTlast => NaN, :Kel => NaN, :HL => NaN, :Rsq => NaN, :Rsqn => NaN, :AUCinf => NaN, :AUCpct => NaN)
+        result           = Dict(:Obsnum => 0, :Cmax => 0, :Tmax => 0, :Tmaxn => 0, :Tlast => 0, :Clast => 0, :AUClast => 0, :AUMClast => 0, :MRTlast => 0, :Kel => NaN, :HL => NaN, :Rsq => NaN, :Rsqn => NaN, :AUCinf => NaN, :AUCpct => NaN)
         result[:Obsnum]  = obsnum(data)
         result[:Cmax]    = maximum(data.conc)
+        result[:Tlast]   = data.time[result[:Obsnum]]
         result[:Clast]   = data.conc[result[:Obsnum]]
         result[:Cmax], result[:Tmax], result[:Tmaxn] = ctmax(data)
         for i = 2:result[:Obsnum]
@@ -484,22 +529,22 @@ using DataFrames
             logconc = log.(data.conc)
             cmask   = Array{Bool, 1}(undef, result[:Obsnum])
             cmask  .= false
-            cmask[data.kelstart:data.kelend] .= true
-            cmask[data.kelexcl] .= false
+            cmask[data.kelrange.kelstart:data.kelrange.kelend] .= true
+            cmask[data.kelrange.kelexcl] .= false
             sl = slope(data.time[cmask], logconc[cmask])
-            push!(keldata, data.kelstart, data.kelend, sl[2], sl[1], sl[3])
+            push!(keldata, data.kelrange.kelstart, data.kelrange.kelend, sl[2], sl[1], sl[3])
         end
         if  obsnum(keldata) > 0
             result[:Rsq], result[:Rsqn] = findmax(keldata.r)
-            data.kelstart   = keldata.s[result[:Rsqn]]
-            data.kelend     = keldata.e[result[:Rsqn]]
+            data.kelrange.kelstart   = keldata.s[result[:Rsqn]]
+            data.kelrange.kelend     = keldata.e[result[:Rsqn]]
             data.keldata    = keldata
             result[:Kel]    = abs(keldata.a[result[:Rsqn]])
             result[:HL]     = LOG2 / result[:Kel]
             result[:AUCinf] = result[:AUClast] + result[:Clast] / result[:Kel]
             result[:AUCpct] = (result[:AUCinf] - result[:AUClast]) / result[:AUCinf] * 100.0
         end
-        return PKPDProfile(data, result)
+        return PKPDProfile(data, result; method = calcm)
     end
     function nca!(data::DataSet{PKSubject}; calcm = :lint)
         results = Array{PKPDProfile, 1}(undef, 0)
@@ -508,7 +553,77 @@ using DataFrames
         end
         return DataSet(Tuple(results))
     end
-    function importpk(data::DataFrame; conc::Symbol, time::Symbol, sort::Array)
+    #---------------------------------------------------------------------------
+    function nca!(data::PDSubject)::PKPDProfile{PDSubject}
+        result = Dict(:Obsnum => 0, :RMAX => 0, :TH => 0, :BL => 0, :AUCABL => 0, :AUCBBL => 0, :AUCATH => NaN, :AUCBTH => NaN, :AUCBLNET => 0, :AUCTHNET => 0, :AUCDBLTH => NaN, :TABL => 0, :TBBL => 0, :TATH => NaN, :TBTH => NaN)
+        result[:Obsnum] = obsnum(data)
+        result[:TH] = data.th
+        result[:BL] = data.bl
+        for i = 2:obsnum(data) #BASELINE
+            if data.resp[i - 1] <= bl && data.resp[i] <= bl
+                result[:TBBL]   += data.time[i,] - data.time[i - 1]
+                result[:AUCBBL] += linauc(data.time[i - 1], data.time[i], bl - data.resp[i - 1], bl - data.resp[i])
+            elseif data.resp[i - 1] <= bl &&  data.resp[i] > bl
+                tx      = linpredict(data.resp[i - 1], data.resp[i], bl, data.time[i - 1], data.time[i])
+                result[:TBBL]   += tx - data.time[i - 1]
+                result[:TABL]   += data.time[i] - tx
+                result[:AUCBBL] += (tx - data.time[i - 1]) * (bl - data.resp[i - 1]) / 2
+                result[:AUCABL] += (data.time[i] - tx) * (data.resp[i] - bl) / 2 #Ok
+            elseif data.resp[i - 1] > bl &&  data.resp[i] <= bl
+                tx      = linpredict(data.resp[i - 1], data.resp[i], bl, data.time[i - 1], data.time[i])
+                result[:TBBL]   += data.time[i] - tx
+                result[:TABL]   += tx - data.time[i - 1]
+                result[:AUCBBL] += (data.time[i] - tx) * (bl - data.resp[i]) / 2
+                result[:AUCABL] += (tx - data.time[i - 1]) * (data.resp[i - 1] - bl) / 2
+            elseif data.resp[i - 1] > bl &&  data.resp[i] > bl
+                result[:TABL]   += data.time[i] - data.time[i - 1]
+                result[:AUCABL]     += linauc(data.time[i - 1], data.time[i], data.resp[i - 1] - bl, data.resp[i] - bl)
+            end
+        end #BASELINE
+
+        #THRESHOLD
+        if data.th !== NaN
+            for i = 2:obsnum(data)
+                if data.resp[i - 1] <= th && data.resp[i] <= th
+                    result[:TBTH]   += data.time[i] - data.time[i - 1]
+                    result[:AUCBTH] += linauc(data.time[i - 1], data.time[i], th - data.resp[i - 1], th - data.resp[i])
+                elseif data.resp[i - 1] <= th &&  data.resp[i] > th
+                    tx      = linpredict(data.resp[i - 1], data.resp[i], th, data.time[i - 1], data.time[i])
+                    result[:TBTH]   += tx - data.time[i - 1]
+                    result[:TATH]   += data.time[i] - tx
+                    result[:AUCBTH] += (tx - data.time[i - 1]) * (th - data.resp[i - 1]) / 2
+                    result[:AUCATH] += (data.time[i] - tx) * (data.resp[i] - th) / 2 #Ok
+                elseif data.resp[i - 1] > th &&  data.resp[i] <= th
+                    tx      = linpredict(data.resp[i - 1], data.resp[i], th, data.time[i - 1], data.time[i])
+                    result[:TBTH]   += data.time[i] - tx
+                    result[:TATH]   += tx - data.time[i - 1]
+                    result[:AUCBTH] += (data.time[i] - tx) * (th - data.resp[i]) / 2
+                    result[:AUCATH] += (tx - data.time[i - 1]) * (data.resp[i - 1] - th) / 2
+                elseif data.resp[i - 1] > th &&  data.resp[i] > th
+                    result[:TATH]   += data.time[i] - data.time[i - 1]
+                    result[:AUCATH] += linauc(data.time[i - 1], data.time[i], data.resp[i - 1] - th, data.resp[i] - th)
+                end
+            end
+            if data.bl > data.th
+                result[:AUCDBLTH] = result[:AUCATH] - result[:AUCABL]
+            else
+                result[:AUCDBLTH] = result[:AUCABL] -result[:AUCATH]
+            end
+            result[:AUCTHNET] = result[:AUCATH] - result[:AUCBTH]
+        end
+        result[:AUCBLNET] = result[:AUCABL] - result[:AUCBBL]
+        return PKPDProfile(data, result)
+    end
+
+    function nca!(data::DataSet{PDSubject})
+        results = Array{PKPDProfile, 1}(undef, 0)
+        for i = 1:length(data.data)
+            push!(results, nca!(data.data[i]))
+        end
+        return DataSet(Tuple(results))
+    end
+    #---------------------------------------------------------------------------
+    function pkimport(data::DataFrame, rule::LimitRule; conc::Symbol, time::Symbol, sort::Array)
         sortlist = unique(data[:, sort])
         results  = Array{PKSubject, 1}(undef, 0)
         for i = 1:size(sortlist, 1) #For each line in sortlist
@@ -518,12 +633,37 @@ using DataFrames
                     push!(datai, [data[c, time], data[c, conc]])
                 end
             end
-            sort!(datai, :Time)
+            if rule.lloq !== NaN
+                ncarule!(datai, :Conc, :Time, rule)
+            else
+                sort!(datai, :Time)
+            end
             push!(results, PKSubject(datai[!, :Time], datai[!, :Conc], sort = DataSort(sort, collect(sortlist[i,:]))))
         end
         return DataSet(Tuple(results))
     end
 
+    function pkimport(data::DataFrame; conc::Symbol, time::Symbol, sort::Array)
+        rule = LimitRule()
+        return pkimport(data, rule; conc = conc, time = time, sort = sort)
+    end
+    #---------------------------------------------------------------------------
+    function pdimport(data::DataFrame; resp::Symbol, time::Symbol, sort::Array)
+        sortlist = unique(data[:, sort])
+        results  = Array{PDSubject, 1}(undef, 0)
+        for i = 1:size(sortlist, 1) #For each line in sortlist
+            datai = DataFrame(Time = Float64[], Resp = Float64[])
+            for c = 1:size(data, 1) #For each line in data
+                if data[c, sort] == sortlist[i,:]
+                    push!(datai, [data[c, time], data[c, resp]])
+                end
+            end
+            sort!(datai, :Time)
+            push!(results, PDSubject(datai[!, :Time], datai[!, :Resp], sort = DataSort(sort, collect(sortlist[i,:]))))
+        end
+        return DataSet(Tuple(results))
+    end
+    #---------------------------------------------------------------------------
     function ncarule!(data::PKSubject, rule::LimitRule)
     end
     function ncarule!(data::DataSet{PKSubject}, rule::LimitRule)
@@ -547,6 +687,10 @@ using DataFrames
     function applyelimrange!(data::DataSet{PKPDProfile{PKSubject}}, subj::Array{Int,1}, range::ElimRange)
     end
     function applyelimrange!(data::DataSet{PKPDProfile{PKSubject}}, subj::Int, range::ElimRange)
+    end
+    function setdosetime!(data::PKSubject, dosetime::DoseTime)
+    end
+    function setdosetime!(data::DataSet{PKSubject}, dosetime::DoseTime)
     end
 
 end #end module

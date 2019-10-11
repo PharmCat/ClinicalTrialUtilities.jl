@@ -683,6 +683,13 @@ println(" ---------------------------------- ")
     @test pk.result.MRTlast[1] ≈ 3.10345 atol=1E-5
     @test pk.result.Tmax[1] ≈ 3.0 atol=1E-5
 
+    pkds = ClinicalTrialUtilities.PK.pkimport(data; conc = :Concentration, time = :Time, sort = [:Subject, :Formulation])
+    pk   = ClinicalTrialUtilities.PK.nca!(pkds)
+    @test pk[1, :AUCinf]  ≈ 1.63205 atol=1E-5
+    @test pk[1, :Cmax]    ≈ 0.4 atol=1E-5
+    @test pk[1, :MRTlast] ≈ 3.10345 atol=1E-5
+    @test pk[1, :Tmax]    ≈ 3.0 atol=1E-5
+
     pk = ClinicalTrialUtilities.PK.nca(data; conc = :Concentration, sort=[:Formulation, :Subject], bl = 2.0)
 
     pk = ClinicalTrialUtilities.PK.nca(data[1:7,:]; conc = :Concentration, sort=[:Formulation, :Subject])

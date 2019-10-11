@@ -1,8 +1,14 @@
 abstract type AbstractData end
 abstract type AbstractDataSet end
 struct DataSort
-    var
-    val
+    var::Vector
+    val::Vector
+    function DataSort(var, val)
+        new(var, val)::DataSort
+    end
+    function DataSort()
+        new(Array{Any,1}(undef, 0), Array{Any,1}(undef, 0))::DataSort
+    end
 end
 """
     Descriptive statistics type
