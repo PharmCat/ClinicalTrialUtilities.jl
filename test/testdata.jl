@@ -1,3 +1,26 @@
+pkdata = DataFrame(Concentration = Float64[], Time = Float64[], Subject = String[], Formulation = String[])
+push!(pkdata, (0.0, 0, "1", "T"))
+push!(pkdata, (0.2, 1, "1", "T"))
+push!(pkdata, (0.3, 2, "1", "T"))
+push!(pkdata, (0.4, 3, "1", "T"))
+push!(pkdata, (0.3, 4, "1", "T"))
+push!(pkdata, (0.2, 5, "1", "T"))
+push!(pkdata, (0.1, 6, "1", "T"))
+push!(pkdata, (0.0, 0, "2", "T"))
+push!(pkdata, (0.3, 1, "2", "T"))
+push!(pkdata, (0.4, 2, "2", "T"))
+push!(pkdata, (0.5, 3, "2", "T"))
+push!(pkdata, (0.3, 4, "2", "T"))
+push!(pkdata, (0.1, 5, "2", "T"))
+push!(pkdata, (0.05, 6, "2", "T"))
+push!(pkdata, (0.1, 0, "1", "R"))
+push!(pkdata, (0.2, 1, "1", "R"))
+push!(pkdata, (0.9, 2, "1", "R"))
+push!(pkdata, (0.8, 3, "1", "R"))
+push!(pkdata, (0.3, 4, "1", "R"))
+push!(pkdata, (0.2, 5, "1", "R"))
+push!(pkdata, (0.1, 6, "1", "R"))
+
 freqdat = """row;col
 q;p
 q;p
@@ -414,7 +437,7 @@ pkdat = """Subject	Formulation	Time	Concentration
 10	R	48	45.204
 10	R	72	42.191"""
 
-pddata = """time;effect
+pddata = CSV.read(IOBuffer("""time;effect
 0;0
 1;1
 2;4
@@ -427,4 +450,4 @@ pddata = """time;effect
 6;1
 7;2
 8;1
-9;1"""
+9;1""")) |> DataFrame

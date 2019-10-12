@@ -122,7 +122,9 @@ end
 function Base.getindex(a::DataSet{PKPDProfile{T}}, i::Int64, s::Symbol)::Real where T <: AbstractSubject
     return a.data[i].result[s]
 end
-
+function Base.getindex(a::DataSet{T}, i::Int64) where T <: AbstractSubject
+    return a.data[i]
+end
 using DataFrames
     #Makoid C, Vuchetich J, Banakar V. 1996-1999. Basic Pharmacokinetics.
     function nca(data::DataFrame; conc = NaN, effect = NaN, time=:Time, sort = NaN, calcm = :lint, bl::Float64 = NaN, th::Float64 = NaN)::NCA
@@ -486,7 +488,7 @@ using DataFrames
                 auc   =  linauc(data.time[i - 1], data.time[i], data.conc[i - 1], data.conc[i])    # (data[i - 1, conc] + data[i, conc]) * (data[i, time] - data[i - 1, time])/2
                 aumc  = linaumc(data.time[i - 1], data.time[i], data.conc[i - 1], data.conc[i])    # (data[i - 1, conc]*data[i - 1, time] + data[i, conc]*data[i, time]) * (data[i, time] - data[i - 1, time])/2
             elseif calcm == :logt
-                if i > tmaxn
+                if i > result[:Tmaxn]
                     if data.conc[i] < data.conc[i - 1] &&  data.conc[i] > 0 &&  data.conc[i - 1] > 0
                         auc   =  logauc(data.time[i - 1], data.time[i], data.conc[i - 1], data.conc[i])
                         aumc  = logaumc(data.time[i - 1], data.time[i], data.conc[i - 1], data.conc[i])
@@ -560,51 +562,57 @@ using DataFrames
         result[:TH] = data.th
         result[:BL] = data.bl
         for i = 2:obsnum(data) #BASELINE
-            if data.resp[i - 1] <= bl && data.resp[i] <= bl
+            if data.resp[i - 1] <= result[:BL] && data.resp[i] <= result[:BL]
                 result[:TBBL]   += data.time[i,] - data.time[i - 1]
-                result[:AUCBBL] += linauc(data.time[i - 1], data.time[i], bl - data.resp[i - 1], bl - data.resp[i])
-            elseif data.resp[i - 1] <= bl &&  data.resp[i] > bl
-                tx      = linpredict(data.resp[i - 1], data.resp[i], bl, data.time[i - 1], data.time[i])
+                result[:AUCBBL] += linauc(data.time[i - 1], data.time[i], result[:BL] - data.resp[i - 1], result[:BL] - data.resp[i])
+            elseif data.resp[i - 1] <= result[:BL] &&  data.resp[i] > result[:BL]
+                tx      = linpredict(data.resp[i - 1], data.resp[i], result[:BL], data.time[i - 1], data.time[i])
                 result[:TBBL]   += tx - data.time[i - 1]
                 result[:TABL]   += data.time[i] - tx
-                result[:AUCBBL] += (tx - data.time[i - 1]) * (bl - data.resp[i - 1]) / 2
-                result[:AUCABL] += (data.time[i] - tx) * (data.resp[i] - bl) / 2 #Ok
-            elseif data.resp[i - 1] > bl &&  data.resp[i] <= bl
-                tx      = linpredict(data.resp[i - 1], data.resp[i], bl, data.time[i - 1], data.time[i])
+                result[:AUCBBL] += (tx - data.time[i - 1]) * (result[:BL] - data.resp[i - 1]) / 2
+                result[:AUCABL] += (data.time[i] - tx) * (data.resp[i] - result[:BL]) / 2 #Ok
+            elseif data.resp[i - 1] > result[:BL] &&  data.resp[i] <= result[:BL]
+                tx      = linpredict(data.resp[i - 1], data.resp[i], result[:BL], data.time[i - 1], data.time[i])
                 result[:TBBL]   += data.time[i] - tx
                 result[:TABL]   += tx - data.time[i - 1]
-                result[:AUCBBL] += (data.time[i] - tx) * (bl - data.resp[i]) / 2
-                result[:AUCABL] += (tx - data.time[i - 1]) * (data.resp[i - 1] - bl) / 2
-            elseif data.resp[i - 1] > bl &&  data.resp[i] > bl
+                result[:AUCBBL] += (data.time[i] - tx) * (result[:BL] - data.resp[i]) / 2
+                result[:AUCABL] += (tx - data.time[i - 1]) * (data.resp[i - 1] - result[:BL]) / 2
+            elseif data.resp[i - 1] > result[:BL] &&  data.resp[i] > result[:BL]
                 result[:TABL]   += data.time[i] - data.time[i - 1]
-                result[:AUCABL]     += linauc(data.time[i - 1], data.time[i], data.resp[i - 1] - bl, data.resp[i] - bl)
+                result[:AUCABL]     += linauc(data.time[i - 1], data.time[i], data.resp[i - 1] - result[:BL], data.resp[i] - result[:BL])
             end
         end #BASELINE
 
         #THRESHOLD
-        if data.th !== NaN
+        if result[:TH] !== NaN
+            result[:AUCATH]   = 0
+            result[:AUCBTH]   = 0
+            result[:TATH]     = 0
+            result[:TBTH]     = 0
+            result[:AUCTHNET] = 0
+            result[:AUCDBLTH] = 0
             for i = 2:obsnum(data)
-                if data.resp[i - 1] <= th && data.resp[i] <= th
+                if data.resp[i - 1] <= result[:TH] && data.resp[i] <= result[:TH]
                     result[:TBTH]   += data.time[i] - data.time[i - 1]
-                    result[:AUCBTH] += linauc(data.time[i - 1], data.time[i], th - data.resp[i - 1], th - data.resp[i])
-                elseif data.resp[i - 1] <= th &&  data.resp[i] > th
-                    tx      = linpredict(data.resp[i - 1], data.resp[i], th, data.time[i - 1], data.time[i])
+                    result[:AUCBTH] += linauc(data.time[i - 1], data.time[i], result[:TH] - data.resp[i - 1], result[:TH] - data.resp[i])
+                elseif data.resp[i - 1] <= result[:TH] &&  data.resp[i] > result[:TH]
+                    tx      = linpredict(data.resp[i - 1], data.resp[i], result[:TH], data.time[i - 1], data.time[i])
                     result[:TBTH]   += tx - data.time[i - 1]
                     result[:TATH]   += data.time[i] - tx
-                    result[:AUCBTH] += (tx - data.time[i - 1]) * (th - data.resp[i - 1]) / 2
-                    result[:AUCATH] += (data.time[i] - tx) * (data.resp[i] - th) / 2 #Ok
-                elseif data.resp[i - 1] > th &&  data.resp[i] <= th
-                    tx      = linpredict(data.resp[i - 1], data.resp[i], th, data.time[i - 1], data.time[i])
+                    result[:AUCBTH] += (tx - data.time[i - 1]) * (result[:TH] - data.resp[i - 1]) / 2
+                    result[:AUCATH] += (data.time[i] - tx) * (data.resp[i] - result[:TH]) / 2 #Ok
+                elseif data.resp[i - 1] > result[:TH] &&  data.resp[i] <= result[:TH]
+                    tx      = linpredict(data.resp[i - 1], data.resp[i], result[:TH], data.time[i - 1], data.time[i])
                     result[:TBTH]   += data.time[i] - tx
                     result[:TATH]   += tx - data.time[i - 1]
-                    result[:AUCBTH] += (data.time[i] - tx) * (th - data.resp[i]) / 2
-                    result[:AUCATH] += (tx - data.time[i - 1]) * (data.resp[i - 1] - th) / 2
-                elseif data.resp[i - 1] > th &&  data.resp[i] > th
+                    result[:AUCBTH] += (data.time[i] - tx) * (result[:TH] - data.resp[i]) / 2
+                    result[:AUCATH] += (tx - data.time[i - 1]) * (data.resp[i - 1] - result[:TH]) / 2
+                elseif data.resp[i - 1] > result[:TH] &&  data.resp[i] > result[:TH]
                     result[:TATH]   += data.time[i] - data.time[i - 1]
-                    result[:AUCATH] += linauc(data.time[i - 1], data.time[i], data.resp[i - 1] - th, data.resp[i] - th)
+                    result[:AUCATH] += linauc(data.time[i - 1], data.time[i], data.resp[i - 1] - result[:TH], data.resp[i] - result[:TH])
                 end
             end
-            if data.bl > data.th
+            if result[:BL] > result[:TH]
                 result[:AUCDBLTH] = result[:AUCATH] - result[:AUCABL]
             else
                 result[:AUCDBLTH] = result[:AUCABL] -result[:AUCATH]
@@ -623,7 +631,7 @@ using DataFrames
         return DataSet(Tuple(results))
     end
     #---------------------------------------------------------------------------
-    function pkimport(data::DataFrame, rule::LimitRule; conc::Symbol, time::Symbol, sort::Array)
+    function pkimport(data::DataFrame, sort::Array, rule::LimitRule; conc::Symbol, time::Symbol)
         sortlist = unique(data[:, sort])
         results  = Array{PKSubject, 1}(undef, 0)
         for i = 1:size(sortlist, 1) #For each line in sortlist
@@ -643,12 +651,22 @@ using DataFrames
         return DataSet(Tuple(results))
     end
 
-    function pkimport(data::DataFrame; conc::Symbol, time::Symbol, sort::Array)
+    function pkimport(data::DataFrame, sort::Array; time::Symbol, conc::Symbol)
         rule = LimitRule()
-        return pkimport(data, rule; conc = conc, time = time, sort = sort)
+        return pkimport(data, sort, rule; conc = conc, time = time)
+    end
+
+    function pkimport(data::DataFrame, rule::LimitRule; time::Symbol, conc::Symbol)
+        rule = LimitRule()
+        datai = ncarule!(copy(data[!,[time, conc]]), conc, time, rule)
+        return DataSet(tuple(PKSubject(datai[!, time], datai[!, conc])))
+    end
+    function pkimport(data::DataFrame; time::Symbol, conc::Symbol)
+        datai = sort(data[!,[time, conc]], time)
+        return DataSet(tuple(PKSubject(datai[!, time], datai[!, conc])))
     end
     #---------------------------------------------------------------------------
-    function pdimport(data::DataFrame; resp::Symbol, time::Symbol, sort::Array)
+    function pdimport(data::DataFrame, sort::Array; resp::Symbol, time::Symbol, bl = 0, th = NaN)
         sortlist = unique(data[:, sort])
         results  = Array{PDSubject, 1}(undef, 0)
         for i = 1:size(sortlist, 1) #For each line in sortlist
@@ -659,9 +677,13 @@ using DataFrames
                 end
             end
             sort!(datai, :Time)
-            push!(results, PDSubject(datai[!, :Time], datai[!, :Resp], sort = DataSort(sort, collect(sortlist[i,:]))))
+            push!(results, PDSubject(datai[!, :Time], datai[!, :Resp], bl, th, sort = DataSort(sort, collect(sortlist[i,:]))))
         end
         return DataSet(Tuple(results))
+    end
+    function pdimport(data::DataFrame; resp::Symbol, time::Symbol, bl = 0, th = NaN)
+        datai = sort(data[!,[time, resp]], time)
+        return DataSet(tuple(PDSubject(datai[!, time], datai[!, resp], bl, th)))
     end
     #---------------------------------------------------------------------------
     function ncarule!(data::PKSubject, rule::LimitRule)
@@ -691,6 +713,19 @@ using DataFrames
     function setdosetime!(data::PKSubject, dosetime::DoseTime)
     end
     function setdosetime!(data::DataSet{PKSubject}, dosetime::DoseTime)
+    end
+
+    function setth!(data::DataSet{PDSubject}, th)
+        for i = 1:length(data)
+            data[1].th = th
+        end
+        data
+    end
+    function setbl!(data::DataSet{PDSubject}, bl)
+        for i = 1:length(data)
+            data[1].bl = bl
+        end
+        data
     end
 
 end #end module

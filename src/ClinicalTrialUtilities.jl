@@ -20,6 +20,7 @@ import SpecialFunctions
 import Base.show
 import Base.showerror
 import Base.getindex
+import Base.length
 
 function lgamma(x)
     return SpecialFunctions.logabsgamma(x)[1]

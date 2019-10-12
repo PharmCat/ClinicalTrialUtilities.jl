@@ -61,6 +61,9 @@ end
 function Base.getindex(a::DataSet{Descriptive}, i::Int64, s::Symbol)::Real
     return a.data[i].data[s]
 end
+function Base.length(data::DataSet{T}) where T <: AbstractData
+    return length(data.data)
+end
 """
     Descriptive statistics
 """
