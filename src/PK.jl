@@ -49,7 +49,6 @@ using DataFrames
         res  = DataFrame()
         elim = DataFrame()
 
-
         if sort === NaN
             if effect !== NaN
                 res   = ncapd(data; conc = effect, time = time, calcm = calcm, bl = bl, th = th)
@@ -71,13 +70,17 @@ using DataFrames
                     end
                     ncares = nca_(datai, :Concentration, :Time, calcm)
                     append!(res, ncares[1])
-                    append!(elim, DataFrame(ncares[3][ncares[2],:]))
+                    if ncares[2] !== NaN
+                        append!(elim, DataFrame(ncares[3][ncares[2], :]))
+                    else
+                        append!(elim, DataFrame(Start = [0], End = [0], b = [NaN], a = [NaN], Rsq = [NaN]))
+                    end
                 end
                 elim = hcat(sortlist, elim)
             #PD NCA
             elseif effect !== NaN && bl !== NaN
                 sortlist = unique(data[:, sort])
-                res      = DataFrame(AUCABL = Float64[], AUCBBL = Float64[], AUCATH = Float64[], AUCBTH = Float64[], AUCBLNET = Float64[], AUCTHNET = Float64[], AUCDBLTH = Float64[], TABL = Float64[], TBBL = Float64[], TATH = Float64[], TBTH = Float64[])
+                res      = DataFrame(RMAX = Float64[], TH = Float64[], BL = Float64[], AUCABL = Float64[], AUCBBL = Float64[], AUCATH = Float64[], AUCBTH = Float64[], AUCBLNET = Float64[], AUCTHNET = Float64[], AUCDBLTH = Float64[], TABL = Float64[], TBBL = Float64[], TATH = Float64[], TBTH = Float64[])
                 for i = 1:size(sortlist, 1) #For each line in sortlist
                     datai = DataFrame(Concentration = Float64[], Time = Float64[])
                     for c = 1:size(data, 1) #For each line in data
@@ -188,18 +191,17 @@ using DataFrames
         return DataFrame(AUClast = [auc], Cmax = [cmax], Tmax = [tmax], AUMClast = [aumc], MRTlast = [mrt], Kel = [kel], HL = [hl], Rsq = [rsq], AUCinf = [aucinf], AUCpct = [aucinfpct]), rsqn, keldata
     end
 
-    function ncapd(data::DataFrame; conc::Symbol, time::Symbol, calcm::Symbol = :lint, bl::T, th::T) where T <: Real
+    function ncapd(data::DataFrame; conc::Symbol, time::Symbol, calcm::Symbol = :lint, bl::Real, th::Real)
 
         aucabl = 0
         aucbbl = 0
         aucath = 0
         aucbth = 0
         aucdblth = 0
-        tabl   = 0
-        tbbl   = 0
-        tath   = 0
-        tbth   = 0
-
+        tabl     = 0
+        tbbl     = 0
+        tath     = 0
+        tbth     = 0
         for i = 2:nrow(data)
             #BASELINE
             if data[i - 1, conc] <= bl && data[i, conc] <= bl
@@ -249,7 +251,7 @@ using DataFrames
         elseif bl < th
             aucdblth = aucabl - aucath
         end
-        return DataFrame(AUCABL = [aucabl], AUCBBL = [aucbbl], AUCATH = [aucath], AUCBTH = [aucbth], AUCBLNET = [aucabl-aucbbl], AUCTHNET = [aucath-aucbth], AUCDBLTH = [aucdblth], TABL = [tabl], TBBL = [tbbl], TATH = [tath], TBTH = [tbth])
+        return DataFrame(RMAX = [maximum(data[!, conc])], TH = [th], BL = [bl], AUCABL = [aucabl], AUCBBL = [aucbbl], AUCATH = [aucath], AUCBTH = [aucbth], AUCBLNET = [aucabl-aucbbl], AUCTHNET = [aucath-aucbth], AUCDBLTH = [aucdblth], TABL = [tabl], TBBL = [tbbl], TATH = [tath], TBTH = [tbth])
     end
 
     function slope(x::Array{S, 1}, y::Array{T, 1})::Tuple{Float64, Float64, Float64} where S <: Real where T <: Real
