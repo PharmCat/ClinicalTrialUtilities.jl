@@ -22,6 +22,8 @@ import Base.showerror
 import Base.getindex
 import Base.length
 
+import DataFrames.DataFrame
+
 function lgamma(x)
     return SpecialFunctions.logabsgamma(x)[1]
 end
@@ -51,16 +53,7 @@ function getindex(a::ConfInt, b::Int64)
     end
 end
 
-struct NCA
-    result::DataFrame
-    elimination::DataFrame
-    settings::DataFrame
-    textout::String
-    errorlog::String
-    errors::Array
-end
-
-export CTUException, ConfInt, NCA, showerror
+export CTUException, ConfInt, showerror
 
 #Deprecated
 include("deprecated.jl")
@@ -82,7 +75,7 @@ include("info.jl")
 #Descriptive statistics
 include("descriptives.jl")
 #PK
-include("PK.jl")
+include("pk.jl")
 #Frequency
 include("freque.jl")
 #Export
@@ -102,7 +95,11 @@ export ci2cv, pooledCV
 #Other
 export descriptive, freque, contab, owensQ, owensT
 #Mudules
-export SIM, CI, PK
+export SIM, CI
+
+#Pharmacokinetics
+
+export nca!, pkimport, pdimport
 
 
 

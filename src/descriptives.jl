@@ -1,22 +1,13 @@
 abstract type AbstractData end
 abstract type AbstractDataSet end
-struct DataSort
-    var::Vector
-    val::Vector
-    function DataSort(var, val)
-        new(var, val)::DataSort
-    end
-    function DataSort()
-        new(Array{Any,1}(undef, 0), Array{Any,1}(undef, 0))::DataSort
-    end
-end
+
 """
     Descriptive statistics type
 """
 struct Descriptive <: AbstractData
     var::Union{Symbol, Nothing}
     varname::Union{String, Nothing}
-    sortval::Union{Tuple{Vararg{Any}}, Nothing}
+    sort::Dict
     #data::NamedTuple{}
     data::NamedTuple{S,T} where S where T <: Tuple{Vararg{Number}}
 end
@@ -45,7 +36,7 @@ function Base.getindex(a::Descriptive, s::Symbol)::Real
     return a.data[s]
 end
 struct DataSet{T <: AbstractData}
-    data::Tuple{Vararg{T}}
+    data::Vector{T}
 end
 function Base.show(io::IO, obj::DataSet{Descriptive})
     println(io, "Descriptive statistics set")
@@ -68,7 +59,7 @@ end
     Descriptive statistics
 """
 function descriptive(data::DataFrame;
-    sort::Union{Symbol, Array{T,1}, Nothing} = nothing,
+    sort::Union{Symbol, Array{T,1}} = Array{Symbol,1}(undef,0),
     vars::Union{Symbol, Array{T,1}},
     stats::Union{Symbol, Array{T,1}, Tuple{Vararg{Symbol}}} = :default)::DataSet{Descriptive} where T <: Union{Symbol, String}
 
@@ -77,14 +68,19 @@ function descriptive(data::DataFrame;
     if isa(vars, Symbol) vars = [vars] end
     if eltype(vars) <: String vars = Symbol.(vars) end
 
-    d = Array{Descriptive, 1}(undef, 0) # Temp Descriptive array
-    if sort === nothing
-        pushvardescriptive!(d, vars, Matrix(data[:,vars]), nothing, stats)
-        return DataSet(Tuple(d))
-    end
-
     if isa(sort, Symbol) sort = [sort] end
     if eltype(sort) <: String sort = Symbol.(sort) end
+
+    d = Array{Descriptive, 1}(undef, 0) # Temp Descriptive array
+
+    if isa(sort, Array) && length(sort) == 0
+        #pushvardescriptive!(d, vars, Matrix(data[:,vars]), Dict(), stats)
+        mx = Matrix(data[:,vars])
+        for v  = 1:length(vars)  #For each variable in list
+            push!(d, Descriptive(vars[v], nothing, Dict(), NamedTuple{stats}(Tuple(descriptive_(mx[:, v], stats)))))
+        end
+        return DataSet(d)
+    end
 
     sortlist = unique(data[:, sort])
     #sort!(sortlist, sort)
@@ -93,13 +89,16 @@ function descriptive(data::DataFrame;
     for i = 1:size(sortlist, 1)
         sortval = Tuple(sortlist[i,:])
         mx = getsortedmatrix(data; datacol=vars, sortcol=sort, sortval=sortval)
-        pushvardescriptive!(d, vars, mx, sortval, stats)  #push variable descriprives for mx
+        for v  = 1:length(vars)  #For each variable in list
+            push!(d, Descriptive(vars[v], nothing, Dict(sort .=> sortval), NamedTuple{stats}(Tuple(descriptive_(mx[:, v], stats)))))
+        end
+        #pushvardescriptive!(d, vars, mx, sortval, stats)  #push variable descriprives for mx
     end
-    return DataSet(Tuple(d))
+    return DataSet(d)
 end
-function descriptive(data::Array{T, 1}; stats::Union{Symbol, Vector, Tuple} = :default, var = nothing, varname = nothing, sortval = nothing)::Descriptive where T <: Real
+function descriptive(data::Array{T, 1}; stats::Union{Symbol, Vector, Tuple} = :default, var = nothing, varname = nothing, sort = Dict())::Descriptive where T <: Real
     stats = checkstats(stats)
-    return Descriptive(var, varname, sortval, NamedTuple{stats}(Tuple(descriptive_(data, stats))))
+    return Descriptive(var, varname, sort, NamedTuple{stats}(Tuple(descriptive_(data, stats))))
 end
 #=
 """

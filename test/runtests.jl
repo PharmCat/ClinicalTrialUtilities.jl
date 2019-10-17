@@ -4,4 +4,3 @@
 using ClinicalTrialUtilities
 
 include("test.jl")
-include("pktest.jl")
