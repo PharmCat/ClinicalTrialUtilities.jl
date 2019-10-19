@@ -15,10 +15,10 @@ end
 struct KelData <: AbstractData
     s::Array{Int, 1}
     e::Array{Int, 1}
-    a::Array{Float64, 1}
-    b::Array{Float64, 1}
-    r::Array{Float64, 1}
-    ar::Array{Float64, 1}
+    a::Array{Number, 1}
+    b::Array{Number, 1}
+    r::Array{Number, 1}
+    ar::Array{Number, 1}
     function KelData(s, e, a, b, r, ar)::KelData
         new(s, e, a, b, r, ar)::KelData
     end
@@ -48,9 +48,9 @@ mutable struct ElimRange
 end
 
 struct DoseTime
-    dose::Real
-    time::Real
-    tau::Real
+    dose::Number
+    time::Number
+    tau::Number
     function DoseTime()
         new(NaN, 0, NaN)::DoseTime
     end
@@ -81,7 +81,7 @@ mutable struct PKSubject <: AbstractSubject
         new(time, conc, kelauto, kelrange, dosetime, KelData(), sort)::PKSubject
     end
     function PKSubject(time::Vector, conc::Vector; sort = Dict())
-        new(time, conc, true, ElimRange(), DoseTime(), KelData(), sort)::PKSubject
+        new(time, conc, true, ElimRange(), DoseTime(NaN, 0 * time[1]), KelData(), sort)::PKSubject
     end
     function PKSubject(data::DataFrame; time::Symbol, conc::Symbol, timesort::Bool = false, sort = Dict())
         if timesort sort!(data, time) end
@@ -104,7 +104,7 @@ mutable struct PDSubject <: AbstractSubject
     end
 end
 
-struct PKPDProfile{T <: AbstractSubject} <: AbstractData
+mutable struct PKPDProfile{T <: AbstractSubject} <: AbstractData
     subject::T
     method
     result::Dict
@@ -298,7 +298,7 @@ end
     end
 
     #---------------------------------------------------------------------------
-    function slope(x::Vector, y::Vector)::Tuple{Float64, Float64, Float64, Float64}
+    function slope(x::Vector, y::Vector)::Tuple{Number, Number, Number, Number}
         if length(x) != length(y) throw(ArgumentError("Unequal vector length!")) end
         n   = length(x)
         if n < 2 throw(ArgumentError("n < 2!")) end
@@ -318,31 +318,31 @@ end
         return a, b, r2, ar
     end #end slope
         #Linear trapezoidal auc
-    function linauc(t₁, t₂, c₁, c₂)::Float64
+    function linauc(t₁, t₂, c₁, c₂)::Number
         return (t₂-t₁)*(c₁+c₂)/2
     end
         #Linear trapezoidal aumc
-    function linaumc(t₁, t₂, c₁, c₂)::Float64
+    function linaumc(t₁, t₂, c₁, c₂)::Number
         return (t₂-t₁)*(t₁*c₁+t₂*c₂)/2
     end
         #Log trapezoidal auc
-    function logauc(t₁, t₂, c₁, c₂)::Float64
+    function logauc(t₁, t₂, c₁, c₂)::Number
         return  (t₂-t₁)*(c₂-c₁)/log(c₂/c₁)
     end
         #Log trapezoidal aumc
-    function logaumc(t₁, t₂, c₁, c₂)::Float64
+    function logaumc(t₁, t₂, c₁, c₂)::Number
         return (t₂-t₁) * (t₂*c₂-t₁*c₁) / log(c₂/c₁) - (t₂-t₁)^2 * (c₂-c₁) / log(c₂/c₁)^2
     end
         #linear prediction bx from ax, a1 < ax < a2
-    function linpredict(a1::Real, a2::Real, ax::Real, b1::Real, b2::Real)::Float64
+    function linpredict(a1, a2, ax, b1, b2)::Number
         return abs((ax - a1) / (a2 - a1))*(b2 - b1) + b1
     end
 
-    function logtpredict(c1::Real, c2::Real, cx::Real, t1::Real, t2::Real)::Float64
+    function logtpredict(c1, c2, cx, t1, t2)::Number
         return log(cx/c1)/log(c2/c1)*(t2-t1)+t1
     end
 
-    function logcpredict(t1::Real, t2::Real, tx::Real, c1::Real, c2::Real)::Float64
+    function logcpredict(t1, t2, tx, c1, c2)::Number
         return exp(log(c1) + abs((tx-t1)/(t2-t1))*(log(c2) - log(c1)))
     end
 
@@ -377,8 +377,11 @@ end
         end
         return auc, aumc
     end
+
 #-------------------------------------------------------------------------------
     function nca!(data::PKSubject; calcm = :lint, verbose = false, io = IO)
+        result   = Dict()
+        #=
         result    = Dict(:Obsnum   => 0,   :Tmax   => 0,   :Tmaxn    => 0,   :Tlast   => 0,
         :Cmax    => 0,   :Cdose    => NaN, :Clast  => 0,   :Ctau     => NaN, :Ctaumin => NaN, :Cavg => NaN,
         :Swing   => NaN, :Swingtau => NaN, :Fluc   => NaN, :Fluctau  => NaN,
@@ -386,6 +389,7 @@ end
         :MRTlast => 0,   :Kel      => NaN, :HL     => NaN,
         :Rsq     => NaN, :ARsq     => NaN, :Rsqn   => NaN,
         :AUCinf  => NaN, :AUCpct   => NaN)
+        =#
 
         result[:Obsnum]  = length(data)
         result[:Cmax]    = maximum(data.obs)
@@ -394,8 +398,8 @@ end
         result[:Cmax], result[:Tmax], result[:Tmaxn] = ctmax(data, data.dosetime.time, data.dosetime.tau)
         #-----------------------------------------------------------------------
         #Areas
-        aucpartl  = Array{Float64,1}(undef, result[:Obsnum] - 1)
-        aumcpartl = Array{Float64,1}(undef, result[:Obsnum] - 1)
+        aucpartl  = Array{Number, 1}(undef, result[:Obsnum] - 1)
+        aumcpartl = Array{Number, 1}(undef, result[:Obsnum] - 1)
         for i = 1:(result[:Obsnum] - 1)
             aucpartl[i], aumcpartl[i] = aucpart(data.time[i], data.time[i + 1], data.obs[i], data.obs[i + 1], calcm, i + 1 > result[:Tmaxn])
         end
@@ -419,7 +423,7 @@ end
         result[:AUCall]  = sum(aucpartl[pmask])
         result[:AUMCall] = sum(aumcpartl[pmask])
         for i = result[:Tmaxn]:result[:Obsnum] - 1
-            if data.obs[i+1] <= 0 pmask[i:end] .= false; break end
+            if data.obs[i+1] <= 0 * data.obs[i+1] pmask[i:end] .= false; break end
         end
         result[:AUClast]  = sum(aucpartl[pmask])
         result[:AUMClast] = sum(aumcpartl[pmask])
@@ -436,7 +440,7 @@ end
                     cmask                    .= false
                     cmask[i:result[:Obsnum]] .= true
                     sl = slope(data.time[cmask], logconc[cmask])
-                    if sl[1] < 0
+                    if sl[1] < 0 * sl[1]
                         push!(keldata, i, result[:Obsnum], sl[1], sl[2], sl[3], sl[4])
                     end
                 end
@@ -575,7 +579,7 @@ end
         sortlist = unique(data[:, sort])
         results  = Array{PKSubject, 1}(undef, 0)
         for i = 1:size(sortlist, 1) #For each line in sortlist
-            datai = DataFrame(Time = Float64[], Conc = Float64[])
+            datai = DataFrame(Time = eltype(data[!,time])[], Conc = eltype(data[!,conc])[])
             for c = 1:size(data, 1) #For each line in data
                 if data[c, sort] == sortlist[i,:]
                     push!(datai, [data[c, time], data[c, conc]])
@@ -653,12 +657,23 @@ end
     end
     #---------------------------------------------------------------------------
     function applyelimrange!(data::PKPDProfile{PKSubject}, range::ElimRange)
+        setelimrange!(data.subject, range)
+        data.result = nca!(data.subject, calcm = data.method).result
+        data
     end
     function applyelimrange!(data::DataSet{PKPDProfile{PKSubject}}, range::ElimRange)
     end
     function applyelimrange!(data::DataSet{PKPDProfile{PKSubject}}, range::ElimRange, subj::Array{Int,1})
     end
-    function applyelimrange!(data::DataSet{PKPDProfile{PKSubject}}, range::ElimRange, subj::Int,)
+    function applyelimrange!(data::DataSet{PKPDProfile{PKSubject}}, range::ElimRange, subj::Int)
+    end
+    function applyelimrange!(data::DataSet{PKPDProfile{PKSubject}}, range::ElimRange, sort::Dict)
+        for i = 1:length(data)
+            if sort ∈ data[i].subject.sort
+                applyelimrange!(data[i], range)
+            end
+        end
+        data
     end
     #---------------------------------------------------------------------------
     function setdosetime!(data::PKSubject, dosetime::DoseTime)

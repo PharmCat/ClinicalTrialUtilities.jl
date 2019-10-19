@@ -30,8 +30,10 @@ println(" ---------------------------------- ")
     @test pk[1, :Tmax]    ≈ 3.0 atol=1E-5
 
     pkds = ClinicalTrialUtilities.pkimport(pkdata2, [:Subject, :Formulation]; conc = :Concentration, time = :Time)
+    pk   = ClinicalTrialUtilities.nca!(pkds)
 
     pkds = ClinicalTrialUtilities.pkimport(glucose2, [:Subject, :Date]; conc = :glucose, time = :Time)
+    pk   = ClinicalTrialUtilities.nca!(pkds)
 
     pdds = ClinicalTrialUtilities.pdimport(pddata; time=:time, resp=:effect, bl = 3.0)
     pd   = ClinicalTrialUtilities.nca!(pdds)
