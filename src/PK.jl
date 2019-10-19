@@ -724,7 +724,7 @@ end
         return data[i].subject.keldata
     end
 
-    function DataFrames.DataFrame(data::DataSet{PKPDProfile}; unst = false)::DataFrame
+    function DataFrames.DataFrame(data::DataSet{PKPDProfile}; unst = false)
         d = DataFrame(id = Int[], sortvar = Symbol[], sortval = Any[])
         for i = 1:length(data)
             if length(data[i].subject.sort) > 0
@@ -733,18 +733,19 @@ end
                 end
             end
         end
-        d   = unstack(d, :sortvar, :sortval)
+        d   = unstack(d, :sortvar, :sortval)[!,2:end]
         df  = DataFrame()
         dfn = names(d)
         for i = 1:size(d,2)
             df[!,dfn[i]] = Array{eltype(d[!, dfn[i]]), 1}(undef, 0)
         end
-        df = hcat(df, DataFrame(param = Symbol[], value = Float64[]))
+        df = hcat(df, DataFrame(param = Any[], value = Any[]))
         for i = 1:size(d,1)
-            a = collect(d[i,:])
+            a = Array{Any,1}(undef, size(d,2))
+            copyto!(a, collect(d[i,:]))
             for p in data[i].result
                 r = append!(copy(a), collect(p))
-                push!(df, r)
+            push!(df, r)
             end
         end
         if unst
