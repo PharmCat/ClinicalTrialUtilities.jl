@@ -170,3 +170,7 @@ function Base.show(io::IO, e::TaskEstimate)
                 prinln("Group $i: $(ceil(e.est))")
         end
 end
+
+function Base.show(io::IO, obj::ConfInt)
+        print(io, "Estimate: $(obj.estimate) ($(obj.lower) - $(obj.upper))")
+end

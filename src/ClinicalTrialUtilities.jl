@@ -39,6 +39,13 @@ struct ConfInt
     lower::Float64
     upper::Float64
     estimate::Float64
+    alpha::Float64
+    function ConfInt(lower, upper, estimate)
+        new(lower, upper, estimate, NaN)::ConfInt
+    end
+    function ConfInt(lower, upper, estimate, alpha)
+        new(lower, upper, estimate, alpha)::ConfInt
+    end
 end
 
 function getindex(a::ConfInt, b::Int64)
