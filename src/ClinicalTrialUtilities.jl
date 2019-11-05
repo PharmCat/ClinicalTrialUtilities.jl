@@ -106,7 +106,7 @@ export SIM, CI
 
 #Pharmacokinetics
 
-export nca!, pkimport, pdimport
+export nca!, pkimport, pdimport, DataFrame
 
 
 
