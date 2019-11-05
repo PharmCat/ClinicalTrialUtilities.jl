@@ -741,7 +741,7 @@ end
         for i = 1:size(d,2)
             df[!,dfn[i]] = Array{eltype(d[!, dfn[i]]), 1}(undef, 0)
         end
-        df = hcat(df, DataFrame(param = Any[], value = Any[]))
+        df = hcat(df, DataFrame(param = Any[], value = Real[]))
         for i = 1:size(d,1)
             a = Array{Any,1}(undef, size(d,2))
             copyto!(a, collect(d[i,:]))
