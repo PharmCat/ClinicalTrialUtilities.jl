@@ -66,6 +66,8 @@ function Design(type::Symbol)::AbstractDesign
         return Crossover(x -> x - 2, 0.5, 4)
     elseif type == :d3x3
         return Crossover(x -> 2 * x - 4, 2/9, 3)
+    elseif type == :d4x4
+        return Crossover(x -> 3 * x - 6, 1/8, 4)
     elseif type == :d3x6x3
         return Crossover(x -> 2 * x - 4, 1/18, 6)
     else throw(ArgumentError("Design type not known!")) end
