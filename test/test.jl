@@ -304,8 +304,8 @@ end
 end
 
 println(" ---------------------------------- ")
-@testset "  Utils test          " begin
-@testset "  ci2cv Test          " begin
+@testset "  Utils test            " begin
+@testset "  ci2cv Test            " begin
 
     cvms = ClinicalTrialUtilities.ci2cv(;alpha = 0.05, theta1 = 0.9, theta2 = 1.25, n=30, design=:d2x2x4, cvms=true)
     @test cvms[1] ≈ 0.583175066140736 && cvms[2] ≈ 0.29273913226894244
@@ -334,7 +334,7 @@ end
 include("citest.jl")
 
 println(" ---------------------------------- ")
-@testset "  Simulations         " begin
+@testset "  Simulations           " begin
 
     @test ClinicalTrialUtilities.SIM.bepower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=20, simnum=4, seed=1111) ≈ 0.8346
     @test ClinicalTrialUtilities.SIM.bepower(alpha=0.1, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=29, simnum=4, seed=1111) ≈ 0.9744
@@ -361,7 +361,7 @@ end
 include("dstest.jl")
 
 println(" ---------------------------------- ")
-@testset "  Frequency           " begin
+@testset "  Frequency             " begin
     df = CSV.read(IOBuffer(freqdat)) |> DataFrame
     ctab =  ClinicalTrialUtilities.contab(df, row = :row, col = :col)
     @test ctab == [9 8; 5 21]
@@ -371,7 +371,7 @@ println(" ---------------------------------- ")
 end
 
 println(" ---------------------------------- ")
-@testset "  Random              " begin
+@testset "  Random                " begin
     @test ClinicalTrialUtilities.randomtable() == [1,2,2,1,2,1,1,2,2,1]
 end
 
@@ -379,25 +379,29 @@ end
 include("pktest.jl")
 
 println(" ---------------------------------- ")
-@testset "  Scenario            " begin
+@testset "  Scenario              " begin
     #Pharmacokinetics statistics
-    
-    pk  = ClinicalTrialUtilities.PK.nca((CSV.read(IOBuffer(pkdat)) |> DataFrame); conc = :Concentration, sort=[:Subject, :Formulation]).result
-    res = ClinicalTrialUtilities.descriptive(pk, sort=[:Formulation], vars = [:AUClast, :Cmax])
-    @test res[1, :mean] ≈ 7431.283916666667
+    pkds = ClinicalTrialUtilities.pkimport(pkdata2, [:Subject, :Formulation]; time = :Time, conc = :Concentration)
+    pk   = ClinicalTrialUtilities.nca!(pkds)
+
+
+    #res = ClinicalTrialUtilities.descriptive(pk, sort=[:Formulation], vars = [:AUClast, :Cmax])
+    #@test res[1, :mean] ≈ 7431.283916666667
     #@test res[3, :mean] ≈ 8607.09
     #html = ClinicalTrialUtilities.Export.htmlExport(res)
+    pdds = ClinicalTrialUtilities.pdimport(pkdata2, [:Subject, :Formulation]; time = :Time, resp = :Concentration)
+    pd   = ClinicalTrialUtilities.nca!(pdds)
 
-    pd  = ClinicalTrialUtilities.PK.nca((CSV.read(IOBuffer(pkdat)) |> DataFrame); effect = :Concentration, sort=[:Subject, :Formulation], bl = 1.0).result
-    res = ClinicalTrialUtilities.descriptive(pd, sort=[:Formulation], stats = :all, vars = [:AUCABL, :AUCBBL, :TABL, :TATH])
-    @test res[3, :mean] ≈ 71.9845013481999
-    @test res[7, :mean] ≈ 71.85794338696802
+    #pd  = ClinicalTrialUtilities.PK.nca((CSV.read(IOBuffer(pkdat)) |> DataFrame); effect = :Concentration, sort=[:Subject, :Formulation], bl = 1.0).result
+    #res = ClinicalTrialUtilities.descriptive(pd, sort=[:Formulation], stats = :all, vars = [:AUCABL, :AUCBBL, :TABL, :TATH])
+    #@test res[3, :mean] ≈ 71.9845013481999
+    #@test res[7, :mean] ≈ 71.85794338696802
     #html = ClinicalTrialUtilities.Export.htmlExport(res; dict = :pd)
 
 end
 
 println(" ---------------------------------- ")
-@testset "  Errors              " begin
+@testset "  Errors                " begin
 
     #ERROR: ArgumentError: sampleSize: alpha and beta sould be > 0 and < 1.
     @test_throws ArgumentError ClinicalTrialUtilities.ctsamplen(param=:mean, type=:ea, group=:one, alpha=2, beta=0.2, diff=1, sd=1, a=1, b=1, k=1)
@@ -431,15 +435,15 @@ println(" ---------------------------------- ")
 
 
     =#
-    data = DataFrame(Concentration = Float64[], Time = Float64[], Subject = String[], Formulation = String[])
-    pk = ClinicalTrialUtilities.PK.nca(data; conc = :c, time = :t,  sort=[:Formulatio, :Subjec], calcm = :logtt)
-    @test length(pk.errors) == 5
-    pk = ClinicalTrialUtilities.PK.nca(data; conc = :Concentration, time = :Time,  sort=6, calcm = :logt)
-    @test length(pk.errors) == 1
+    #data = DataFrame(Concentration = Float64[], Time = Float64[], Subject = String[], Formulation = String[])
+    #pk = ClinicalTrialUtilities.PK.nca(data; conc = :c, time = :t,  sort=[:Formulatio, :Subjec], calcm = :logtt)
+    #@test length(pk.errors) == 5
+    #pk = ClinicalTrialUtilities.PK.nca(data; conc = :Concentration, time = :Time,  sort=6, calcm = :logt)
+    #@test length(pk.errors) == 1
 end
 
 println(" ---------------------------------- ")
-@testset "  Show test          " begin
+@testset "  Show test             " begin
 
     io = IOBuffer();
     #1
