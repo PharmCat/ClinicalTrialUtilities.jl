@@ -80,7 +80,7 @@ using DataFrames
             #PD NCA
             elseif effect !== NaN && bl !== NaN
                 sortlist = unique(data[:, sort])
-                res      = DataFrame(RMAX = Float64[], TH = Float64[], BL = Float64[], AUCABL = Float64[], AUCBBL = Float64[], AUCATH = Float64[], AUCBTH = Float64[], AUCBLNET = Float64[], AUCTHNET = Float64[], AUCDBLTH = Float64[], TABL = Float64[], TBBL = Float64[], TATH = Float64[], TBTH = Float64[])
+                res      = DataFrame(RMIN = Float64[], RMAX = Float64[], TH = Float64[], BL = Float64[], AUCABL = Float64[], AUCBBL = Float64[], AUCATH = Float64[], AUCBTH = Float64[], AUCBLNET = Float64[], AUCTHNET = Float64[], AUCDBLTH = Float64[], TABL = Float64[], TBBL = Float64[], TATH = Float64[], TBTH = Float64[])
                 for i = 1:size(sortlist, 1) #For each line in sortlist
                     datai = DataFrame(Concentration = Float64[], Time = Float64[])
                     for c = 1:size(data, 1) #For each line in data
@@ -251,7 +251,7 @@ using DataFrames
         elseif bl < th
             aucdblth = aucabl - aucath
         end
-        return DataFrame(RMAX = [maximum(data[!, conc])], TH = [th], BL = [bl], AUCABL = [aucabl], AUCBBL = [aucbbl], AUCATH = [aucath], AUCBTH = [aucbth], AUCBLNET = [aucabl-aucbbl], AUCTHNET = [aucath-aucbth], AUCDBLTH = [aucdblth], TABL = [tabl], TBBL = [tbbl], TATH = [tath], TBTH = [tbth])
+        return DataFrame(RMIN = [minimum(data[!, conc])], RMAX = [maximum(data[!, conc])], TH = [th], BL = [bl], AUCABL = [aucabl], AUCBBL = [aucbbl], AUCATH = [aucath], AUCBTH = [aucbth], AUCBLNET = [aucabl-aucbbl], AUCTHNET = [aucath-aucbth], AUCDBLTH = [aucdblth], TABL = [tabl], TBBL = [tbbl], TATH = [tath], TBTH = [tbth])
     end
 
     function slope(x::Array{S, 1}, y::Array{T, 1})::Tuple{Float64, Float64, Float64} where S <: Real where T <: Real
