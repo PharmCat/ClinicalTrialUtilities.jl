@@ -20,11 +20,12 @@ v0.2.0
   Other changes:
 
   - Changes in error messages. Now throw(ArgumentError(msg));
-  - LimitRule for PK
-  - RMIN/RMAX/TH/BL for PD
+  - LimitRule for PK;
+  - RMIN/RMAX/TH/BL for PD;
   - Descriptive stats add SES and SEK;
   - Descriptive performance;
   - Test procedures restructured;
+  - 4x4 design;
   - Minor changes, bugfix, code cleaning, cosmetics.
 
 v0.1.16
