@@ -383,14 +383,15 @@ println(" ---------------------------------- ")
     #Pharmacokinetics statistics
     pkds = ClinicalTrialUtilities.pkimport(pkdata2, [:Subject, :Formulation]; time = :Time, conc = :Concentration)
     pk   = ClinicalTrialUtilities.nca!(pkds)
-
-
+    df   = ClinicalTrialUtilities.DataFrame(pk; unst = true)
+    ds   = ClinicalTrialUtilities.descriptive(df, stats = :all, sort = [:Formulation])
     #res = ClinicalTrialUtilities.descriptive(pk, sort=[:Formulation], vars = [:AUClast, :Cmax])
     #@test res[1, :mean] ≈ 7431.283916666667
     #@test res[3, :mean] ≈ 8607.09
     #html = ClinicalTrialUtilities.Export.htmlExport(res)
-    pdds = ClinicalTrialUtilities.pdimport(pkdata2, [:Subject, :Formulation]; time = :Time, resp = :Concentration)
+    pdds = ClinicalTrialUtilities.pdimport(pkdata2, [:Formulation]; time = :Time, resp = :Concentration)
     pd   = ClinicalTrialUtilities.nca!(pdds)
+    ds   = ClinicalTrialUtilities.descriptive(df, stats = :default, sort = [:Formulation])
 
     #pd  = ClinicalTrialUtilities.PK.nca((CSV.read(IOBuffer(pkdat)) |> DataFrame); effect = :Concentration, sort=[:Subject, :Formulation], bl = 1.0).result
     #res = ClinicalTrialUtilities.descriptive(pd, sort=[:Formulation], stats = :all, vars = [:AUCABL, :AUCBBL, :TABL, :TATH])
