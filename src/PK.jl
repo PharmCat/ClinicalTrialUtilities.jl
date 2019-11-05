@@ -501,10 +501,12 @@ end
     end
     #---------------------------------------------------------------------------
     function nca!(data::PDSubject)::PKPDProfile{PDSubject}
-        result = Dict(:Obsnum => 0, :RMAX => 0, :TH => 0, :BL => 0, :AUCABL => 0, :AUCBBL => 0, :AUCATH => NaN, :AUCBTH => NaN, :AUCBLNET => 0, :AUCTHNET => 0, :AUCDBLTH => NaN, :TABL => 0, :TBBL => 0, :TATH => NaN, :TBTH => NaN)
+        result = Dict(:TH => NaN, :AUCABL => 0, :AUCBBL => 0, :AUCBLNET => 0,  :TABL => 0, :TBBL => 0)
         result[:Obsnum] = length(data)
         result[:TH] = data.th
         result[:BL] = data.bl
+        result[:RMAX] = maximum(data.obs)
+        result[:RMIN] = maximum(data.obs)
         for i = 2:obsnum(data) #BASELINE
             if data.obs[i - 1] <= result[:BL] && data.obs[i] <= result[:BL]
                 result[:TBBL]   += data.time[i,] - data.time[i - 1]
