@@ -15,7 +15,7 @@ function Base.show(io::IO, obj::Descriptive)
     println(io, "Descriptive statistics")
     if obj.var !== nothing print(io, "Variable: ", obj.var) end
     if obj.varname !== nothing println(io, "(", obj.varname,")") else println(io, "") end
-    if obj.sortval !== nothing println(io, "Group: ", obj.sortval) end
+    if obj.sort !== nothing println(io, "Group: ", obj.sort) end
     maxcol = 0
     for k in keys(obj.data)
         if length(string(k)) > maxcol maxcol = length(string(k)) end
@@ -42,7 +42,7 @@ function Base.show(io::IO, obj::DataSet{Descriptive})
     println(io, "Descriptive statistics set")
     for i = 1:length(obj.data)
         print(io, i, " | ", string(obj.data[i].var))
-        if obj.data[i].sortval !== nothing println(io, " | ", string(obj.data[i].sortval)) end
+        if obj.data[i].sort !== nothing println(io, " | ", string(obj.data[i].sort)) end
         println(io, "____________________")
     end
 end
@@ -60,13 +60,27 @@ end
 """
 function descriptive(data::DataFrame;
     sort::Union{Symbol, Array{T,1}} = Array{Symbol,1}(undef,0),
-    vars::Union{Symbol, Array{T,1}},
+    vars = [],
     stats::Union{Symbol, Array{T,1}, Tuple{Vararg{Symbol}}} = :default)::DataSet{Descriptive} where T <: Union{Symbol, String}
 
     stats = checkstats(stats)
 
-    if isa(vars, Symbol) vars = [vars] end
-    if eltype(vars) <: String vars = Symbol.(vars) end
+    if isa(vars, Array) && length(vars) == 0
+        vars = filter(x -> x ∉ sort, names(data))
+        del  = []
+        for i = 1:length(vars)
+            if !(eltype(data[!, vars[i]]) <: Union{Missing, Real}) push!(del, i) end
+        end
+        if length(del) > 0
+            deleteat!(vars, del)
+        end
+    end
+    if isa(vars, Symbol) 
+        vars = [vars]
+    elseif !(isa(vars, Array))
+        vars = [Symbol(vars)]
+    end
+    if isa(vars, Array) && !(eltype(vars) <: Symbol) vars = Symbol.(vars) end
 
     if isa(sort, Symbol) sort = [sort] end
     if eltype(sort) <: String sort = Symbol.(sort) end
