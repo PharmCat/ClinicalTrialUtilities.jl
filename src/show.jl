@@ -75,7 +75,7 @@ function groupnum(p::T)::String where T <: AbstractParameter
                 return "Two"
         end
 end
-function designinfo(d::Onegroup)::String
+function designinfo(d::OneGroup)::String
         return "One group design"
 end
 function designinfo(d::Parallel)::String
@@ -85,7 +85,7 @@ function designinfo(d::Crossover)::String
         return "Crossover design"
 end
 
-function showresult(io, obj::TaskResult{CT}) where CT <:  CTask{T, D, H, O} where T where D <: Onegroup where H where O <: SampleSize
+function showresult(io, obj::TaskResult{CT}) where CT <:  CTask{T, D, H, O} where T where D <: OneGroup where H where O <: SampleSize
         println(io, "Sample size: $(ceil(obj.result))")
 end
 function showresult(io, obj::TaskResult{CT}) where CT <:  CTask{T, D, H, O} where T where D <: Crossover where H where O <: SampleSize

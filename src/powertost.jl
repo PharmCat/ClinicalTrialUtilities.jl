@@ -166,22 +166,40 @@ end #approx2PowerTOST
 #-------------------------------------------------------------------------------
 
 #CV2se
-@inline function cv2sd(cv::Real)::Float64
-    return sqrt(cv2ms(cv))
-end
+"""
+    sdfromcv(cv::Real)::Float64
 
-@inline function cv2ms(cv::Real)::Float64
+LnSD from CV.
+"""
+@inline function sdfromcv(cv::Real)::Float64
+    return sqrt(varfromcv(cv))
+end
+"""
+    varfromcv(cv::Real)::Float64
+
+LnVariance from CV.
+"""
+function varfromcv(cv::Real)::Float64
      return log(1+cv^2)
 end
-@inline function cvfromvar(σ²::Real)::Float64
+"""
+    cvfromvar(σ²::Real)::Float64
+
+CV from variance.
+"""
+function cvfromvar(σ²::Real)::Float64
     return sqrt(exp(σ²)-1)
 end
 #CV2se
 @inline function cvfromsd(σ::Real)::Float64
     return sqrt(exp(σ^2)-1)
 end
+"""
+    cvfromci(;alpha = 0.05, theta1 = 0.8, theta2 = 1.25, n, design=:d2x2, mso=false, cvms=false)::Union{Float64, Tuple{Float64, Float64}}
 
-function ci2cv(;alpha = 0.05, theta1 = 0.8, theta2 = 1.25, n, design=:d2x2, mso=false, cvms=false)::Union{Float64, Tuple{Float64, Float64}}
+CV from bioequivalence confidence inerval.
+"""
+function cvfromci(;alpha = 0.05, theta1 = 0.8, theta2 = 1.25, n, design=:d2x2, mso=false, cvms=false)::Union{Float64, Tuple{Float64, Float64}}
     d     = Design(design)
     df    = d.df(n)
     if df < 1 throw(ArgumentError("df < 1, check n!")) end
@@ -193,12 +211,16 @@ function ci2cv(;alpha = 0.05, theta1 = 0.8, theta2 = 1.25, n, design=:d2x2, mso=
     if mso return ms end
     return cvfromvar(ms)
 end
+"""
+    pooledcv(data::DataFrame; cv=:cv, df=:df, alpha=0.05, returncv=true)::ConfInt
 
+Pooled CV from multiple sources.
+"""
 function pooledcv(data::DataFrame; cv=:cv, df=:df, alpha=0.05, returncv=true)::ConfInt
     if isa(cv, String)  cv = Symbol(cv) end
     if isa(df, String)  df = Symbol(df) end
     tdf = sum(data[:, df])
-    result = sum(cv2ms.(data[:, cv]) .* data[:, df])/tdf
+    result = sum(varfromcv.(data[:, cv]) .* data[:, df])/tdf
     CHSQ = Chisq(tdf)
     if returncv return ConfInt(cvfromvar(result*tdf/quantile(CHSQ, 1-alpha/2)), cvfromvar(result*tdf/quantile(CHSQ, alpha/2)), cvfromvar(result))
     else ConfInt(result*tdf/quantile(CHSQ, 1-alpha/2), result*tdf/quantile(CHSQ, alpha/2), result)

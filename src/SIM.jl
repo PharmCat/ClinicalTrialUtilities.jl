@@ -6,14 +6,14 @@ module SIM
     using Random
 
     import ..ctsamplen
-    import ..cv2ms
+    import ..varfromcv
     import ..sediv
     import ..Design
     import ..ZDIST
     import ..ConfInt
-    import ..CTUException
-    import ..CI.twoprop
-    import ..CI.twoMeans
+    #import ..CTUException
+    import ..twoprop
+    import ..diffmeanci
     import ..AbstractTask, ..CTask, ..AbstractParameter, ..AbstractObjective, ..AbstractHypothesis, ..SampleSize, ..Power, ..Proportion, ..Probability, ..DiffProportion
     import ..TaskResult
 
@@ -176,7 +176,7 @@ module SIM
             sm2    = rand(ZDIST)*se2+m2
             ss1    = rand(CHSQ1)*s1/(n1-1)
             ss2    = rand(CHSQ2)*s2/(n2-1)
-            ci = twoMeans(sm1, ss1, n1, sm2, ss2, n2; alpha=alpha,  method=:ev)
+            ci = diffmeanci(sm1, ss1, n1, sm2, ss2, n2; alpha=alpha,  method=:ev)
             if ci.lower > ref pow += 1 end
         end
         return pow/nsim
@@ -195,7 +195,7 @@ module SIM
         for i=1:nsim
             set1   = (rand(ZDIST, n1)*sd1).+m1
             set2   = (rand(ZDIST, n2)*sd2).+m2
-            ci     = twoMeans(mean(set1), var(set1), n1, mean(set2), var(set2), n2; alpha=alpha,  method=method)
+            ci     = diffmeanci(mean(set1), var(set1), n1, mean(set2), var(set2), n2; alpha=alpha,  method=method)
             if ci.lower > ref pow += 1 end
         end
         return pow/nsim

@@ -7,7 +7,7 @@ function freque(data::DataFrame; vars::Symbol, alpha = 0.05)::DataFrame
     for i in list
         ne = count(x -> (x == i), data[:, vars])
         pe = ne/n
-        ci = ClinicalTrialUtilities.CI.oneProp(ne, n, alpha=alpha, method=:wald)
+        ci = ClinicalTrialUtilities.propci(ne, n, alpha=alpha, method=:wald)
         push!(result, [i, ne, pe, ci.lower, ci.upper])
     end
     return result

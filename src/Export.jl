@@ -1,5 +1,9 @@
-module Export
-    function htmlExport(data; sort = NaN, rspan=:all, title="Title", dict::Union{Symbol, Dict} = :undef, file=NaN)
+"""
+    htmlexport(data::DataFrame; io::IO = stdout; sort = NaN, rspan=:all, title="Title", dict::Union{Symbol, Dict} = :undef)
+
+HTLM export for DataFrame.
+"""
+    function htmlexport(data::DataFrame; io::IO = stdout, sort = NaN, rspan=:all, title="Title", dict::Union{Symbol, Dict} = :undef)
         rowlist = Array{String,1}(undef, 0)
         cnames  = names(data)
         if isa(sort, Array)
@@ -240,19 +244,8 @@ module Export
     </TABLE>"""
         out *= html_f
 
-        if isa(file, String)
-            try
-                io = open(file, "w")
-                truncate(io, 0)
-                print(io, out)
-                close(io)
-                return true
-            catch
-                return false
-            end
-        else
-            return out
-        end
+        return out
+
     end
 
     function cellformat(val)
@@ -265,4 +258,3 @@ module Export
             return val
         end
     end
-end #End module

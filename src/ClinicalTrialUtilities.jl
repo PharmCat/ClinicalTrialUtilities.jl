@@ -13,16 +13,16 @@
 # If you want to check and get R code you can find some here: http://powerandsamplesize.com/Calculators/
 __precompile__(true)
 module ClinicalTrialUtilities
-using Distributions, StatsBase, Statistics, Random
-using QuadGK
-using DataFrames
+using Distributions, StatsBase, Statistics, Random, Roots, QuadGK, DataFrames
 import SpecialFunctions
 import Base.show
 import Base.showerror
 import Base.getindex
 import Base.length
-
+import StatsBase.confint
 import DataFrames.DataFrame
+
+const CTU = ClinicalTrialUtilities
 
 function lgamma(x)
     return SpecialFunctions.logabsgamma(x)[1]
@@ -60,7 +60,6 @@ function getindex(a::ConfInt, b::Int64)
     end
 end
 
-export CTUException, ConfInt, showerror
 
 #Deprecated
 include("deprecated.jl")
@@ -74,7 +73,7 @@ include("powersamplesize.jl")
 #Main sample size and power functions: sampleSize, ctpower, besamplen
 include("samplesize.jl")
 #Confidence interval calculation
-include("CI.jl")
+include("ci.jl")
 #Simulations
 include("SIM.jl")
 #info function
@@ -86,23 +85,33 @@ include("pk.jl")
 #Frequency
 include("freque.jl")
 #Export
-include("Export.jl")
+include("export.jl")
 #Randomization
 include("randomization.jl")
 #Show
 include("show.jl")
 
 
+#Types
+export CTU, ConfInt,
 #Sample size
-export ctsamplen, besamplen
+ctsamplen,
+besamplen,
 #Power
-export ctpower, bepower
+ctpower,
+bepower,
 #Utils
-export ci2cv, pooledCV
+cvfromci,
+cvfromvar,
+pooledcv,
 #Other
-export descriptive, freque, contab, owensQ, owensT
+descriptive,
+freque,
+contab,
+htmlexport,
 #Mudules
-export SIM, CI
+SIM,
+confint
 
 #Pharmacokinetics
 

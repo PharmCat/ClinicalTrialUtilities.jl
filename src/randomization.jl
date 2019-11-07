@@ -3,7 +3,11 @@ struct RandomTable
     table
     t
 end
-
+"""
+    randomtable(;blocksize = 4, subject = 10, group = 2, ratio = [1,1], grseq = [["A", "B"], ["B", "A"]], seed = 1234)
+    
+Randomization list.
+"""
 function randomtable(;blocksize = 4, subject = 10, group = 2, ratio = [1,1], grseq = [["A", "B"], ["B", "A"]], seed = 1234)
 
     rng = MersenneTwister()

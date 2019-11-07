@@ -8,6 +8,8 @@ v0.2.0
   Hypothesis testing for difference is A-B everywhere.
   - Keyword "logdiff" removed in ctsamplen(), because this was inconsistent with bepower/besamplen, new parameter logscale using instead.
   - Keyword "out" removed everywhere. Output via Base.show(io::IO, obj::TaskResult);
+  - twoProp() removed;
+  - No submodule politics.
 
   Major changes:
 
@@ -16,6 +18,7 @@ v0.2.0
   - descriptive() rewrited;
   - DataSet type;
   - Descriptive type;
+  - Include CI in ClinicalTrialUtilities & StatsBase methods for AbstractParameter types.
 
   Other changes:
 
@@ -26,6 +29,7 @@ v0.2.0
   - Descriptive performance;
   - Test procedures restructured;
   - 4x4 design;
+  - documentation;
   - Minor changes, bugfix, code cleaning, cosmetics.
 
 v0.1.16

@@ -298,8 +298,8 @@ end
     d = ClinicalTrialUtilities.Design(:d2x3x3)
     @test d.df(31) ≈ 59 && d.bkni ≈ 1/6 && d.sq ≈ 3
 
-    ClinicalTrialUtilities.cvfromsd(ClinicalTrialUtilities.cv2sd(0.2)) ≈ 0.2
-    ClinicalTrialUtilities.cvfromvar(ClinicalTrialUtilities.cv2ms(0.2)) ≈ 0.2
+    ClinicalTrialUtilities.cvfromsd(ClinicalTrialUtilities.sdfromcv(0.2)) ≈ 0.2
+    ClinicalTrialUtilities.cvfromvar(ClinicalTrialUtilities.varfromcv(0.2)) ≈ 0.2
 end
 end
 
@@ -307,12 +307,12 @@ println(" ---------------------------------- ")
 @testset "  Utils test            " begin
 @testset "  ci2cv Test            " begin
 
-    cvms = ClinicalTrialUtilities.ci2cv(;alpha = 0.05, theta1 = 0.9, theta2 = 1.25, n=30, design=:d2x2x4, cvms=true)
+    cvms = ClinicalTrialUtilities.cvfromci(;alpha = 0.05, theta1 = 0.9, theta2 = 1.25, n=30, design=:d2x2x4, cvms=true)
     @test cvms[1] ≈ 0.583175066140736 && cvms[2] ≈ 0.29273913226894244
-    @test ClinicalTrialUtilities.ci2cv(;alpha = 0.05, theta1 = 0.9, theta2 = 1.25, n=30, design=:d2x2x4, mso=true) ≈ 0.29273913226894244
-    @test ClinicalTrialUtilities.ci2cv(;alpha = 0.05, theta1 = 0.9, theta2 = 1.25, n=30) ≈ 0.387417014838382
-    @test ClinicalTrialUtilities.ci2cv(;alpha = 0.05, theta1 = 0.8, theta2 = 1.25, n=30) ≈ 0.5426467811605913
-    @test ClinicalTrialUtilities.ci2cv(;alpha = 0.05, theta1 = 1.01, theta2 = 1.21, n=31, design=:d2x2) ≈ 0.21151405971696524
+    @test ClinicalTrialUtilities.cvfromci(;alpha = 0.05, theta1 = 0.9, theta2 = 1.25, n=30, design=:d2x2x4, mso=true) ≈ 0.29273913226894244
+    @test ClinicalTrialUtilities.cvfromci(;alpha = 0.05, theta1 = 0.9, theta2 = 1.25, n=30) ≈ 0.387417014838382
+    @test ClinicalTrialUtilities.cvfromci(;alpha = 0.05, theta1 = 0.8, theta2 = 1.25, n=30) ≈ 0.5426467811605913
+    @test ClinicalTrialUtilities.cvfromci(;alpha = 0.05, theta1 = 1.01, theta2 = 1.21, n=31, design=:d2x2) ≈ 0.21151405971696524
 end
 @testset "  pooledCV            " begin
 
@@ -432,7 +432,7 @@ println(" ---------------------------------- ")
         ClinicalTrialUtilities.ctsamplen(param=:mean, type=:ns, group=:one, alpha=0.5, beta=0.2, diff=1, sd=0, a=1, b=1, k=1)
 
 
-        ClinicalTrialUtilities.CI.oneProp(38, 100, alpha=0.05, method=:err)
+        ClinicalTrialUtilities.CI.propci(38, 100, alpha=0.05, method=:err)
 
 
     =#

@@ -252,7 +252,7 @@ bepower(;alpha=0.05, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.0, n=0, logscale
 Take CV from known CI and subject number.
 
 ```
-ci2cv(;alpha = 0.05, theta1 = 0.8, theta2 = 1.25, n, design=:d2x2, mso=false, cvms=false)
+cvfromci(;alpha = 0.05, theta1 = 0.8, theta2 = 1.25, n, design=:d2x2, mso=false, cvms=false)
 ```
 
 **alpha** - Alpha (o < alpha < 1)  (default=0.05);
@@ -388,7 +388,7 @@ bepower(cv=0.4, n=35, design=:d2x4x4)
 bepower(cv=0.14, n=21)
 
 #CV from CI
-ci2cv(;alpha = 0.05, theta1 = 0.9, theta2 = 1.25, n=30, design=:d2x2x4)
+cvfromci(;alpha = 0.05, theta1 = 0.9, theta2 = 1.25, n=30, design=:d2x2x4)
 
 #Polled CV
 data = DataFrame(cv = Float64[], df = Int[])

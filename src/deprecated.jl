@@ -1,3 +1,50 @@
+#deprecated
+function twoprop(x1::Int, n1::Int, x2::Int, n2::Int; alpha=0.05, type::Symbol, method::Symbol)::ConfInt
+    if alpha >= 1.0 || alpha <= 0.0 throw(ArgumentError("Alpha shold be > 0.0 and < 1.0")) end
+    if type==:diff
+        if method ==:nhs
+            return propDiffNHSCI(x1, n1, x2, n2, alpha)
+        elseif method ==:nhscc
+            return propDiffNHSCCCI(x1, n1, x2, n2, alpha)
+        elseif method ==:ac
+            return propDiffACCI(x1, n1, x2, n2, alpha)
+        elseif method ==:mn
+            return propDiffMNCI(x1, n1, x2, n2, alpha)
+        elseif method ==:mee2
+            return propDiffMeeCI(x1, n1, x2, n2, alpha)
+        elseif method ==:mee || method == :fm
+            return propDiffFMCI(x1, n1, x2, n2, alpha)
+        elseif method ==:wald
+            return propDiffWaldCI(x1, n1, x2, n2, alpha)
+        elseif method ==:waldcc
+            return propDiffWaldCCCI(x1, n1, x2, n2, alpha)
+        end
+    elseif type==:rr
+        if method==:mn
+            return propRRMNCI(x1, n1, x2, n2, alpha)
+        elseif method == :cli || method == :walters
+            return propRRCLICI(x1, n1, x2, n2, alpha)
+        elseif method == :li || method == :katz
+            return proprrkatzci(x1, n1, x2, n2, alpha)
+        elseif method ==:mover
+            return  propRRMOVERCI(x1, n1, x2, n2, alpha)
+        end
+    elseif type==:or
+        if method==:mn
+            return propORMNCI(x1, n1, x2, n2, alpha)
+        elseif method==:awoolf || method==:gart
+            return propORaWoolfCI(x1, n1, x2, n2, alpha)
+        elseif method==:woolf
+            return propORWoolfCI(x1, n1, x2, n2, alpha)
+        elseif method==:mover
+            return propORMOVERCI(x1, n1, x2, n2, alpha)
+        elseif method==:mn2
+            return propORCI(x1, n1, x2, n2, alpha)
+        end
+    end
+end #twoProp
+
+
 function designProp(type::Symbol)::Tuple{Function, Float64, Int}
     if type == :parallel
         #function f1(n) n - 2 end

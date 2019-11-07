@@ -197,7 +197,7 @@ function Base.show(io::IO, obj::PDSubject)
     end
 end
 #-------------------------------------------------------------------------------
-    function ncarule!(data::DataFrame, conc::Symbol, time::Symbol, rule::LimitRule)
+function ncarule!(data::DataFrame, conc::Symbol, time::Symbol, rule::LimitRule)
         sort!(data, [time])
 
         cmax, tmax, tmaxn = ctmax(data, conc, time)
@@ -217,7 +217,10 @@ end
         if length(filterv) > 0
             deleterows!(data, filterv)
         end
-    end
+end
+function ncarule!(data::PKSubject, rule::LimitRule)
+    #!!!!
+end
 
     """
         cmax
@@ -391,7 +394,12 @@ end
     end
 
 #-------------------------------------------------------------------------------
-    function nca!(data::PKSubject; calcm = :lint, verbose = false, io = IO)
+"""
+    nca!(data::PKSubject; calcm = :lint, verbose = false, io::IO = stdout)
+
+Pharmacokinetics non-compartment analysis for one PK subject.
+"""
+function nca!(data::PKSubject; calcm = :lint, verbose = false, io::IO = stdout)
         result   = Dict()
         #=
         result    = Dict(:Obsnum   => 0,   :Tmax   => 0,   :Tmaxn    => 0,   :Tlast   => 0,
@@ -511,15 +519,25 @@ end
         #-----------------------------------------------------------------------
         return PKPDProfile(data, result; method = calcm)
     end
-    function nca!(data::DataSet{PKSubject}; calcm = :lint)
+"""
+    nca!(data::DataSet{PKSubject}; calcm = :lint, verbose = false, io::IO = stdout)
+
+Pharmacokinetics non-compartment analysis for PK subjects set.
+"""
+function nca!(data::DataSet{PKSubject}; calcm = :lint, verbose = false, io::IO = stdout)
         results = Array{PKPDProfile, 1}(undef, 0)
         for i = 1:length(data.data)
             push!(results, nca!(data.data[i]; calcm = calcm))
         end
         return DataSet(results)
-    end
+end
     #---------------------------------------------------------------------------
-    function nca!(data::PDSubject)::PKPDProfile{PDSubject}
+"""
+    nca!(data::PDSubject; verbose = false, io::IO = stdout)::PKPDProfile{PDSubject}
+
+Pharmacodynamics non-compartment analysis for one PD subject.
+"""
+function nca!(data::PDSubject; verbose = false, io::IO = stdout)::PKPDProfile{PDSubject}
         result = Dict(:TH => NaN, :AUCABL => 0, :AUCBBL => 0, :AUCBLNET => 0,  :TABL => 0, :TBBL => 0)
         result[:Obsnum] = length(data)
         result[:TH] = data.th
@@ -587,8 +605,12 @@ end
         result[:AUCBLNET] = result[:AUCABL] - result[:AUCBBL]
         return PKPDProfile(data, result)
     end
+"""
+    nca!(data::PDSubject; verbose = false, io::IO = stdout)::PKPDProfile{PDSubject}
 
-    function nca!(data::DataSet{PDSubject})
+Pharmacodynamics non-compartment analysis for PD subjects set.
+"""
+function nca!(data::DataSet{PDSubject}; verbose = false, io::IO = stdout)
         results = Array{PKPDProfile, 1}(undef, 0)
         for i = 1:length(data.data)
             push!(results, nca!(data.data[i]))
@@ -596,7 +618,12 @@ end
         return DataSet(results)
     end
     #---------------------------------------------------------------------------
-    function pkimport(data::DataFrame, sort::Array, rule::LimitRule; conc::Symbol, time::Symbol)
+"""
+    pkimport(data::DataFrame, sort::Array, rule::LimitRule; conc::Symbol, time::Symbol)
+
+Pharmacokinetics data import from DataFrame.
+"""
+function pkimport(data::DataFrame, sort::Array, rule::LimitRule; conc::Symbol, time::Symbol)
         sortlist = unique(data[:, sort])
         results  = Array{PKSubject, 1}(undef, 0)
         for i = 1:size(sortlist, 1) #For each line in sortlist
@@ -631,7 +658,12 @@ end
         return DataSet([PKSubject(datai[!, time], datai[!, conc])])
     end
     #---------------------------------------------------------------------------
-    function pdimport(data::DataFrame, sort::Array; resp::Symbol, time::Symbol, bl = 0, th = NaN)
+"""
+    pdimport(data::DataFrame, sort::Array; resp::Symbol, time::Symbol, bl::Real = 0, th::Real = NaN)
+
+Pharmacodynamics data import from DataFrame.
+"""
+    function pdimport(data::DataFrame, sort::Array; resp::Symbol, time::Symbol, bl::Real = 0, th::Real = NaN)
         sortlist = unique(data[:, sort])
         results  = Array{PDSubject, 1}(undef, 0)
         for i = 1:size(sortlist, 1) #For each line in sortlist
@@ -667,14 +699,17 @@ end
         for i = 1:length(data)
             data[i].kelrange = range
         end
+        data
     end
     function setelimrange!(data::DataSet{PKSubject}, range::ElimRange, subj::Array{Int,1})
         for i = 1:length(data)
             if i ∈ subj data[i].kelrange = range end
         end
+        data
     end
     function setelimrange!(data::DataSet{PKSubject}, range::ElimRange, subj::Int)
         data[subj].kelrange = range
+        data
     end
     #---------------------------------------------------------------------------
     function applyelimrange!(data::PKPDProfile{PKSubject}, range::ElimRange)
@@ -683,10 +718,20 @@ end
         data
     end
     function applyelimrange!(data::DataSet{PKPDProfile{PKSubject}}, range::ElimRange)
+        for i = 1:length(data)
+            applyelimrange!(data[i], range)
+        end
+        data
     end
     function applyelimrange!(data::DataSet{PKPDProfile{PKSubject}}, range::ElimRange, subj::Array{Int,1})
+        for i = 1:length(data)
+            if i ∈ subj applyelimrange!(data[i], range) end
+        end
+        data
     end
     function applyelimrange!(data::DataSet{PKPDProfile{PKSubject}}, range::ElimRange, subj::Int)
+        applyelimrange!(data[subj], range)
+        data
     end
     function applyelimrange!(data::DataSet{PKPDProfile{PKSubject}}, range::ElimRange, sort::Dict)
         for i = 1:length(data)
@@ -713,29 +758,37 @@ end
         end
         data
     end
-    function setth!(data::PDSubject, th)
+    function setth!(data::PDSubject, th::Real)
         data.th = th
         data
     end
-    function setth!(data::DataSet{PDSubject}, th)
+    function setth!(data::DataSet{PDSubject}, th::Real)
         for i = 1:length(data)
-            data[1].th = th
+            data[i].th = th
         end
         data
     end
-    function setth!(data::DataSet{PDSubject}, th, sort)
+    function setth!(data::DataSet{PDSubject}, th::Real, sort::Dict)
+        for i = 1:length(data)
+            if sort ∈ data[i].sort data[i].th = th end
+        end
+        data
     end
     function setbl!(data::PDSubject, bl)
         data.bl = bl
         data
     end
-    function setbl!(data::DataSet{PDSubject}, bl)
+    function setbl!(data::DataSet{PDSubject}, bl::Real)
         for i = 1:length(data)
-            data[1].bl = bl
+            data[i].bl = bl
         end
         data
     end
-    function setbl!(data::DataSet{PDSubject}, bl, sort)
+    function setbl!(data::DataSet{PDSubject}, bl::Real, sort::Dict)
+        for i = 1:length(data)
+            if sort ∈ data[i].sort data[i].bl = bl end
+        end
+        data
     end
     #---------------------------------------------------------------------------
     function keldata(data::PKPDProfile{PKSubject})

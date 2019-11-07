@@ -56,7 +56,12 @@ function Base.length(data::DataSet{T}) where T <: AbstractData
     return length(data.data)
 end
 """
-    Descriptive statistics
+descriptive(data::DataFrame;
+    sort::Union{Symbol, Array{T,1}} = Array{Symbol,1}(undef,0),
+    vars = [],
+    stats::Union{Symbol, Array{T,1}, Tuple{Vararg{Symbol}}} = :default)::DataSet{Descriptive} where T <: Union{Symbol, String}
+
+Descriptive statistics.
 """
 function descriptive(data::DataFrame;
     sort::Union{Symbol, Array{T,1}} = Array{Symbol,1}(undef,0),
@@ -75,7 +80,7 @@ function descriptive(data::DataFrame;
             deleteat!(vars, del)
         end
     end
-    if isa(vars, Symbol) 
+    if isa(vars, Symbol)
         vars = [vars]
     elseif !(isa(vars, Array))
         vars = [Symbol(vars)]
@@ -139,7 +144,7 @@ end
 end
 =#
 """
-    Check if all statistics in allstat list. return stats tuple
+Check if all statistics in allstat list. return stats tuple
 """
 @inline function checkstats(stats::Union{Symbol, Array{T,1}, Tuple{Vararg{Symbol}}})::Tuple{Vararg{Symbol}} where T <: Union{Symbol, String}
     allstat = (:n, :min, :max, :range, :mean, :var, :sd, :sem, :cv, :harmmean, :geomean, :geovar, :geosd, :geocv, :skew, :ses, :kurt, :sek, :uq, :median, :lq, :iqr, :mode)
@@ -153,7 +158,7 @@ end
     return stats
 end
 """
-    Push in d Descriptive obj in mx vardata
+Push in d Descriptive obj in mx vardata
 """
 @inline function pushvardescriptive!(d::Array{Descriptive, 1}, vars::Array{Symbol, 1}, mx::Union{DataFrame, Matrix{T}}, sortval::Union{Tuple{Vararg{Any}}, Nothing}, stats::Tuple{Vararg{Symbol}}) where T<: Real
     for v  = 1:length(vars)  #For each variable in list
@@ -161,7 +166,7 @@ end
     end
 end
 """
-    Check if data row sortcol equal sortval
+Check if data row sortcol equal sortval
 """
 @inline function checksort(data::DataFrame, row::Int, sortcol::Array{Symbol, 1}, sortval::Tuple{Vararg{Any}})::Bool
     for i = 1:length(sortcol)
@@ -170,7 +175,7 @@ end
     return true
 end
 """
-    Return matrix of filtered data (datacol) by sortcol with sortval
+Return matrix of filtered data (datacol) by sortcol with sortval
 """
 @inline function getsortedmatrix(data::DataFrame; datacol::Array{Symbol,1}, sortcol::Array{Symbol,1}, sortval::Tuple{Vararg{Any}})::Matrix{Real}
     result  = Array{Real, 1}(undef, 0)

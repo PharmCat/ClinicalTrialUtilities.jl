@@ -29,12 +29,12 @@ struct Parallel <: AbstractDesign
         new(x -> x - 2, 1.0, 2)::Parallel
     end
 end
-struct Onegroup <: AbstractDesign
+struct OneGroup <: AbstractDesign
     df::Function
     bkni::Real
     sq::Int
-    function Onegroup()
-        new(x -> x - 1, 1, 1)::Onegroup
+    function OneGroup()
+        new(x -> x - 1, 1, 1)::OneGroup
     end
 end
 struct Crossover <: AbstractDesign
@@ -123,12 +123,19 @@ end
 struct Proportion <: AbstractSimpleProportion
     x::Int
     n::Int
+    function Proportion(x::Int, n::Int)
+        if x > n throw(ArgumentError("Error: X > N!")) end
+        new(x, n)::Proportion
+    end
 end
 struct Probability <: AbstractSimpleProportion
     p::Float64
     function Probability(p::Float64)
         if p ≥ 1.0 || p ≤ 0.0 throw(ArgumentError("Probability can't be ≥ 1.0 or ≤ 0.0!")) end
         new(p::Float64)::Probability
+    end
+    function Probability(p::Proportion)
+        new(p.x/p.n)::Probability
     end
 end
 function getval(p::Proportion)::Float64
@@ -229,13 +236,13 @@ function ctsamplen(;param=:notdef, type=:notdef, group=:notdef, alpha=0.05, beta
         if group == :one
             if type == :ea
                 n = one_mean_equality(a, b, sd, alpha, beta)
-                task = CTask(DiffMean(Mean(a, sd), b), Onegroup(), Equality(), SampleSize(beta), alpha)
+                task = CTask(DiffMean(Mean(a, sd), b), OneGroup(), Equality(), SampleSize(beta), alpha)
             elseif type == :ei
                 n = one_mean_equivalence(a, b, sd, diff, alpha, beta)
-                task = CTask(DiffMean(Mean(a, sd), b),  Onegroup(), Equivalence(b-diff, b+diff), SampleSize(beta), alpha)
+                task = CTask(DiffMean(Mean(a, sd), b),  OneGroup(), Equivalence(b-diff, b+diff), SampleSize(beta), alpha)
             elseif type == :ns
                 n = one_mean_superiority(a, b, sd, diff, alpha, beta)
-                task = CTask(DiffMean(Mean(a, sd), b), Onegroup(), Superiority(b + diff, diff), SampleSize(beta), alpha)
+                task = CTask(DiffMean(Mean(a, sd), b), OneGroup(), Superiority(b + diff, diff), SampleSize(beta), alpha)
             else throw(ArgumentError("Keyword type unknown!")) end
         elseif group == :two
             if type == :ea
@@ -258,13 +265,13 @@ function ctsamplen(;param=:notdef, type=:notdef, group=:notdef, alpha=0.05, beta
             if group == :one
                 if type == :ea
                     n = one_proportion_equality(a, b, alpha, beta)
-                    task = CTask(DiffProportion(Probability(a), b), Onegroup(), Equality(), SampleSize(beta), alpha)
+                    task = CTask(DiffProportion(Probability(a), b), OneGroup(), Equality(), SampleSize(beta), alpha)
                 elseif type == :ei
                     n = one_proportion_equivalence(a, b, diff, alpha, beta)
-                    task = CTask(DiffProportion(Probability(a), b), Onegroup(), Equivalence(b-diff, b+diff), SampleSize(beta), alpha)
+                    task = CTask(DiffProportion(Probability(a), b), OneGroup(), Equivalence(b-diff, b+diff), SampleSize(beta), alpha)
                 elseif type == :ns
                     n = one_proportion_superiority(a, b, diff, alpha, beta)
-                    task = CTask(DiffProportion(Probability(a), b), Onegroup(), Superiority(b+diff, diff), SampleSize(beta), alpha)
+                    task = CTask(DiffProportion(Probability(a), b), OneGroup(), Superiority(b+diff, diff), SampleSize(beta), alpha)
                 else throw(ArgumentError("Keyword type unknown!")) end
             elseif group == :two
                 if type == :ea
@@ -502,7 +509,7 @@ function besamplen(;alpha::Real=0.05, beta::Real=0.2, theta0::Real=0.95, theta1:
         theta1 = log(theta1)
         theta2 = log(theta2)
         theta0 = log(theta0)
-        sd     = cv2sd(cv)
+        sd     = sdfromcv(cv)
     end
 
     task = CTask(DiffMean(Mean(0, sd), Mean(theta0, sd)), Crossover(design), Equivalence(theta1, theta2, bio=true), SampleSize(beta), alpha)
@@ -532,7 +539,7 @@ function bepower(;alpha::Real=0.05, theta1::Real=0.8, theta2::Real=1.25, theta0:
         theta1 = log(theta1)
         theta2 = log(theta2)
         theta0 = log(theta0)
-        sd     = cv2sd(cv)    # sqrt(ms)
+        sd     = sdfromcv(cv)    # sqrt(ms)
     end
 
     task = CTask(DiffMean(Mean(theta0, sd), Mean(0, sd)), Crossover(design), Equivalence(theta1, theta2, bio=true), Power(n), alpha)
