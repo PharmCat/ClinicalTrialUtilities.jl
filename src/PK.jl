@@ -256,6 +256,10 @@ end
         cmax, tmax, tmaxn = ctmax(data.time[mask], data.obs[mask])
         if cmax > cpredict return cmax, tmax, tmaxn + s else return cpredict, data.dosetime.time, s end
     end
+    """
+    Range for AUC
+        return start point number, end point number
+    """
     function ncarange(data::PKSubject, dosetime, tau)
         tautime = dosetime + tau
         s     = 0
@@ -333,6 +337,7 @@ end
     function logaumc(t₁, t₂, c₁, c₂)::Number
         return (t₂-t₁) * (t₂*c₂-t₁*c₁) / log(c₂/c₁) - (t₂-t₁)^2 * (c₂-c₁) / log(c₂/c₁)^2
     end
+    #Intrapolation
         #linear prediction bx from ax, a1 < ax < a2
     function linpredict(a1, a2, ax, b1, b2)::Number
         return abs((ax - a1) / (a2 - a1))*(b2 - b1) + b1
@@ -342,11 +347,18 @@ end
         return log(cx/c1)/log(c2/c1)*(t2-t1)+t1
     end
 
-    function logcpredict(t1, t2, tx, c1, c2)::Number
-        return exp(log(c1) + abs((tx-t1)/(t2-t1))*(log(c2) - log(c1)))
+    function logcpredict(t₁, t₂, tx, c₁, c₂)::Number
+        return exp(log(c₁) + abs((tx-t₁)/(t₂-t₁))*(log(c₂) - log(c₁)))
     end
-
-
+    function cpredict(t₁, t₂, tx, c₁, c₂, calcm)
+        if calcm == :lint || c₂ >= c₁
+            return linpredict(t₁, t₂, tx, c₁, c₂)
+        else
+            return logcpredict(t₁, t₂, tx, c₁, c₂)
+        end
+    end
+    #Extrapolation
+        #!!!
     #---------------------------------------------------------------------------
 
     function aucpart(t₁, t₂, c₁, c₂, calcm, aftertmax)
@@ -355,7 +367,7 @@ end
             aumc  = linaumc(t₁, t₂, c₁, c₂)    # (data[i - 1, conc]*data[i - 1, time] + data[i, conc]*data[i, time]) * (data[i, time] - data[i - 1, time])/2
         elseif calcm == :logt
             if aftertmax
-                if c₂ < c₁ &&  c₂ > 0 &&  c₁ > 0
+                if c₁ > c₂ > 0
                     auc   =  logauc(t₁, t₂, c₁, c₂)
                     aumc  = logaumc(t₁, t₂, c₁, c₂)
                 else
@@ -367,7 +379,7 @@ end
                 aumc  = linaumc(t₁, t₂, c₁, c₂)
             end
         elseif calcm == :luld
-            if c₂ < c₁ &&  c₂ > 0 &&  c₁ > 0
+            if c₁ > c₂ > 0
                 auc   =  logauc(t₁, t₂, c₁, c₂)
                 aumc  = logaumc(t₁, t₂, c₁, c₂)
             else
@@ -400,11 +412,13 @@ end
         #Areas
         aucpartl  = Array{Number, 1}(undef, result[:Obsnum] - 1)
         aumcpartl = Array{Number, 1}(undef, result[:Obsnum] - 1)
+        #Calculate all UAC part based on data
         for i = 1:(result[:Obsnum] - 1)
             aucpartl[i], aumcpartl[i] = aucpart(data.time[i], data.time[i + 1], data.obs[i], data.obs[i + 1], calcm, i + 1 > result[:Tmaxn])
         end
         pmask   = Array{Bool, 1}(undef, result[:Obsnum] - 1)
         pmask  .= true
+        #Find AUC part from dose time; exclude all before dosetime
         for i = 1:result[:Obsnum] - 1
             if  data.time[i] <= data.dosetime.time < data.time[i+1]
                 if data.time[i] == data.dosetime.time
@@ -420,8 +434,10 @@ end
                 pmask[i]     = false
             end
         end
+        #sum all AUC parts
         result[:AUCall]  = sum(aucpartl[pmask])
         result[:AUMCall] = sum(aumcpartl[pmask])
+        #Exclude all AUC parts from observed concentation before 0 or less
         for i = result[:Tmaxn]:result[:Obsnum] - 1
             if data.obs[i+1] <= 0 * data.obs[i+1] pmask[i:end] .= false; break end
         end
@@ -471,11 +487,14 @@ end
             ncas, ncae = ncarange(data, data.dosetime.time, data.dosetime.tau)
             tautime = data.dosetime.time + data.dosetime.tau
             if tautime < data.time[end]
-                result[:Ctau] = linpredict(data.time[ncae] , data.time[ncae+1], tautime, data.obs[ncae], data.obs[ncae+1])
-                aucpartl[ncae], aumcpartl[ncae] = aucpart(data.time[ncae], tautime, data.obs[ncae], result[:Ctau], :lint, false)
+                #result[:Ctau] = linpredict(data.time[ncae] , data.time[ncae+1], tautime, data.obs[ncae], data.obs[ncae+1])
+                result[:Ctau] = cpredict(data.time[ncae], data.time[ncae+1], tautime, data.obs[ncae], data.obs[ncae+1], calcm)
+                aucpartl[ncae], aumcpartl[ncae] = aucpart(data.time[ncae], tautime, data.obs[ncae], result[:Ctau], calcm, false)
+                #remoove part after tau
                 if ncae < result[:Obsnum] - 1 pmask[ncae+1:end] .= false end
             elseif tautime > data.time[end]
                 #extrapolation
+                #!!!
             else
                 result[:Ctau] = data.obs[end]
             end
