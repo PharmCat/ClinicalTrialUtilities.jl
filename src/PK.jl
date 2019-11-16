@@ -342,12 +342,12 @@ end
     end
     #Intrapolation
         #linear prediction bx from ax, a1 < ax < a2
-    function linpredict(a1, a2, ax, b1, b2)::Number
-        return abs((ax - a1) / (a2 - a1))*(b2 - b1) + b1
+    function linpredict(a₁, a₂, ax, b₁, b₂)::Number
+        return abs((ax - a₁) / (a₂ - a₁))*(b₂ - b₁) + b₁
     end
 
-    function logtpredict(c1, c2, cx, t1, t2)::Number
-        return log(cx/c1)/log(c2/c1)*(t2-t1)+t1
+    function logtpredict(c₁, c₂, cx, t₁, t₂)::Number
+        return log(cx/c₁)/log(c₂/c₁)*(t₂-t₁)+t₁
     end
 
     function logcpredict(t₁, t₂, tx, c₁, c₂)::Number
@@ -683,6 +683,14 @@ Pharmacodynamics data import from DataFrame.
         return DataSet([PDSubject(datai[!, time], datai[!, resp], bl, th)])
     end
     #---------------------------------------------------------------------------
+    function applyncarule(data::PKSubject, rule::LimitRule)
+    end
+    function applyncarule(data::DataSet{PKSubject}, rule::LimitRule)
+    end
+    function applyncarule(data::PKPDProfile{PKSubject}, rule::LimitRule)
+    end
+    function applyncarule(data::DataSet{PKPDProfile{PKSubject}}, rule::LimitRule)
+    end
     function applyncarule!(data::PKSubject, rule::LimitRule)
     end
     function applyncarule!(data::DataSet{PKSubject}, rule::LimitRule)

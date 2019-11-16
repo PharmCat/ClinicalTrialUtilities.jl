@@ -75,7 +75,7 @@ include("samplesize.jl")
 #Confidence interval calculation
 include("ci.jl")
 #Simulations
-include("SIM.jl")
+include("sim.jl")
 #info function
 include("info.jl")
 #Descriptive statistics
@@ -109,9 +109,14 @@ descriptive,
 freque,
 contab,
 htmlexport,
-#Mudules
-SIM,
-confint
+#CI
+confint,
+propci,
+diffpropci,
+rrpropci,
+orpropci,
+meanci,
+diffmeanci
 
 #Pharmacokinetics
 
