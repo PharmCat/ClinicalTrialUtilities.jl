@@ -41,11 +41,12 @@ struct Crossover <: AbstractDesign
     df::Function
     bkni::Real
     sq::Int
+    type::Symbol
     function Crossover(type::Symbol)
         return Design(type)
     end
-    function Crossover(df::Function, bkni::Real, sq::Int)
-        new(df, bkni, sq)::Crossover
+    function Crossover(df::Function, bkni::Real, sq::Int, type::Symbol)
+        new(df, bkni, sq, type)::Crossover
     end
 end
 
@@ -53,24 +54,31 @@ function Design(type::Symbol)::AbstractDesign
     if type == :parallel
         return Parallel()
     elseif type == :d2x2
-        return Crossover(x -> x - 2, 0.5, 2)
+        return Crossover(x -> x - 2, 0.5, 2, type)
     elseif type == :d2x2x3
-        return Crossover(x -> 2 * x - 3, 0.375, 2)
+        return Crossover(x -> 2 * x - 3, 0.375, 2, type)
     elseif type == :d2x2x4
-        return Crossover(x -> 3 * x - 4, 0.25, 2)
+        return Crossover(x -> 3 * x - 4, 0.25, 2, type)
     elseif type == :d2x4x4
-        return  Crossover(x -> 3 * x - 4, 0.0625, 4)
+        return  Crossover(x -> 3 * x - 4, 0.0625, 4, type)
     elseif type == :d2x3x3
-        return Crossover(x -> 2 * x - 3, 1/6, 3)
+        return Crossover(x -> 2 * x - 3, 1/6, 3, type)
     elseif type == :d2x4x2
-        return Crossover(x -> x - 2, 0.5, 4)
+        return Crossover(x -> x - 2, 0.5, 4, type)
     elseif type == :d3x3
-        return Crossover(x -> 2 * x - 4, 2/9, 3)
+        return Crossover(x -> 2 * x - 4, 2/9, 3, type)
     elseif type == :d4x4
-        return Crossover(x -> 3 * x - 6, 1/8, 4)
+        return Crossover(x -> 3 * x - 6, 1/8, 4, type)
     elseif type == :d3x6x3
-        return Crossover(x -> 2 * x - 4, 1/18, 6)
+        return Crossover(x -> 2 * x - 4, 1/18, 6, type)
     else throw(ArgumentError("Design type not known!")) end
+end
+
+function designtype(d::Crossover)
+    return d.type
+end
+function designtype(d::Parallel)
+    return :parallel
 end
 
 @inline function sediv(d::AbstractDesign, n::Int)
@@ -512,14 +520,22 @@ function besamplen(;alpha::Real=0.05, beta::Real=0.2, theta0::Real=0.95, theta1:
         sd     = sdfromcv(cv)
     end
 
-    task = CTask(DiffMean(Mean(0, sd), Mean(theta0, sd)), Crossover(design), Equivalence(theta1, theta2, bio=true), SampleSize(beta), alpha)
+    task = CTask(DiffMean(Mean(theta0, sd), Mean(0, sd)), Crossover(design), Bioequivalence(theta1, theta2), SampleSize(beta), alpha)
 
     estn, estpow = samplentostint(alpha, theta1, theta2, theta0, sd, beta, design, method)
-    return TaskResult(task, :chow, estn)
+    return TaskResult(task, method, estn)
 end
 
-function besamplen(t::CTask)
-
+function besamplen(t::CTask; method::Symbol = :owenq)
+    design = designtype(t.design)
+    σ      = t.param.a.sd
+    α      = t.alpha
+    β      = t.objective.val
+    θ₁     = t.hyp.llim
+    θ₂     = t.hyp.ulim
+    δ      = t.param.a.m - t.param.b.m
+    estn, estpow = samplentostint(α, θ₁, θ₂, δ, σ, β, design, method)
+    return TaskResult(t, method, estn)
 end
 
 #-------------------------------------------------------------------------------
@@ -542,30 +558,25 @@ function bepower(;alpha::Real=0.05, theta1::Real=0.8, theta2::Real=1.25, theta0:
         sd     = sdfromcv(cv)    # sqrt(ms)
     end
 
-    task = CTask(DiffMean(Mean(theta0, sd), Mean(0, sd)), Crossover(design), Equivalence(theta1, theta2, bio=true), Power(n), alpha)
+    task = CTask(DiffMean(Mean(theta0, sd), Mean(0, sd)), Crossover(design), Bioequivalence(theta1, theta2), Power(n), alpha)
 
-    pow =  powertostint(alpha,  theta1, theta2, theta0, sd, n, design, method)
+    df         = task.design.df(task.objective.val)
+    σ̵ₓ         = task.param.a.sd*sediv(task.design, task.objective.val)
+    powertostf = powertostintf(method)
+    pow        = powertostf(task.alpha, task.hyp.llim, task.hyp.ulim, task.param.a.m, σ̵ₓ, df)
+    #pow =  powertostint(alpha,  theta1, theta2, theta0, sd, n, design, method)
 
     return TaskResult(task, method, pow)
 end #bepower
 
 function bepower(t::CTask; method::Symbol = :owenq)
-    df    = t.design.df(t.objective.val)
-    σ̵ₓ    = t.param.a.sd*sediv(t.design, t.objective.val)
-    α     = t.alpha
-    θ₁    = t.hyp.llim
-    θ₂    = t.hyp.ulim
-    δ     = t.param.a.m - t.param.b.m
-    if method     == :owenq
-        pow =    powertost_owenq(α, θ₁, θ₂, δ, σ̵ₓ, df)
-    elseif method == :nct
-        pow =      powertost_nct(α, θ₁, θ₂, δ, σ̵ₓ, df)
-    elseif method == :mvt
-        pow =      powertost_mvt(α, θ₁, θ₂, δ, σ̵ₓ, df) #not implemented
-    elseif method == :shifted
-        pow =  powertost_shifted(α, θ₁, θ₂, δ, σ̵ₓ, df)
-    else
-         throw(ArgumentError("method not known!"))
-    end
+    df         = t.design.df(t.objective.val)
+    σ̵ₓ         = t.param.a.sd*sediv(t.design, t.objective.val)
+    α          = t.alpha
+    θ₁         = t.hyp.llim
+    θ₂         = t.hyp.ulim
+    δ          = t.param.a.m - t.param.b.m
+    powertostf = powertostintf(method)
+    pow        = powertostf(α, θ₁, θ₂, δ, σ̵ₓ, df)
     return TaskResult(t, method, pow)
 end

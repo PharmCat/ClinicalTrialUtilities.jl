@@ -31,7 +31,15 @@ function samplentostint(α::Real, θ₁::Real, θ₂::Real, δ::Real, σ::Real, 
     tp = 1 - β  #target power
     if n₀ < 4 n₀ = 4 end
     if n₀ > 5000 n₀ = 5000 end
-    pow = powertostint(α,  θ₁, θ₂, δ, σ, n₀, design, method)
+
+    d     = Design(design) #dffunc if generic funtion with 1 arg return df
+    df    = d.df(n₀)
+    σ̵ₓ    = σ*sediv(d, n₀)
+    if df < 1 throw(ArgumentError("powertostint: df < 1")) end
+
+    powertostf = powertostintf(method) #PowerTOST function
+
+    pow = powertostf(α, θ₁, θ₂, δ, σ̵ₓ, df)
     np::Int = 2
     powp::Float64 = pow
     if pow > tp
@@ -41,7 +49,9 @@ function samplentostint(α::Real, θ₁::Real, θ₂::Real, δ::Real, σ::Real, 
             n₀ = n₀ - 2
             #pow = powerTOST(;alpha=alpha, logscale=false, theta1=ltheta1, theta2=ltheta2, theta0=diffm, cv=se, n=n0, design=design, method=method)
             if n₀ < 4 break end #n0, pow end
-            pow = powertostint(α,  θ₁, θ₂, δ, σ, n₀, design, method)
+            df    = d.df(n₀)
+            σ̵ₓ    = σ*sediv(d, n₀)
+            pow = powertostf(α, θ₁, θ₂, δ, σ̵ₓ, df)
         end
         estpower = powp
         estn     = np
@@ -51,7 +61,9 @@ function samplentostint(α::Real, θ₁::Real, θ₂::Real, δ::Real, σ::Real, 
             powp = pow
             n₀ = n₀ + 2
             #pow = powerTOST(;alpha=alpha, logscale=false, theta1=ltheta1, theta2=ltheta2, theta0=diffm, cv=se, n=n0, design=design, method=method)
-            pow = powertostint(α,  θ₁, θ₂, δ, σ, n₀, design, method)
+            df    = d.df(n₀)
+            σ̵ₓ    = σ*sediv(d, n₀)
+            pow = powertostf(α, θ₁, θ₂, δ, σ̵ₓ, df)
             if n₀ > 10000  break end # n0, pow end
         end
         estpower = pow
@@ -69,22 +81,16 @@ end
 #  α  - alpha
 #  θ₁ - theta1
 #  θ₂ - theta2
-function powertostint(α::Real,  θ₁::Real, θ₂::Real, δ::Real, σ::Real, n::Int, design::Symbol, method::Symbol)::Float64
-    d     = Design(design) #dffunc if generic funtion with 1 arg return df
-    df    = d.df(n)
-
-    if df < 1 throw(ArgumentError("powertostint: df < 1")) end
-
-    σ̵ₓ::Float64 = σ*sediv(d, n)
-
+#powerTOST
+function powertostintf(method::Symbol)::Function
     if method     == :owenq
-        return   powertost_owenq(α, θ₁, θ₂, δ, σ̵ₓ, df)
+        return   powertost_owenq
     elseif method == :nct
-        return     powertost_nct(α, θ₁, θ₂, δ, σ̵ₓ, df)
+        return     powertost_nct
     elseif method == :mvt
-        return     powertost_mvt(α, θ₁, θ₂, δ, σ̵ₓ, df) #not implemented
+        return     powertost_mvt
     elseif method == :shifted
-        return powertost_shifted(α, θ₁, θ₂, δ, σ̵ₓ, df)
+        return powertost_shifted
     else
          throw(ArgumentError("method not known!"))
     end

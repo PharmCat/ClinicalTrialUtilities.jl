@@ -1,4 +1,24 @@
 #deprecated
+
+function powertostint(α::Real,  θ₁::Real, θ₂::Real, δ::Real, σ::Real, n::Int, design::Symbol, method::Symbol)::Float64
+    d     = Design(design) #dffunc if generic funtion with 1 arg return df
+    df    = d.df(n)
+    if df < 1 throw(ArgumentError("powertostint: df < 1")) end
+    σ̵ₓ::Float64 = σ*sediv(d, n)
+    if method     == :owenq
+        return   powertost_owenq(α, θ₁, θ₂, δ, σ̵ₓ, df)
+    elseif method == :nct
+        return     powertost_nct(α, θ₁, θ₂, δ, σ̵ₓ, df)
+    elseif method == :mvt
+        return     powertost_mvt(α, θ₁, θ₂, δ, σ̵ₓ, df) #not implemented
+    elseif method == :shifted
+        return powertost_shifted(α, θ₁, θ₂, δ, σ̵ₓ, df)
+    else
+         throw(ArgumentError("method not known!"))
+    end
+end
+
+
 function twoprop(x1::Int, n1::Int, x2::Int, n2::Int; alpha=0.05, type::Symbol, method::Symbol)::ConfInt
     if alpha >= 1.0 || alpha <= 0.0 throw(ArgumentError("Alpha shold be > 0.0 and < 1.0")) end
     if type==:diff
