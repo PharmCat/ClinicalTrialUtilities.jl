@@ -13,6 +13,7 @@ v0.2.0
 
   Major changes:
 
+  - using DataFrames 19.0+
   - Task types for many functions (sample size, power functions, random ets.);
   - Sample size and power functions now return TaskResult{T <: CTask};
   - descriptive() rewrited;
