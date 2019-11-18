@@ -9,97 +9,148 @@
 # DescTools https://CRAN.R-project.org/package=DescTools
 # metafor by Wolfgang Viechtbauer https://cran.r-project.org/package=metafor
 
-module CI
-    using Distributions, Roots, DataFrames
-    import ..ZDIST, ..CTUException, ..ConfInt
-    export oneProp, oneMeans, twoProp, twoMeans, cmh
 
-    function oneProp(x::Int, n::Int; alpha=0.05, method=:wilson)
-        if alpha >= 1.0 || alpha <= 0.0
-            @warn "Alpha >= 1.0 or <= 0.0"
-            return ConfInt(0,0,x/n)
-        end
-        if method==:wilson
-            return propwilsonci(x, n, alpha)
-        elseif method==:wilsoncc
-            return propwilsonccci(x, n, alpha)
-        elseif method==:cp
-            return propCPCI(x, n, alpha)
-        elseif method==:soc
-            return propSOCCI(x, n, alpha)
-        elseif method==:blaker
-            return propBlakerCI(x, n, alpha)
-        elseif method==:arcsine
-            return propARCCI(x, n, alpha)
-        elseif method==:wald
-            return propWaldCI(x, n, alpha)
-        elseif method==:waldcc
-            return propWaldCICC(x, n, alpha)
-        else
-            throw(CTUException(1301,"oneProp: no such method."))
-        end
+function StatsBase.confint(param::Proportion; level = 0.95, method = :default)::ConfInt
+    propci(param.x, param.n; alpha = 1 - level, method = method)
+end
+function StatsBase.confint(param::DiffProportion{P, P}; level = 0.95, method = :default)::ConfInt  where P <: Proportion
+    diffpropci(param.a.x, param.a.n, param.b.x, param.b.n; alpha = 1 - level, method = method)
+end
+function StatsBase.confint(param::OddRatio{P}; level = 0.95, method = :default)::ConfInt where P <: Proportion
+    orpropci(param.a.x, param.a.n, param.b.x, param.b.n; alpha = 1 - level, method = method)
+end
+function StatsBase.confint(param::RiskRatio{P}; level = 0.95, method = :default)::ConfInt where P <: Proportion
+    rrpropci(param.a.x, param.a.n, param.b.x, param.b.n; alpha = 1 - level, method = method)
+end
+function StatsBase.confint(param::Mean; level = 0.95, method = :default)::ConfInt
+    meanci(param.m, param.s, param.n; alpha = 1 - level, method = method)
+end
+function StatsBase.confint(param::DiffMean{T}; level = 0.95, method = :default)::ConfInt where T <: Mean
+    diffmeanci(param.a.m, param.a.s, param.a.n, param.b.m, param.b.s, param.b.n; alpha = 1 - level, method = method)
+end
+"""
+    propci(x::Int, n::Int; alpha=0.05, method = :default)::ConfInt
+
+Confidence interval for proportion.
+"""
+function propci(x::Int, n::Int; alpha=0.05, method = :default)::ConfInt
+    if alpha >= 1.0 || alpha <= 0.0
+        @warn "Alpha >= 1.0 or <= 0.0"
+        return ConfInt(0,0,x/n)
     end
+    if method == :wilson || method == :default
+        return propwilsonci(x, n, alpha)
+    elseif method==:wilsoncc
+        return propwilsonccci(x, n, alpha)
+    elseif method==:cp
+        return propcpci(x, n, alpha)
+    elseif method==:soc
+        return propsocci(x, n, alpha)
+    elseif method==:blaker
+        return propblakerci(x, n, alpha)
+    elseif method==:arcsine
+        return proparcci(x, n, alpha)
+    elseif method==:wald
+        return propwaldci(x, n, alpha)
+    elseif method==:waldcc
+        return propwaldcicc(x, n, alpha)
+    else
+        throw(ArgumentError("unknown method!"))
+    end
+end
+"""
+    diffpropci(x1::Int, n1::Int, x2::Int, n2::Int; alpha = 0.05, method::Symbol = :default)::ConfInt
 
-    function oneMean(m::Real,s::Real,n::Int,alpha::Real; method=:norm)::ConfInt
+Confidence interval for proportion difference.
+"""
+function diffpropci(x1::Int, n1::Int, x2::Int, n2::Int; alpha = 0.05, method::Symbol = :default)::ConfInt
+    if alpha >= 1.0 || alpha <= 0.0
+        throw(ArgumentError("Alpha shold be > 0.0 and < 1.0"))
+    end
+    if method == :nhs
+        return propDiffNHSCI(x1, n1, x2, n2, alpha)
+    elseif method == :nhscc
+        return propDiffNHSCCCI(x1, n1, x2, n2, alpha)
+    elseif method == :ac
+        return propDiffACCI(x1, n1, x2, n2, alpha)
+    elseif method == :mn || method == :default
+        return propDiffMNCI(x1, n1, x2, n2, alpha)
+    elseif method == :mee2
+        return propDiffMeeCI(x1, n1, x2, n2, alpha)
+    elseif method == :mee || method == :fm
+        return propDiffFMCI(x1, n1, x2, n2, alpha)
+    elseif method == :wald
+        return propDiffWaldCI(x1, n1, x2, n2, alpha)
+    elseif method == :waldcc
+        return propDiffWaldCCCI(x1, n1, x2, n2, alpha)
+    else
+        throw(ArgumentError("Method unknown!"))
+    end
+end
+"""
+    rrpropci(x1::Int, n1::Int, x2::Int, n2::Int; alpha=0.05, method::Symbol = :default)::ConfInt
+
+Confidence interval for relative risk.
+"""
+function rrpropci(x1::Int, n1::Int, x2::Int, n2::Int; alpha=0.05, method::Symbol = :default)::ConfInt
+    if alpha >= 1.0 || alpha <= 0.0 throw(ArgumentError("Alpha shold be > 0.0 and < 1.0")) end
+    if method==:mn || method == :default
+        return propRRMNCI(x1, n1, x2, n2, alpha)
+    elseif method == :cli || method == :walters
+        return propRRCLICI(x1, n1, x2, n2, alpha)
+    elseif method == :li || method == :katz
+        return proprrkatzci(x1, n1, x2, n2, alpha)
+    elseif method ==:mover
+        return  propRRMOVERCI(x1, n1, x2, n2, alpha)
+    else
+        throw(ArgumentError("Method unknown!"))
+    end
+end
+"""
+    orpropci(x1::Int, n1::Int, x2::Int, n2::Int; alpha=0.05, method::Symbol = :default)::ConfInt
+
+Confidence interval for odd ratio.
+"""
+function orpropci(x1::Int, n1::Int, x2::Int, n2::Int; alpha=0.05, method::Symbol = :default)::ConfInt
+    if alpha >= 1.0 || alpha <= 0.0 throw(ArgumentError("Alpha shold be > 0.0 and < 1.0")) end
+    if method==:mn || method == :default
+        return propORMNCI(x1, n1, x2, n2, alpha)
+    elseif method==:awoolf || method==:gart
+        return propORaWoolfCI(x1, n1, x2, n2, alpha)
+    elseif method==:woolf
+        return propORWoolfCI(x1, n1, x2, n2, alpha)
+    elseif method==:mover
+        return propORMOVERCI(x1, n1, x2, n2, alpha)
+    elseif method==:mn2
+        return propORCI(x1, n1, x2, n2, alpha)
+    else
+        throw(ArgumentError("Method unknown!"))
+    end
+end
+"""
+    meanci(m::Real, s::Real, n::Int; alpha::Real = 0.05, method=:norm)::ConfInt
+
+Confidence interval for mean.
+"""
+function meanci(m::Real, s::Real, n::Int; alpha::Real = 0.05, method=:norm)::ConfInt
         if method==:norm
-            return meanNormCI(m,s,n,alpha)
+            return meanNormCI(m, s, n, alpha)
         elseif method==:tdist
-            return meanTdistCI(m,s,n,alpha)
+            return meanTdistCI(m, s, n, alpha)
         end
-    end
+end
+"""
+    diffmeanci(m1::Real, s1::Real, n1::Real, m2::Real, s2::Real, n2::Real; alpha::Real = 0.05, method::Symbol = :default)::ConfInt
 
-    function twoProp(x1::Int, n1::Int, x2::Int, n2::Int; alpha=0.05, type::Symbol, method::Symbol)::ConfInt
-        if alpha >= 1.0 || alpha <= 0.0 throw(ArgumentError("Alpha shold be > 0.0 and < 1.0")) end
-        if type==:diff
-            if method ==:nhs
-                return propDiffNHSCI(x1, n1, x2, n2, alpha)
-            elseif method ==:nhscc
-                return propDiffNHSCCCI(x1, n1, x2, n2, alpha)
-            elseif method ==:ac
-                return propDiffACCI(x1, n1, x2, n2, alpha)
-            elseif method ==:mn
-                return propDiffMNCI(x1, n1, x2, n2, alpha)
-            elseif method ==:mee2
-                return propDiffMeeCI(x1, n1, x2, n2, alpha)
-            elseif method ==:mee || method == :fm
-                return propDiffFMCI(x1, n1, x2, n2, alpha)
-            elseif method ==:wald
-                return propDiffWaldCI(x1, n1, x2, n2, alpha)
-            elseif method ==:waldcc
-                return propDiffWaldCCCI(x1, n1, x2, n2, alpha)
-            end
-        elseif type==:rr
-            if method==:mn
-                return propRRMNCI(x1, n1, x2, n2, alpha)
-            elseif method == :cli || method == :walters
-                return propRRCLICI(x1, n1, x2, n2, alpha)
-            elseif method == :li || method == :katz
-                return proprrkatzci(x1, n1, x2, n2, alpha)
-            elseif method ==:mover
-                return  propRRMOVERCI(x1, n1, x2, n2, alpha)
-            end
-        elseif type==:or
-            if method==:mn
-                return propORMNCI(x1, n1, x2, n2, alpha)
-            elseif method==:awoolf || method==:gart
-                return propORaWoolfCI(x1, n1, x2, n2, alpha)
-            elseif method==:woolf
-                return propORWoolfCI(x1, n1, x2, n2, alpha)
-            elseif method==:mover
-                return propORMOVERCI(x1, n1, x2, n2, alpha)
-            elseif method==:mn2
-                return propORCI(x1, n1, x2, n2, alpha)
-            end
+Confidence interval for mead difference.
+"""
+function diffmeanci(m1::Real, s1::Real, n1::Real, m2::Real, s2::Real, n2::Real; alpha::Real = 0.05, method::Symbol = :default)::ConfInt
+        if method == :ev || method == :default
+            return meanDiffEV(m1::Real, s1::Real, n1::Real, m2::Real, s2::Real, n2::Real, alpha::Real)
+        elseif method == :uv
+            return meanDiffUV(m1::Real, s1::Real, n1::Real, m2::Real, s2::Real, n2::Real, alpha::Real)
         end
-    end #twoProp
-
-    function twoMeans(m1::Real, s1::Real, n1::Real, m2::Real, s2::Real, n2::Real; alpha::Real=0.05, method=:ev)::ConfInt
-            if method == :ev
-                return meanDiffEV(m1::Real, s1::Real, n1::Real, m2::Real, s2::Real, n2::Real, alpha::Real)
-            elseif method == :uv
-                return meanDiffUV(m1::Real, s1::Real, n1::Real, m2::Real, s2::Real, n2::Real, alpha::Real)
-            end
-    end #twoMeans
+end
 
     #-----------------------------PROPORTIONS-----------------------------------
 
@@ -110,7 +161,7 @@ module CI
         p = x/n
         b = z*sqrt((p*(1-p)+(z^2)/(4*n))/n)/(1+(z^2)/n)
         m = (p+(z^2)/(2*n))/(1+(z^2)/n)
-        return ConfInt(m - b,m + b,m)
+        return ConfInt(m - b, m + b, m, alpha)
     end
     #Wilson CC
     #Newcombe, R. G. (1998). "Two-sided confidence intervals for the single proportion: comparison of seven methods". Statistics in Medicine. 17 (8): 857–872. doi:10.1002/(SICI)1097-0258(19980430)17:8<857::AID-SIM777>3.0.CO;2-E. PMID 9595616
@@ -119,12 +170,12 @@ module CI
         p = x/n
         l = (2*n*p+z*z-1-z*sqrt(z*z-2-1/n+4*p*(n*(1-p)+1)))/2/(n+z*z)
         u = (2*n*p+z*z+1+z*sqrt(z*z+2-1/n+4*p*(n*(1-p)-1)))/2/(n+z*z)
-        return ConfInt(min(p, l), max(p, u), p)
+        return ConfInt(min(p, l), max(p, u), p, alpha)
     end
 
     #Clopper-Pearson exatct CI
     #Clopper, C. and Pearson, E.S. (1934) The use of confidence or fiducial limits illustrated in the caseof the binomial.Biometrika26, 404–413.
-    function propCPCI(x::Int, n::Int, alpha::Float64)::ConfInt
+    function propcpci(x::Int, n::Int, alpha::Float64)::ConfInt
         if x==0
             ll = 0.0
             ul = 1.0-(alpha/2)^(1/n)
@@ -135,11 +186,11 @@ module CI
             ll = 1/(1+(n-x+1)/(x*quantile(FDist(2*x, 2*(n-x+1)), alpha/2)))
             ul = 1/(1+(n-x) / ((x+1)*quantile(FDist(2*(x+1), 2*(n-x)), 1-alpha/2)))
         end
-        return ConfInt(ll, ul, x/n)
+        return ConfInt(ll, ul, x/n, alpha)
     end
     #Blaker CI
     #Blaker, H. (2000). Confidence curves and improved exact confidence intervals for discrete distributions,Canadian Journal of Statistics28 (4), 783–798
-    function propBlakerCI(x::Int, n::Int, alpha::Float64)::ConfInt
+    function propblakerci(x::Int, n::Int, alpha::Float64)::ConfInt
         tol = 1E-5; lower = 0; upper = 1;
         if n != 0
             lower = quantile(Beta(x, n-x+1), alpha/2)
@@ -153,7 +204,7 @@ module CI
                 upper -=tol
             end
         end
-        return ConfInt(lower,upper, x/n)
+        return ConfInt(lower,upper, x/n, alpha)
     end
     @inline function acceptbin(x::Int, n::Int, p::Float64)::Float64
         BIN = Binomial(n,p)
@@ -164,20 +215,20 @@ module CI
         return min(a1,a2)
     end
     #Wald CI
-    function propWaldCI(x::Int, n::Int, alpha::Float64)::ConfInt
+    function propwaldci(x::Int, n::Int, alpha::Float64)::ConfInt
         p=x/n
         b = quantile(ZDIST, 1-alpha/2)*sqrt(p*(1-p)/n)
-        return ConfInt(p-b,p+b,p)
+        return ConfInt(p-b, p+b, p, alpha)
     end
-    function propWaldCICC(x::Int, n::Int, alpha::Float64)::ConfInt
+    function propwaldcicc(x::Int, n::Int, alpha::Float64)::ConfInt
         p=x/n
         b = quantile(ZDIST, 1-alpha/2)*sqrt(p*(1-p)/n)
         cc = 0.5/n
-        return ConfInt(p-b-cc,p+b+cc,p)
+        return ConfInt(p-b-cc, p+b+cc, p, alpha)
     end
     #SOC  Second-Order corrected
     #T. Tony Cai One-sided confdence intervals in discrete distributions doi:10.1016/j.jspi.2004.01.00
-    function propSOCCI(x::Int, n::Int, alpha::Float64)::ConfInt
+    function propsocci(x::Int, n::Int, alpha::Float64)::ConfInt
         p  = x/n
         k  = quantile(ZDIST, 1-alpha/2)
         k2 = k^2
@@ -186,14 +237,14 @@ module CI
         γ2 = k2/18+7/36
         m  = (x+η)/(n+2*η)
         b  = k*sqrt(p*(1-p)+(γ1*p*(1-p)+γ2)/n)/sqrt(n)
-        return ConfInt(m-b, m+b, p)
+        return ConfInt(m-b, m+b, p, alpha)
     end
     #Arcsine
-    function propARCCI(x::Int, n::Int, alpha::Float64)::ConfInt
+    function proparcci(x::Int, n::Int, alpha::Float64)::ConfInt
         q = quantile(ZDIST, 1-alpha/2)
         p = x/n
         z = q/(2*sqrt(n))
-        return ConfInt(sin(asin(sqrt(p))-z)^2, sin(asin(sqrt(p))+z)^2, p)
+        return ConfInt(sin(asin(sqrt(p))-z)^2, sin(asin(sqrt(p))+z)^2, p, alpha)
     end
     #--------------------------------OR-----------------------------------------
     #Cornfield, J. (1956) A statistical problem arising from retrospective studies.  In Neyman J. (ed.),Proceedings of the third Berkeley Symposium on Mathematical Statistics and Probability4,  pp.135–148.
@@ -220,7 +271,7 @@ module CI
             theta = p1/(1-p1)/(p2/(1-p2))*1.1
             ul    = limit(x1,n1,x2,n2,alpha,theta,1)
         end
-        return ConfInt(ll, ul, (p1/(1-p1))/(p2/(1-p2)))
+        return ConfInt(ll, ul, (p1/(1-p1))/(p2/(1-p2)), alpha)
     end
     @inline function limit(x1, n1, x2, n2, alpha, lim, t)
         z  = quantile(Chisq(1), 1-alpha)
@@ -264,7 +315,7 @@ module CI
             return ConfInt(find_zero(fmnor, 1e-6, atol=1E-6), Inf, Inf)
         else
             estimate = (x1/(n1-x1))/(x2/(n2-x2))
-            return ConfInt(find_zero(fmnor, 1e-6, atol=1E-6), find_zero(fmnor, estimate+1e-6, atol=1E-6), estimate)
+            return ConfInt(find_zero(fmnor, 1e-6, atol=1E-6), find_zero(fmnor, estimate+1e-6, atol=1E-6), estimate, alpha)
         end
     end
 
@@ -278,7 +329,7 @@ module CI
             estI      = log(estimate)
             stde      = sqrt(1/xa + 1/xb + 1/xc + 1/xd)
             z         = quantile(ZDIST, 1-alpha/2)
-            return ConfInt(exp(estI - z*stde), exp(estI + z*stde), estimate)
+            return ConfInt(exp(estI - z*stde), exp(estI + z*stde), estimate, alpha)
     end
     #Woolf logit
     #Woolf, B. (1955). On estimating the relation between blood group and disease. Annals of human genetics, 19(4):251-253.
@@ -291,7 +342,7 @@ module CI
             estI     = log(estimate)
             stde     = sqrt(1/xa + 1/xb + 1/xc + 1/xd)
             z        = quantile(ZDIST, 1-alpha/2)
-            return ConfInt(exp(estI - z*stde), exp(estI + z*stde), estimate)
+            return ConfInt(exp(estI - z*stde), exp(estI + z*stde), estimate, alpha)
     end
 
     #Method of variance estimates recovery
@@ -307,7 +358,7 @@ module CI
         wilci2   = ConfInt(wilci2.lower/(1-wilci2.lower), wilci2.upper/(1-wilci2.upper), estimate)
         lower    = (p1*p2-sqrt((p1*p2)^2 - wilci1.lower*wilci2.upper*(2*p1-wilci1.lower)*(2*p2-wilci2.upper)))/(wilci2.upper*(2*p2 - wilci2.upper))
         upper    = (p1*p2+sqrt((p1*p2)^2 - wilci1.upper*wilci2.lower*(2*p1-wilci1.upper)*(2*p2-wilci2.lower)))/(wilci2.lower*(2*p2 - wilci2.lower))
-        return ConfInt(lower, upper, estimate)
+        return ConfInt(lower, upper, estimate, alpha)
     end
 
     #?Agresti independence-smoothed logit
@@ -325,7 +376,7 @@ module CI
         estimate = p1-p2
         z        = quantile(ZDIST, 1 - alpha/2)
         stderr   = sqrt(p1*(1-p1)/n1+p2*(1-p2)/n2)
-        return ConfInt(estimate - z*stderr, estimate + z*stderr, estimate)
+        return ConfInt(estimate - z*stderr, estimate + z*stderr, estimate, alpha)
     end
     #Wald CC
     function propDiffWaldCCCI(x1::Int, n1::Int, x2::Int, n2::Int, alpha::Float64)::ConfInt
@@ -335,7 +386,7 @@ module CI
         cc       = 0.5*(1/n1+1/n2)
         z        = quantile(ZDIST, 1 - alpha/2)
         stderr   = sqrt(p1*(1-p1)/n1+p2*(1-p2)/n2)
-        return ConfInt(estimate - z*stderr - cc, estimate + z*stderr + cc, estimate)
+        return ConfInt(estimate - z*stderr - cc, estimate + z*stderr + cc, estimate, alpha)
     end
 
     #Newcombes Hybrid (wilson) Score interval for the difference of proportions
@@ -350,7 +401,7 @@ module CI
         ci1      = propwilsonci(x1, n1, alpha)
         ci2      = propwilsonci(x2, n2, alpha)
         return ConfInt(estimate-z*sqrt(ci1.lower*(1-ci1.lower)/n1+ci2.upper*(1-ci2.upper)/n2),
-                       estimate+z*sqrt(ci1.upper*(1-ci1.upper)/n1+ci2.lower*(1-ci2.lower)/n2), estimate)
+                       estimate+z*sqrt(ci1.upper*(1-ci1.upper)/n1+ci2.lower*(1-ci2.lower)/n2), estimate, alpha)
     end
 
     function propDiffNHSCCCI(x1::Int, n1::Int, x2::Int, n2::Int, alpha::Float64)::ConfInt
@@ -361,7 +412,7 @@ module CI
         ci1      = propwilsonccci(x1, n1, alpha)
         ci2      = propwilsonccci(x2, n2, alpha)
         return ConfInt(estimate-sqrt((p1-ci1.lower)^2 + (ci2.upper-p2)^2),
-                       estimate+sqrt((ci1.upper - p1)^2 + (p2 - ci2.lower)^2), estimate)
+                       estimate+sqrt((ci1.upper - p1)^2 + (p2 - ci2.lower)^2), estimate, alpha)
     end
 
     #Agresti-Caffo interval for the difference of proportions
@@ -378,7 +429,7 @@ module CI
         n2I      = n2+2
         estI     = p1I-p2I
         stderr   = sqrt(p1I*(1-p1I)/n1I+p2I*(1-p2I)/n2I)
-        return ConfInt(estI-z*stderr, estI+z*stderr, estimate)
+        return ConfInt(estI-z*stderr, estI+z*stderr, estimate, alpha)
     end
     #Method of Mee 1984 with Miettinen and Nurminen modification n / (n - 1) Newcombe 1998
     #Score intervals for the difference of two binomial proportions
@@ -432,7 +483,7 @@ module CI
             ul = ci.upper
             uu = 1.0-1e-8
         end
-        return ConfInt(find_zero(fmnd, (ll, lu), atol=1E-6), find_zero(fmnd, (ul, uu), atol=1E-6), estimate)
+        return ConfInt(find_zero(fmnd, (ll, lu), atol=1E-6), find_zero(fmnd, (ul, uu), atol=1E-6), estimate, alpha)
     end
     @inline function mndiffval(p1::Float64, n1::Int, p2::Float64, n2::Int, estimate::Float64, Δ::Float64)::Float64
         return (estimate-Δ)^2/((n1+n2)/(n1+n2-1)*mlemndiff(p1, n1, p2, n2, Δ))
@@ -462,22 +513,22 @@ module CI
         z        = quantile(Chisq(1), 1-alpha)
         f(x)     = fmpval(p1, n1, p2, n2, estimate, x) - z
         return ConfInt(find_zero(f, (-1.0+1e-8, estimate-1e-8), atol=1E-6),
-                       find_zero(f, (estimate+1e-8, 1.0-1e-8), atol=1E-6), estimate)
+                       find_zero(f, (estimate+1e-8, 1.0-1e-8), atol=1E-6), estimate, alpha)
     end
     @inline function fmpval(p1::Float64, n1::Int, p2::Float64, n2::Int, estimate::Float64, Δ::Float64)
         return abs((estimate-Δ)^2/mlemndiff(p1, n1, p2, n2, Δ))
     end
     function propDiffMeeCI(x1::Int, n1::Int, x2::Int, n2::Int, alpha::Float64)::ConfInt
-        p1   = x1/n1
-        p2   = x2/n2
-        est  = p1 - p2
-        f(x) = fmpval2(p1, n1, p2, n2, est, x) - alpha
-        return ConfInt(find_zero(f, (-1.0+1e-8, est-1e-8), atol=1E-6), find_zero(f, ( est+1e-6, 1.0-1e-6), atol=1E-6), est)
+        p1        = x1/n1
+        p2        = x2/n2
+        estimate  = p1 - p2
+        f(x)      = fmpval2(p1, n1, p2, n2, estimate, x) - alpha
+        return ConfInt(find_zero(f, (-1.0+1e-8, estimate-1e-8), atol=1E-6), find_zero(f, ( estimate+1e-6, 1.0-1e-6), atol=1E-6), estimate, alpha)
     end
-    @inline function fmpval2(p1, n1, p2, n2, est, delta)::Float64
-        z = (est-delta)/sqrt(mlemndiff(p1, n1, p2, n2, delta))
+    @inline function fmpval2(p1, n1, p2, n2, estimate, delta)::Float64
+        z = (estimate - delta)/sqrt(mlemndiff(p1, n1, p2, n2, delta))
         p = cdf(ZDIST, z)
-        return 2*min(1-p, p)
+        return 2*min(1 - p, p)
     end
 
 
@@ -517,12 +568,12 @@ module CI
         if (x1==0 && x2==0) || (x1==n1 && x2==n2)
             return ConfInt(0.0, Inf, NaN)
         elseif x1==0 || x2==n2
-            return ConfInt(0.0, find_zero(fmnrr, 1e-8, atol=1E-6), 0.0)
+            return ConfInt(0.0, find_zero(fmnrr, 1e-8, atol=1E-6), 0.0, alpha)
         elseif x1==n1 || x2 == 0
-            return ConfInt(find_zero(fmnrr, 1e-8, atol=1E-6), Inf, Inf)
+            return ConfInt(find_zero(fmnrr, 1e-8, atol=1E-6), Inf, Inf, alpha)
         else
             estimate = (x1/n1)/(x2/n2)
-            return ConfInt(find_zero(fmnrr, 1e-8, atol=1E-6), find_zero(fmnrr, estimate+1e-6, atol=1E-6), estimate)
+            return ConfInt(find_zero(fmnrr, 1e-8, atol=1E-6), find_zero(fmnrr, estimate+1e-6, atol=1E-6), estimate, alpha)
         end
     end #propRRMNCI
 
@@ -532,7 +583,7 @@ module CI
         estI      = log(estimate)
         stderrlog = sqrt(1/x2+1/x1-1/n2-1/n1)
         Z         = quantile(ZDIST,1-alpha/2)
-        return ConfInt(exp(estI-Z*stderrlog), exp(estI+Z*stderrlog), estimate)
+        return ConfInt(exp(estI-Z*stderrlog), exp(estI+Z*stderrlog), estimate, alpha)
     end
 
     #Crude log interval
@@ -547,7 +598,7 @@ module CI
         stderrlog = sqrt(1/x2I+1/x1I-1/n2I-1/n1I)
         estimate  = (x1/n1)/(x2/n2)
         Z         =  quantile(ZDIST,1-alpha/2)
-        return ConfInt(exp(estI-Z*stderrlog), exp(estI+Z*stderrlog), estimate)
+        return ConfInt(exp(estI-Z*stderrlog), exp(estI+Z*stderrlog), estimate, alpha)
     end
     #Method of variance estimates recovery (Donner, Zou, 2012)
     function propRRMOVERCI(x1::Int, n1::Int, x2::Int, n2::Int, alpha::Float64)::ConfInt
@@ -559,19 +610,19 @@ module CI
         wilci2   = propwilsonci(x2, n2, alpha)
         lower    = (p1*p2-sqrt((p1*p2)^2 - wilci1.lower*wilci2.upper*(2*p1-wilci1.lower)*(2*p2-wilci2.upper)))/(wilci2.upper*(2*p2 - wilci2.upper))
         upper    = (p1*p2+sqrt((p1*p2)^2 - wilci1.upper*wilci2.lower*(2*p1-wilci1.upper)*(2*p2-wilci2.lower)))/(wilci2.lower*(2*p2 - wilci2.lower))
-        return ConfInt(lower, upper, estimate)
+        return ConfInt(lower, upper, estimate, alpha)
     end
     #-------------------------------MEANS---------------------------------------
 
     #Normal
-    function meanNormCI(m,s,n,alpha)::ConfInt
+    function meanNormCI(m::Real, s::Real, n::Real, alpha::Real)::ConfInt
         e = quantile(ZDIST, 1-alpha/2)*sqrt(s/n)
-        return ConfInt(m-e, m+e, m)
+        return ConfInt(m-e, m+e, m, alpha)
     end
     #T Distribution
-    function meanTdistCI(m,s,n,alpha)::ConfInt
+    function meanTdistCI(m::Real, s::Real, n::Real, alpha::Real)::ConfInt
         e = quantile(TDist(n-1), 1-alpha/2)*sqrt(s/n)
-        return ConfInt(m-e, m+e, m)
+        return ConfInt(m-e, m+e, m, alpha)
     end
     #mean diff equal var
     function meanDiffEV(m1::Real, s1::Real, n1::Real, m2::Real, s2::Real, n2::Real, alpha::Real)::ConfInt
@@ -579,7 +630,7 @@ module CI
         stddev = sqrt(((n1 - 1) * s1 + (n2 - 1) * s2) / (n1 + n2 - 2))
         stderr = stddev * sqrt(1/n1 + 1/n2)
         d      = stderr*quantile(TDist(n1+n2-2), 1-alpha/2)
-        return ConfInt(diff-d, diff+d, diff)
+        return ConfInt(diff-d, diff+d, diff, alpha)
     end
     function meanDiffEV(a1::AbstractVector{T}, a2::AbstractVector{S}, alpha::Real)::ConfInt where {T<:Real,S<:Real}
         return meanDiffEV(mean(a1), var(a1), length(a1), mean(a2), var(a2), length(a2), alpha)
@@ -592,7 +643,7 @@ module CI
         v      = (s1/n1+s2/n2)^2/(s1^2/n1^2/(n1-1)+s2^2/n2^2/(n2-1))
         stderr = sqrt(s1/n1 + s2/n2)
         d      = stderr*quantile(TDist(v), 1-alpha/2)
-        return ConfInt(diff-d, diff+d, diff)
+        return ConfInt(diff-d, diff+d, diff, alpha)
     end
     function meanDiffUV(a1::AbstractVector{T}, a2::AbstractVector{S}, alpha::Real)::ConfInt where {T<:Real,S<:Real}
         return meanDiffUV(mean(a1), var(a1), length(a1), mean(a2), var(a2), length(a2), alpha)
@@ -630,7 +681,7 @@ module CI
             end
             #zval = est/se
             #pval = 2*(1-cdf(Normal(), abs(zval)))
-            return ConfInt(est - z*se, est + z*se, est)
+            return ConfInt(est - z*se, est + z*se, est, alpha)
         elseif type == :or
             #...
             Pi = (data[:, a] ./ N) + (data[:, d] ./ N)
@@ -645,7 +696,7 @@ module CI
             se  = sqrt(1/2 * (sum(Pi .* Ri)/R^2 + sum(Pi .* Si + Qi .* Ri)/(R*S) + sum(Qi .* Si)/S^2)) # based on Robins et al. (1986)
             #zval= est / se
             #pval= 2*(1-cdf(Normal(), abs(zval)))
-            if logscale return ConfInt(est - z*se, est + z*se, est) else return ConfInt(exp(est - z*se), exp(est + z*se), exp(est)) end
+            if logscale return ConfInt(est - z*se, est + z*se, est, alpha) else return ConfInt(exp(est - z*se), exp(est + z*se), exp(est), alpha) end
         elseif type == :rr
             #...
             R = sum(data[:, a] .* (n2 ./ N))
@@ -657,8 +708,8 @@ module CI
             se  = sqrt(sum(((n1 ./ N) .* (n2 ./ N) .* (data[:, a] + data[:, c]) - (data[:, a] ./ N) .* data[:, c])) / (R*S))
             #zval= est / se
             #pval= 2*(1-cdf(Normal(), abs(zval)))
-            if logscale return ConfInt(est - z*se, est + z*se, est) else return ConfInt(exp(est - z*se), exp(est + z*se), exp(est)) end
+            if logscale return ConfInt(est - z*se, est + z*se, est, alpha) else return ConfInt(exp(est - z*se), exp(est + z*se), exp(est), alpha) end
         end
     end
 
-end #end module CI
+#end #end module CI

@@ -9,11 +9,11 @@
 
 1031: designProp
 
-104*: beSampleN
+104*: besamplen
 
 1051: cv2ci
 
-111*: SIM.bePower
+111*: SIM.bepower
 
 12**: sampleSize
 

@@ -6,7 +6,7 @@ Simulation submodule.
 
 Bioequivalence power simulation
 
-bePower(;alpha, logscale, theta1, theta2, theta0, cv, n, simnum, seed)
+bepower(;alpha, logscale, theta1, theta2, theta0, cv, n, simnum, seed)
 
 Proportion power simulation
 
@@ -16,10 +16,10 @@ Proportion simulation sample size
 
 ctPropSampleN(p1, p2, ref; alpha, beta, type, citype, method, simnum, seed)
 
-### <a name="bePower">bePower</a>
+### <a name="bepower">bepower</a>
 
 ```
-bePower(;alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.0, n=0, simnum=5, seed=0)
+bepower(;alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.0, n=0, simnum=5, seed=0)
 ```
 
 ### <a name="ctPropPower">ctPropPower</a>

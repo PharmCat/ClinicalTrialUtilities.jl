@@ -14,7 +14,7 @@ b = @benchmark ClinicalTrialUtilities.powerTOST(alpha=0.05, logscale=true, theta
 
 display(b[:])
 
-b = @benchmark ClinicalTrialUtilities.beSampleN(;theta0=1.0, theta1=0.8, theta2=1.25, cv=0.3, alpha=0.05, beta=0.1, logscale=true, method="owenq")
+b = @benchmark ClinicalTrialUtilities.besamplen(;theta0=1.0, theta1=0.8, theta2=1.25, cv=0.3, alpha=0.05, beta=0.1, logscale=true, method="owenq")
 
 display(b[:])
 

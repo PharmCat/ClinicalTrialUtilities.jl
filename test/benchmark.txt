@@ -10,7 +10,7 @@ benchmark(a<-sampleN.TOST(theta0=1, theta1=0.8, theta2=1.25, CV=0.3, alpha=0.05,
 
 #Julia
 
-julia> b = @benchmark ClinicalTrialUtilities.beSampleN(;theta0=1.0, theta1=0.8, theta2=1.25, cv=0.3, alpha=0.05, beta=0.1, logscale=true, method="owenq");
+julia> b = @benchmark ClinicalTrialUtilities.besamplen(;theta0=1.0, theta1=0.8, theta2=1.25, cv=0.3, alpha=0.05, beta=0.1, logscale=true, method="owenq");
 
 julia> bBenchmarkTools.Trial:
   memory estimate:  5.48 KiB

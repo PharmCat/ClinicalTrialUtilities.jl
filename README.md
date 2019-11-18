@@ -1,5 +1,7 @@
 # ClinicalTrialUtilities
 
+**VERSION 0.2.0 INCOMATIBLE WITH 0.1.x**
+
  Clinical trial related calculation: descriptive statistics, power and sample size calculation, power simulations, confidence interval, pharmacokinetics/pharmacodynamics parameters calculation.
 
 [![Build Status](https://travis-ci.com/PharmCat/ClinicalTrialUtilities.jl.svg?branch=master)](https://travis-ci.com/PharmCat/ClinicalTrialUtilities.jl)
@@ -17,10 +19,10 @@ The package is designed to perform calculations related to the planning and anal
 - [Basic functions](#Basic)
 - [Usage](#Usage)
   - [descriptives](#descriptives)
-  - [ctSampleN](#ctSampleN)
-  - [ctPower](#ctPower)
-  - [beSampleN](#beSampleN)
-  - [bePower](#bePower)
+  - [ctsamplen](#ctsamplen)
+  - [ctpower](#ctpower)
+  - [besamplen](#besamplen)
+  - [bepower](#bepower)
   - [ci2cv](#ci2cv)
   - [pooledCV](#pooledCV)
 - [Submodules](#Submodules)
@@ -33,7 +35,7 @@ The package is designed to perform calculations related to the planning and anal
   - [PK](https://github.com/PharmCat/ClinicalTrialUtilities.jl/blob/master/doc/PK.md)
     - [nca](https://github.com/PharmCat/ClinicalTrialUtilities.jl/blob/master/doc/PK.md#nca)
   - [SIM](https://github.com/PharmCat/ClinicalTrialUtilities.jl/blob/master/doc/SIM.md)
-    - [bePower](https://github.com/PharmCat/ClinicalTrialUtilities.jl/blob/master/doc/SIM.md#bePower)
+    - [bepower](https://github.com/PharmCat/ClinicalTrialUtilities.jl/blob/master/doc/SIM.md#bepower)
     - [ctPropPower](https://github.com/PharmCat/ClinicalTrialUtilities.jl/blob/master/doc/SIM.md#ctPropPower)
     - [ctPropSampleN](https://github.com/PharmCat/ClinicalTrialUtilities.jl/blob/master/doc/SIM.md#ctPropSampleN)
     - [ctMeansPower](https://github.com/PharmCat/ClinicalTrialUtilities.jl/blob/master/doc/SIM.md#ctMeansPower)
@@ -63,13 +65,13 @@ Pkg.test("ClinicalTrialUtilities");
 
 - [Descriptive statistics](#descriptives)
 
-- [Clinical trial sample size estimation](#ctSampleN)
+- [Clinical trial sample size estimation](#ctsamplen)
 
-- [Clinical trial power estimation](#ctPower)
+- [Clinical trial power estimation](#ctpower)
 
-- [Iterative sample size estimation for bioequivalence trials](#beSampleN)
+- [Iterative sample size estimation for bioequivalence trials](#besamplen)
 
-- [Power estimation for bioequivalence trials](#bePower)
+- [Power estimation for bioequivalence trials](#bepower)
 
 - [CV from CI for bioequivalence trials](#ci2cv)
 
@@ -91,12 +93,12 @@ Descriptive statistics.
 descriptives(data::DataFrame; sort = NaN, vars = NaN, stats = [:n, :mean, :sd, :sem, :uq, :median, :lq])::DataFrame
 ```
 
-### <a name="ctSampleN">ctSampleN</a>
+### <a name="ctsamplen">ctsamplen</a>
 
 Sample size estimation for clinical trial.
 
 ```
-ctSampleN(;param=:notdef, type=:notdef, group=:notdef, alpha=0.05, beta=0.2, diff=0, sd=0, a=0, b=0, k=1, logdiff=false, out=:num)
+ctsamplen(;param=:notdef, type=:notdef, group=:notdef, alpha=0.05, beta=0.2, diff=0, sd=0, a=0, b=0, k=1, logscale=false)
 ```
 
 **param (Parameter type):**
@@ -114,36 +116,30 @@ ctSampleN(;param=:notdef, type=:notdef, group=:notdef, alpha=0.05, beta=0.2, dif
 - :one - One sample;
 - :two - Two sample, result is for one group, second group size = n * k;
 
-**alpha** - Alpha (o < alpha < 1)  (default=0.05);
+**alpha** - Alpha (o < α < 1)  (default=0.05);
 
-**beta** - Beta (o < beta < 1) (default=0.2); power = 1 - beta;
+**beta** - Beta (o < β < 1) (default=0.2); power = 1 - β;
 
 **diff** - difference/equivalence margin/non-inferiority/superiority margin;
 
 **sd** - Standard deviation (σ, for Means only);
 
-**a** - Null Hypothesis mean (μ0), Group A;
+**a** -  Group A  (μ₀/p₀) - Test group;
 
-**b** - True mean (μ) for one sample / Group B for two sample design;
+**b** -  Group B (μ₁/p₁) - Reference group or reference value;
 
 **k** - Na/Nb (after sample size estimation second group size: Na=k*Nb, only for two sample design) (default=1);
 
-**logdiff** - diff is log transformed for OR:
-- false (default, diff would be transformed)
-- true
+**logscale** - diff is log transformed for OR:
+- true  - diff is already in log-scale, no transformation required (default);
+- false - diff is not in log-scale, will be transformed;
 
-**out** - output type:
-- :num   - numeric (default);
-- :str   - String variable with text output;
-- :vstr  - numeric and String variable;
-- :print - print to console;
-
-### <a name="ctPower">ctPower</a>
+### <a name="ctpower">ctpower</a>
 
 Power estimation for clinical trials.
 
 ```
-ctPower(;param=:notdef, type=:notdef, group=:notdef, alpha=0.05, logdiff=false, diff=0, sd=0, a=0, b=0, n=0, k=1,  out=:num)
+ctpower(;param=:notdef, type=:notdef, group=:notdef, alpha=0.05, logdiff=false, diff=0, sd=0, a=0, b=0, n=0, k=1)
 ```
 
 **param (Parameter type):**
@@ -161,7 +157,7 @@ ctPower(;param=:notdef, type=:notdef, group=:notdef, alpha=0.05, logdiff=false, 
 - :one - one sample;
 - :two - Two sample;
 
-**alpha** - Alpha (0<alpha<1)  (default=0.05);
+**alpha** - Alpha (0 < α < 1)  (default=0.05);
 
 **n** - Subjects number;
 
@@ -169,33 +165,27 @@ ctPower(;param=:notdef, type=:notdef, group=:notdef, alpha=0.05, logdiff=false, 
 
 **sd** - Standard deviation (σ, for Means only);
 
-**a** - Null Hypothesis mean (μ0), Group A;
+**a** -  Group A  (μ₀/p₀) - Test group;
 
-**b** - True mean (μ) for one sample / Group B for two sample design;
+**b** -  Group B (μ₁/p₁) - Reference group or reference value;
 
 **k** - Na/Nb (after sample size estimation second group size: Na=k*Nb, only for two sample design) (default=1);
 
-**logdiff** - diff is log transformed for OR:
-- false (default, diff would be transformed)
-- true
+**logscale** - diff is log transformed for OR:
+- true  - diff is already in log-scale, no transformation required (default);
+- false - diff is not in log-scale, will be transformed;
 
-**out** - output type:
-- :num   - numeric (default);
-- :str   - String variable with text output;
-- :vstr  - numeric and String variable;
-- :print - print to console;
-
-### <a name="beSampleN">beSampleN</a>
+### <a name="besamplen">besamplen</a>
 
 Sample size estimation for bioequivalence study (iterative procedure).
 
 ```
-beSampleN(;alpha=0.05, beta=0.2, theta0=0.95, theta1=0.8, theta2=1.25, cv=0.0, logscale=true, design=:d2x2, method=:owenq,  out=:num)
+besamplen(;alpha=0.05, beta=0.2, theta0=0.95, theta1=0.8, theta2=1.25, cv=0.0, logscale=true, design=:d2x2, method=:owenq)
 ```
 
-**alpha** - Alpha (o < alpha < 1)  (default=0.05);
+**alpha** - Alpha (o < α < 1)  (default=0.05);
 
-**beta** - Beta (o < beta < 1) (default=0.2); power = 1 - beta;
+**beta** - Beta (o < β < 1) (default=0.2); power = 1 - β;
 
 **theta0** - T/R Ratio (default=0.95);
 
@@ -222,21 +212,15 @@ beSampleN(;alpha=0.05, beta=0.2, theta0=0.95, theta1=0.8, theta2=1.25, cv=0.0, l
 - :nct
 - :shifted
 
-**out** - output type:
-- :num   - numeric (default);
-- :str   - String variable with text output;
-- :vstr  - numeric and String variable;
-- :print - print to console;
-
-### <a name="bePower">bePower</a>
+### <a name="bepower">bepower</a>
 
 Power estimation for bioequivalence trials.
 
 ```
-bePower(;alpha=0.05, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.0, n=0, logscale=true, design=:d2x2, method=:owenq,  out=:num)
+bepower(;alpha=0.05, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.0, n=0, logscale=true, design=:d2x2, method=:owenq)
 ```
 
-**alpha** - Alpha (0 < alpha < 1)  (default=0.05);
+**alpha** - Alpha (0 < α < 1)  (default=0.05);
 
 **theta1** - Lower Level (default=0.8);
 
@@ -265,18 +249,12 @@ bePower(;alpha=0.05, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.0, n=0, logscale
 - :nct
 - :shifted
 
-**out** - output type:
-- :num   - numeric (default);
-- :str   - String variable with text output;
-- :vstr  - numeric and String variable;
-- :print - print to console;
-
 ### <a name="ci2cv">ci2cv</a>
 
 Take CV from known CI and subject number.
 
 ```
-ci2cv(;alpha = 0.05, theta1 = 0.8, theta2 = 1.25, n, design=:d2x2, mso=false, cvms=false)
+cvfromci(;alpha = 0.05, theta1 = 0.8, theta2 = 1.25, n, design=:d2x2, mso=false, cvms=false)
 ```
 
 **alpha** - Alpha (o < alpha < 1)  (default=0.05);
@@ -316,7 +294,7 @@ Calculate CV and MS
 Get pooled CV from multiple sources.
 
 ```
-pooledCV(data::DataFrame; cv=:cv, df=:df, alpha=0.05, returncv=true)::ConfInt
+pooledcv(data::DataFrame; cv=:cv, df=:df, alpha=0.05, returncv=true)::ConfInt
 ```
 
 **data**::DataFrame - Dataframe with CV data
@@ -345,8 +323,8 @@ pooledCV(data::DataFrame; cv=:cv, df=:df, alpha=0.05, returncv=true)::ConfInt
   * nca
 
 * Simulations - [Doc](https://github.com/PharmCat/ClinicalTrialUtilities.jl/blob/master/doc/SIM.md)
-  * bePower
-  * bePowerSIM
+  * bepower
+  * bepowerSIM
   * ctPropPower
   * ctPropSampleN
   * ctMeansPower
@@ -381,45 +359,45 @@ end
 
 ```
 #Sample size for one proportion equality
-ctSampleN(param=:prop, type=:ea, group=:one, a=0.3, b=0.5)
+ctsamplen(param=:prop, type=:ea, group=:one, a=0.3, b=0.5)
 #Equivalence for two means
-ctSampleN(param=:mean, type=:ei, group=:two, diff=0.3, sd=1, a=0.3, b=0.5)
+ctsamplen(param=:mean, type=:ei, group=:two, diff=0.3, sd=1, a=0.3, b=0.5)
 #Odd ratio non-inferiority
-ctSampleN(param=:or, type=:ns, diff=-0.1, a=0.3, b=0.5, k=2)
+ctsamplen(param=:or, type=:ns, diff=-0.1, a=0.3, b=0.5, k=2)
 #Odd ratio equality
-ctSampleN(param=:or, type=:ea, a=0.3, b=0.5, k=2)
+ctsamplen(param=:or, type=:ea, a=0.3, b=0.5, k=2)
 
 #Power
-ctPower(param=:mean, type=:ea, group=:one, a=1.5, b=2, sd=1,n=32, alpha=0.05)
+ctpower(param=:mean, type=:ea, group=:one, a=1.5, b=2, sd=1,n=32, alpha=0.05)
 
 #Bioequivalence sample size
-beSampleN(alpha=0.05,  theta1=0.8, theta2=1.25, theta0=0.95, cv=0.15, method=:owenq)
-beSampleN(cv=0.20, method=:nct)
-beSampleN(cv=0.347, design=:parallel,  out=:print)
-beSampleN(cv=0.40)
-n, p, s = beSampleN(cv=0.347, design=:d2x2x4, method=:nct, out=:vstr)
+besamplen(alpha=0.05,  theta1=0.8, theta2=1.25, theta0=0.95, cv=0.15, method=:owenq)
+besamplen(cv=0.20, method=:nct)
+besamplen(cv=0.347, design=:parallel)
+besamplen(cv=0.40)
+besamplen(cv=0.347, design=:d2x2x4, method=:nct)
 
 #Bioequivalence power for 2x2 design, default method - OwensQ
-bePower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=20, design=:d2x2, method=:owenq)
+bepower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=20, design=:d2x2, method=:owenq)
 #Same
-bePower(alpha=0.05, cv=0.2, n=20, design=:d2x2)
+bepower(alpha=0.05, cv=0.2, n=20, design=:d2x2)
 #Bioequivalence power for cv 14%, 21 subjects, default OwensQ method, logscale false
-bePower(alpha=0.1, logscale=false, theta1=-0.1, theta2=0.1, theta0=0, cv=0.14, n=21)
+bepower(alpha=0.1, logscale=false, theta1=-0.1, theta2=0.1, theta0=0, cv=0.14, n=21)
 #Bioequivalence power for cv 14%, 21 subjects, shifted method, logscale false
-bePower(alpha=0.1, logscale=false, theta1=-0.1, theta2=0.1, theta0=0, cv=0.14, n=21, method=:shifted)
+bepower(alpha=0.1, logscale=false, theta1=-0.1, theta2=0.1, theta0=0, cv=0.14, n=21, method=:shifted)
 #Simple notations
-bePower(cv=0.4, n=35, design=:d2x4x4)
-bePower(cv=0.14, n=21)
+bepower(cv=0.4, n=35, design=:d2x4x4)
+bepower(cv=0.14, n=21)
 
 #CV from CI
-ci2cv(;alpha = 0.05, theta1 = 0.9, theta2 = 1.25, n=30, design=:d2x2x4)
+cvfromci(;alpha = 0.05, theta1 = 0.9, theta2 = 1.25, n=30, design=:d2x2x4)
 
 #Polled CV
 data = DataFrame(cv = Float64[], df = Int[])
 push!(data, (0.12, 12))
 push!(data, (0.2, 20))
 push!(data, (0.25, 30))
-pooledCV(data; cv=:cv, df=:df, alpha=0.05, returncv=true)
+pooledcv(data; cv=:cv, df=:df, alpha=0.05, returncv=true)
 
 ```
 

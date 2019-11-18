@@ -13,29 +13,39 @@
 # If you want to check and get R code you can find some here: http://powerandsamplesize.com/Calculators/
 __precompile__(true)
 module ClinicalTrialUtilities
-using Distributions, StatsBase, Statistics, Random
-using QuadGK
-using DataFrames
-import SpecialFunctions.lgamma
+using Distributions, StatsBase, Statistics, Random, Roots, QuadGK, DataFrames
+import SpecialFunctions
+import Base.show
+import Base.showerror
+import Base.getindex
+import Base.length
+import StatsBase.confint
+import DataFrames.DataFrame
 
-#Exceptions
-struct CTUException <: Exception
-    n::Int
-    var::String
+const CTU = ClinicalTrialUtilities
+
+function lgamma(x)
+    return SpecialFunctions.logabsgamma(x)[1]
 end
 
-Base.showerror(io::IO, e::CTUException) = print("CTU Exception code: ", e.n, " Message: ", e.var);
 const ZDIST  = Normal()
 const LOG2   = log(2)
 const PI2    = π * 2.0
 const PI2INV = 0.5 / π
-const VERSION = "0.1.16"
+const VERSION = "0.2.0"
 #Exceptions
 
 struct ConfInt
     lower::Float64
     upper::Float64
     estimate::Float64
+    alpha::Float64
+    function ConfInt(lower, upper, estimate)
+        new(lower, upper, estimate, NaN)::ConfInt
+    end
+    function ConfInt(lower, upper, estimate, alpha)
+        new(lower, upper, estimate, alpha)::ConfInt
+    end
 end
 
 function getindex(a::ConfInt, b::Int64)
@@ -50,16 +60,9 @@ function getindex(a::ConfInt, b::Int64)
     end
 end
 
-struct NCA
-    result::DataFrame
-    elimination::DataFrame
-    settings::DataFrame
-    textout::String
-    errorlog::String
-    errors::Array
-end
 
-export CTUException, ConfInt, NCA
+#Deprecated
+include("deprecated.jl")
 
 #Owen function calc: owensQ, owensQo, ifun1, owensTint2, owensT, tfn
 include("owensq.jl")
@@ -67,35 +70,57 @@ include("owensq.jl")
 include("powertost.jl")
 #Sample sise and Power atomic functions
 include("powersamplesize.jl")
-#Main sample size and power functions: sampleSize, ctPower, beSampleN
+#Main sample size and power functions: sampleSize, ctpower, besamplen
 include("samplesize.jl")
 #Confidence interval calculation
-include("CI.jl")
+include("ci.jl")
 #Simulations
-include("SIM.jl")
-#PK
-include("PK.jl")
+include("sim.jl")
 #info function
 include("info.jl")
 #Descriptive statistics
 include("descriptives.jl")
+#PK
+include("pk.jl")
 #Frequency
 include("freque.jl")
 #Export
-include("Export.jl")
+include("export.jl")
 #Randomization
 include("randomization.jl")
+#Show
+include("show.jl")
 
+
+#Types
+export CTU, ConfInt,
 #Sample size
-export ctSampleN, beSampleN
+ctsamplen,
+besamplen,
 #Power
-export ctPower, bePower
+ctpower,
+bepower,
 #Utils
-export ci2cv, pooledCV
+cvfromci,
+cvfromvar,
+pooledcv,
 #Other
-export descriptive, freque, contab, owensQ, owensT
-#Mudules
-export SIM, CI, PK
+descriptive,
+freque,
+contab,
+htmlexport,
+#CI
+confint,
+propci,
+diffpropci,
+rrpropci,
+orpropci,
+meanci,
+diffmeanci
+
+#Pharmacokinetics
+
+export nca!, pkimport, pdimport, DataFrame
 
 
 

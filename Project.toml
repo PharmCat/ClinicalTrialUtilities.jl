@@ -1,7 +1,7 @@
 authors = ["Vladimir Arnautov (mail@pharmcat.net)"]
 name = "ClinicalTrialUtilities"
 uuid = "535c2557-d7d0-564d-8ff9-4ae146c18cfe"
-version = "0.1.16"
+version = "0.2.0"
 
 [deps]
 Distributions = "31c24e10-a181-5473-b8eb-7969acd0382f"
@@ -21,8 +21,10 @@ Test = "8dfed614-e22c-5e08-85e1-65c5234f0b40"
 test = ["CSV", "Test"]
 
 [compat]
-julia = "1"
-DataFrames = "0.11, 0.12, 0.13, 0.14, 0.15, 0.16, 0.17, 0.18"
-Distributions = "0.16, 0.17, 0.18, 0.19, 0.20"
-StatsBase = "0.30, 0.31"
+julia = "1.0, 1.1, 1.2"
+DataFrames = "0.19"
+Distributions = "0.16, 0.17, 0.18, 0.19, 0.20, 0.21"
+StatsBase = "0.22, 0.23, 0.24, 0.25, 0.26, 0.27, 0.28, 0.29, 0.30, 0.31, 0.32"
 CSV = "0.5"
+QuadGK = "2.0, 2.1"
+Roots = "0.7, 0.8"
