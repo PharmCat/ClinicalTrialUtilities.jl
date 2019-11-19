@@ -19,6 +19,7 @@ import Base.show
 import Base.showerror
 import Base.getindex
 import Base.length
+import Base.in
 import StatsBase.confint
 import DataFrames.DataFrame
 

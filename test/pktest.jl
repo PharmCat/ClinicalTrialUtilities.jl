@@ -31,10 +31,118 @@ println(" ---------------------------------- ")
 
     pkds = ClinicalTrialUtilities.pkimport(pkdata2, [:Subject, :Formulation]; conc = :Concentration, time = :Time)
     pk   = ClinicalTrialUtilities.nca!(pkds)
+    df   = DataFrame(pk; unst = true)
+    sort!(df, :Subject)
 
+    #Linear-trapezoidal rule
+    #AUC
+    @test round.(df[!, :AUClast], sigdigits = 6) == round.([9585.4218
+    10112.176
+    5396.5498
+    9317.8358
+    9561.26
+    6966.598
+    7029.5735
+    7110.6745
+    8315.0803
+    5620.8945], sigdigits = 6)
+
+    #Cmax
+    @test df[!, :Cmax] == [190.869
+    261.177
+    105.345
+    208.542
+    169.334
+    154.648
+    153.254
+    138.327
+    167.347
+    125.482]
+
+    #Clast
+    @test df[!, :Clast] == [112.846
+    85.241
+    67.901
+    97.625
+    110.778
+    69.501
+    58.051
+    74.437
+    93.44
+    42.191]
+
+    #Adjusted R sq
+    @test round.(df[!, :ARsq], digits = 6) == round.([0.71476928
+    0.99035145
+    0.77630678
+    0.83771737
+    0.82891994
+    0.92517856
+    0.96041642
+    0.92195356
+    0.92130684
+    0.86391165], digits = 6)
+
+    #Kel
+    @test round.(df[!, :Kel], sigdigits = 6) == round.([0.0033847439
+    0.014106315
+    0.0032914304
+    0.0076953442
+    0.0068133279
+    0.0076922807
+    0.012458956
+    0.0089300798
+    0.0056458649
+    0.017189737], sigdigits = 6)
+
+    @test round.(df[!, :AUCinf], sigdigits = 6) == round.([42925.019
+    16154.93
+    26026.183
+    22004.078
+    25820.275
+    16001.76
+    11688.953
+    15446.21
+    24865.246
+    8075.3242], sigdigits = 6)
+
+
+    @test df[!, :Tmax] == [1
+    1
+    1.5
+    1
+    4
+    2.5
+    2.5
+    4
+    3
+    2]
+
+
+    @test round.(df[!, :MRTlast], digits = 6) == round.([34.801023
+    29.538786
+    34.472406
+    33.69408
+    32.964438
+    32.58076
+    31.267574
+    33.826053
+    33.386807
+    27.556657], digits = 6)
+
+
+    #glucose2
     pkds = ClinicalTrialUtilities.pkimport(glucose2, [:Subject, :Date]; conc = :glucose, time = :Time)
     pk   = ClinicalTrialUtilities.nca!(pkds)
+    df   = DataFrame(pk; unst = true)
 
+end
+
+
+println(" ---------------------------------- ")
+@testset "  PD                    " begin
+
+    #PD
     pdds = ClinicalTrialUtilities.pdimport(pddata; time=:time, resp=:effect, bl = 3.0)
     pd   = ClinicalTrialUtilities.nca!(pdds)
     @test pd[1,:AUCABL]   ≈ 7.38571428571429 atol=1E-5

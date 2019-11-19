@@ -11,6 +11,11 @@ function in(a::AbstractDict, b::AbstractDict)
     end
     return true
 end
+function in(a::Pair, b::AbstractDict)
+    if a[1]  ∉  collect(keys(b)) return false end
+    if a[2] != b[a[1]] return false end
+    return true
+end
 #!!!
 struct KelData <: AbstractData
     s::Array{Int, 1}
@@ -142,9 +147,15 @@ end
 function Base.getindex(a::DataSet{PKPDProfile}, i::Int64, s::Symbol)::Real
     return a.data[i].result[s]
 end
+function Base.getindex(a::DataSet{PKPDProfile}, d::Pair)
+    for i = 1:length(a)
+        if d ∈ a[i].subject.sort return a[i] end
+    end
+end
 function Base.getindex(a::DataSet{T}, i::Int64) where T <: AbstractSubject
     return a.data[i]
 end
+
 #-------------------------------------------------------------------------------
 function obsnum(data::T) where T <:  AbstractSubject
     return length(data.time)
@@ -183,6 +194,7 @@ end
 function Base.show(io::IO, obj::PKSubject)
     println(io, "Pharmacokinetic subject")
     println(io, "Observations: $(length(obj))")
+    println(io,  obj.kelrange)
     println(io, "Time   Concentration")
     for i = 1:length(obj)
         println(io, obj.time[i], " => ", obj.obs[i])
@@ -195,6 +207,26 @@ function Base.show(io::IO, obj::PDSubject)
     for i = 1:length(obj)
         println(io, obj.time[i], " => ", obj.obs[i])
     end
+end
+function Base.show(io::IO, obj::ElimRange)
+    print(io, "Elimination range: $(obj.kelstart) - $(obj.kelend) ")
+    if length(obj.kelexcl) > 0
+        print(io, "Exclusions: $(obj.kelexcl[i])")
+        if length(obj.kelexcl) > 1 for i = 1:length(obj.kelexcl) print(io, ", $(obj.kelexcl[i])") end end
+        print(io, ".")
+    else
+        print(io, "No exclusion.")
+    end
+end
+function Base.show(io::IO, obj::KelData)
+    m = copy(obj.s)
+    m = hcat(m, obj.e)
+    m = hcat(m, obj.a)
+    m = hcat(m, obj.b)
+    m = hcat(m, obj.r)
+    m = hcat(m, obj.ar)
+    println(io, "Elimination table:")
+    print(io, m)
 end
 #-------------------------------------------------------------------------------
 function ncarule!(data::DataFrame, conc::Symbol, time::Symbol, rule::LimitRule)
@@ -806,7 +838,7 @@ Pharmacodynamics data import from DataFrame.
         return data[i].subject.keldata
     end
 
-    function DataFrames.DataFrame(data::DataSet{PKPDProfile}; unst = false)
+    function DataFrames.DataFrame(data::DataSet{PKPDProfile}; unst = false, us = false)
         d = DataFrame(id = Int[], sortvar = Symbol[], sortval = Any[])
         for i = 1:length(data)
             if length(data[i].subject.sort) > 0
@@ -830,7 +862,7 @@ Pharmacodynamics data import from DataFrame.
             push!(df, r)
             end
         end
-        if unst
+        if unst || us
             return unstack(df, names(df)[end-1], names(df)[end])
         else
             return df
