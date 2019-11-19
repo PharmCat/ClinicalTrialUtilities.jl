@@ -458,6 +458,10 @@ function nca!(data::PKSubject; calcm = :lint, verbose = false, io::IO = stdout)
         end
         pmask   = Array{Bool, 1}(undef, result[:Obsnum] - 1)
         pmask  .= true
+
+        if data.dosetime.time < data.time[1]
+            #Dosetime < first time
+        end
         #Find AUC part from dose time; exclude all before dosetime
         for i = 1:result[:Obsnum] - 1
             if  data.time[i] <= data.dosetime.time < data.time[i+1]
@@ -478,6 +482,7 @@ function nca!(data::PKSubject; calcm = :lint, verbose = false, io::IO = stdout)
         result[:AUCall]  = sum(aucpartl[pmask])
         result[:AUMCall] = sum(aumcpartl[pmask])
         #Exclude all AUC parts from observed concentation before 0 or less
+        #Need elaborate!!!! 
         for i = result[:Tmaxn]:result[:Obsnum] - 1
             if data.obs[i+1] <= 0 * data.obs[i+1] pmask[i:end] .= false; break end
         end
