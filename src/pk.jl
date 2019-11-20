@@ -392,8 +392,6 @@ end
             return logcpredict(t₁, t₂, tx, c₁, c₂)
         end
     end
-    #Extrapolation
-        #!!!
     #---------------------------------------------------------------------------
 
     function aucpart(t₁, t₂, c₁, c₂, calcm, aftertmax)
@@ -431,7 +429,7 @@ end
 
 Pharmacokinetics non-compartment analysis for one PK subject.
 """
-function nca!(data::PKSubject; calcm = :lint, verbose = false, io::IO = stdout)
+function nca!(data::PKSubject; calcm = :lint, intp = :lint, verbose = false, io::IO = stdout)
         result   = Dict()
         #=
         result    = Dict(:Obsnum   => 0,   :Tmax   => 0,   :Tmaxn    => 0,   :Tlast   => 0,
@@ -445,8 +443,14 @@ function nca!(data::PKSubject; calcm = :lint, verbose = false, io::IO = stdout)
 
         result[:Obsnum]  = length(data)
         result[:Cmax]    = maximum(data.obs)
-        result[:Tlast]   = data.time[result[:Obsnum]]
-        result[:Clast]   = data.obs[result[:Obsnum]]
+
+        for i = result[:Obsnum]:-1:1
+            if data.obs[i] > 0
+                result[:Tlast]   = data.time[i]
+                result[:Clast]   = data.obs[i]
+                break
+            end
+        end
         result[:Cmax], result[:Tmax], result[:Tmaxn] = ctmax(data, data.dosetime.time, data.dosetime.tau)
         #-----------------------------------------------------------------------
         #Areas
@@ -482,7 +486,7 @@ function nca!(data::PKSubject; calcm = :lint, verbose = false, io::IO = stdout)
         result[:AUCall]  = sum(aucpartl[pmask])
         result[:AUMCall] = sum(aumcpartl[pmask])
         #Exclude all AUC parts from observed concentation before 0 or less
-        #Need elaborate!!!! 
+        #Need elaborate!!!!
         for i = result[:Tmaxn]:result[:Obsnum] - 1
             if data.obs[i+1] <= 0 * data.obs[i+1] pmask[i:end] .= false; break end
         end
@@ -519,12 +523,15 @@ function nca!(data::PKSubject; calcm = :lint, verbose = false, io::IO = stdout)
             result[:Rsq], result[:Rsqn] = findmax(keldata.ar)
             data.kelrange.kelstart   = keldata.s[result[:Rsqn]]
             data.kelrange.kelend     = keldata.e[result[:Rsqn]]
-            data.keldata    = keldata
-            result[:ARsq]   = keldata.ar[result[:Rsqn]]
-            result[:Kel]    = abs(keldata.a[result[:Rsqn]])
-            result[:HL]     = LOG2 / result[:Kel]
-            result[:AUCinf] = result[:AUClast] + result[:Clast] / result[:Kel]
-            result[:AUCpct] = (result[:AUCinf] - result[:AUClast]) / result[:AUCinf] * 100.0
+            data.keldata        = keldata
+            result[:ARsq]       = keldata.ar[result[:Rsqn]]
+            result[:Kel]        = abs(keldata.a[result[:Rsqn]])
+            result[:LZ]         = keldata.a[result[:Rsqn]]
+            result[:LZint]      = keldata.b[result[:Rsqn]]
+            result[:Clast_pred] = exp(result[:LZint] + result[:LZ]*result[:Tlast])
+            result[:HL]         = LOG2 / result[:Kel]
+            result[:AUCinf]     = result[:AUClast] + result[:Clast] / result[:Kel]
+            result[:AUCpct]     = (result[:AUCinf] - result[:AUClast]) / result[:AUCinf] * 100.0
         end
         #-----------------------------------------------------------------------
         #Steady-state
@@ -539,6 +546,8 @@ function nca!(data::PKSubject; calcm = :lint, verbose = false, io::IO = stdout)
                 if ncae < result[:Obsnum] - 1 pmask[ncae+1:end] .= false end
             elseif tautime > data.time[end]
                 #extrapolation
+                result[:Ctau] = exp(result[:LZint] + result[:LZ]*tautime)
+                aucpartl[ncae], aumcpartl[ncae] = aucpart(data.time[ncae], tautime, data.obs[ncae], result[:Ctau], calcm, false)
                 #!!!
             else
                 result[:Ctau] = data.obs[end]
