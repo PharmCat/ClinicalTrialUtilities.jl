@@ -172,6 +172,7 @@ println(" ---------------------------------- ")
 @testset "#3  besamplen Test      " begin
     t = ClinicalTrialUtilities.besamplen(;theta0=0.95, theta1=0.8, theta2=1.25, cv=0.2, alpha=0.05, beta=0.2, logscale=true, method=:owenq)
     @test ClinicalTrialUtilities.besamplen(t.task).result == 20
+    @test ClinicalTrialUtilities.ctsamplen(t.task).result == 20
     Base.show(io, t)
     #@test n == 20 && round(p, digits=7) == 0.8346802
     t = ClinicalTrialUtilities.besamplen(;theta0=0.95, theta1=0.8, theta2=1.25, cv=0.3, alpha=0.05, beta=0.2, logscale=true, method=:owenq)
@@ -242,6 +243,7 @@ println(" ---------------------------------- ")
     #1
     t = ClinicalTrialUtilities.bepower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.3, n=31, design=:parallel, method=:owenq)
     @test ClinicalTrialUtilities.bepower(t.task).result ≈ 0.2949476 atol=1E-7
+    @test ClinicalTrialUtilities.ctpower(t.task).result ≈ 0.2949476 atol=1E-7
     Base.show(io, t)
     #2
     t = ClinicalTrialUtilities.bepower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.3, n=32, design=:parallel, method=:owenq)
@@ -320,7 +322,7 @@ println(" ---------------------------------- ")
     #2x4x2
     t = ClinicalTrialUtilities.bepower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.4, n=30, design=:d2x4x2)
     @test ClinicalTrialUtilities.bepower(t.task).result ≈ 0.0001785665  atol=1E-10
-
+    #@test ClinicalTrialUtilities.ctpower(t.task).result ≈ 0.0001785665  atol=1E-10
 end
 
 println(" ---------------------------------- ")

@@ -365,6 +365,10 @@ end
 function ctsamplen(t::CTask{T, D, H, O}) where T <: DiffProportion{P, P} where P <: AbstractProportion  where D <: AbstractDesign where H <: McNemars where O <: SampleSize
     return TaskResult(t, :chow, mcnm(getval(t.param.a), getval(t.param.b), t.alpha, t.objective.val))
 end
+#------------
+function ctsamplen(t::CTask{T, D, Bioequivalence, SampleSize}; method::Symbol = :owenq)  where T where D
+    return besamplen(t; method = method)
+end
 
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
@@ -498,6 +502,11 @@ end
 #------------
 function ctpower(t::CTask{T, D, H, O}) where T <: DiffProportion{P, P} where P <: AbstractProportion where D <: AbstractDesign  where H <: McNemars where O <: Power
     return TaskResult(t, :chow, mcnm_pow(getval(t.param.a), getval(t.param.b), t.alpha, t.objective.val))
+end
+#------------
+
+function ctpower(t::CTask{T, D, Bioequivalence, Power}; method::Symbol = :owenq)  where T where D
+    return bepower(t; method = method)
 end
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
