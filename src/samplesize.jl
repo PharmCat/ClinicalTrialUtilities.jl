@@ -235,7 +235,45 @@ end
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
 #main sample size function
-function ctsamplen(;param=:notdef, type=:notdef, group=:notdef, alpha=0.05, beta=0.2, diff=0, sd=0, a=0, b=0, k=1, logscale=true)::TaskResult
+"""
+    ctsamplen(;param::Symbol, type::Symbol, group::Symbol = :notdef, alpha::Real = 0.05, beta::Real = 0.2, diff::Real = 0, sd::Real = 0, a::Real = 0, b::Real = 0, k::Real = 1, logscale::Bool = true)::TaskResult
+
+Clinical trial sample size estimation.
+
+**param (Parameter type):**
+- :mean - Means;
+- :prop - Proportions;
+- :or - Odd Ratio;
+
+**type (Hypothesis type):**
+- :ea - Equality;
+- :ei - Equivalencens;
+- :ns - Non-Inferiority / Superiority (!one-sided hypothesis!);
+- :mcnm - McNemar's Equality test;
+
+**group (group num):**
+- :one - One sample;
+- :two - Two sample, result is for one group, second group size = n * k;
+
+**alpha** - Alpha (o < α < 1)  (default=0.05);
+
+**beta** - Beta (o < β < 1) (default=0.2); power = 1 - β;
+
+**diff** - difference/equivalence margin/non-inferiority/superiority margin;
+
+**sd** - Standard deviation (σ, for Means only);
+
+**a** -  Group A  (μ₀/p₀) - Test group;
+
+**b** -  Group B (μ₁/p₁) - Reference group or reference value;
+
+**k** - Na/Nb (after sample size estimation second group size: Na=k*Nb, only for two sample design) (default=1);
+
+**logscale** - diff is log transformed for OR:
+- true  - diff is already in log-scale, no transformation required (default);
+- false - diff is not in log-scale, will be transformed;
+"""
+function ctsamplen(;param::Symbol, type::Symbol, group::Symbol = :notdef, alpha::Real = 0.05, beta::Real = 0.2, diff::Real = 0, sd::Real = 0, a::Real = 0, b::Real = 0, k::Real = 1, logscale::Bool = true)::TaskResult
     if alpha >= 1 || alpha <= 0 || beta >= 1 || beta <= 0  throw(ArgumentError("sampleSize: alpha and beta sould be > 0 and < 1.")) end
     if param == :prop && !(group == :one || group == :two || type == :mcnm)  throw(ArgumentError("sampleSize: group should be defined or mcnm type.")) end
     if sd ≤ 0 && param == :mean throw(ArgumentError("SD can't be ≤ 0.0!")) end
@@ -373,7 +411,45 @@ end
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
 #clinical trial power main function
-function ctpower(;param=:notdef, type=:notdef, group=:notdef, alpha=0.05, logscale=true, diff=0, sd=0, a=0, b=0, n=0, k=1)::TaskResult
+"""
+    function ctpower(;param::Symbol, type::Symbol, group::Symbol = :notdef, alpha::Real = 0.05, n::Real = 0, diff::Real = 0, sd::Real = 0, a::Real = 0, b::Real = 0,  k::Real = 1, logscale::Bool = true)::TaskResult
+
+Clinical trial power estimation.
+
+**param (Parameter type):**
+- :mean - Means;
+- :prop - Proportions;
+- :or   - Odd Ratio;
+
+**type (Hypothesis type):**
+- :ea   - Equality;
+- :ei   - Equivalence;
+- :ns   - Non-Inferiority / Superiority;
+- :mcnm - McNemar's Equality test;
+
+**group (group num):**
+- :one - one sample;
+- :two - Two sample;
+
+**alpha** - Alpha (0 < α < 1)  (default=0.05);
+
+**n** - Subjects number;
+
+**diff** - difference/equivalence margin/non-inferiority/superiority margin;
+
+**sd** - Standard deviation (σ, for Means only);
+
+**a** -  Group A  (μ₀/p₀) - Test group;
+
+**b** -  Group B (μ₁/p₁) - Reference group or reference value;
+
+**k** - Na/Nb (after sample size estimation second group size: Na=k*Nb, only for two sample design) (default=1);
+
+**logscale** - diff is log transformed for OR:
+- true  - diff is already in log-scale, no transformation required (default);
+- false - diff is not in log-scale, will be transformed;
+"""
+function ctpower(;param::Symbol, type::Symbol, group::Symbol = :notdef, alpha::Real = 0.05, n::Real = 0, diff::Real = 0, sd::Real = 0, a::Real = 0, b::Real = 0,  k::Real = 1, logscale::Bool = true)::TaskResult
     if alpha >= 1 || alpha <= 0  throw(ArgumentError("Keyword alpha out of the range!")) end
     if param == :prop && !(group == :one || group == :two || type == :mcnm)  throw(ArgumentError("Keyword group or type defined incorrectly!")) end
     if sd == 0 && param == :mean throw(ArgumentError("Keyword sd = 0!")) end
@@ -510,7 +586,42 @@ function ctpower(t::CTask{T, D, Bioequivalence, Power}; method::Symbol = :owenq)
 end
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
-function besamplen(;alpha::Real=0.05, beta::Real=0.2, theta0::Real=0.95, theta1::Real=0.8, theta2::Real=1.25, cv::Real=0.0, sd::Real=0.0, logscale::Bool=true, design::Symbol=:d2x2, method::Symbol=:owenq)::TaskResult
+"""
+    besamplen(;alpha::Real=0.05, beta::Real=0.2, theta0::Real=0.95, theta1::Real=0.8, theta2::Real=1.25, cv::Real=0.0, sd::Real=0.0, design::Symbol=:d2x2, method::Symbol=:owenq, logscale::Bool=true)::TaskResult
+
+Bioequivalence sample size estimation.
+
+**alpha** - Alpha (o < α < 1)  (default=0.05);
+
+**beta** - Beta (o < β < 1) (default=0.2); power = 1 - β;
+
+**theta0** - T/R Ratio (default=0.95);
+
+**theta1** - Lower Level (default=0.8);
+
+**theta2** - Upper level (default=1.25);
+
+**cv** - coefficient of variation;
+
+**logscale** - theta1, theta2, theta0: if true - make log transformation (default true);
+
+**design** - trial design;
+- :parallel
+- :d2x2 (default)
+- :d2x2x4
+- :d2x4x4
+- :d2x3x3
+- :d2x4x2
+- :d3x3
+- :d3x6x3
+
+**method** - calculating method: Owen's Q Function | NonCentral T | Shifted;
+- :owenq (default)
+- :nct
+- :shifted
+
+"""
+function besamplen(;alpha::Real=0.05, beta::Real=0.2, theta0::Real=0.95, theta1::Real=0.8, theta2::Real=1.25, cv::Real=0.0, sd::Real=0.0, design::Symbol=:d2x2, method::Symbol=:owenq, logscale::Bool=true)::TaskResult
     if !(0 < beta < 1) throw(ArgumentError("Beta ≥ 1.0 or ≤ 0.0!")) end
     if !(0 < alpha < 1) throw(ArgumentError("Alfa ≥ 1.0 or ≤ 0.0!")) end
     if theta1 ≥ theta2  throw(ArgumentError("theta1 ≥ theta2!")) end
@@ -549,7 +660,41 @@ end
 
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
-function bepower(;alpha::Real=0.05, theta1::Real=0.8, theta2::Real=1.25, theta0::Real=0.95, cv::Real=0.0, sd::Real=0.0, n::Int=0, logscale::Bool=true, design::Symbol=:d2x2, method::Symbol=:owenq)::TaskResult
+"""
+    bepower(;alpha::Real=0.05, theta1::Real=0.8, theta2::Real=1.25, theta0::Real=0.95, cv::Real=0.0, sd::Real=0.0, n::Int=0, design::Symbol=:d2x2, method::Symbol=:owenq, logscale::Bool=true)::TaskResult
+
+Bioequivalence power estimation.
+
+**alpha** - Alpha (0 < α < 1)  (default=0.05);
+
+**theta1** - Lower Level (default=0.8);
+
+**theta2** - Upper level (default=1.25);
+
+**theta0** - T/R Ratio (default=0.95);
+
+**cv** - coefficient of variation;
+
+**n** - subject number;
+
+**logscale** - theta1, theta2, theta0: if true - make log transformation (default true);
+
+**design** - trial design;
+- :parallel
+- :d2x2 (default)
+- :d2x2x4
+- :d2x4x4
+- :d2x3x3
+- :d2x4x2
+- :d3x3
+- :d3x6x3
+
+**method** - calculating method: Owen's Q Function | NonCentral T, Shifted;
+- :owenq (default)
+- :nct
+- :shifted
+"""
+function bepower(;alpha::Real=0.05, theta1::Real=0.8, theta2::Real=1.25, theta0::Real=0.95, cv::Real=0.0, sd::Real=0.0, n::Int=0, design::Symbol=:d2x2, method::Symbol=:owenq, logscale::Bool=true)::TaskResult
     if n < 2 throw(ArgumentError("n < 2")) end
 
     if !(0 < alpha < 1) throw(ArgumentError("Alfa ≥ 1.0 or ≤ 0.0")) end

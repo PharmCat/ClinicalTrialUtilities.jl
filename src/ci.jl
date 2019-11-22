@@ -9,7 +9,19 @@
 # DescTools https://CRAN.R-project.org/package=DescTools
 # metafor by Wolfgang Viechtbauer https://cran.r-project.org/package=metafor
 
+"""
+    StatsBase.confint(param::Proportion; level = 0.95, method = :default)::ConfInt
 
+# Computation methods:
+
+- wilson - Wilson's confidence interval (CI) for a single proportion (wilson score) (default);
+- wilsoncc - Wilson's CI with continuity correction (CC);
+- cp - Clopper-Pearson exact CI;
+- soc - SOC: Second-Order corrected CI;
+- blaker - Blaker exact CI for discrete distributions;
+- arcsine - Arcsine CI;
+- wald - Wald CI without CC;
+"""
 function StatsBase.confint(param::Proportion; level = 0.95, method = :default)::ConfInt
     propci(param.x, param.n; alpha = 1 - level, method = method)
 end
@@ -32,8 +44,19 @@ end
     propci(x::Int, n::Int; alpha=0.05, method = :default)::ConfInt
 
 Confidence interval for proportion.
+
+# Computation methods:
+
+- :wilson | :default - Wilson's confidence interval (CI) for a single proportion (wilson score);
+- :wilsoncc - Wilson's CI with continuity correction (CC);
+- :cp - Clopper-Pearson exact CI;
+- :soc - SOC: Second-Order corrected CI;
+- :blaker - Blaker exact CI for discrete distributions;
+- :arcsine - Arcsine CI;
+- :wald - Wald CI without CC;
+- :waldcc - Wald CI with CC;
 """
-function propci(x::Int, n::Int; alpha=0.05, method = :default)::ConfInt
+function propci(x::Int, n::Int; alpha::Real = 0.05, method = :default)::ConfInt
     if alpha >= 1.0 || alpha <= 0.0
         @warn "Alpha >= 1.0 or <= 0.0"
         return ConfInt(0,0,x/n)
@@ -59,11 +82,21 @@ function propci(x::Int, n::Int; alpha=0.05, method = :default)::ConfInt
     end
 end
 """
-    diffpropci(x1::Int, n1::Int, x2::Int, n2::Int; alpha = 0.05, method::Symbol = :default)::ConfInt
+    diffpropci(x1::Int, n1::Int, x2::Int, n2::Int; alpha::Real = 0.05, method::Symbol = :default)::ConfInt
 
 Confidence interval for proportion difference.
+
+# Computation methods:
+
+- :nhs - Newcombes Hybrid (wilson) Score interval for the difference of proportions;
+- :nhscc - Newcombes Hybrid Score CC;
+- :ac - Agresti-Caffo interval for the difference of proportions;
+- :mn | :default - Method of Mee 1984 with Miettinen and Nurminen modification;
+- :mee | :fm - Mee maximum likelihood method;
+- :wald - Wald CI without CC;
+- :waldcc - Wald CI with CC;
 """
-function diffpropci(x1::Int, n1::Int, x2::Int, n2::Int; alpha = 0.05, method::Symbol = :default)::ConfInt
+function diffpropci(x1::Int, n1::Int, x2::Int, n2::Int; alpha::Real = 0.05, method::Symbol = :default)::ConfInt
     if alpha >= 1.0 || alpha <= 0.0
         throw(ArgumentError("Alpha shold be > 0.0 and < 1.0"))
     end
@@ -88,11 +121,18 @@ function diffpropci(x1::Int, n1::Int, x2::Int, n2::Int; alpha = 0.05, method::Sy
     end
 end
 """
-    rrpropci(x1::Int, n1::Int, x2::Int, n2::Int; alpha=0.05, method::Symbol = :default)::ConfInt
+    rrpropci(x1::Int, n1::Int, x2::Int, n2::Int; alpha::Real = 0.05, method::Symbol = :default)::ConfInt
 
 Confidence interval for relative risk.
+
+# Computation methods:
+
+- :mn | :default - Miettinen-Nurminen Score interval;
+- :cli | :walters - Crude log interval;
+- :li | :katz - Log interval for the risk ratio;
+- :mover - Method of variance estimates recovery;
 """
-function rrpropci(x1::Int, n1::Int, x2::Int, n2::Int; alpha=0.05, method::Symbol = :default)::ConfInt
+function rrpropci(x1::Int, n1::Int, x2::Int, n2::Int; alpha::Real = 0.05, method::Symbol = :default)::ConfInt
     if alpha >= 1.0 || alpha <= 0.0 throw(ArgumentError("Alpha shold be > 0.0 and < 1.0")) end
     if method==:mn || method == :default
         return propRRMNCI(x1, n1, x2, n2, alpha)
@@ -107,13 +147,21 @@ function rrpropci(x1::Int, n1::Int, x2::Int, n2::Int; alpha=0.05, method::Symbol
     end
 end
 """
-    orpropci(x1::Int, n1::Int, x2::Int, n2::Int; alpha=0.05, method::Symbol = :default)::ConfInt
+    orpropci(x1::Int, n1::Int, x2::Int, n2::Int; alpha::Real = 0.05, method::Symbol = :default)::ConfInt
 
 Confidence interval for odd ratio.
+
+# Computation methods:
+
+- :mn - Miettinen-Nurminen CI (deprecated);
+- :mn2 | :default - Miettinen-Nurminen CI;
+- :woolf - Woolf logit CI;
+- :awoolf | :gart - Adjusted Woolf interval (Gart adjusted logit);
+- :mover - Method of variance estimates recovery;
 """
-function orpropci(x1::Int, n1::Int, x2::Int, n2::Int; alpha=0.05, method::Symbol = :default)::ConfInt
+function orpropci(x1::Int, n1::Int, x2::Int, n2::Int; alpha::Real = 0.05, method::Symbol = :default)::ConfInt
     if alpha >= 1.0 || alpha <= 0.0 throw(ArgumentError("Alpha shold be > 0.0 and < 1.0")) end
-    if method==:mn || method == :default
+    if method==:mn
         return propORMNCI(x1, n1, x2, n2, alpha)
     elseif method==:awoolf || method==:gart
         return propORaWoolfCI(x1, n1, x2, n2, alpha)
@@ -121,21 +169,27 @@ function orpropci(x1::Int, n1::Int, x2::Int, n2::Int; alpha=0.05, method::Symbol
         return propORWoolfCI(x1, n1, x2, n2, alpha)
     elseif method==:mover
         return propORMOVERCI(x1, n1, x2, n2, alpha)
-    elseif method==:mn2
+    elseif method==:mn2 || method == :default
         return propORCI(x1, n1, x2, n2, alpha)
     else
         throw(ArgumentError("Method unknown!"))
     end
 end
 """
-    meanci(m::Real, s::Real, n::Int; alpha::Real = 0.05, method=:norm)::ConfInt
+    meanci(m::Real, s::Real, n::Int; alpha::Real = 0.05, method=:default)::ConfInt
 
 Confidence interval for mean.
+
+# Computation methods:
+
+- :norm - Normal distribution (default);
+- :tdist - T Distribution.
+
 """
-function meanci(m::Real, s::Real, n::Int; alpha::Real = 0.05, method=:norm)::ConfInt
-        if method==:norm
+function meanci(m::Real, s::Real, n::Int; alpha::Real = 0.05, method=:default)::ConfInt
+        if method==:norm || method == :default
             return meanNormCI(m, s, n, alpha)
-        elseif method==:tdist
+        elseif method == :tdist
             return meanTdistCI(m, s, n, alpha)
         end
 end
@@ -143,6 +197,9 @@ end
     diffmeanci(m1::Real, s1::Real, n1::Real, m2::Real, s2::Real, n2::Real; alpha::Real = 0.05, method::Symbol = :default)::ConfInt
 
 Confidence interval for mead difference.
+
+- :ev - equal variance (default);
+- :uv - unequal variance with Welch-Satterthwaite df correction.
 """
 function diffmeanci(m1::Real, s1::Real, n1::Real, m2::Real, s2::Real, n2::Real; alpha::Real = 0.05, method::Symbol = :default)::ConfInt
         if method == :ev || method == :default
@@ -434,34 +491,6 @@ end
     #Method of Mee 1984 with Miettinen and Nurminen modification n / (n - 1) Newcombe 1998
     #Score intervals for the difference of two binomial proportions
     #6
-    #=
-    function propDiffMNCI(x1::Int, n1::Int, x2::Int, n2::Int, alpha::Float64)::ConfInt  #With correction factor
-        p1    = x1/n1
-        p2    = x2/n2
-        z     = quantile(Chisq(1), 1-alpha)
-        score = 0
-        proot = p1 - p2
-        dp    = 1 - proot
-        up2   = 0
-        while dp > 0.0000001 && abs(z-score) > 0.000001
-            dp    = dp/2
-            up2   = proot + dp
-            score = mnzstat(p1, n1, p2, n2, up2)
-            if score < z proot = up2 end
-        end
-        score = 0
-        proot = p1-p2
-        dp    = 1 + proot
-        low2  = 0
-        while dp > 0.0000001 && abs(z-score) > 0.000001
-            dp    = dp/2
-            low2  = proot - dp
-            score = mnzstat(p1, n1, p2, n2, low2)
-            if score < z proot = low2 end
-        end
-        return ConfInt(low2, up2, p1-p2)
-    end
-    =#
     function propDiffMNCI(x1::Int, n1::Int, x2::Int, n2::Int, alpha::Float64)::ConfInt
         ci       = propDiffNHSCCCI(x1, n1, x2, n2, alpha) #approx zero bounds
         p1       = x1/n1
@@ -712,4 +741,82 @@ end
         end
     end
 
-#end #end module CI
+"""
+    diffcmhci(data::DataFrame; a = :a, b = :b, c = :c, d = :d, alpha = 0.05, method = :default)::ConfInt
+
+Cochran–Mantel–Haenszel confidence intervals for proportion difference.
+
+**data**- dataframe with 4 columns, each line represent 2X2 table
+
+**a** **b** **c** **d** - dataframe table names (number of subjects in 2X2 table):
+
+|         | outcome 1 | outcome 2 |
+|---------|-----------|-----------|
+| group 1 |     a     |     b     |
+| group 2 |     c     |     d     |
+
+"""
+    function diffcmhci(data::DataFrame; a = :a, b = :b, c = :c, d = :d, alpha = 0.05, method = :default)::ConfInt
+        n1 = data[:, a] + data[:, b]
+        n2 = data[:, c] + data[:, d]
+        N  = data[:, a] + data[:, b] + data[:, c] + data[:, d]
+        z = quantile(ZDIST, 1 - alpha/2)
+
+        estimate = sum(data[:, a] .* (n2 ./ N) - data[:, c] .* (n1 ./ N)) / sum(n1 .* (n2 ./ N))
+        #1
+        if method == :sato || method == :default
+            se   = sqrt((estimate * (sum(data[:, c] .* (n1 ./ N) .^ 2 - data[:, a] .* (n2 ./ N) .^2 + (n1 ./ N) .* (n2 ./ N) .* (n2-n1) ./ 2)) + sum(data[:, a] .* (n2 - data[:, c]) ./ N + data[:, c] .* (n1 - data[:, a]) ./ N)/2) / sum(n1 .* (n2 ./ N)) .^ 2) # equation in: Sato, Greenland, & Robins (1989)
+        #2
+        elseif method == :gr
+            se   = sqrt(sum(((data[:, a] ./N .^2) .* data[:, b] .* (n2 .^2 ./ n1) + (data[:, c] ./N .^2) .* data[:, d] .* (n1 .^2 ./ n2))) / sum(n1 .*(n2 ./ N))^2) # equation in: Greenland & Robins (1985)
+        else
+            throw(ArgumentError("Method unknown!"))
+        end
+        return ConfInt(estimate - z*se, estimate + z*se, estimate, alpha)
+    end
+
+    """
+        orcmhci(data::DataFrame; a = :a, b = :b, c = :c, d = :d, alpha = 0.05, logscale = false)::ConfInt
+
+    Cochran–Mantel–Haenszel confidence intervals for odd ratio.
+    """
+    function orcmhci(data::DataFrame; a = :a, b = :b, c = :c, d = :d, alpha = 0.05, logscale = false)::ConfInt
+        #n1 = data[:, a] + data[:, b]
+        #n2 = data[:, c] + data[:, d]
+        N  = data[:, a] + data[:, b] + data[:, c] + data[:, d]
+        z = quantile(ZDIST, 1 - alpha/2)
+
+        Pi = (data[:, a] ./ N) + (data[:, d] ./ N)
+        Qi = (data[:, b] ./ N) + (data[:, c] ./ N)
+        Ri = (data[:, a] ./ N) .* data[:, d]
+        Si = (data[:, b] ./ N) .* data[:, c]
+        R  = sum(Ri)
+        S  = sum(Si)
+        if R == 0 || S == 0 return ConfInt(NaN, NaN, NaN) end
+        estimate = log(R/S)
+        se  = sqrt(1/2 * (sum(Pi .* Ri)/R^2 + sum(Pi .* Si + Qi .* Ri)/(R*S) + sum(Qi .* Si)/S^2)) # based on Robins et al. (1986)
+        #zval= est / se
+        #pval= 2*(1-cdf(Normal(), abs(zval)))
+        if logscale return ConfInt(estimate - z*se, estimate + z*se, estimate, alpha) else return ConfInt(exp(estimate - z*se), exp(estimate + z*se), exp(estimate), alpha) end
+    end
+
+    """
+        rrcmhci(data::DataFrame; a = :a, b = :b, c = :c, d = :d, alpha = 0.05, logscale = false)::ConfInt
+
+    Cochran–Mantel–Haenszel confidence intervals for risk ratio.
+    """
+    function rrcmhci(data::DataFrame; a = :a, b = :b, c = :c, d = :d, alpha = 0.05, logscale = false)::ConfInt
+        n1 = data[:, a] + data[:, b]
+        n2 = data[:, c] + data[:, d]
+        N  = data[:, a] + data[:, b] + data[:, c] + data[:, d]
+        z = quantile(ZDIST, 1 - alpha/2)
+            #...
+        R = sum(data[:, a] .* (n2 ./ N))
+        S = sum(data[:, c] .* (n1 ./ N))
+        if sum(data[:, a]) == 0 || sum(data[:, c]) == 0 return ConfInt(NaN, NaN, NaN) end
+        estimate = log(R/S)
+        se  = sqrt(sum(((n1 ./ N) .* (n2 ./ N) .* (data[:, a] + data[:, c]) - (data[:, a] ./ N) .* data[:, c])) / (R*S))
+        #zval= est / se
+        #pval= 2*(1-cdf(Normal(), abs(zval)))
+        if logscale return ConfInt(estimate  - z*se, estimate  + z*se, estimate , alpha) else return ConfInt(exp(estimate  - z*se), exp(estimate  + z*se), exp(estimate ), alpha) end
+    end
