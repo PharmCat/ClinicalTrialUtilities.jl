@@ -23,7 +23,6 @@ import Base.in
 import StatsBase.confint
 import DataFrames.DataFrame
 
-const CTU = ClinicalTrialUtilities
 
 function lgamma(x)
     return SpecialFunctions.logabsgamma(x)[1]
@@ -89,6 +88,8 @@ include("freque.jl")
 include("export.jl")
 #Randomization
 include("randomization.jl")
+#Utilities
+include("utilities.jl")
 #Show
 include("show.jl")
 
@@ -117,7 +118,12 @@ diffpropci,
 rrpropci,
 orpropci,
 meanci,
-diffmeanci
+diffmeanci,
+diffcmhci,
+orcmhci,
+rrcmhci,
+#Randomization
+randomtable
 
 #Pharmacokinetics
 
