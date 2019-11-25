@@ -35,7 +35,7 @@ println(" ---------------------------------- ")
     sort!(df, :Subject)
 
     #Linear-trapezoidal rule
-    #AUC
+    #AUC last
     @test round.(df[!, :AUClast], sigdigits = 6) == round.([9585.4218
     10112.176
     5396.5498
@@ -46,6 +46,18 @@ println(" ---------------------------------- ")
     7110.6745
     8315.0803
     5620.8945], sigdigits = 6)
+
+    #AUMC last
+    @test round.(df[!, :AUMClast], sigdigits = 6) == round.([333582.48
+    298701.39
+    186032.06
+    313955.9
+    315181.56
+    226977.06
+    219797.71
+    240526.05
+    277613.98
+    154893.06], sigdigits = 6)
 
     #Cmax
     @test df[!, :Cmax] == [190.869
@@ -140,12 +152,41 @@ println(" ---------------------------------- ")
     93.761762
     38.810857], sigdigits = 6)
 
+    pkds = ClinicalTrialUtilities.pkimport(pkdata2, [:Subject, :Formulation]; conc = :Concentration, time = :Time)
+    pk   = ClinicalTrialUtilities.nca!(pkds, calcm = :logt)
+    df   = DataFrame(pk; unst = true)
+    sort!(df, :Subject)
+
+    @test round.(df[!, :AUClast], sigdigits = 6) == round.([9572.8582
+    10054.037
+    5391.5322
+    9296.2179
+    9518.6531
+    6948.5757
+    6987.0645
+    7064.7816
+    8298.9634
+    5485.6538], sigdigits = 6)
+
+    @test round.(df[!, :AUCinf], sigdigits = 6) == round.([42912.456
+    16096.791
+    26021.165
+    21982.46
+    25777.668
+    15983.737
+    11646.444
+    15400.317
+    24849.129
+    7940.0834], sigdigits = 6)
+
 
 
     #glucose2
     pkds = ClinicalTrialUtilities.pkimport(glucose2, [:Subject, :Date]; conc = :glucose, time = :Time)
     pk   = ClinicalTrialUtilities.nca!(pkds)
     df   = DataFrame(pk; unst = true)
+
+
 
 end
 

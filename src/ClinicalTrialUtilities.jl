@@ -93,7 +93,7 @@ include("utilities.jl")
 #Show
 include("show.jl")
 
-
+const CTU = ClinicalTrialUtilities
 #Types
 export CTU, ConfInt,
 #Sample size
@@ -123,11 +123,17 @@ diffcmhci,
 orcmhci,
 rrcmhci,
 #Randomization
-randomtable
+randomtable,
 
 #Pharmacokinetics
-
-export nca!, pkimport, pdimport, DataFrame
+nca!,
+pkimport,
+pdimport,
+DataFrame,
+ElimRange,
+DoseTime,
+LimitRule,
+keldata
 
 
 
