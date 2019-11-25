@@ -1,4 +1,3 @@
-## Randomization
 
 ### ClinicalTrialUtilities.randomtable
 ```@docs

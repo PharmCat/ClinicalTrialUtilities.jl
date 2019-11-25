@@ -1,4 +1,3 @@
-## Confidence Intervals
 
 ### ClinicalTrialUtilities.propci
 ```@docs

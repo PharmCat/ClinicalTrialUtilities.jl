@@ -1,4 +1,4 @@
-## Confidence intervals:
+## Confidence intervals
 
 ```
 propci(81, 263, alpha=0.05, method=:wilson)

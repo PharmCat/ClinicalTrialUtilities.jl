@@ -1,4 +1,3 @@
-## Sample size estimation
 
 ### ClinicalTrialUtilities.ctsamplen
 ```@docs

@@ -1,4 +1,3 @@
-## PD NCA
 
 ### ClinicalTrialUtilities.pdimport
 ```@docs
