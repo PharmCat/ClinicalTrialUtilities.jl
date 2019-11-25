@@ -11,7 +11,7 @@ function in(a::AbstractDict, b::AbstractDict)
     end
     return true
 end
-function in(a::Pair, b::AbstractDict)
+function in(a::Pair, b::Dict)
     if a[1]  ∉  collect(keys(b)) return false end
     if a[2] != b[a[1]] return false end
     return true
@@ -56,8 +56,8 @@ struct DoseTime
     dose::Number
     time::Number
     tau::Number
-    function DoseTime()
-        new(NaN, 0, NaN)::DoseTime
+    function DoseTime(;dose::Number = NaN, time::Number = 0, tau::Number = NaN)
+        new(dose, time, tau)::DoseTime
     end
     function DoseTime(dose)
         new(dose, 0, NaN)::DoseTime

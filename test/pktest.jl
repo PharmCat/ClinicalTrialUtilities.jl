@@ -152,6 +152,13 @@ println(" ---------------------------------- ")
     93.761762
     38.810857], sigdigits = 6)
 
+
+    ClinicalTrialUtilities.setdosetime!(pkds, ClinicalTrialUtilities.DoseTime(dose = 120, time = 0, tau = 12))
+    pk   = ClinicalTrialUtilities.nca!(pkds)
+    df   = DataFrame(pk; unst = true)
+    sort!(df, :Subject)
+
+
     pkds = ClinicalTrialUtilities.pkimport(pkdata2, [:Subject, :Formulation]; conc = :Concentration, time = :Time)
     pk   = ClinicalTrialUtilities.nca!(pkds, calcm = :logt)
     df   = DataFrame(pk; unst = true)

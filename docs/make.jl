@@ -21,7 +21,7 @@ makedocs(
         "Examples" => "examples.md",
         "Export" => "export.md",
         "Validation" => "validation.md",
-        "References" => "ref.jl",
+        "References" => "ref.md",
     ],
 )
 
