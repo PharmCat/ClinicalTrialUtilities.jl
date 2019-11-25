@@ -123,7 +123,6 @@ orcmhci,
 rrcmhci,
 #Randomization
 randomtable,
-
 #Pharmacokinetics
 nca!,
 pkimport,
@@ -132,7 +131,9 @@ DataFrame,
 ElimRange,
 DoseTime,
 LimitRule,
-keldata
+keldata,
+# Simulation
+ctsim
 
 
 
