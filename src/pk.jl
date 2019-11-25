@@ -134,17 +134,17 @@ function Base.getindex(a::PKPDProfile{T}, s::Symbol)::Real where T <: AbstractSu
     return a.result[s]
 end
 #=
-function Base.getindex(a::DataSet{PKPDProfile{T}}, i::Int64) where T <: AbstractSubject
+function Base.getindex(a::DataSet{PKPDProfile{T}}, i::Int) where T <: AbstractSubject
     return a.data[i]
 end
-function Base.getindex(a::DataSet{PKPDProfile{T}}, i::Int64, s::Symbol)::Real where T <: AbstractSubject
+function Base.getindex(a::DataSet{PKPDProfile{T}}, i::Int, s::Symbol)::Real where T <: AbstractSubject
     return a.data[i].result[s]
 end
 =#
-function Base.getindex(a::DataSet{PKPDProfile}, i::Int64)
+function Base.getindex(a::DataSet{PKPDProfile}, i::Int)
     return a.data[i]
 end
-function Base.getindex(a::DataSet{PKPDProfile}, i::Int64, s::Symbol)::Real
+function Base.getindex(a::DataSet{PKPDProfile}, i::Int, s::Symbol)::Real
     return a.data[i].result[s]
 end
 function Base.getindex(a::DataSet{PKPDProfile}, d::Pair)
@@ -152,7 +152,7 @@ function Base.getindex(a::DataSet{PKPDProfile}, d::Pair)
         if d ∈ a[i].subject.sort return a[i] end
     end
 end
-function Base.getindex(a::DataSet{T}, i::Int64) where T <: AbstractSubject
+function Base.getindex(a::DataSet{T}, i::Int) where T <: AbstractSubject
     return a.data[i]
 end
 
@@ -632,10 +632,10 @@ verbose - print to out stream if "true";
 
 io - out stream (stdout by default)
 """
-function nca!(data::DataSet{PKSubject}; calcm = :lint, verbose = false, io::IO = stdout)
+function nca!(data::DataSet{PKSubject}; calcm = :lint, intp = :lint, verbose = false, io::IO = stdout)
         results = Array{PKPDProfile, 1}(undef, 0)
         for i = 1:length(data.data)
-            push!(results, nca!(data.data[i]; calcm = calcm, verbose = verbose))
+            push!(results, nca!(data.data[i]; calcm = calcm, intp = intp, verbose = verbose))
         end
         return DataSet(results)
 end

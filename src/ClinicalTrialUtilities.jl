@@ -47,7 +47,7 @@ struct ConfInt
     end
 end
 
-function getindex(a::ConfInt, b::Int64)
+function getindex(a::ConfInt, b::Int)
     if b == 1
         return a.lower
     elseif b == 2
