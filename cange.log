@@ -2,13 +2,14 @@ v0.2.0
 
   Breaking changes(!):
 
-  - Renamed exported functions: ctsamplen, ctpower, besamplen, bepower (now in lower case).
+  - Renamed exported functions: ctsamplen, ctpower, besamplen, bepower, ets (now in lower case).
+  - nca() -> nca!() - renamed;
   - Changes in ctsamplen() in one group estimation. In version 0.1.x test mean/proportion denoted as parameter/keyword  "a" was a "Reference".
   This situation was inconsistent with two group analysis where "a" - T, "b" - R. Now everywhere "a" means "Test group", "b" means "Reference group".
   Hypothesis testing for difference is A-B everywhere.
   - Keyword "logdiff" removed in ctsamplen(), because this was inconsistent with bepower/besamplen, new parameter logscale using instead.
   - Keyword "out" removed everywhere. Output via Base.show(io::IO, obj::TaskResult);
-  - twoProp() removed;
+  - twoProp(), oneProp(), oneMean. twoMeans() removed;
   - No submodule politics.
 
   Major changes:
@@ -18,7 +19,9 @@ v0.2.0
   - Sample size and power functions now return TaskResult{T <: CTask};
   - descriptive() rewrited;
   - DataSet type;
+  - make DataFrame from DataSet;
   - Descriptive type;
+  - CMH CI split;
   - Include CI in ClinicalTrialUtilities & StatsBase methods for AbstractParameter types.
 
   Other changes:
@@ -26,11 +29,12 @@ v0.2.0
   - Changes in error messages. Now throw(ArgumentError(msg));
   - LimitRule for PK;
   - RMIN/RMAX/TH/BL for PD;
+  - Steady-state PK and other PK parameters;
   - Descriptive stats add SES and SEK;
   - Descriptive performance;
   - Test procedures restructured;
   - 4x4 design;
-  - documentation;
+  - Documentation;
   - Minor changes, bugfix, code cleaning, cosmetics.
 
 v0.1.16

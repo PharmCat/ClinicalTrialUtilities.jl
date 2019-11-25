@@ -11,6 +11,11 @@ function in(a::AbstractDict, b::AbstractDict)
     end
     return true
 end
+function in(a::Pair, b::Dict)
+    if a[1]  ∉  collect(keys(b)) return false end
+    if a[2] != b[a[1]] return false end
+    return true
+end
 #!!!
 struct KelData <: AbstractData
     s::Array{Int, 1}
@@ -51,8 +56,8 @@ struct DoseTime
     dose::Number
     time::Number
     tau::Number
-    function DoseTime()
-        new(NaN, 0, NaN)::DoseTime
+    function DoseTime(;dose::Number = NaN, time::Number = 0, tau::Number = NaN)
+        new(dose, time, tau)::DoseTime
     end
     function DoseTime(dose)
         new(dose, 0, NaN)::DoseTime
@@ -142,9 +147,15 @@ end
 function Base.getindex(a::DataSet{PKPDProfile}, i::Int64, s::Symbol)::Real
     return a.data[i].result[s]
 end
+function Base.getindex(a::DataSet{PKPDProfile}, d::Pair)
+    for i = 1:length(a)
+        if d ∈ a[i].subject.sort return a[i] end
+    end
+end
 function Base.getindex(a::DataSet{T}, i::Int64) where T <: AbstractSubject
     return a.data[i]
 end
+
 #-------------------------------------------------------------------------------
 function obsnum(data::T) where T <:  AbstractSubject
     return length(data.time)
@@ -183,6 +194,7 @@ end
 function Base.show(io::IO, obj::PKSubject)
     println(io, "Pharmacokinetic subject")
     println(io, "Observations: $(length(obj))")
+    println(io,  obj.kelrange)
     println(io, "Time   Concentration")
     for i = 1:length(obj)
         println(io, obj.time[i], " => ", obj.obs[i])
@@ -195,6 +207,26 @@ function Base.show(io::IO, obj::PDSubject)
     for i = 1:length(obj)
         println(io, obj.time[i], " => ", obj.obs[i])
     end
+end
+function Base.show(io::IO, obj::ElimRange)
+    print(io, "Elimination range: $(obj.kelstart) - $(obj.kelend) ")
+    if length(obj.kelexcl) > 0
+        print(io, "Exclusions: $(obj.kelexcl[i])")
+        if length(obj.kelexcl) > 1 for i = 1:length(obj.kelexcl) print(io, ", $(obj.kelexcl[i])") end end
+        print(io, ".")
+    else
+        print(io, "No exclusion.")
+    end
+end
+function Base.show(io::IO, obj::KelData)
+    m = copy(obj.s)
+    m = hcat(m, obj.e)
+    m = hcat(m, obj.a)
+    m = hcat(m, obj.b)
+    m = hcat(m, obj.r)
+    m = hcat(m, obj.ar)
+    println(io, "Elimination table:")
+    print(io, m)
 end
 #-------------------------------------------------------------------------------
 function ncarule!(data::DataFrame, conc::Symbol, time::Symbol, rule::LimitRule)
@@ -360,8 +392,6 @@ end
             return logcpredict(t₁, t₂, tx, c₁, c₂)
         end
     end
-    #Extrapolation
-        #!!!
     #---------------------------------------------------------------------------
 
     function aucpart(t₁, t₂, c₁, c₂, calcm, aftertmax)
@@ -370,7 +400,7 @@ end
             aumc  = linaumc(t₁, t₂, c₁, c₂)    # (data[i - 1, conc]*data[i - 1, time] + data[i, conc]*data[i, time]) * (data[i, time] - data[i - 1, time])/2
         elseif calcm == :logt
             if aftertmax
-                if c₁ > c₂ > 0
+                if c₁ > 0 && c₂ > 0
                     auc   =  logauc(t₁, t₂, c₁, c₂)
                     aumc  = logaumc(t₁, t₂, c₁, c₂)
                 else
@@ -389,6 +419,19 @@ end
                 auc   =  linauc(t₁, t₂, c₁, c₂)
                 aumc  = linaumc(t₁, t₂, c₁, c₂)
             end
+        elseif calcm == :luldt
+            if aftertmax
+                if c₁ > c₂ > 0
+                    auc   =  logauc(t₁, t₂, c₁, c₂)
+                    aumc  = logaumc(t₁, t₂, c₁, c₂)
+                else
+                    auc   =  linauc(t₁, t₂, c₁, c₂)
+                    aumc  = linaumc(t₁, t₂, c₁, c₂)
+                end
+            else
+                auc   =  linauc(t₁, t₂, c₁, c₂)
+                aumc  = linaumc(t₁, t₂, c₁, c₂)
+            end
         end
         return auc, aumc
     end
@@ -398,8 +441,22 @@ end
     nca!(data::PKSubject; calcm = :lint, verbose = false, io::IO = stdout)
 
 Pharmacokinetics non-compartment analysis for one PK subject.
+
+calcm - calculation method;
+
+- :lint  - Linear trapezoidal everywhere;
+- :logt  - Log-trapezoidat rule after Tmax if c₁ > 0 and c₂ > 0, else Linear trapezoidal used;
+- :luld  - Linear Up - Log Down everywhere if c₁ > c₂ > 0, else Linear trapezoidal used;
+- :luldt - Linear Up - Log Down  after Tmax if c₁ > c₂ > 0, else Linear trapezoidal used;
+
+verbose - print to out stream if "true";
+
+- true;
+- false.
+
+io - out stream (stdout by default)
 """
-function nca!(data::PKSubject; calcm = :lint, verbose = false, io::IO = stdout)
+function nca!(data::PKSubject; calcm = :lint, intp = :lint, verbose = false, io::IO = stdout)
         result   = Dict()
         #=
         result    = Dict(:Obsnum   => 0,   :Tmax   => 0,   :Tmaxn    => 0,   :Tlast   => 0,
@@ -413,9 +470,22 @@ function nca!(data::PKSubject; calcm = :lint, verbose = false, io::IO = stdout)
 
         result[:Obsnum]  = length(data)
         result[:Cmax]    = maximum(data.obs)
-        result[:Tlast]   = data.time[result[:Obsnum]]
-        result[:Clast]   = data.obs[result[:Obsnum]]
+
+        for i = result[:Obsnum]:-1:1
+            if data.obs[i] > 0
+                result[:Tlast]   = data.time[i]
+                result[:Clast]   = data.obs[i]
+                break
+            end
+        end
         result[:Cmax], result[:Tmax], result[:Tmaxn] = ctmax(data, data.dosetime.time, data.dosetime.tau)
+        #-----------------------------------------------------------------------
+        if verbose
+            println(io, "Non-compartmental Pharmacokinetic Analysis")
+            printsortval(io, data.sort)
+            println(io, "Settings:")
+            println(io, "Method: $(calcm)")
+        end
         #-----------------------------------------------------------------------
         #Areas
         aucpartl  = Array{Number, 1}(undef, result[:Obsnum] - 1)
@@ -426,6 +496,10 @@ function nca!(data::PKSubject; calcm = :lint, verbose = false, io::IO = stdout)
         end
         pmask   = Array{Bool, 1}(undef, result[:Obsnum] - 1)
         pmask  .= true
+
+        if data.dosetime.time < data.time[1]
+            #Dosetime < first time
+        end
         #Find AUC part from dose time; exclude all before dosetime
         for i = 1:result[:Obsnum] - 1
             if  data.time[i] <= data.dosetime.time < data.time[i+1]
@@ -445,7 +519,22 @@ function nca!(data::PKSubject; calcm = :lint, verbose = false, io::IO = stdout)
         #sum all AUC parts
         result[:AUCall]  = sum(aucpartl[pmask])
         result[:AUMCall] = sum(aumcpartl[pmask])
+        #-----------------------------------------------------------------------
+        if verbose
+            aucpartlsum  = similar(aucpartl)
+            aumcpartlsum = similar(aumcpartl)
+            for i = 1:length(aucpartl)
+                aucpartlsum[i]  = sum(aucpartl[1:i])
+                aumcpartlsum[i] = sum(aumcpartl[1:i])
+            end
+            mx = hcat(data.time, data.obs, round.(vcat([0], aucpartl), digits = 3),  round.(vcat([0], aucpartlsum), digits = 3), round.(vcat([0], aumcpartl), digits = 3),  round.(vcat([0], aumcpartlsum), digits = 3))
+            mx = vcat(permutedims(["Time", "Concentrtion", "AUC", "AUC (cumulate)", "AUMC", "AUMC (cumulate)"]), mx)
+            printmatrix(io, mx)
+            println(io, "")
+        end
+        #-----------------------------------------------------------------------
         #Exclude all AUC parts from observed concentation before 0 or less
+        #Need elaborate!!!!
         for i = result[:Tmaxn]:result[:Obsnum] - 1
             if data.obs[i+1] <= 0 * data.obs[i+1] pmask[i:end] .= false; break end
         end
@@ -482,12 +571,15 @@ function nca!(data::PKSubject; calcm = :lint, verbose = false, io::IO = stdout)
             result[:Rsq], result[:Rsqn] = findmax(keldata.ar)
             data.kelrange.kelstart   = keldata.s[result[:Rsqn]]
             data.kelrange.kelend     = keldata.e[result[:Rsqn]]
-            data.keldata    = keldata
-            result[:ARsq]   = keldata.ar[result[:Rsqn]]
-            result[:Kel]    = abs(keldata.a[result[:Rsqn]])
-            result[:HL]     = LOG2 / result[:Kel]
-            result[:AUCinf] = result[:AUClast] + result[:Clast] / result[:Kel]
-            result[:AUCpct] = (result[:AUCinf] - result[:AUClast]) / result[:AUCinf] * 100.0
+            data.keldata        = keldata
+            result[:ARsq]       = keldata.ar[result[:Rsqn]]
+            result[:Kel]        = abs(keldata.a[result[:Rsqn]])
+            result[:LZ]         = keldata.a[result[:Rsqn]]
+            result[:LZint]      = keldata.b[result[:Rsqn]]
+            result[:Clast_pred] = exp(result[:LZint] + result[:LZ]*result[:Tlast])
+            result[:HL]         = LOG2 / result[:Kel]
+            result[:AUCinf]     = result[:AUClast] + result[:Clast] / result[:Kel]
+            result[:AUCpct]     = (result[:AUCinf] - result[:AUClast]) / result[:AUCinf] * 100.0
         end
         #-----------------------------------------------------------------------
         #Steady-state
@@ -502,6 +594,8 @@ function nca!(data::PKSubject; calcm = :lint, verbose = false, io::IO = stdout)
                 if ncae < result[:Obsnum] - 1 pmask[ncae+1:end] .= false end
             elseif tautime > data.time[end]
                 #extrapolation
+                result[:Ctau] = exp(result[:LZint] + result[:LZ]*tautime)
+                aucpartl[ncae], aumcpartl[ncae] = aucpart(data.time[ncae], tautime, data.obs[ncae], result[:Ctau], calcm, false)
                 #!!!
             else
                 result[:Ctau] = data.obs[end]
@@ -523,11 +617,25 @@ function nca!(data::PKSubject; calcm = :lint, verbose = false, io::IO = stdout)
     nca!(data::DataSet{PKSubject}; calcm = :lint, verbose = false, io::IO = stdout)
 
 Pharmacokinetics non-compartment analysis for PK subjects set.
+
+calcm - calculation method;
+
+- :lint  - Linear trapezoidal everywhere;
+- :logt  - Log-trapezoidat rule after Tmax if c₁ > 0 and c₂ > 0, else Linear trapezoidal used;
+- :luld  - Linear Up - Log Down everywhere if c₁ > c₂ > 0, else Linear trapezoidal used;
+- :luldt - Linear Up - Log Down  after Tmax if c₁ > c₂ > 0, else Linear trapezoidal used;
+
+verbose - print to out stream if "true";
+
+- true;
+- false.
+
+io - out stream (stdout by default)
 """
 function nca!(data::DataSet{PKSubject}; calcm = :lint, verbose = false, io::IO = stdout)
         results = Array{PKPDProfile, 1}(undef, 0)
         for i = 1:length(data.data)
-            push!(results, nca!(data.data[i]; calcm = calcm))
+            push!(results, nca!(data.data[i]; calcm = calcm, verbose = verbose))
         end
         return DataSet(results)
 end
@@ -622,6 +730,13 @@ function nca!(data::DataSet{PDSubject}; verbose = false, io::IO = stdout)
     pkimport(data::DataFrame, sort::Array, rule::LimitRule; conc::Symbol, time::Symbol)
 
 Pharmacokinetics data import from DataFrame.
+
+- data - sourece DataFrame;
+- sort - sorting columns;
+- rule - applied LimitRule.
+
+- conc - concentration column;
+- time - time column.
 """
 function pkimport(data::DataFrame, sort::Array, rule::LimitRule; conc::Symbol, time::Symbol)
         sortlist = unique(data[:, sort])
@@ -642,28 +757,66 @@ function pkimport(data::DataFrame, sort::Array, rule::LimitRule; conc::Symbol, t
         end
         return DataSet(results)
     end
+"""
+    pkimport(data::DataFrame, sort::Array; time::Symbol, conc::Symbol)
 
-    function pkimport(data::DataFrame, sort::Array; time::Symbol, conc::Symbol)
+Pharmacokinetics data import from DataFrame.
+
+- data - sourece DataFrame;
+- sort - sorting columns.
+
+- conc - concentration column;
+- time - time column.
+"""
+function pkimport(data::DataFrame, sort::Array; time::Symbol, conc::Symbol)
         rule = LimitRule()
         return pkimport(data, sort, rule; conc = conc, time = time)
-    end
+end
+"""
+    pkimport(data::DataFrame, sort::Array; time::Symbol, conc::Symbol)
 
-    function pkimport(data::DataFrame, rule::LimitRule; time::Symbol, conc::Symbol)
+Pharmacokinetics data import from DataFrame for one subject.
+
+- data - sourece DataFrame;
+- rule - applied LimitRule.
+
+- conc - concentration column;
+- time - time column.
+"""
+function pkimport(data::DataFrame, rule::LimitRule; time::Symbol, conc::Symbol)
         rule = LimitRule()
         datai = ncarule!(copy(data[!,[time, conc]]), conc, time, rule)
         return DataSet([PKSubject(datai[!, time], datai[!, conc])])
-    end
-    function pkimport(data::DataFrame; time::Symbol, conc::Symbol)
+end
+"""
+    pkimport(data::DataFrame, sort::Array; time::Symbol, conc::Symbol)
+
+Pharmacokinetics data import from DataFrame for one subject.
+
+- data - sourece DataFrame;
+
+- conc - concentration column;
+- time - time column.
+"""
+function pkimport(data::DataFrame; time::Symbol, conc::Symbol)
         datai = sort(data[!,[time, conc]], time)
         return DataSet([PKSubject(datai[!, time], datai[!, conc])])
-    end
+end
     #---------------------------------------------------------------------------
 """
     pdimport(data::DataFrame, sort::Array; resp::Symbol, time::Symbol, bl::Real = 0, th::Real = NaN)
 
 Pharmacodynamics data import from DataFrame.
+
+- data - sourece DataFrame;
+- sort - sorting columns;
+
+- resp - responce column;
+- time - time column
+- bl - baseline;
+- th - treashold.
 """
-    function pdimport(data::DataFrame, sort::Array; resp::Symbol, time::Symbol, bl::Real = 0, th::Real = NaN)
+function pdimport(data::DataFrame, sort::Array; resp::Symbol, time::Symbol, bl::Real = 0, th::Real = NaN)
         sortlist = unique(data[:, sort])
         results  = Array{PDSubject, 1}(undef, 0)
         for i = 1:size(sortlist, 1) #For each line in sortlist
@@ -677,7 +830,7 @@ Pharmacodynamics data import from DataFrame.
             push!(results, PDSubject(datai[!, :Time], datai[!, :Resp], bl, th, sort = Dict(sort .=> collect(sortlist[i,:]))))
         end
         return DataSet(results)
-    end
+end
     function pdimport(data::DataFrame; resp::Symbol, time::Symbol, bl = 0, th = NaN)
         datai = sort(data[!,[time, resp]], time)
         return DataSet([PDSubject(datai[!, time], datai[!, resp], bl, th)])
@@ -700,31 +853,48 @@ Pharmacodynamics data import from DataFrame.
     function applyncarule!(data::DataSet{PKPDProfile{PKSubject}}, rule::LimitRule)
     end
     #---------------------------------------------------------------------------
-    function setelimrange!(data::PKSubject, range::ElimRange)
+"""
+    setelimrange!(data::PKSubject, range::ElimRange)
+
+Set range for elimination parameters calculation for subject.
+
+data - PK subject;
+range - ElimRange object.
+"""
+function setelimrange!(data::PKSubject, range::ElimRange)
         data.kelrange = range
-    end
-    function setelimrange!(data::DataSet{PKSubject}, range::ElimRange)
+end
+
+function setelimrange!(data::DataSet{PKSubject}, range::ElimRange)
         for i = 1:length(data)
             data[i].kelrange = range
         end
         data
-    end
-    function setelimrange!(data::DataSet{PKSubject}, range::ElimRange, subj::Array{Int,1})
+end
+function setelimrange!(data::DataSet{PKSubject}, range::ElimRange, subj::Array{Int,1})
         for i = 1:length(data)
             if i ∈ subj data[i].kelrange = range end
         end
         data
-    end
-    function setelimrange!(data::DataSet{PKSubject}, range::ElimRange, subj::Int)
+end
+function setelimrange!(data::DataSet{PKSubject}, range::ElimRange, subj::Int)
         data[subj].kelrange = range
         data
-    end
+end
     #---------------------------------------------------------------------------
-    function applyelimrange!(data::PKPDProfile{PKSubject}, range::ElimRange)
+"""
+    applyelimrange!(data::PKPDProfile{PKSubject}, range::ElimRange)
+
+Set range for elimination parameters calculation for profile's subject and recalculate NCA parameters.
+
+data - PK subject;
+range - ElimRange object.
+"""
+function applyelimrange!(data::PKPDProfile{PKSubject}, range::ElimRange)
         setelimrange!(data.subject, range)
         data.result = nca!(data.subject, calcm = data.method).result
         data
-    end
+end
     function applyelimrange!(data::DataSet{PKPDProfile{PKSubject}}, range::ElimRange)
         for i = 1:length(data)
             applyelimrange!(data[i], range)
@@ -750,10 +920,18 @@ Pharmacodynamics data import from DataFrame.
         data
     end
     #---------------------------------------------------------------------------
-    function setdosetime!(data::PKSubject, dosetime::DoseTime)
+"""
+    setdosetime!(data::PKSubject, dosetime::DoseTime)
+
+Set dosing time and tau for subject.
+
+data - PK subject;
+dosetime - DoseTime object.
+"""
+function setdosetime!(data::PKSubject, dosetime::DoseTime)
         data.dosetime = dosetime
         data
-    end
+end
     function setdosetime!(data::DataSet{PKSubject}, dosetime::DoseTime)
         for i = 1:length(data)
             data[i].dosetime = dosetime
@@ -766,10 +944,18 @@ Pharmacodynamics data import from DataFrame.
         end
         data
     end
-    function setth!(data::PDSubject, th::Real)
+"""
+    setth!(data::PDSubject, th::Real)
+
+Set treashold for subject.
+
+data - PK subject;
+th - treashold.
+"""
+function setth!(data::PDSubject, th::Real)
         data.th = th
         data
-    end
+end
     function setth!(data::DataSet{PDSubject}, th::Real)
         for i = 1:length(data)
             data[i].th = th
@@ -782,10 +968,19 @@ Pharmacodynamics data import from DataFrame.
         end
         data
     end
-    function setbl!(data::PDSubject, bl)
-        data.bl = bl
-        data
-    end
+
+"""
+    setbl!(data::PDSubject, bl::Real)
+
+Set baseline for subject.
+
+data - PK subject;
+bl - baseline.
+"""
+function setbl!(data::PDSubject, bl::Real)
+    data.bl = bl
+    data
+end
     function setbl!(data::DataSet{PDSubject}, bl::Real)
         for i = 1:length(data)
             data[i].bl = bl
@@ -798,15 +993,27 @@ Pharmacodynamics data import from DataFrame.
         end
         data
     end
-    #---------------------------------------------------------------------------
-    function keldata(data::PKPDProfile{PKSubject})
-        return data.subject.keldata
-    end
-    function keldata(data::DataSet{PKPDProfile{PKSubject}}, i::Int)
-        return data[i].subject.keldata
-    end
+#-------------------------------------------------------------------------------
+"""
+    keldata(data::PKPDProfile{PKSubject})
 
-    function DataFrames.DataFrame(data::DataSet{PKPDProfile}; unst = false)
+Return elimination data for PK subject in profile.
+"""
+function keldata(data::PKPDProfile{PKSubject})
+    return data.subject.keldata
+end
+function keldata(data::DataSet{PKPDProfile{PKSubject}}, i::Int)
+        return data[i].subject.keldata
+end
+
+"""
+    DataFrames.DataFrame(data::DataSet{PKPDProfile}; unst = false, us = false)
+
+Make datafrafe from PK/PD DataSet.
+
+unst | us - unstack data;
+"""
+function DataFrames.DataFrame(data::DataSet{PKPDProfile}; unst = false, us = false)
         d = DataFrame(id = Int[], sortvar = Symbol[], sortval = Any[])
         for i = 1:length(data)
             if length(data[i].subject.sort) > 0
@@ -830,9 +1037,9 @@ Pharmacodynamics data import from DataFrame.
             push!(df, r)
             end
         end
-        if unst
+        if unst || us
             return unstack(df, names(df)[end-1], names(df)[end])
         else
             return df
         end
-    end
+end

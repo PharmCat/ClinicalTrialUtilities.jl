@@ -12,14 +12,16 @@ makedocs(
         "Power" => "power.md",
         "Confidence intervals" => "ci.md",
         "Descriptive statistics" => "ds.md",
+        "NCA" => ["NCA" => "nca.md",
         "Pharmakokinetics" => "pk.md",
-        "Pharmacodynamics" => "pd.md",
+        "Pharmacodynamics" => "pd.md"],
         "Randomization" => "random.md",
         "Simulations" => "sim.md",
         "Utilities" => "utils.md",
         "Examples" => "examples.md",
         "Export" => "export.md",
         "Validation" => "validation.md",
+        "References" => "ref.md",
     ],
 )
 

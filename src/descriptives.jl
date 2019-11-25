@@ -46,10 +46,10 @@ function Base.show(io::IO, obj::DataSet{Descriptive})
         println(io, "____________________")
     end
 end
-function Base.getindex(a::DataSet{Descriptive}, i::Int64)::Descriptive
+function Base.getindex(a::DataSet{Descriptive}, i::Int)::Descriptive
     return a.data[i]
 end
-function Base.getindex(a::DataSet{Descriptive}, i::Int64, s::Symbol)::Real
+function Base.getindex(a::DataSet{Descriptive}, i::Int, s::Symbol)::Real
     return a.data[i].data[s]
 end
 function Base.length(data::DataSet{T}) where T <: AbstractData

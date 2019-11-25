@@ -10,6 +10,7 @@
 # p₀ = Test Proportion
 # p₁ = Reference Proportion
 # σ  = SD - Standart deviation
+# σ²
 # δ  = difference μ
 # α  = Alpha
 # β  = Beta
