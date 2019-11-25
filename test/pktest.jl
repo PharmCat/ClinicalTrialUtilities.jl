@@ -34,7 +34,7 @@ println(" ---------------------------------- ")
     df   = DataFrame(pk; unst = true)
     sort!(df, :Subject)
 
-    #Linear-trapezoidal rule
+    # Linear-trapezoidal rule (linear interpolation)
     #AUC last
     @test round.(df[!, :AUClast], sigdigits = 6) == round.([9585.4218
     10112.176
@@ -153,11 +153,45 @@ println(" ---------------------------------- ")
     38.810857], sigdigits = 6)
 
 
+    # Linear-trapezoidal Log Interpolation
+
     ClinicalTrialUtilities.setdosetime!(pkds, ClinicalTrialUtilities.DoseTime(dose = 120, time = 0, tau = 12))
+    pk   = ClinicalTrialUtilities.nca!(pkds, intp = :logt)
+    df   = DataFrame(pk; unst = true)
+    sort!(df, :Subject)
+
+
+    @test round.(df[!, :AUCtau], sigdigits = 6) == round.([1670.1018
+    2380.2695
+    980.34575
+    1711.0358
+    1738.46
+    1409.998
+    1436.5595
+    1105.0705
+    1638.1903
+    1293.7065], sigdigits = 6)
+
+    # Linear-trapezoidal Linear Interpolation
+
+    ClinicalTrialUtilities.setdosetime!(pkds, ClinicalTrialUtilities.DoseTime(dose = 120, time = 2, tau = 10))
     pk   = ClinicalTrialUtilities.nca!(pkds)
     df   = DataFrame(pk; unst = true)
     sort!(df, :Subject)
 
+    @test round.(df[!, :AUCtau], sigdigits = 6) == round.([1367.7388
+    2043.0158
+    838.8295
+    1444.7985
+    1618.6205
+    1224.6608
+    1265.7013
+    880.311
+    1417.942
+    1167.911], sigdigits = 6)
+
+
+    # Log-trapezoidal Linear Interpolation
 
     pkds = ClinicalTrialUtilities.pkimport(pkdata2, [:Subject, :Formulation]; conc = :Concentration, time = :Time)
     pk   = ClinicalTrialUtilities.nca!(pkds, calcm = :logt)
@@ -188,7 +222,8 @@ println(" ---------------------------------- ")
 
 
 
-    #glucose2
+    # glucose2
+
     pkds = ClinicalTrialUtilities.pkimport(glucose2, [:Subject, :Date]; conc = :glucose, time = :Time)
     pk   = ClinicalTrialUtilities.nca!(pkds)
     df   = DataFrame(pk; unst = true)
