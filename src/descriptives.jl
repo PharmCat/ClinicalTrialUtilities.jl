@@ -119,30 +119,7 @@ function descriptive(data::Array{T, 1}; stats::Union{Symbol, Vector, Tuple} = :d
     stats = checkstats(stats)
     return Descriptive(var, varname, sort, NamedTuple{stats}(Tuple(descriptive_(data, stats))))
 end
-#=
-"""
-"""
-@inline function usort(data::DataFrame, sort)
-    if size(data, 1) == 0 throw(ArgumentError("DataFrame size equal 0")) end
-    sortlist = Array{Array{Any,1},1}(undef, 0)
-    push!(sortlist, getrow(data, sort,1))
-    if size(data, 1) == 1 return sortlist end
-    for i = 2:size(data, 1)
-        v = getrow(data, sort, i)
-        if v ∉ sortlist push!(sortlist, v) end
-    end
-    return sortlist
-end
-"""
-"""
-@inline function getrow(df::DataFrame, sort::Array{T, 1}, i::Int)::Array{Any, 1} where T
-    v = Array{Any, 1}(undef,0)
-    for c = 1:length(sort)
-        push!(v, df[i, sort[c]])
-    end
-    return v
-end
-=#
+
 """
 Check if all statistics in allstat list. return stats tuple
 """
@@ -191,7 +168,11 @@ end
 
 #Statistics calculation
 @inline function descriptive_(data::Array{T,1}, stats::Union{Tuple{Vararg{Symbol}}, Array{Symbol,1}})::Array{Real,1} where T <: Real
-    deleteat!(data, findall(x->x === NaN || x === nothing || x === missing, data))
+    dlist = findall(x -> x === NaN || x === nothing || x === missing, data)
+    if length(dlist) > 0
+        data = copy(data)
+        deleteat!(data, dlist)
+    end
 
     dn         = nothing
     #if (@isdefined dn) end
@@ -216,15 +197,17 @@ end
     #dmode      = nothing
     if length(data) > 0
         sarray = Array{Real,1}(undef, 0)
-    elseif length(data) <= 2
+    else
+        sarray = Array{Real,1}(undef, length(stats))
+        return sarray .= NaN
+    end
+    if length(data) <= 2
         sesv = NaN
         sekv = NaN
     elseif length(data) <= 3
         sekv = NaN
-    elseif length(data) == 0
-        sarray = Array{Real,1}(undef, length(stats))
-        return sarray .= NaN
     end
+
 
     if any(x -> (x == :geomean || x == :geocv || x == :geosd || x == :geovar), stats)
         if any(x -> (x <= 0), data)

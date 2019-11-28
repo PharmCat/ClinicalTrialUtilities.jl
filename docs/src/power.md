@@ -1,4 +1,3 @@
-## Power estimation
 
 ### ClinicalTrialUtilities.ctpower
 ```@docs

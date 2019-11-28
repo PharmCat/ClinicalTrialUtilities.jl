@@ -47,7 +47,7 @@ struct ConfInt
     end
 end
 
-function getindex(a::ConfInt, b::Int64)
+function getindex(a::ConfInt, b::Int)
     if b == 1
         return a.lower
     elseif b == 2
@@ -95,6 +95,8 @@ include("show.jl")
 const CTU = ClinicalTrialUtilities
 #Types
 export CTU, ConfInt,
+#Task
+CTask,
 #Sample size
 ctsamplen,
 besamplen,
@@ -123,7 +125,7 @@ orcmhci,
 rrcmhci,
 #Randomization
 randomtable,
-
+randomseq,
 #Pharmacokinetics
 nca!,
 pkimport,
@@ -132,7 +134,9 @@ DataFrame,
 ElimRange,
 DoseTime,
 LimitRule,
-keldata
+keldata,
+# Simulation
+ctsim
 
 
 

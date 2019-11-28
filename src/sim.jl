@@ -1,5 +1,10 @@
 
+"""
+    ctsim(t::CTask{T, D, Bioequivalence, Power}; nsim = 100, seed=0)  where T where D
 
+Bioequivalence power simulation.
+
+"""
 function ctsim(t::CTask{T, D, Bioequivalence, Power}; nsim = 100, seed=0)  where T where D
     if seed != 0  Random.seed!(seed) end
     df      = t.design.df(t.objective.val)

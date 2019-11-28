@@ -23,6 +23,7 @@ println(" ---------------------------------- ")
     t = ClinicalTrialUtilities.ctsamplen(param=:mean, type=:ea, group=:one, alpha=0.05, beta=0.2, sd=1, a=2, b=1.5)
     @test ceil(t.result) == ceil(ClinicalTrialUtilities.ctsamplen(t.task).result) == 32
     Base.show(io, t)
+    Base.show(io, t.task)
     #2
     t = ClinicalTrialUtilities.ctsamplen(param=:mean, type=:ei, group=:one, alpha=0.05, beta=0.2, sd=0.1, diff=0.05, a=2, b=2)
     @test ceil(t.result) == ceil(ClinicalTrialUtilities.ctsamplen(t.task).result) == 35
@@ -106,6 +107,7 @@ println(" ---------------------------------- ")
     t = ClinicalTrialUtilities.ctpower(param=:mean, type=:ea, group=:one, a=2, b=1.5, sd=1,n=32, alpha=0.05)
     @test ClinicalTrialUtilities.ctpower(t.task).result ≈ 0.8074304194325561  atol=1E-7
     Base.show(io, t)
+    Base.show(io, t.task)
     #2
     t = ClinicalTrialUtilities.ctpower(param=:mean, type=:ei, group=:one, a=2, b=2, sd=0.1, diff=0.05, n=35, alpha=0.05)
     @test ClinicalTrialUtilities.ctpower(t.task).result ≈ 0.8108839754376387  atol=1E-7
@@ -174,6 +176,7 @@ println(" ---------------------------------- ")
     @test ClinicalTrialUtilities.besamplen(t.task).result == 20
     @test ClinicalTrialUtilities.ctsamplen(t.task).result == 20
     Base.show(io, t)
+    Base.show(io, t.task)
     #@test n == 20 && round(p, digits=7) == 0.8346802
     t = ClinicalTrialUtilities.besamplen(;theta0=0.95, theta1=0.8, theta2=1.25, cv=0.3, alpha=0.05, beta=0.2, logscale=true, method=:owenq)
     @test ClinicalTrialUtilities.besamplen(t.task).result == 40
@@ -245,6 +248,7 @@ println(" ---------------------------------- ")
     @test ClinicalTrialUtilities.bepower(t.task).result ≈ 0.2949476 atol=1E-7
     @test ClinicalTrialUtilities.ctpower(t.task).result ≈ 0.2949476 atol=1E-7
     Base.show(io, t)
+    Base.show(io, t.task)
     #2
     t = ClinicalTrialUtilities.bepower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.3, n=32, design=:parallel, method=:owenq)
     @test ClinicalTrialUtilities.bepower(t.task).result ≈ 0.3166927 atol=1E-7
@@ -327,8 +331,8 @@ end
 
 println(" ---------------------------------- ")
 @testset "#5  utils Test          " begin
-@testset "  ci2cv Test            " begin
 
+@testset "  ci2cv Test            " begin
     cvms = ClinicalTrialUtilities.cvfromci(;alpha = 0.05, theta1 = 0.9, theta2 = 1.25, n=30, design=:d2x2x4, cvms=true)
     @test cvms[1] ≈ 0.583175066140736 && cvms[2] ≈ 0.29273913226894244
     @test ClinicalTrialUtilities.cvfromci(;alpha = 0.05, theta1 = 0.9, theta2 = 1.25, n=30, design=:d2x2x4, mso=true) ≈ 0.29273913226894244
@@ -336,8 +340,8 @@ println(" ---------------------------------- ")
     @test ClinicalTrialUtilities.cvfromci(;alpha = 0.05, theta1 = 0.8, theta2 = 1.25, n=30) ≈ 0.5426467811605913
     @test ClinicalTrialUtilities.cvfromci(;alpha = 0.05, theta1 = 1.01, theta2 = 1.21, n=31, design=:d2x2) ≈ 0.21151405971696524
 end
-@testset "  pooledcv            " begin
 
+@testset "  pooledcv            " begin
     data = DataFrame(cv = Float64[], df = Int[])
     push!(data, (0.12, 12))
     push!(data, (0.2, 20))
@@ -351,6 +355,9 @@ end
     @test ci.upper    ≈ 0.06586718662236608 atol=1E-15
     @test ci.estimate ≈ 0.04475355764465427 atol=1E-15
 end
+
+@test ClinicalTrialUtilities.cvfromsd(ClinicalTrialUtilities.sdfromcv(0.2)) ≈ 0.2
+@test ClinicalTrialUtilities.cvfromvar(ClinicalTrialUtilities.varfromcv(0.2)) ≈ 0.2
 end
 
 println(" ---------------------------------- ")
@@ -414,8 +421,6 @@ end
     d = ClinicalTrialUtilities.Design(:d2x3x3)
     @test d.df(31) ≈ 59 && d.bkni ≈ 1/6 && d.sq ≈ 3
 
-    ClinicalTrialUtilities.cvfromsd(ClinicalTrialUtilities.sdfromcv(0.2)) ≈ 0.2
-    ClinicalTrialUtilities.cvfromvar(ClinicalTrialUtilities.varfromcv(0.2)) ≈ 0.2
 end
 end
 
@@ -425,26 +430,9 @@ include("citest.jl")
 println(" ---------------------------------- ")
 @testset "  Simulations           " begin
 
-    #@test ClinicalTrialUtilities.SIM.bepower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=20, simnum=4, seed=1111) ≈ 0.8346
-    #@test ClinicalTrialUtilities.SIM.bepower(alpha=0.1, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=29, simnum=4, seed=1111) ≈ 0.9744
-
-    #!
-    #ClinicalTrialUtilities.SIM.bepower(alpha=0.1, logscale=false, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=29, simnum=4, seed=1111)
-
-    #@test ClinicalTrialUtilities.SIM.ctPropPower(0.5, 100, 0.5, 100, 0.6; alpha=0.05, type=:ns, citype=:or, method=:mn, seed=123, simnum=4) ≈ 0.4131
-    #ClinicalTrialUtilities.SIM.ctPropPower(0.5, 100, 0.5, 100, [0.3, 3.0]; alpha=0.05, type=:ei, citype=:or, method=:mn, seed=123, simnum=4) ≈ 0.9562
-
-    #@test ClinicalTrialUtilities.SIM.ctPropPower(0.5, 100, 0.4, 100, 0.8; alpha=0.1, type=:ns,  citype=:or, method=:mn, seed=123, simnum=4) ≈ 0.6988
-
-    #@test ClinicalTrialUtilities.SIM.ctMeansPowerFS(1.0, 1.0, 10, 1.0, 1.0, 10, -0.3; alpha=0.1, method=:ev,  seed=1235, simnum=4) ≈ 0.1584
-    #@test ClinicalTrialUtilities.SIM.ctMeansPower(1.0, 1.0, 10, 1.0, 1.0, 10, -0.3; alpha=0.1,  seed=1235, simnum=4) ≈ 0.1662
-
-    #T = ClinicalTrialUtilities.SIM.ctPropSampleN(0.6, 0.6,-0.15; alpha=0.1, type =:ns, citype=:diff, method=:nhs, seed=1234, simnum=4)
-    #@test T[1] == 125
-    #@test T[2] ≈ 0.8036 atol=1E-3
-    #T = ClinicalTrialUtilities.SIM.ctPropSampleN(0.6, 0.6,0.34; alpha=0.1, type =:ns, citype=:or, method=:awoolf, seed=1237, simnum=4)
-    #@test T[3] == 44
-    #@test T[4] ≈ 0.8106 atol=1E-3
+    t      = ClinicalTrialUtilities.bepower(cv=0.2, n=20).task
+    result = ClinicalTrialUtilities.ctsim(t; nsim = 100, seed=1234)
+    @test result == 0.83
 end
 
 include("dstest.jl")
@@ -461,7 +449,9 @@ end
 
 println(" ---------------------------------- ")
 @testset "  Random                " begin
-    @test ClinicalTrialUtilities.randomtable() == [1,2,2,1,2,1,1,2,2,1]
+    @test ClinicalTrialUtilities.randomseq(seed = 1234) == [1,2,2,1,2,1,1,2,2,1]
+    rdf   = ClinicalTrialUtilities.randomtable(seed = 1234)
+    @test rdf[!, :Group] == [1,2,2,1,2,1,1,2,2,1]
 end
 
 #PK
@@ -474,19 +464,18 @@ println(" ---------------------------------- ")
     pk   = ClinicalTrialUtilities.nca!(pkds)
     df   = ClinicalTrialUtilities.DataFrame(pk; unst = true)
     ds   = ClinicalTrialUtilities.descriptive(df, stats = :all, sort = [:Formulation])
-    #res = ClinicalTrialUtilities.descriptive(pk, sort=[:Formulation], vars = [:AUClast, :Cmax])
-    #@test res[1, :mean] ≈ 7431.283916666667
+
+
+    @test ds[5, :mean] ≈ 7431.283916666667
     #@test res[3, :mean] ≈ 8607.09
-    #html = ClinicalTrialUtilities.Export.htmlExport(res)
-    pdds = ClinicalTrialUtilities.pdimport(pkdata2, [:Formulation]; time = :Time, resp = :Concentration)
+
+    pdds = ClinicalTrialUtilities.pdimport(pkdata2, [:Subject, :Formulation]; time = :Time, resp = :Concentration)
     pd   = ClinicalTrialUtilities.nca!(pdds)
+    df   = ClinicalTrialUtilities.DataFrame(pd; unst = true)
     ds   = ClinicalTrialUtilities.descriptive(df, stats = :default, sort = [:Formulation])
 
-    #pd  = ClinicalTrialUtilities.PK.nca((CSV.read(IOBuffer(pkdat)) |> DataFrame); effect = :Concentration, sort=[:Subject, :Formulation], bl = 1.0).result
-    #res = ClinicalTrialUtilities.descriptive(pd, sort=[:Formulation], stats = :all, vars = [:AUCABL, :AUCBBL, :TABL, :TATH])
-    #@test res[3, :mean] ≈ 71.9845013481999
-    #@test res[7, :mean] ≈ 71.85794338696802
-    #html = ClinicalTrialUtilities.Export.htmlExport(res; dict = :pd)
+    @test ds[2, :mean] ≈ 7431.283916666667
+
 
 end
 
@@ -503,33 +492,7 @@ println(" ---------------------------------- ")
     @test_throws ArgumentError ClinicalTrialUtilities.ctsamplen(param=:mean, type=:ea, group=:one, alpha=0.05, beta=0.2, diff=1, sd=1, a=0, b=0, k=0)
     #ERROR: ArgumentError: Design not known!
     @test_throws ArgumentError ClinicalTrialUtilities.Design(:ddd)
-    #=
-        ClinicalTrialUtilities.bepower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=0,  method=:mvt)
 
-        ClinicalTrialUtilities.bepower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0, n=10,  method=:mvt)
-
-        ClinicalTrialUtilities.bepower(alpha=1.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=10,  method=:mvt)
-
-        ClinicalTrialUtilities.bepower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=2,  method=:mvt)
-
-        ClinicalTrialUtilities.bepower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=20,  method=:mmvt)
-
-        ClinicalTrialUtilities.bepower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=20, design=:d2x2, method=:mvt)
-
-        ClinicalTrialUtilities.ctsamplen(param=:prop, type=:ea, group=:oone, alpha=0.05, beta=0.2, diff=1, a=0.5, b=0.5, k=1)
-
-        ClinicalTrialUtilities.ctsamplen(param=:mean, type=:ns, group=:one, alpha=0.5, beta=0.2, diff=1, sd=0, a=1, b=1, k=1)
-
-
-        ClinicalTrialUtilities.CI.propci(38, 100, alpha=0.05, method=:err)
-
-
-    =#
-    #data = DataFrame(Concentration = Float64[], Time = Float64[], Subject = String[], Formulation = String[])
-    #pk = ClinicalTrialUtilities.PK.nca(data; conc = :c, time = :t,  sort=[:Formulatio, :Subjec], calcm = :logtt)
-    #@test length(pk.errors) == 5
-    #pk = ClinicalTrialUtilities.PK.nca(data; conc = :Concentration, time = :Time,  sort=6, calcm = :logt)
-    #@test length(pk.errors) == 1
 end
 
 #println(" ---------------------------------- ")

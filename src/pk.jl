@@ -134,17 +134,17 @@ function Base.getindex(a::PKPDProfile{T}, s::Symbol)::Real where T <: AbstractSu
     return a.result[s]
 end
 #=
-function Base.getindex(a::DataSet{PKPDProfile{T}}, i::Int64) where T <: AbstractSubject
+function Base.getindex(a::DataSet{PKPDProfile{T}}, i::Int) where T <: AbstractSubject
     return a.data[i]
 end
-function Base.getindex(a::DataSet{PKPDProfile{T}}, i::Int64, s::Symbol)::Real where T <: AbstractSubject
+function Base.getindex(a::DataSet{PKPDProfile{T}}, i::Int, s::Symbol)::Real where T <: AbstractSubject
     return a.data[i].result[s]
 end
 =#
-function Base.getindex(a::DataSet{PKPDProfile}, i::Int64)
+function Base.getindex(a::DataSet{PKPDProfile}, i::Int)
     return a.data[i]
 end
-function Base.getindex(a::DataSet{PKPDProfile}, i::Int64, s::Symbol)::Real
+function Base.getindex(a::DataSet{PKPDProfile}, i::Int, s::Symbol)::Real
     return a.data[i].result[s]
 end
 function Base.getindex(a::DataSet{PKPDProfile}, d::Pair)
@@ -152,7 +152,7 @@ function Base.getindex(a::DataSet{PKPDProfile}, d::Pair)
         if d ∈ a[i].subject.sort return a[i] end
     end
 end
-function Base.getindex(a::DataSet{T}, i::Int64) where T <: AbstractSubject
+function Base.getindex(a::DataSet{T}, i::Int) where T <: AbstractSubject
     return a.data[i]
 end
 
@@ -588,7 +588,7 @@ function nca!(data::PKSubject; calcm = :lint, intp = :lint, verbose = false, io:
             tautime = data.dosetime.time + data.dosetime.tau
             if tautime < data.time[end]
                 #result[:Ctau] = linpredict(data.time[ncae] , data.time[ncae+1], tautime, data.obs[ncae], data.obs[ncae+1])
-                result[:Ctau] = cpredict(data.time[ncae], data.time[ncae+1], tautime, data.obs[ncae], data.obs[ncae+1], calcm)
+                result[:Ctau] = cpredict(data.time[ncae], data.time[ncae+1], tautime, data.obs[ncae], data.obs[ncae+1], intp)
                 aucpartl[ncae], aumcpartl[ncae] = aucpart(data.time[ncae], tautime, data.obs[ncae], result[:Ctau], calcm, false)
                 #remoove part after tau
                 if ncae < result[:Obsnum] - 1 pmask[ncae+1:end] .= false end
@@ -614,7 +614,7 @@ function nca!(data::PKSubject; calcm = :lint, intp = :lint, verbose = false, io:
         return PKPDProfile(data, result; method = calcm)
     end
 """
-    nca!(data::DataSet{PKSubject}; calcm = :lint, verbose = false, io::IO = stdout)
+    nca!(data::DataSet{PKSubject}; calcm = :lint, intp = :lint, verbose = false, io::IO = stdout)
 
 Pharmacokinetics non-compartment analysis for PK subjects set.
 
@@ -625,6 +625,10 @@ calcm - calculation method;
 - :luld  - Linear Up - Log Down everywhere if c₁ > c₂ > 0, else Linear trapezoidal used;
 - :luldt - Linear Up - Log Down  after Tmax if c₁ > c₂ > 0, else Linear trapezoidal used;
 
+intp - interpolation rule;
+- :lint - linear interpolation;
+- :logt - log interpolation;
+
 verbose - print to out stream if "true";
 
 - true;
@@ -632,10 +636,10 @@ verbose - print to out stream if "true";
 
 io - out stream (stdout by default)
 """
-function nca!(data::DataSet{PKSubject}; calcm = :lint, verbose = false, io::IO = stdout)
+function nca!(data::DataSet{PKSubject}; calcm = :lint, intp = :lint, verbose = false, io::IO = stdout)
         results = Array{PKPDProfile, 1}(undef, 0)
         for i = 1:length(data.data)
-            push!(results, nca!(data.data[i]; calcm = calcm, verbose = verbose))
+            push!(results, nca!(data.data[i]; calcm = calcm, intp = intp, verbose = verbose))
         end
         return DataSet(results)
 end

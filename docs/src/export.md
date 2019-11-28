@@ -1,4 +1,3 @@
-## Export
 
 ### ClinicalTrialUtilities.htmlexport
 ```@docs

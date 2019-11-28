@@ -277,17 +277,17 @@ println(" ---------------------------------- ")
     data = DataFrame(a = Int[], b = Int[], c = Int[], d = Int[])
     push!(data, (8, 98, 5, 115))
     push!(data, (22, 76, 16, 69))
-    ci = ClinicalTrialUtilities.cmh(data, alpha = 0.1)
+    ci = ClinicalTrialUtilities.diffcmhci(data, alpha = 0.1)
     @test ci.estimate ≈  0.03490026933691816 atol=1E-4
     @test ci.lower    ≈  -0.01757497925425447 atol=1E-4
     @test ci.upper    ≈  0.08737551792809078 atol=1E-4
 
-    ci = ClinicalTrialUtilities.cmh(data, alpha = 0.1, type = :or, logscale = true)
+    ci = ClinicalTrialUtilities.orcmhci(data, alpha = 0.1, logscale = true)
     @test ci.estimate ≈  0.33871867108844556 atol=1E-7 #0.3387187
     @test ci.lower    ≈  -0.1730848826896063 atol=1E-7 #-0.1730849
     @test ci.upper    ≈  0.8505222248664974 atol=1E-7  #0.8505222
 
-    ci = ClinicalTrialUtilities.cmh(data, alpha = 0.1, type = :rr, logscale = true)
+    ci = ClinicalTrialUtilities.rrcmhci(data, alpha = 0.1, logscale = true)
     @test ci.estimate ≈  0.28183148420493526 atol=1E-7
     @test ci.lower    ≈  -0.14415538594969263 atol=1E-7
     @test ci.upper    ≈  0.7078183543595631 atol=1E-7

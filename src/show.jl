@@ -1,13 +1,53 @@
-
+#-------------------------------------------------------------------------------
+#Task
 function Base.show(io::IO, obj::CTask)
         println(io, obj.param)
-        println(io, obj.llim)
-        println(io, obj.ulim)
-        println(io, obj.alpha)
-        println(io, obj.hyp)
-        println(io, obj.k)
-        println(io, obj.objective)
+        println(io, "  $(obj.design)")
+        println(io, "  Alpha: $(obj.alpha)")
+        println(io, "  Hypothesis: $(obj.hyp)")
+        println(io, "  K: $(obj.k)")
+        print(io,   "  Objective: $(obj.objective)")
 end
+
+#-------------------------------------------------------------------------------
+#Designs
+function Base.show(io::IO, obj::Crossover{:d2x2})
+        print(io, "2x2 Design")
+end
+function Base.show(io::IO, obj::Crossover{:d2x2x3})
+        print(io, "2x2x3 Design")
+end
+function Base.show(io::IO, obj::Crossover{:d2x2x4})
+        print(io, "2x2x4 Design")
+end
+function Base.show(io::IO, obj::Crossover{:d2x4x4})
+        print(io, "2x4x4 Design")
+end
+function Base.show(io::IO, obj::Crossover{:d2x3x3})
+        print(io, "2x3x3 Design")
+end
+function Base.show(io::IO, obj::Crossover{:d3x3})
+        print(io, "3x3 Design")
+end
+function Base.show(io::IO, obj::Crossover{:d4x4})
+        print(io, "4x4 Design")
+end
+function Base.show(io::IO, obj::Crossover{:d3x6x3})
+        print(io, "3x6x3 Design")
+end
+
+#-------------------------------------------------------------------------------
+# Objectives
+
+function Base.show(io::IO, obj::SampleSize)
+        print(io, "SampleSize (β: $(obj.val))")
+end
+function Base.show(io::IO, obj::Power)
+        print(io, "Power (n: $(obj.val))")
+end
+
+#-------------------------------------------------------------------------------
+#Task result
 
 function Base.show(io::IO, obj::TaskResult{CT}) where CT <:  CTask{T, D, H, O} where T where D where H where O <: Union{SampleSize, Power}
         println(io, objectivename(obj.task.objective))
@@ -100,6 +140,9 @@ function showresult(io, obj::TaskResult{CT}) where CT <:  CTask{T, D, H, O} wher
         println(io, "Power: ", round(obj.result, sigdigits = 6))
 end
 
+#-------------------------------------------------------------------------------
+#Parameters
+
 function Base.show(io::IO, p::Proportion)
         print(io,"  Proportion: ", p.x, "/", p.n)
 end
@@ -142,6 +185,10 @@ function Base.show(io::IO, m::Mean{Nothing})
         print(io,"  Mean(SD): ", m.m, " ± ", m.sd)
 end
 
+
+#-------------------------------------------------------------------------------
+# Hypothesis
+
 function Base.show(io::IO, h::Equality)
         println(io,"Equality")
         println(io,"  H₀: A = B")
@@ -170,6 +217,10 @@ function Base.show(io::IO, e::TaskEstimate)
                 prinln("Group $i: $(ceil(e.est))")
         end
 end
+
+
+#-------------------------------------------------------------------------------
+# Confidence intervals
 
 function Base.show(io::IO, obj::ConfInt)
         print(io, "Estimate: $(obj.estimate) ($(obj.lower) - $(obj.upper))")

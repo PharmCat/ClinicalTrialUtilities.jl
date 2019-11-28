@@ -1,5 +1,54 @@
 #deprecated
 
+function cmh(data::DataFrame; a = :a, b = :b, c = :c, d = :d, alpha = 0.05, type = :diff, method = :default, logscale = false)::ConfInt
+    n1 = data[:, a] + data[:, b]
+    n2 = data[:, c] + data[:, d]
+    N  = data[:, a] + data[:, b] + data[:, c] + data[:, d]
+    z = quantile(ZDIST, 1 - alpha/2)
+    if type == :diff
+        if method == :default method = :sato end #default method
+
+        est = sum(data[:, a] .* (n2 ./ N) - data[:, c] .* (n1 ./ N)) / sum(n1 .* (n2 ./ N))
+        #1
+        if method == :sato
+            se   = sqrt((est * (sum(data[:, c] .* (n1 ./ N) .^ 2 - data[:, a] .* (n2 ./ N) .^2 + (n1 ./ N) .* (n2 ./ N) .* (n2-n1) ./ 2)) + sum(data[:, a] .* (n2 - data[:, c]) ./ N + data[:, c] .* (n1 - data[:, a]) ./ N)/2) / sum(n1 .* (n2 ./ N)) .^ 2) # equation in: Sato, Greenland, & Robins (1989)
+        #2
+        elseif method == :gr
+            se   = sqrt(sum(((data[:, a] ./N .^2) .* data[:, b] .* (n2 .^2 ./ n1) + (data[:, c] ./N .^2) .* data[:, d] .* (n1 .^2 ./ n2))) / sum(n1 .*(n2 ./ N))^2) # equation in: Greenland & Robins (1985)
+        end
+        #zval = est/se
+        #pval = 2*(1-cdf(Normal(), abs(zval)))
+        return ConfInt(est - z*se, est + z*se, est, alpha)
+    elseif type == :or
+        #...
+        Pi = (data[:, a] ./ N) + (data[:, d] ./ N)
+        Qi = (data[:, b] ./ N) + (data[:, c] ./ N)
+        Ri = (data[:, a] ./ N) .* data[:, d]
+        Si = (data[:, b] ./ N) .* data[:, c]
+        R  = sum(Ri)
+        S  = sum(Si)
+        if R == 0 || S == 0 return ConfInt(NaN, NaN, NaN) end
+
+        est = log(R/S)
+        se  = sqrt(1/2 * (sum(Pi .* Ri)/R^2 + sum(Pi .* Si + Qi .* Ri)/(R*S) + sum(Qi .* Si)/S^2)) # based on Robins et al. (1986)
+        #zval= est / se
+        #pval= 2*(1-cdf(Normal(), abs(zval)))
+        if logscale return ConfInt(est - z*se, est + z*se, est, alpha) else return ConfInt(exp(est - z*se), exp(est + z*se), exp(est), alpha) end
+    elseif type == :rr
+        #...
+        R = sum(data[:, a] .* (n2 ./ N))
+        S = sum(data[:, c] .* (n1 ./ N))
+
+        if sum(data[:, a]) == 0 || sum(data[:, c]) == 0 return ConfInt(NaN, NaN, NaN) end
+
+        est = log(R/S)
+        se  = sqrt(sum(((n1 ./ N) .* (n2 ./ N) .* (data[:, a] + data[:, c]) - (data[:, a] ./ N) .* data[:, c])) / (R*S))
+        #zval= est / se
+        #pval= 2*(1-cdf(Normal(), abs(zval)))
+        if logscale return ConfInt(est - z*se, est + z*se, est, alpha) else return ConfInt(exp(est - z*se), exp(est + z*se), exp(est), alpha) end
+    end
+end
+
 function powertostint(α::Real,  θ₁::Real, θ₂::Real, δ::Real, σ::Real, n::Int, design::Symbol, method::Symbol)::Float64
     d     = Design(design) #dffunc if generic funtion with 1 arg return df
     df    = d.df(n)

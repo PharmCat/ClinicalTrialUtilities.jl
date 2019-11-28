@@ -33,6 +33,7 @@ end
 @inline function cvfromsd(σ::Real)::Float64
     return sqrt(exp(σ^2)-1)
 end
+
 """
     cvfromci(;alpha = 0.05, theta1 = 0.8, theta2 = 1.25, n, design=:d2x2, mso=false, cvms=false)::Union{Float64, Tuple{Float64, Float64}}
 
@@ -70,6 +71,7 @@ Calculate CV and MS
 - false(default)
 - true
 """
+
 function cvfromci(;alpha = 0.05, theta1 = 0.8, theta2 = 1.25, n, design=:d2x2, mso=false, cvms=false)::Union{Float64, Tuple{Float64, Float64}}
     d     = Design(design)
     df    = d.df(n)
@@ -82,6 +84,7 @@ function cvfromci(;alpha = 0.05, theta1 = 0.8, theta2 = 1.25, n, design=:d2x2, m
     if mso return ms end
     return cvfromvar(ms)
 end
+
 """
     pooledcv(data::DataFrame; cv=:cv, df=:df, alpha=0.05, returncv=true)::ConfInt
 
@@ -101,8 +104,6 @@ Pooled CV from multiple sources.
 - false - return var
 
 """
-
-
 function pooledcv(data::DataFrame; cv=:cv, df=:df, alpha=0.05, returncv=true)::ConfInt
     if isa(cv, String)  cv = Symbol(cv) end
     if isa(df, String)  df = Symbol(df) end

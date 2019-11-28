@@ -1,4 +1,3 @@
-## NCA
 
 ### ClinicalTrialUtilities.nca!
 ```@docs
