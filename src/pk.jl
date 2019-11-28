@@ -113,8 +113,9 @@ mutable struct PKPDProfile{T <: AbstractSubject} <: AbstractData
     subject::T
     method
     result::Dict
+    sort::Dict
     function PKPDProfile(subject::T, result; method = nothing) where T <: AbstractSubject
-        new{T}(subject, method, result)
+        new{T}(subject, method, result, subject.sort)
     end
 end
 
@@ -1019,11 +1020,11 @@ Make datafrafe from PK/PD DataSet.
 
 unst | us - unstack data;
 """
-function DataFrames.DataFrame(data::DataSet{PKPDProfile}; unst = false, us = false)
+function DataFrames.DataFrame(data::DataSet{T}; unst = false, us = false) where T
         d = DataFrame(id = Int[], sortvar = Symbol[], sortval = Any[])
         for i = 1:length(data)
-            if length(data[i].subject.sort) > 0
-                for s in data[i].subject.sort
+            if length(data[i].sort) > 0
+                for s in data[i].sort
                     push!(d, [i, s[1], s[2]])
                 end
             end
