@@ -238,6 +238,11 @@ println(" ---------------------------------- ")
     @test ClinicalTrialUtilities.besamplen(t.task).result == 106
     Base.show(io, t)
     #@test n == 106 && p ≈ 0.9013894463164578
+
+    #CHECK with R
+    t = ClinicalTrialUtilities.besamplen(;cv=0.35, design=:d4x4)
+    @test ClinicalTrialUtilities.besamplen(t.task).result == 52
+    Base.show(io, t)
 end
 
 println(" ---------------------------------- ")
@@ -464,6 +469,9 @@ println(" ---------------------------------- ")
     pk   = ClinicalTrialUtilities.nca!(pkds)
     df   = ClinicalTrialUtilities.DataFrame(pk; unst = true)
     ds   = ClinicalTrialUtilities.descriptive(df, stats = :all, sort = [:Formulation])
+    Base.show(io, pkds)
+    Base.show(io, pk)
+    Base.show(io, ds)
 
 
     @test ds[5, :mean] ≈ 7431.283916666667
@@ -477,6 +485,15 @@ println(" ---------------------------------- ")
     @test ds[2, :mean] ≈ 7431.283916666667
 
 
+end
+
+println(" ---------------------------------- ")
+@testset "  HTML export           " begin
+
+    pkds = ClinicalTrialUtilities.pkimport(pkdata2, [:Subject, :Formulation]; time = :Time, conc = :Concentration)
+    pk   = ClinicalTrialUtilities.nca!(pkds)
+    df   = ClinicalTrialUtilities.DataFrame(pk; unst = true)
+    ClinicalTrialUtilities.htmlexport(df; io = io, sort = :Subject, rspan=:all, title = "PK Parameters", dict = :pk)
 end
 
 println(" ---------------------------------- ")

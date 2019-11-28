@@ -3,7 +3,7 @@
 
 abstract type AbstractSubject <: AbstractData end
 #!!!
-function in(a::AbstractDict, b::AbstractDict)
+function in(a::Dict, b::Dict)
     k = collect(keys(a))
     if any(x -> x  ∉  collect(keys(b)), k) return false end
     for i = 1:length(a)

@@ -9,6 +9,32 @@
 # DescTools https://CRAN.R-project.org/package=DescTools
 # metafor by Wolfgang Viechtbauer https://cran.r-project.org/package=metafor
 
+struct ConfInt
+    lower::Float64
+    upper::Float64
+    estimate::Float64
+    alpha::Float64
+    function ConfInt(lower, upper, estimate)
+        new(lower, upper, estimate, NaN)::ConfInt
+    end
+    function ConfInt(lower, upper, estimate, alpha)
+        new(lower, upper, estimate, alpha)::ConfInt
+    end
+end
+
+function getindex(a::ConfInt, b::Int)
+    if b == 1
+        return a.lower
+    elseif b == 2
+        return a.upper
+    elseif b == 3
+        return a.estimate
+    else
+        throw(ArgumentError("Index should be in 1:3"))
+    end
+end
+
+
 """
     StatsBase.confint(param::Proportion; level = 0.95, method = :default)::ConfInt
 

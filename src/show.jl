@@ -2,7 +2,7 @@
 #Task
 function Base.show(io::IO, obj::CTask)
         println(io, obj.param)
-        println(io, "  $(obj.design)")
+        println(io, "  Design: $(obj.design)")
         println(io, "  Alpha: $(obj.alpha)")
         println(io, "  Hypothesis: $(obj.hyp)")
         println(io, "  K: $(obj.k)")
@@ -12,29 +12,36 @@ end
 #-------------------------------------------------------------------------------
 #Designs
 function Base.show(io::IO, obj::Crossover{:d2x2})
-        print(io, "2x2 Design")
+        print(io, "2x2")
 end
 function Base.show(io::IO, obj::Crossover{:d2x2x3})
-        print(io, "2x2x3 Design")
+        print(io, "2x2x3")
 end
 function Base.show(io::IO, obj::Crossover{:d2x2x4})
-        print(io, "2x2x4 Design")
+        print(io, "2x2x4")
 end
 function Base.show(io::IO, obj::Crossover{:d2x4x4})
-        print(io, "2x4x4 Design")
+        print(io, "2x4x4")
 end
 function Base.show(io::IO, obj::Crossover{:d2x3x3})
-        print(io, "2x3x3 Design")
+        print(io, "2x3x3")
 end
 function Base.show(io::IO, obj::Crossover{:d3x3})
-        print(io, "3x3 Design")
+        print(io, "3x3")
 end
 function Base.show(io::IO, obj::Crossover{:d4x4})
-        print(io, "4x4 Design")
+        print(io, "4x4")
 end
 function Base.show(io::IO, obj::Crossover{:d3x6x3})
-        print(io, "3x6x3 Design")
+        print(io, "3x6x3")
 end
+function Base.show(io::IO, obj::Parallel)
+        print(io, "Parallel")
+end
+function Base.show(io::IO, obj::OneGroup)
+        print(io, "OneGroup")
+end
+
 
 #-------------------------------------------------------------------------------
 # Objectives
@@ -53,7 +60,7 @@ function Base.show(io::IO, obj::TaskResult{CT}) where CT <:  CTask{T, D, H, O} w
         println(io, objectivename(obj.task.objective))
         println(io,"-----------------------------------------")
         println(io,"  Parameter type: ",  paramname(obj.task.param))
-        println(io,"  Design: ",  designinfo(obj.task.design))
+        println(io,"  Design: $(obj.task.design)")
         println(io,"  Hypothesis: ", obj.task.hyp)
         #println(io,"  Lower limit: ", round(obj.task.llim, sigdigits = 4))
         #println(io,"  Upper limit: ", round(obj.task.ulim, sigdigits = 4))
@@ -114,15 +121,6 @@ function groupnum(p::T)::String where T <: AbstractParameter
         else
                 return "Two"
         end
-end
-function designinfo(d::OneGroup)::String
-        return "One group design"
-end
-function designinfo(d::Parallel)::String
-        return "Two parallel groups design"
-end
-function designinfo(d::Crossover)::String
-        return "Crossover design"
 end
 
 function showresult(io, obj::TaskResult{CT}) where CT <:  CTask{T, D, H, O} where T where D <: OneGroup where H where O <: SampleSize

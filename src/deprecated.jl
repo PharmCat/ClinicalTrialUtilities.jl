@@ -1,5 +1,15 @@
 #deprecated
 
+function designinfo(d::OneGroup)::String
+        return "One group design"
+end
+function designinfo(d::Parallel)::String
+        return "Two parallel groups design"
+end
+function designinfo(d::Crossover)::String
+        return "Crossover design"
+end
+
 function cmh(data::DataFrame; a = :a, b = :b, c = :c, d = :d, alpha = 0.05, type = :diff, method = :default, logscale = false)::ConfInt
     n1 = data[:, a] + data[:, b]
     n2 = data[:, c] + data[:, d]
