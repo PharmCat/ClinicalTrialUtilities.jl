@@ -49,7 +49,7 @@ Mee RW (1984) Confidence bounds for the difference between two probabilities,Bio
 
 Rothman, K. J., Greenland, S., & Lash, T. L. (2008). Modern epidemiology (3rd ed.). Philadelphia: Lippincott Williams & Wilkins.
 
-## Interesting R packages
+## R packages
 
 PowerTOST by by Detlew Labes, Helmut Schuetz, Benjamin Lang  https://cran.r-project.org/web/packages/PowerTOST/
 

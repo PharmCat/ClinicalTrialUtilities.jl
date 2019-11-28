@@ -56,12 +56,16 @@ function Base.length(data::DataSet{T}) where T <: AbstractData
     return length(data.data)
 end
 """
-descriptive(data::DataFrame;
-    sort::Union{Symbol, Array{T,1}} = Array{Symbol,1}(undef,0),
-    vars = [],
-    stats::Union{Symbol, Array{T,1}, Tuple{Vararg{Symbol}}} = :default)::DataSet{Descriptive} where T <: Union{Symbol, String}
+    descriptive(data::DataFrame;
+        sort::Union{Symbol, Array{T,1}} = Array{Symbol,1}(undef,0),
+        vars = [],
+        stats::Union{Symbol, Array{T,1}, Tuple{Vararg{Symbol}}} = :default)::DataSet{Descriptive} where T <: Union{Symbol, String}
 
 Descriptive statistics.
+
+- ``sort`` sorting columns
+- ``vars`` variabels
+- ``stats`` statistics
 """
 function descriptive(data::DataFrame;
     sort::Union{Symbol, Array{T,1}} = Array{Symbol,1}(undef,0),

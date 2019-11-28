@@ -614,7 +614,8 @@ function nca!(data::PKSubject; calcm = :lint, intp = :lint, verbose = false, io:
         return PKPDProfile(data, result; method = calcm)
     end
 """
-    nca!(data::DataSet{PKSubject}; calcm = :lint, intp = :lint, verbose = false, io::IO = stdout)
+    nca!(data::DataSet{PKSubject}; calcm = :lint, intp = :lint,
+        verbose = false, io::IO = stdout)
 
 Pharmacokinetics non-compartment analysis for PK subjects set.
 
@@ -808,7 +809,8 @@ function pkimport(data::DataFrame; time::Symbol, conc::Symbol)
 end
     #---------------------------------------------------------------------------
 """
-    pdimport(data::DataFrame, sort::Array; resp::Symbol, time::Symbol, bl::Real = 0, th::Real = NaN)
+    pdimport(data::DataFrame, sort::Array; resp::Symbol, time::Symbol,
+        bl::Real = 0, th::Real = NaN)
 
 Pharmacodynamics data import from DataFrame.
 

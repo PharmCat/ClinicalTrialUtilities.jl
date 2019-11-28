@@ -53,7 +53,8 @@ function randomseq(;blocksize::Int = 4, subject = 10, group = 2, ratio = [1,1], 
 end
 
 """
-    randomtable(;blocksize = 4, subject = 10, group = 2, ratio = [1,1], grseq = [["A", "B"], ["B", "A"]], seed = 0)
+    randomtable(;blocksize = 4, subject = 10, group = 2,
+        ratio = [1,1], grseq = ["AB", "BA"], seed = 0)
 
 Randomization table generaton.
 

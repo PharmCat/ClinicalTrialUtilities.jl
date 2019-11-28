@@ -236,7 +236,10 @@ end
 #-------------------------------------------------------------------------------
 #main sample size function
 """
-    ctsamplen(;param::Symbol, type::Symbol, group::Symbol = :notdef, alpha::Real = 0.05, beta::Real = 0.2, diff::Real = 0, sd::Real = 0, a::Real = 0, b::Real = 0, k::Real = 1, logscale::Bool = true)::TaskResult
+    ctsamplen(;param::Symbol, type::Symbol, group::Symbol = :notdef,
+        alpha::Real = 0.05, beta::Real = 0.2, diff::Real = 0, sd::Real = 0,
+        a::Real = 0, b::Real = 0,
+        k::Real = 1, logscale::Bool = true)::TaskResult
 
 Clinical trial sample size estimation.
 
@@ -412,7 +415,10 @@ end
 #-------------------------------------------------------------------------------
 #clinical trial power main function
 """
-    function ctpower(;param::Symbol, type::Symbol, group::Symbol = :notdef, alpha::Real = 0.05, n::Real = 0, diff::Real = 0, sd::Real = 0, a::Real = 0, b::Real = 0,  k::Real = 1, logscale::Bool = true)::TaskResult
+    function ctpower(;param::Symbol, type::Symbol, group::Symbol = :notdef,
+        alpha::Real = 0.05, n::Real = 0, diff::Real = 0, sd::Real = 0,
+        a::Real = 0, b::Real = 0,
+        k::Real = 1, logscale::Bool = true)::TaskResult
 
 Clinical trial power estimation.
 
@@ -587,7 +593,10 @@ end
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
 """
-    besamplen(;alpha::Real=0.05, beta::Real=0.2, theta0::Real=0.95, theta1::Real=0.8, theta2::Real=1.25, cv::Real=0.0, sd::Real=0.0, design::Symbol=:d2x2, method::Symbol=:owenq, logscale::Bool=true)::TaskResult
+    besamplen(;alpha::Real=0.05, beta::Real=0.2,
+        theta0::Real=0.95, theta1::Real=0.8, theta2::Real=1.25,
+        cv::Real=0.0, sd::Real=0.0, design::Symbol=:d2x2,
+        method::Symbol=:owenq, logscale::Bool=true)::TaskResult
 
 Bioequivalence sample size estimation.
 
@@ -661,7 +670,9 @@ end
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
 """
-    bepower(;alpha::Real=0.05, theta1::Real=0.8, theta2::Real=1.25, theta0::Real=0.95, cv::Real=0.0, sd::Real=0.0, n::Int=0, design::Symbol=:d2x2, method::Symbol=:owenq, logscale::Bool=true)::TaskResult
+    bepower(;alpha::Real=0.05, theta1::Real=0.8, theta2::Real=1.25, theta0::Real=0.95,
+        cv::Real=0.0, sd::Real=0.0, n::Int=0,
+        design::Symbol=:d2x2, method::Symbol=:owenq, logscale::Bool=true)::TaskResult
 
 Bioequivalence power estimation.
 
