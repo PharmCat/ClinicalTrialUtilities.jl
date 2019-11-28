@@ -37,16 +37,16 @@ struct OneGroup <: AbstractDesign
         new(x -> x - 1, 1, 1)::OneGroup
     end
 end
-struct Crossover <: AbstractDesign
+struct Crossover{Symbol} <: AbstractDesign
     df::Function
     bkni::Real
     sq::Int
-    type::Symbol
+    type
     function Crossover(type::Symbol)
         return Design(type)
     end
-    function Crossover(df::Function, bkni::Real, sq::Int, type::Symbol)
-        new(df, bkni, sq, type)::Crossover
+    function Crossover(df::Function, bkni::Real, sq::Int, t::Symbol)
+        new{t}(df, bkni, sq, t)
     end
 end
 

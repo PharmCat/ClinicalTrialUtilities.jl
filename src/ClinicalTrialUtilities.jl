@@ -95,6 +95,8 @@ include("show.jl")
 const CTU = ClinicalTrialUtilities
 #Types
 export CTU, ConfInt,
+#Task
+CTask,
 #Sample size
 ctsamplen,
 besamplen,
@@ -123,6 +125,7 @@ orcmhci,
 rrcmhci,
 #Randomization
 randomtable,
+randomseq,
 #Pharmacokinetics
 nca!,
 pkimport,

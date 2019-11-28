@@ -29,6 +29,15 @@ ClinicalTrialUtilities.meanci
 ClinicalTrialUtilities.diffmeanci
 ```
 
+## Cochran–Mantel–Haenszel confidence intervals
+
+Table cell map:
+
+|         | outcome 1 | outcome 2 |
+|---------|-----------|-----------|
+| group 1 |     a     |     b     |
+| group 2 |     c     |     d     |
+
 ### ClinicalTrialUtilities.diffcmhci
 ```@docs
 ClinicalTrialUtilities.diffcmhci
