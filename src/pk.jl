@@ -3,7 +3,7 @@
 
 abstract type AbstractSubject <: AbstractData end
 #!!!
-function in(a::AbstractDict, b::AbstractDict)
+function in(a::Dict, b::Dict)
     k = collect(keys(a))
     if any(x -> x  ∉  collect(keys(b)), k) return false end
     for i = 1:length(a)
@@ -28,7 +28,7 @@ struct KelData <: AbstractData
         new(s, e, a, b, r, ar)::KelData
     end
     function KelData()::KelData
-        new(Int[], Int[], Float64[], Float64[], Float64[], Float64[])::KelData
+        new(Int[], Int[], Real[], Real[], Real[], Real[])::KelData
     end
 end
 function Base.push!(keldata::KelData, s, e, a, b, r, ar)
@@ -43,12 +43,18 @@ end
 mutable struct ElimRange
     kelstart::Int
     kelend::Int
-    kelexcl::Array{Int, 1}
-    function ElimRange(kelstart, kelend, kelexcl)
+    kelexcl::Vector{Int}
+    function ElimRange(kelstart::Int, kelend::Int, kelexcl::Vector{Int})::ElimRange
+        if kelstart < 0 throw(ArgumentError("Kel start point < 0")) end
+        if kelend   < 0 throw(ArgumentError("Kel endpoint < 0")) end
+        if any(x -> x < 0, kelexcl) throw(ArgumentError("Exclude point < 0")) end
         new(kelstart, kelend, kelexcl)::ElimRange
     end
+    function ElimRange(kelstart::Int, kelend::Int)
+        ElimRange(kelstart, kelend, Vector{Int}(undef, 0))
+    end
     function ElimRange()
-        new(0, 0, Array{Int, 1}(undef, 0))::ElimRange
+        ElimRange(0, 0, Vector{Int}(undef, 0))
     end
 end
 
@@ -113,15 +119,16 @@ mutable struct PKPDProfile{T <: AbstractSubject} <: AbstractData
     subject::T
     method
     result::Dict
+    sort::Dict
     function PKPDProfile(subject::T, result; method = nothing) where T <: AbstractSubject
-        new{T}(subject, method, result)
+        new{T}(subject, method, result, subject.sort)
     end
 end
 
 struct LimitRule
-    lloq::Float64
-    btmax::Float64
-    atmax::Float64
+    lloq::Real
+    btmax::Real
+    atmax::Real
     function LimitRule(lloq, btmax, atmax)
         new(lloq, btmax, atmax)::LimitRule
     end
@@ -133,14 +140,6 @@ end
 function Base.getindex(a::PKPDProfile{T}, s::Symbol)::Real where T <: AbstractSubject
     return a.result[s]
 end
-#=
-function Base.getindex(a::DataSet{PKPDProfile{T}}, i::Int) where T <: AbstractSubject
-    return a.data[i]
-end
-function Base.getindex(a::DataSet{PKPDProfile{T}}, i::Int, s::Symbol)::Real where T <: AbstractSubject
-    return a.data[i].result[s]
-end
-=#
 function Base.getindex(a::DataSet{PKPDProfile}, i::Int)
     return a.data[i]
 end
@@ -570,16 +569,18 @@ function nca!(data::PKSubject; calcm = :lint, intp = :lint, verbose = false, io:
         if  length(keldata) > 0
             result[:Rsq], result[:Rsqn] = findmax(keldata.ar)
             data.kelrange.kelstart   = keldata.s[result[:Rsqn]]
+            result[:Kelstart]        = data.kelrange.kelstart
             data.kelrange.kelend     = keldata.e[result[:Rsqn]]
-            data.keldata        = keldata
-            result[:ARsq]       = keldata.ar[result[:Rsqn]]
-            result[:Kel]        = abs(keldata.a[result[:Rsqn]])
-            result[:LZ]         = keldata.a[result[:Rsqn]]
-            result[:LZint]      = keldata.b[result[:Rsqn]]
-            result[:Clast_pred] = exp(result[:LZint] + result[:LZ]*result[:Tlast])
-            result[:HL]         = LOG2 / result[:Kel]
-            result[:AUCinf]     = result[:AUClast] + result[:Clast] / result[:Kel]
-            result[:AUCpct]     = (result[:AUCinf] - result[:AUClast]) / result[:AUCinf] * 100.0
+            result[:Kelend]          = data.kelrange.kelend
+            data.keldata             = keldata
+            result[:ARsq]            = keldata.ar[result[:Rsqn]]
+            result[:Kel]             = abs(keldata.a[result[:Rsqn]])
+            result[:LZ]              = keldata.a[result[:Rsqn]]
+            result[:LZint]           = keldata.b[result[:Rsqn]]
+            result[:Clast_pred]      = exp(result[:LZint] + result[:LZ]*result[:Tlast])
+            result[:HL]              = LOG2 / result[:Kel]
+            result[:AUCinf]          = result[:AUClast] + result[:Clast] / result[:Kel]
+            result[:AUCpct]          = (result[:AUCinf] - result[:AUClast]) / result[:AUCinf] * 100.0
         end
         #-----------------------------------------------------------------------
         #Steady-state
@@ -614,7 +615,9 @@ function nca!(data::PKSubject; calcm = :lint, intp = :lint, verbose = false, io:
         return PKPDProfile(data, result; method = calcm)
     end
 """
-    nca!(data::DataSet{PKSubject}; calcm = :lint, intp = :lint, verbose = false, io::IO = stdout)
+    nca!(data::DataSet{PKSubject}; calcm = :lint, intp = :lint,
+        verbose = false, io::IO = stdout)
+
 
 Pharmacokinetics non-compartment analysis for PK subjects set.
 
@@ -639,7 +642,8 @@ io - out stream (stdout by default)
 function nca!(data::DataSet{PKSubject}; calcm = :lint, intp = :lint, verbose = false, io::IO = stdout)
         results = Array{PKPDProfile, 1}(undef, 0)
         for i = 1:length(data.data)
-            push!(results, nca!(data.data[i]; calcm = calcm, intp = intp, verbose = verbose))
+            push!(results, nca!(data.data[i]; calcm = calcm, intp = intp, verbose = verbose, io = io))
+
         end
         return DataSet(results)
 end
@@ -808,7 +812,8 @@ function pkimport(data::DataFrame; time::Symbol, conc::Symbol)
 end
     #---------------------------------------------------------------------------
 """
-    pdimport(data::DataFrame, sort::Array; resp::Symbol, time::Symbol, bl::Real = 0, th::Real = NaN)
+    pdimport(data::DataFrame, sort::Array; resp::Symbol, time::Symbol,
+        bl::Real = 0, th::Real = NaN)
 
 Pharmacodynamics data import from DataFrame.
 
@@ -824,7 +829,7 @@ function pdimport(data::DataFrame, sort::Array; resp::Symbol, time::Symbol, bl::
         sortlist = unique(data[:, sort])
         results  = Array{PDSubject, 1}(undef, 0)
         for i = 1:size(sortlist, 1) #For each line in sortlist
-            datai = DataFrame(Time = Float64[], Resp = Float64[])
+            datai = DataFrame(Time = Real[], Resp = Real[])
             for c = 1:size(data, 1) #For each line in data
                 if data[c, sort] == sortlist[i,:]
                     push!(datai, [data[c, time], data[c, resp]])
@@ -866,26 +871,56 @@ data - PK subject;
 range - ElimRange object.
 """
 function setelimrange!(data::PKSubject, range::ElimRange)
+        if range.kelend > length(data) throw(ArgumentError("Kel endpoint out of range")) end
         data.kelrange = range
 end
 
 function setelimrange!(data::DataSet{PKSubject}, range::ElimRange)
         for i = 1:length(data)
-            data[i].kelrange = range
+            setelimrange!(data[i], range)
         end
         data
 end
 function setelimrange!(data::DataSet{PKSubject}, range::ElimRange, subj::Array{Int,1})
-        for i = 1:length(data)
-            if i ∈ subj data[i].kelrange = range end
+        for i in subj
+            setelimrange!(data[i], range)
         end
         data
 end
 function setelimrange!(data::DataSet{PKSubject}, range::ElimRange, subj::Int)
-        data[subj].kelrange = range
+        setelimrange!(data[subj], range)
         data
 end
-    #---------------------------------------------------------------------------
+#-------------------------------------------------------------------------------
+"""
+    setkelauto!(data::PKSubject, kelauto::Bool)
+
+Set range for elimination parameters calculation for subject.
+
+data     - PK subject;
+kelauto  - value.
+"""
+function setkelauto!(data::PKSubject, kelauto::Bool)
+        data.kelauto = kelauto
+end
+
+function setkelauto!(data::DataSet{PKSubject}, kelauto::Bool)
+        for i = 1:length(data)
+            setkelauto!(data[i], kelauto)
+        end
+        data
+end
+function setkelauto!(data::DataSet{PKSubject}, kelauto::Bool, subj::Array{Int,1})
+        for i in subj
+            setkelauto!(data[i], kelauto)
+        end
+        data
+end
+function setkelauto!(data::DataSet{PKSubject}, kelauto::Bool, subj::Int)
+        setkelauto!(data[subj], kelauto)
+        data
+end
+#-------------------------------------------------------------------------------
 """
     applyelimrange!(data::PKPDProfile{PKSubject}, range::ElimRange)
 
@@ -933,21 +968,21 @@ data - PK subject;
 dosetime - DoseTime object.
 """
 function setdosetime!(data::PKSubject, dosetime::DoseTime)
-        data.dosetime = dosetime
-        data
+    data.dosetime = dosetime
+    data
 end
-    function setdosetime!(data::DataSet{PKSubject}, dosetime::DoseTime)
-        for i = 1:length(data)
-            data[i].dosetime = dosetime
-        end
-        data
+function setdosetime!(data::DataSet{PKSubject}, dosetime::DoseTime)
+    for i = 1:length(data)
+        setdosetime!(data[i], dosetime)
     end
-    function setdosetime!(data::DataSet{PKSubject}, dosetime::DoseTime, sort::Dict)
-        for i = 1:length(data)
-            if sort ∈ data[i].sort data[i].dosetime = dosetime end
-        end
-        data
+    data
+end
+function setdosetime!(data::DataSet{PKSubject}, dosetime::DoseTime, sort::Dict)
+    for i = 1:length(data)
+        if sort ∈ data[i].sort setdosetime!(data[i], dosetime) end
     end
+    data
+end
 """
     setth!(data::PDSubject, th::Real)
 
@@ -960,18 +995,18 @@ function setth!(data::PDSubject, th::Real)
         data.th = th
         data
 end
-    function setth!(data::DataSet{PDSubject}, th::Real)
-        for i = 1:length(data)
-            data[i].th = th
-        end
-        data
+function setth!(data::DataSet{PDSubject}, th::Real)
+    for i = 1:length(data)
+        setth!(data[i], th)
     end
-    function setth!(data::DataSet{PDSubject}, th::Real, sort::Dict)
-        for i = 1:length(data)
-            if sort ∈ data[i].sort data[i].th = th end
-        end
-        data
+    data
+end
+function setth!(data::DataSet{PDSubject}, th::Real, sort::Dict)
+    for i = 1:length(data)
+        if sort ∈ data[i].sort setth!(data[i], th) end
     end
+    data
+end
 
 """
     setbl!(data::PDSubject, bl::Real)
@@ -985,18 +1020,18 @@ function setbl!(data::PDSubject, bl::Real)
     data.bl = bl
     data
 end
-    function setbl!(data::DataSet{PDSubject}, bl::Real)
-        for i = 1:length(data)
-            data[i].bl = bl
-        end
-        data
+function setbl!(data::DataSet{PDSubject}, bl::Real)
+    for i = 1:length(data)
+        setbl!(data[i], bl)
     end
-    function setbl!(data::DataSet{PDSubject}, bl::Real, sort::Dict)
-        for i = 1:length(data)
-            if sort ∈ data[i].sort data[i].bl = bl end
-        end
-        data
+    data
+end
+function setbl!(data::DataSet{PDSubject}, bl::Real, sort::Dict)
+    for i = 1:length(data)
+        if sort ∈ data[i].sort setbl!(data[i], bl) end
     end
+    data
+end
 #-------------------------------------------------------------------------------
 """
     keldata(data::PKPDProfile{PKSubject})
@@ -1017,11 +1052,11 @@ Make datafrafe from PK/PD DataSet.
 
 unst | us - unstack data;
 """
-function DataFrames.DataFrame(data::DataSet{PKPDProfile}; unst = false, us = false)
+function DataFrames.DataFrame(data::DataSet{T}; unst = false, us = false) where T
         d = DataFrame(id = Int[], sortvar = Symbol[], sortval = Any[])
         for i = 1:length(data)
-            if length(data[i].subject.sort) > 0
-                for s in data[i].subject.sort
+            if length(data[i].sort) > 0
+                for s in data[i].sort
                     push!(d, [i, s[1], s[2]])
                 end
             end

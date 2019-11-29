@@ -220,7 +220,38 @@ println(" ---------------------------------- ")
     24849.129
     7940.0834], sigdigits = 6)
 
+    pk   = ClinicalTrialUtilities.nca!(pkds, calcm = :luldt, io = io, verbose = true)
+    df   = DataFrame(pk; unst = true)
+    sort!(df, :Subject)
 
+    @test round.(df[!, :AUClast], sigdigits = 6) == round.([9573.810558691312
+    10054.286478059563
+    5392.457219413793
+    9297.096334450325
+    9519.181808199797
+    6948.985621117448
+    6988.960344867885
+    7073.306755718137
+    8303.373085532965
+    5486.838889441992], sigdigits = 6)
+    #---------------------------------------------------------------------------
+    # Elimination range check
+    ClinicalTrialUtilities.setkelauto!(pkds, false)
+    ClinicalTrialUtilities.setelimrange!(pkds, ClinicalTrialUtilities.ElimRange(11, 15))
+    pk   = ClinicalTrialUtilities.nca!(pkds)
+    df   = DataFrame(pk; unst = true)
+    sort!(df, :Subject)
+
+    @test round.(df[!, :AUCinf], sigdigits = 6) == round.([655061.1994219155
+    15395.482644599213
+    22227.779049490928
+    53919.75612131339
+    21428.55291240885
+    21778.845190342177
+    15100.132319764292
+    25511.20156654014
+    27923.624963124363
+    7386.834076155846], sigdigits = 6)
 
     # glucose2
 

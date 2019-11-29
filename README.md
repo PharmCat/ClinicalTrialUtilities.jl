@@ -28,78 +28,7 @@ using Pkg; Pkg.add("ClinicalTrialUtilities");
 - :ei - Equivalencens: two one-sided hypothesis;
 - :ns - Non-Inferiority / Superiority: one-sided hypothesis, for some cases you should use two-sided hypothesis for  Non-Inferiority/Superiority, you can use alpha/2 for this;
 
-### <a name="descriptives">descriptives</a>
 
-Descriptive statistics.
-
-```
-descriptives(data::DataFrame; sort = NaN, vars = NaN, stats = [:n, :mean, :sd, :sem, :uq, :median, :lq])::DataFrame
-```
-
-
-
-### <a name="ci2cv">ci2cv</a>
-
-Take CV from known CI and subject number.
-
-```
-cvfromci(;alpha = 0.05, theta1 = 0.8, theta2 = 1.25, n, design=:d2x2, mso=false, cvms=false)
-```
-
-**alpha** - Alpha (o < alpha < 1)  (default=0.05);
-
-**beta** - Beta (o < beta < 1) (default=0.2); power = 1 - beta;
-
-**theta1** - Lower Level (default=0.8);
-
-**theta2** - Upper level (default=1.25);
-
-**n** - subject n;
-
-**design** - trial design;
-- :parallel
-- :d2x2 (default)
-- :d2x2x4
-- :d2x4x4
-- :d2x3x3
-- :d2x4x2
-- :d3x3
-- :d3x6x3
-
-**mso**
-
-Calculate MS only
-- false(default)
-- true
-
-**cvms**
-
-Calculate CV and MS
-- false(default)
-- true
-
-### <a name="pooledCV">pooledCV</a>
-
-Get pooled CV from multiple sources.
-
-```
-pooledcv(data::DataFrame; cv=:cv, df=:df, alpha=0.05, returncv=true)::ConfInt
-```
-
-**data**::DataFrame - Dataframe with CV data
-
-**cv**::Symbol - CV column in dataframe
-
-**df**::Symbol - DF column in dataframe
-
-**alpha** - Alpha for var/cv confidence interval.
-
-**returncv** - Return CV or var:
-
-- true  - return cv
-- false - return var
-
-#
 ### <a name="Examples">Examples</a>
 
 ```
@@ -147,10 +76,10 @@ pooledcv(data; cv=:cv, df=:df, alpha=0.05, returncv=true)
 ```
 
 
- ### <a name="Copyrights">Copyrights</a>
+### <a name="Copyrights">Copyrights</a>
 
- Clinical Trial Utilities
+Clinical Trial Utilities
 
- Copyright © 2019 Vladimir Arnautov aka PharmCat (mail@pharmcat.net)
+Copyright © 2019 Vladimir Arnautov aka PharmCat (mail@pharmcat.net)
 
- If you want to check and get R code for power/sample size estimation, you can find examples here: http://powerandsamplesize.com/Calculators/
+If you want to check and get R code for power/sample size estimation, you can find examples here: http://powerandsamplesize.com/Calculators/

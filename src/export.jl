@@ -1,5 +1,6 @@
 """
-    htmlexport(data::DataFrame; io::IO = stdout; sort = NaN, rspan=:all, title="Title", dict::Union{Symbol, Dict} = :undef)
+    htmlexport(data::DataFrame; io::IO = stdout, sort = NaN,
+        rspan=:all, title="Title", dict::Union{Symbol, Dict} = :undef)
 
 HTLM export for DataFrame.
 """

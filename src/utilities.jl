@@ -35,7 +35,8 @@ end
 end
 
 """
-    cvfromci(;alpha = 0.05, theta1 = 0.8, theta2 = 1.25, n, design=:d2x2, mso=false, cvms=false)::Union{Float64, Tuple{Float64, Float64}}
+    cvfromci(;alpha = 0.05, theta1 = 0.8, theta2 = 1.25, n, design=:d2x2,
+        mso=false, cvms=false)::Union{Float64, Tuple{Float64, Float64}}
 
 CV from bioequivalence confidence inerval.
 

@@ -8,8 +8,7 @@ struct Descriptive <: AbstractData
     var::Union{Symbol, Nothing}
     varname::Union{String, Nothing}
     sort::Dict
-    #data::NamedTuple{}
-    data::NamedTuple{S,T} where S where T <: Tuple{Vararg{Number}}
+    result::Dict
 end
 function Base.show(io::IO, obj::Descriptive)
     println(io, "Descriptive statistics")
@@ -17,13 +16,13 @@ function Base.show(io::IO, obj::Descriptive)
     if obj.varname !== nothing println(io, "(", obj.varname,")") else println(io, "") end
     if obj.sort !== nothing println(io, "Group: ", obj.sort) end
     maxcol = 0
-    for k in keys(obj.data)
+    for k in keys(obj.result)
         if length(string(k)) > maxcol maxcol = length(string(k)) end
     end
-    for k in keys(obj.data)
+    for k in keys(obj.result)
         spv = Vector{Char}(undef, maxcol-length(string(k)))
         spv .= ' '
-        val = obj.data[k]
+        val = obj.result[k]
         if typeof(val) <: AbstractFloat val = round(val; digits = 8) end
         val =  string(val)
         println(io, string(k), String(spv), " | ", val)
@@ -33,7 +32,7 @@ function Base.show(io::IO, obj::Descriptive)
     end
 end
 function Base.getindex(a::Descriptive, s::Symbol)::Real
-    return a.data[s]
+    return a.result[s]
 end
 struct DataSet{T <: AbstractData}
     data::Vector{T}
@@ -50,18 +49,22 @@ function Base.getindex(a::DataSet{Descriptive}, i::Int)::Descriptive
     return a.data[i]
 end
 function Base.getindex(a::DataSet{Descriptive}, i::Int, s::Symbol)::Real
-    return a.data[i].data[s]
+    return a.data[i].result[s]
 end
-function Base.length(data::DataSet{T}) where T <: AbstractData
-    return length(data.data)
+function Base.length(a::DataSet{T}) where T <: AbstractData
+    return length(a.data)
 end
 """
-descriptive(data::DataFrame;
-    sort::Union{Symbol, Array{T,1}} = Array{Symbol,1}(undef,0),
-    vars = [],
-    stats::Union{Symbol, Array{T,1}, Tuple{Vararg{Symbol}}} = :default)::DataSet{Descriptive} where T <: Union{Symbol, String}
+    descriptive(data::DataFrame;
+        sort::Union{Symbol, Array{T,1}} = Array{Symbol,1}(undef,0),
+        vars = [],
+        stats::Union{Symbol, Array{T,1}, Tuple{Vararg{Symbol}}} = :default)::DataSet{Descriptive} where T <: Union{Symbol, String}
 
 Descriptive statistics.
+
+- ``sort`` sorting columns
+- ``vars`` variabels
+- ``stats`` statistics
 """
 function descriptive(data::DataFrame;
     sort::Union{Symbol, Array{T,1}} = Array{Symbol,1}(undef,0),
@@ -96,7 +99,7 @@ function descriptive(data::DataFrame;
         #pushvardescriptive!(d, vars, Matrix(data[:,vars]), Dict(), stats)
         mx = Matrix(data[:,vars])
         for v  = 1:length(vars)  #For each variable in list
-            push!(d, Descriptive(vars[v], nothing, Dict(), NamedTuple{stats}(Tuple(descriptive_(mx[:, v], stats)))))
+            push!(d, Descriptive(vars[v], nothing, Dict(:Variable => v), descriptive_(mx[:, v], stats)))
         end
         return DataSet(d)
     end
@@ -109,7 +112,9 @@ function descriptive(data::DataFrame;
         sortval = Tuple(sortlist[i,:])
         mx = getsortedmatrix(data; datacol=vars, sortcol=sort, sortval=sortval)
         for v  = 1:length(vars)  #For each variable in list
-            push!(d, Descriptive(vars[v], nothing, Dict(sort .=> sortval), NamedTuple{stats}(Tuple(descriptive_(mx[:, v], stats)))))
+            dict = Dict{Symbol, Any}(sort .=> sortval)
+            dict[:Variable]   =  vars[v]
+            push!(d, Descriptive(vars[v], nothing, dict, descriptive_(mx[:, v], stats)))
         end
         #pushvardescriptive!(d, vars, mx, sortval, stats)  #push variable descriprives for mx
     end
@@ -117,7 +122,8 @@ function descriptive(data::DataFrame;
 end
 function descriptive(data::Array{T, 1}; stats::Union{Symbol, Vector, Tuple} = :default, var = nothing, varname = nothing, sort = Dict())::Descriptive where T <: Real
     stats = checkstats(stats)
-    return Descriptive(var, varname, sort, NamedTuple{stats}(Tuple(descriptive_(data, stats))))
+    return Descriptive(var, varname, sort, descriptive_(data, stats))
+
 end
 
 """
@@ -139,7 +145,7 @@ Push in d Descriptive obj in mx vardata
 """
 @inline function pushvardescriptive!(d::Array{Descriptive, 1}, vars::Array{Symbol, 1}, mx::Union{DataFrame, Matrix{T}}, sortval::Union{Tuple{Vararg{Any}}, Nothing}, stats::Tuple{Vararg{Symbol}}) where T<: Real
     for v  = 1:length(vars)  #For each variable in list
-        push!(d, Descriptive(vars[v], nothing, sortval, NamedTuple{stats}(Tuple(descriptive_(mx[:, v], stats)))))
+        push!(d, Descriptive(vars[v], nothing, sortval, descriptive_(mx[:, v], stats)))
     end
 end
 """
@@ -167,7 +173,9 @@ Return matrix of filtered data (datacol) by sortcol with sortval
 end
 
 #Statistics calculation
-@inline function descriptive_(data::Array{T,1}, stats::Union{Tuple{Vararg{Symbol}}, Array{Symbol,1}})::Array{Real,1} where T <: Real
+
+@inline function descriptive_(data::Array{T,1}, stats::Union{Tuple{Vararg{Symbol}}, Array{Symbol,1}}) where T <: Real
+
     dlist = findall(x -> x === NaN || x === nothing || x === missing, data)
     if length(dlist) > 0
         data = copy(data)
@@ -175,7 +183,6 @@ end
     end
 
     dn         = nothing
-    #if (@isdefined dn) end
     dmin       = nothing
     dmax       = nothing
     drange     = nothing
@@ -187,25 +194,38 @@ end
     dgeomean   = nothing
     dgeovar    = nothing
     dgeosd     = nothing
-    dgeocv     = nothing
-    dharmmean  = nothing
+    #dgeocv     = nothing
+    #dharmmean  = nothing
     duq        = nothing
     dlq        = nothing
     sesv       = nothing
-    sekv       = nothing
-    #dirq       = nothing
-    #dmode      = nothing
-    if length(data) > 0
-        sarray = Array{Real,1}(undef, 0)
-    else
-        sarray = Array{Real,1}(undef, length(stats))
-        return sarray .= NaN
+
+
+
+
+
+    dict = Dict{Symbol, Real}()
+
+
+    if length(data) == 0
+        for i in stats
+            dict[i] = NaN
+        end
+        return dict
     end
-    if length(data) <= 2
-        sesv = NaN
-        sekv = NaN
-    elseif length(data) <= 3
-        sekv = NaN
+
+    if :sesv in stats
+        if length(data) <= 2
+            sesv = NaN
+            dict[:sesv] = sesv
+        end
+    end
+    if :sekv in stats
+        if length(data) <= 3
+            sekv = NaN
+            dict[:sekv] = sekv
+        end
+
     end
 
 
@@ -219,94 +239,98 @@ end
             logsdata = log.(data)
         end
     end
+
     for s in stats
         if s == :n
             if dn === nothing dn = length(data) end
-            push!(sarray, dn)
+            dict[s] = dn
         elseif s == :sum
-            push!(sarray, sum(data))
+            dict[s] = sum(data)
         elseif s == :min
             if dmin === nothing dmin = minimum(data) end
-            push!(sarray, dmin)
+            dict[s] = dmin
         elseif s == :max
             if dmax === nothing dmax = maximum(data) end
-            push!(sarray, dmax)
+            dict[s] = dmax
         elseif s == :range
-            if dmax === nothing dmax = max(data) end
-            if dmin === nothing dmin = max(data) end
-            push!(sarray, abs(dmax-dmin))
+            if dmax === nothing dmax = minimum(data) end
+            if dmin === nothing dmin = maximum(data) end
+            dict[s] =  abs(dmax-dmin)
         elseif s == :mean
             if dmean === nothing dmean = mean(data) end
-            push!(sarray, dmean)
+            dict[s] = dmean
         elseif s == :var
             if dvar === nothing dvar = var(data) end
-            push!(sarray, dvar)
+            dict[s] = dvar
         elseif s == :sd
             if dvar === nothing dvar = var(data) end
             if dsd  === nothing dsd  = sqrt(dvar) end
-            push!(sarray, dsd)
+            dict[s] = dsd
         elseif s == :sem
             if dvar === nothing dvar = var(data) end
             if dn === nothing dn = length(data) end
-            push!(sarray, sqrt(dvar/dn))
+            dict[s] = sqrt(dvar/dn)
         elseif s == :cv
             if dmean === nothing dmean = mean(data) end
             if dvar === nothing dvar = var(data) end
             if dsd  === nothing dsd  = sqrt(dvar) end
-            push!(sarray, dsd/dmean*100)
+            dict[s] = dsd/dmean*100
         elseif s == :harmmean
-            if dharmmean === nothing
-                if any(x -> (x == 0), data)
-                    dharmmean = NaN
-                else
-                    dharmmean = harmmean(data)
-                end
+            if any(x -> (x == 0), data)
+                dict[s] = NaN
+            else
+                dict[s] = harmmean(data)
             end
-            push!(sarray, dharmmean)
         elseif s == :geomean
             if dgeomean === nothing dgeomean = exp(mean(logsdata)) end
-            push!(sarray, dgeomean)
+            dict[s] =  dgeomean
         elseif s == :geovar
             if dgeovar === nothing dgeovar = var(logsdata) end
-            push!(sarray, dgeovar)
+            dict[s] = dgeovar
         elseif s == :geosd
             if dgeovar === nothing dgeovar = var(logsdata) end
-            if dgeosd === nothing dgeosd = sqrt(dgeovar) end
-            push!(sarray, dgeosd)
+            if dgeosd  === nothing dgeosd = sqrt(dgeovar) end
+            dict[s] = dgeosd
         elseif s == :geocv
             if dgeovar === nothing dgeovar = var(logsdata) end
-            if dgeocv === nothing dgeocv = sqrt(exp(dgeovar)-1)*100 end
-            push!(sarray, dgeocv)
+            dict[s] = sqrt(exp(dgeovar)-1)*100
         elseif s == :skew
-            push!(sarray, skewness(data))
+            dict[s] = skewness(data)
         elseif s == :ses
-            if dn === nothing dn = length(data) end
-            sesv = ses(dn)
-            push!(sarray, sesv)
+            if length(data) <= 2
+                dict[s] = NaN
+            else
+                if dn   === nothing dn   = length(data) end
+                if sesv === nothing sesv = ses(dn) end
+                dict[s] = sesv
+            end
         elseif s == :kurt
-            push!(sarray, kurtosis(data))
+            dict[s] = kurtosis(data)
         elseif s == :sek
-            if dn === nothing dn = length(data) end
-            if sesv === nothing sesv = ses(dn) end
-            sekv = sek(dn; ses = sesv)
-            push!(sarray, sekv)
+            if length(data) <= 3
+                dict[s] = NaN
+            else
+                if dn   === nothing dn = length(data) end
+                if sesv === nothing sesv = ses(dn) end
+                dict[s] = sek(dn; ses = sesv)
+            end
         elseif s == :uq
             if duq  === nothing duq  = percentile(data, 75) end
-            push!(sarray, duq)
+            dict[s] = duq
         elseif s == :median
-            push!(sarray,  median(data))
+            dict[s] = median(data)
         elseif s == :lq
             if dlq  === nothing dlq  = percentile(data, 25) end
-            push!(sarray, dlq)
+            dict[s] = dlq
         elseif s == :iqr
             if duq  === nothing duq  = percentile(data, 75) end
             if dlq  === nothing dlq  = percentile(data, 25) end
-            push!(sarray, abs(duq-dlq))
+            dict[s] = abs(duq-dlq)
         elseif s == :mode
-            push!(sarray, mode(data))
+            dict[s] = mode(data)
         end
     end
-    return sarray
+    return dict
 end
 
 @inline function ses(data::AbstractVector)::Float64
@@ -317,10 +341,10 @@ end
     return sqrt(6 * n *(n - 1) / ((n - 2) * (n + 1) * (n + 3)))
 end
 
-function sek(data::AbstractVector; ses::T = ses(data))::Float64 where T <: Real
+@inline function sek(data::AbstractVector; ses::T = ses(data))::Float64 where T <: Real
     n = length(data)
     sek(n; ses = ses)
 end
-function sek(n::Int; ses::T = ses(n))::Float64 where T <: Real
+@inline  function sek(n::Int; ses::T = ses(n))::Float64 where T <: Real
     return 2 * ses * sqrt((n * n - 1)/((n - 3) * (n + 5)))
 end

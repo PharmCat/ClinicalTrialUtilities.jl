@@ -19,6 +19,7 @@ import Base.show
 import Base.showerror
 import Base.getindex
 import Base.length
+import Base.in
 import StatsBase.confint
 import DataFrames.DataFrame
 
@@ -33,35 +34,6 @@ const PI2    = π * 2.0
 const PI2INV = 0.5 / π
 const VERSION = "0.2.0"
 #Exceptions
-
-struct ConfInt
-    lower::Float64
-    upper::Float64
-    estimate::Float64
-    alpha::Float64
-    function ConfInt(lower, upper, estimate)
-        new(lower, upper, estimate, NaN)::ConfInt
-    end
-    function ConfInt(lower, upper, estimate, alpha)
-        new(lower, upper, estimate, alpha)::ConfInt
-    end
-end
-
-function getindex(a::ConfInt, b::Int)
-    if b == 1
-        return a.lower
-    elseif b == 2
-        return a.upper
-    elseif b == 3
-        return a.estimate
-    else
-        throw(ArgumentError("Index should be in 1:3"))
-    end
-end
-
-
-#Deprecated
-include("deprecated.jl")
 
 #Owen function calc: owensQ, owensQo, ifun1, owensTint2, owensT, tfn
 include("owensq.jl")
@@ -91,6 +63,9 @@ include("randomization.jl")
 include("utilities.jl")
 #Show
 include("show.jl")
+
+#Deprecated
+include("deprecated.jl")
 
 const CTU = ClinicalTrialUtilities
 #Types

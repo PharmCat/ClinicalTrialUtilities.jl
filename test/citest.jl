@@ -291,4 +291,8 @@ println(" ---------------------------------- ")
     @test ci.estimate ≈  0.28183148420493526 atol=1E-7
     @test ci.lower    ≈  -0.14415538594969263 atol=1E-7
     @test ci.upper    ≈  0.7078183543595631 atol=1E-7
+
+    @test ci[1]       ≈  -0.14415538594969263 atol=1E-7
+
+    Base.show(io, ci)
 end

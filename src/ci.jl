@@ -9,6 +9,32 @@
 # DescTools https://CRAN.R-project.org/package=DescTools
 # metafor by Wolfgang Viechtbauer https://cran.r-project.org/package=metafor
 
+struct ConfInt
+    lower::Float64
+    upper::Float64
+    estimate::Float64
+    alpha::Float64
+    function ConfInt(lower, upper, estimate)
+        new(lower, upper, estimate, NaN)::ConfInt
+    end
+    function ConfInt(lower, upper, estimate, alpha)
+        new(lower, upper, estimate, alpha)::ConfInt
+    end
+end
+
+function getindex(a::ConfInt, b::Int)
+    if b == 1
+        return a.lower
+    elseif b == 2
+        return a.upper
+    elseif b == 3
+        return a.estimate
+    else
+        throw(ArgumentError("Index should be in 1:3"))
+    end
+end
+
+
 """
     StatsBase.confint(param::Proportion; level = 0.95, method = :default)::ConfInt
 
@@ -82,7 +108,8 @@ function propci(x::Int, n::Int; alpha::Real = 0.05, method = :default)::ConfInt
     end
 end
 """
-    diffpropci(x1::Int, n1::Int, x2::Int, n2::Int; alpha::Real = 0.05, method::Symbol = :default)::ConfInt
+    diffpropci(x1::Int, n1::Int, x2::Int, n2::Int;
+        alpha::Real = 0.05, method::Symbol = :default)::ConfInt
 
 Confidence interval for proportion difference.
 
@@ -121,7 +148,8 @@ function diffpropci(x1::Int, n1::Int, x2::Int, n2::Int; alpha::Real = 0.05, meth
     end
 end
 """
-    rrpropci(x1::Int, n1::Int, x2::Int, n2::Int; alpha::Real = 0.05, method::Symbol = :default)::ConfInt
+    rrpropci(x1::Int, n1::Int, x2::Int, n2::Int; alpha::Real = 0.05,
+        method::Symbol = :default)::ConfInt
 
 Confidence interval for relative risk.
 
@@ -147,7 +175,8 @@ function rrpropci(x1::Int, n1::Int, x2::Int, n2::Int; alpha::Real = 0.05, method
     end
 end
 """
-    orpropci(x1::Int, n1::Int, x2::Int, n2::Int; alpha::Real = 0.05, method::Symbol = :default)::ConfInt
+    orpropci(x1::Int, n1::Int, x2::Int, n2::Int; alpha::Real = 0.05,
+        method::Symbol = :default)::ConfInt
 
 Confidence interval for odd ratio.
 
@@ -176,7 +205,8 @@ function orpropci(x1::Int, n1::Int, x2::Int, n2::Int; alpha::Real = 0.05, method
     end
 end
 """
-    meanci(m::Real, s::Real, n::Int; alpha::Real = 0.05, method=:default)::ConfInt
+    meanci(m::Real, s::Real, n::Int; alpha::Real = 0.05,
+        method=:default)::ConfInt
 
 Confidence interval for mean.
 
@@ -194,7 +224,8 @@ function meanci(m::Real, s::Real, n::Int; alpha::Real = 0.05, method=:default)::
         end
 end
 """
-    diffmeanci(m1::Real, s1::Real, n1::Real, m2::Real, s2::Real, n2::Real; alpha::Real = 0.05, method::Symbol = :default)::ConfInt
+    diffmeanci(m1::Real, s1::Real, n1::Real, m2::Real, s2::Real, n2::Real;
+        alpha::Real = 0.05, method::Symbol = :default)::ConfInt
 
 Confidence interval for mead difference.
 
@@ -694,7 +725,8 @@ end
     # metafor: Meta-Analysis Package for R - Wolfgang Viechtbauer
 
 """
-    diffcmhci(data::DataFrame; a = :a, b = :b, c = :c, d = :d, alpha = 0.05, method = :default)::ConfInt
+    diffcmhci(data::DataFrame; a = :a, b = :b, c = :c, d = :d,
+        alpha = 0.05, method = :default)::ConfInt
 
 Cochran–Mantel–Haenszel confidence intervals for proportion difference.
 
@@ -723,7 +755,8 @@ Cochran–Mantel–Haenszel confidence intervals for proportion difference.
     end
 
     """
-        orcmhci(data::DataFrame; a = :a, b = :b, c = :c, d = :d, alpha = 0.05, logscale = false)::ConfInt
+        orcmhci(data::DataFrame; a = :a, b = :b, c = :c, d = :d,
+            alpha = 0.05, logscale = false)::ConfInt
 
     Cochran–Mantel–Haenszel confidence intervals for odd ratio.
     """
@@ -748,7 +781,8 @@ Cochran–Mantel–Haenszel confidence intervals for proportion difference.
     end
 
     """
-        rrcmhci(data::DataFrame; a = :a, b = :b, c = :c, d = :d, alpha = 0.05, logscale = false)::ConfInt
+        rrcmhci(data::DataFrame; a = :a, b = :b, c = :c, d = :d,
+            alpha = 0.05, logscale = false)::ConfInt
 
     Cochran–Mantel–Haenszel confidence intervals for risk ratio.
     """
