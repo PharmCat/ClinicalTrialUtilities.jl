@@ -471,8 +471,11 @@ println(" ---------------------------------- ")
     ds   = ClinicalTrialUtilities.descriptive(df, stats = [:n, :mean, :sd], sort = [:Formulation])
     df   = ClinicalTrialUtilities.DataFrame(ds; unst = true)
     Base.show(io, pkds)
+    Base.show(io, pkds[1])
     Base.show(io, pk)
+    Base.show(io, pk[1])
     Base.show(io, ds)
+    Base.show(io, ds[1])
 
 
     @test ds[5, :mean] ≈ 7431.283916666667
