@@ -618,6 +618,7 @@ function nca!(data::PKSubject; calcm = :lint, intp = :lint, verbose = false, io:
     nca!(data::DataSet{PKSubject}; calcm = :lint, intp = :lint,
         verbose = false, io::IO = stdout)
 
+
 Pharmacokinetics non-compartment analysis for PK subjects set.
 
 calcm - calculation method;
@@ -642,6 +643,7 @@ function nca!(data::DataSet{PKSubject}; calcm = :lint, intp = :lint, verbose = f
         results = Array{PKPDProfile, 1}(undef, 0)
         for i = 1:length(data.data)
             push!(results, nca!(data.data[i]; calcm = calcm, intp = intp, verbose = verbose, io = io))
+
         end
         return DataSet(results)
 end

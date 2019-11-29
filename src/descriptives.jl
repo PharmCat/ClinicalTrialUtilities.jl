@@ -123,6 +123,7 @@ end
 function descriptive(data::Array{T, 1}; stats::Union{Symbol, Vector, Tuple} = :default, var = nothing, varname = nothing, sort = Dict())::Descriptive where T <: Real
     stats = checkstats(stats)
     return Descriptive(var, varname, sort, descriptive_(data, stats))
+
 end
 
 """
@@ -172,7 +173,9 @@ Return matrix of filtered data (datacol) by sortcol with sortval
 end
 
 #Statistics calculation
+
 @inline function descriptive_(data::Array{T,1}, stats::Union{Tuple{Vararg{Symbol}}, Array{Symbol,1}}) where T <: Real
+
     dlist = findall(x -> x === NaN || x === nothing || x === missing, data)
     if length(dlist) > 0
         data = copy(data)
@@ -200,6 +203,7 @@ end
 
 
 
+
     dict = Dict{Symbol, Real}()
 
 
@@ -221,7 +225,9 @@ end
             sekv = NaN
             dict[:sekv] = sekv
         end
+
     end
+
 
     if any(x -> (x == :geomean || x == :geocv || x == :geosd || x == :geovar), stats)
         if any(x -> (x <= 0), data)

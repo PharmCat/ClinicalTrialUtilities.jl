@@ -3,6 +3,7 @@
 function Base.show(io::IO, obj::CTask)
         println(io, obj.param)
         println(io, "  Design: $(obj.design)")
+
         println(io, "  Alpha: $(obj.alpha)")
         println(io, "  Hypothesis: $(obj.hyp)")
         println(io, "  K: $(obj.k)")
@@ -52,6 +53,34 @@ end
 function Base.show(io::IO, obj::Power)
         print(io, "Power (n: $(obj.val))")
 end
+function Base.show(io::IO, obj::Crossover{:d2x4x4})
+        print(io, "2x4x4 Design")
+end
+function Base.show(io::IO, obj::Crossover{:d2x3x3})
+        print(io, "2x3x3 Design")
+end
+function Base.show(io::IO, obj::Crossover{:d3x3})
+        print(io, "3x3 Design")
+end
+function Base.show(io::IO, obj::Crossover{:d4x4})
+        print(io, "4x4 Design")
+end
+function Base.show(io::IO, obj::Crossover{:d3x6x3})
+        print(io, "3x6x3 Design")
+end
+
+#-------------------------------------------------------------------------------
+# Objectives
+
+function Base.show(io::IO, obj::SampleSize)
+        print(io, "SampleSize (β: $(obj.val))")
+end
+function Base.show(io::IO, obj::Power)
+        print(io, "Power (n: $(obj.val))")
+end
+
+#-------------------------------------------------------------------------------
+#Task result
 
 #-------------------------------------------------------------------------------
 #Task result
