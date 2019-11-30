@@ -39,8 +39,8 @@ Pages = [
         "ci.md",
         "ds.md",
         "nca.md",
-        ["pk.md",
-        "pd.md"],
+        "pk.md",
+        "pd.md",
         "random.md",
         "sim.md",
         "utils.md",
@@ -48,7 +48,7 @@ Pages = [
         "export.md",
         "validation.md",
         "ref.md"]
-Depth = 3
+Depth = 4
 ```
 
 ## Copyrights
