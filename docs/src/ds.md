@@ -1,5 +1,8 @@
+## Descriptive statistics
 
-### ClinicalTrialUtilities.descriptive
+Calculation descriptive statistics by groups.
+
+### descriptive
 ```@docs
 ClinicalTrialUtilities.descriptive
 ```

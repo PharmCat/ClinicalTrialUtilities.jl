@@ -717,6 +717,16 @@ end
         x = ((n-k)*log(s) - ((n1-1)*log(s1)+(n2-1)*log(s2)))/(1+(1/(n1-1) + 1/(n2-1) - 1/(n-k))/3/(k-1))
         return 1-cdf(Chisq(k-1),x), x
     end
+# Test
+function meanratiot(m1::Real, s1::Real, n1::Real, m2::Real, s2::Real, n2::Real, cov::Real, alpha::Real)
+    t0 = quantile(TDist(10), 1-alpha/2)
+    a = m1*m2 - cov * t0^2
+    b = m1^2 - s1 * t0^2
+    d = sqrt((cov^2 - s1 * s2) * t0^4 + (m1^2 * s2 - 2 * m1 * m2 * cov + m2^2 * s1) * t0^2)
+    return ((a - d)/b, (a + d)/b, m2/m1, alpha)
+end
+function meanratiof(m1::Real, s1::Real, n1::Real, m2::Real, s2::Real, n2::Real, cov::Real, alpha::Real)
+end
 
     #Cochran–Mantel–Haenszel confidence intervals
     #p275, Rothman, K. J., Greenland, S., & Lash, T. L. (2008). Modern epidemiology (3rd ed.). Philadelphia: Lippincott Williams & Wilkins.

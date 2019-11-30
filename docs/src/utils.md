@@ -1,15 +1,16 @@
+## Utilities
 
-### ClinicalTrialUtilities.cvfromci
+### cvfromci
 ```@docs
 ClinicalTrialUtilities.cvfromci
 ```
 
-### ClinicalTrialUtilities.cvfromvar
+### cvfromvar
 ```@docs
 ClinicalTrialUtilities.cvfromvar
 ```
 
-### ClinicalTrialUtilities.pooledcv
+### pooledcv
 ```@docs
 ClinicalTrialUtilities.pooledcv
 ```

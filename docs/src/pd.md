@@ -1,5 +1,6 @@
+## Pharmacodynamics
 
-### ClinicalTrialUtilities.pdimport
+### pdimport
 ```@docs
 ClinicalTrialUtilities.pdimport
 ```

@@ -12,9 +12,9 @@ struct Descriptive <: AbstractData
 end
 function Base.show(io::IO, obj::Descriptive)
     println(io, "Descriptive statistics")
-    if obj.var !== nothing print(io, "Variable: ", obj.var) end
+    if obj.var     !== nothing print(io, "Variable: ", obj.var) end
     if obj.varname !== nothing println(io, "(", obj.varname,")") else println(io, "") end
-    if obj.sort !== nothing println(io, "Group: ", obj.sort) end
+    if obj.sort    !== nothing println(io, "Group: ", obj.sort) end
     maxcol = 0
     for k in keys(obj.result)
         if length(string(k)) > maxcol maxcol = length(string(k)) end
@@ -45,13 +45,28 @@ function Base.show(io::IO, obj::DataSet{Descriptive})
         println(io, "____________________")
     end
 end
-function Base.getindex(a::DataSet{Descriptive}, i::Int)::Descriptive
+function Base.getindex(a::DataSet{T}, i::Int)::T where T
     return a.data[i]
 end
-function Base.getindex(a::DataSet{Descriptive}, i::Int, s::Symbol)::Real
+function Base.getindex(a::DataSet{T}, i::Int, s::Symbol)::Real where T
     return a.data[i].result[s]
 end
-function Base.length(a::DataSet{T}) where T <: AbstractData
+function Base.getindex(a::DataSet{T}, d::Pair)::T where T
+    for i = 1:length(a)
+        if d ∈ a[i].sort return a[i] end
+    end
+    throw(ArgumentError("Element not found!"))
+end
+function Base.getindex(a::DataSet{T}, d::Dict)::T where T
+    for i = 1:length(a)
+        if d ∈ a[i].sort return a[i] end
+    end
+    throw(ArgumentError("Element not found!"))
+end
+function Base.getindex(a::DataSet{T}, d::Tuple{Vararg{Pair}})::T where T
+    return a[Dict(d)]
+end
+function Base.length(a::DataSet{T})::Int where T <: AbstractData
     return length(a.data)
 end
 """
@@ -327,18 +342,18 @@ end
     return dict
 end
 
-@inline function ses(data::AbstractVector)::Float64
+@inline function ses(data::AbstractVector)
     n = length(data)
     ses(n)
 end
-@inline function ses(n::Int)::Float64
+@inline function ses(n::Int)
     return sqrt(6 * n *(n - 1) / ((n - 2) * (n + 1) * (n + 3)))
 end
 
-@inline function sek(data::AbstractVector; ses::T = ses(data))::Float64 where T <: Real
+@inline function sek(data::AbstractVector; ses::T = ses(data)) where T <: Real
     n = length(data)
     sek(n; ses = ses)
 end
-@inline  function sek(n::Int; ses::T = ses(n))::Float64 where T <: Real
+@inline  function sek(n::Int; ses::T = ses(n)) where T <: Real
     return 2 * ses * sqrt((n * n - 1)/((n - 3) * (n + 5)))
 end

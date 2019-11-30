@@ -1,10 +1,11 @@
+## Randomization
 
-### ClinicalTrialUtilities.randomseq
+### randomseq
 ```@docs
 ClinicalTrialUtilities.randomseq
 ```
 
-### ClinicalTrialUtilities.randomtable
+### randomtable
 ```@docs
 ClinicalTrialUtilities.randomtable
 ```

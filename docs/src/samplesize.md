@@ -1,10 +1,13 @@
+## SampleSize
 
-### ClinicalTrialUtilities.ctsamplen
+Sample size estimation.
+
+### ctsamplen
 ```@docs
 ClinicalTrialUtilities.ctsamplen
 ```
 
-### ClinicalTrialUtilities.besamplen
+### besamplen
 ```@docs
 ClinicalTrialUtilities.besamplen
 ```
