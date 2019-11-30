@@ -53,21 +53,6 @@ end
 function Base.show(io::IO, obj::Power)
         print(io, "Power (n: $(obj.val))")
 end
-function Base.show(io::IO, obj::Crossover{:d2x4x4})
-        print(io, "2x4x4 Design")
-end
-function Base.show(io::IO, obj::Crossover{:d2x3x3})
-        print(io, "2x3x3 Design")
-end
-function Base.show(io::IO, obj::Crossover{:d3x3})
-        print(io, "3x3 Design")
-end
-function Base.show(io::IO, obj::Crossover{:d4x4})
-        print(io, "4x4 Design")
-end
-function Base.show(io::IO, obj::Crossover{:d3x6x3})
-        print(io, "3x6x3 Design")
-end
 
 #-------------------------------------------------------------------------------
 # Objectives

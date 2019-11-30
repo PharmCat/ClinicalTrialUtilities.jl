@@ -8,11 +8,11 @@ path    = dirname(@__FILE__)
 io      = IOBuffer();
 
 # Multiple subjects PK DataFrame
-pkdata2 = CSV.File(path*"\\csv\\pkdata2.csv") |> DataFrame
+pkdata2 = CSV.File(path*"/csv/pkdata2.csv") |> DataFrame
 #Glucose2
 #Pinheiro, J. C. and Bates, D. M. (2000), Mixed-Effects Models in S and S-PLUS, Springer, New York. (Appendix A.10)
 #Hand, D. and Crowder, M. (1996), Practical Longitudinal Data Analysis, Chapman and Hall, London.
-glucose2 = CSV.File(path*"\\csv\\glucose2.csv") |> DataFrame
+glucose2 = CSV.File(path*"/csv/glucose2.csv") |> DataFrame
 
 @testset "  Info:                 " begin
     ClinicalTrialUtilities.info()
