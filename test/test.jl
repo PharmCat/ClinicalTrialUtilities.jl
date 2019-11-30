@@ -486,7 +486,13 @@ println(" ---------------------------------- ")
     Base.show(io, ds[1])
 
 
+<<<<<<< HEAD
     @test ds[Dict(:Variable=>:AUClast,:Formulation=>"R")][:mean] ≈ 7431.283916666667
+=======
+
+    @test ds[5, :mean] ≈ 7431.283916666667
+    #@test res[3, :mean] ≈ 8607.09
+>>>>>>> ec30af1d82508f0370b8ff0f3177ded5ff92d742
 
     pdds = ClinicalTrialUtilities.pdimport(pkdata2, [:Subject, :Formulation]; time = :Time, resp = :Concentration)
     pd   = ClinicalTrialUtilities.nca!(pdds)

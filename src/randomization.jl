@@ -56,6 +56,7 @@ end
     randomtable(;blocksize = 4, subject = 10, group = 2,
         ratio = [1,1], grseq = ["AB", "BA"], seed = 0)
 
+
 Randomization table generaton.
 
 - ``blocksize`` - size of block;

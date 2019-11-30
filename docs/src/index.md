@@ -14,7 +14,12 @@
 
 The package is designed to perform calculations related to the planning and analysis of the results of clinical trials. The package includes the basic functions described below, as well as a few modules to perform specific calculations.
 
+<<<<<<< HEAD
 ## Installation
+=======
+### Installation
+
+>>>>>>> ec30af1d82508f0370b8ff0f3177ded5ff92d742
 ```
 using Pkg; Pkg.add("ClinicalTrialUtilities");
 ```
@@ -33,6 +38,7 @@ When ctpower/ctsamplen used:
 
 ```@contents
 Pages = [
+
         "samplesize.md",
         "power.md",
         "ci.md",
@@ -51,6 +57,7 @@ Depth = 3
 ```
 
 ## Copyrights
+
 
 Clinical Trial Utilities
 
