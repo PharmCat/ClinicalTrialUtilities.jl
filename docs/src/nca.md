@@ -1,4 +1,4 @@
-## Non-compartment analysis
+# Non-compartment analysis
 
 NCA analysis based on following steps:
 
@@ -16,37 +16,37 @@ ClinicalTrialUtilities.nca!
 
 ### Scenario
 
-1. Loading DataFrame
+1 Loading DataFrame
 
 ```julia
 using CSV, DataFrames, ClinicalTrialUtilities
 pkdata2 = CSV.File("pkdata.csv") |> DataFrame
 ```
-2. Subject list
+2 Subject list
 
 ```julia
   pkds = pkimport(pkdata2, [:Subject, :Formulation]; time = :Time, conc = :Concentration)
 ```
 
-3. NCA  analysis with default settings
+3 NCA  analysis with default settings
 
 ```julia
   pk   = nca!(pkds)
 ```
 
-4. Exporting
+4 Exporting
 
 ```julia
   ncadf   = DataFrame(pk; unst = true)
 ```
 
-5. Descriptive statistics
+5 Descriptive statistics
 
 ```julia
   ds   = ClinicalTrialUtilities.descriptive(ncadf, stats = [:n, :mean, :sd], sort = [:Formulation])
 ```
 
-6. Exporting  
+6 Exporting  
 
 ```julia
   dsdf   = ClinicalTrialUtilities.DataFrame(ds; unst = true)

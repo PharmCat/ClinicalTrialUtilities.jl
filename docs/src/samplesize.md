@@ -1,4 +1,4 @@
-## SampleSize
+# SampleSize
 
 Sample size estimation.
 

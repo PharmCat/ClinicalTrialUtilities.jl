@@ -1,4 +1,4 @@
-## Descriptive statistics
+# Descriptive statistics
 
 Calculation descriptive statistics by groups.
 

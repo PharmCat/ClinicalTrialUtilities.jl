@@ -1,7 +1,6 @@
 println(" ---------------------------------- ")
 @testset "  descriptives          " begin
-
-    df = CSV.read(IOBuffer(descriptivedat)) |> DataFrame
+    df = descriptivedat
     ds = ClinicalTrialUtilities.descriptive(df, stats = :all, sort = [:C1, :C2], vars=[:P1, :P2])
     @test ds[1,:n]        ≈ 20 atol=1E-5
     @test ds[1,:min]      ≈ 11.30162773 atol=1E-5
@@ -46,7 +45,7 @@ println(" ---------------------------------- ")
     @test ds[3,:sem]      ≈ 48.65 atol=1E-5
     @test ds[3,:median]   ≈ 51.35 atol=1E-3
 
-    df = CSV.read(IOBuffer(negdat)) |> DataFrame
+    df = negdat
     ds = ClinicalTrialUtilities.descriptive(df, stats = :all, vars=[:P1])
     @test ds[1,:harmmean] === NaN
     @test ds[1,:geomean]  === NaN

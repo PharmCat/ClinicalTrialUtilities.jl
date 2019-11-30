@@ -2,17 +2,10 @@
 # Copyright © 2019 Vladimir Arnautov aka PharmCat (mail@pharmcat.net)
 using Distributions, Random, DataFrames, CSV, Test
 
-include("testdata.jl")
-
 path    = dirname(@__FILE__)
 io      = IOBuffer();
 
-# Multiple subjects PK DataFrame
-pkdata2 = CSV.File(path*"/csv/pkdata2.csv") |> DataFrame
-#Glucose2
-#Pinheiro, J. C. and Bates, D. M. (2000), Mixed-Effects Models in S and S-PLUS, Springer, New York. (Appendix A.10)
-#Hand, D. and Crowder, M. (1996), Practical Longitudinal Data Analysis, Chapman and Hall, London.
-glucose2 = CSV.File(path*"/csv/glucose2.csv") |> DataFrame
+include("testdata.jl")
 
 @testset "  Info:                 " begin
     ClinicalTrialUtilities.info()
@@ -452,7 +445,7 @@ include("dstest.jl")
 
 println(" ---------------------------------- ")
 @testset "  Frequency             " begin
-    df = CSV.read(IOBuffer(freqdat)) |> DataFrame
+    df   = freqdat
     ctab =  ClinicalTrialUtilities.contab(df, row = :row, col = :col)
     @test ctab == [9 8; 5 21]
 
