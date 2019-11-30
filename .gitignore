@@ -1,4 +1,7 @@
 *.jl.cov
 *.jl.*.cov
 *.jl.mem
+test/csv/rds/
 docs/build/
+docs/deprecated
+examples
