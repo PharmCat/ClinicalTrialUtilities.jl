@@ -1,5 +1,6 @@
+### Pharmacokinetics
 
-### ClinicalTrialUtilities.pkimport
+#### pkimport
 ```@docs
 ClinicalTrialUtilities.pkimport
 ```

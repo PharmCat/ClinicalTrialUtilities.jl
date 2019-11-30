@@ -1,4 +1,6 @@
-## Sample size / power
+## References
+
+### Sample size / power
 
 OwensQ/PowerTOST functions rewritten from https://github.com/Detlew/PowerTOST by Detlew Labes, Helmut Schuetz, Benjamin Lang
 
@@ -19,7 +21,7 @@ D.B. Owen "Tables for computing bivariate normal Probabilities" The Annals of Ma
 matlab code  by J. Burkhardt license GNU LGPL
 
 
-## Confidence intervals
+### Confidence intervals
 
 Wilson, E.B. (1927) Probable inference, the law of succession, and statistical inference. J. Amer. Stat. Assoc22, 209–212.
 
@@ -49,8 +51,7 @@ Mee RW (1984) Confidence bounds for the difference between two probabilities,Bio
 
 Rothman, K. J., Greenland, S., & Lash, T. L. (2008). Modern epidemiology (3rd ed.). Philadelphia: Lippincott Williams & Wilkins.
 
-
-## R packages
+### R packages
 
 
 PowerTOST by by Detlew Labes, Helmut Schuetz, Benjamin Lang  https://cran.r-project.org/web/packages/PowerTOST/

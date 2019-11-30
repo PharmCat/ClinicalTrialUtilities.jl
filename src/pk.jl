@@ -137,6 +137,7 @@ struct LimitRule
     end
 end
 
+#=
 function Base.getindex(a::PKPDProfile{T}, s::Symbol)::Real where T <: AbstractSubject
     return a.result[s]
 end
@@ -154,6 +155,7 @@ end
 function Base.getindex(a::DataSet{T}, i::Int) where T <: AbstractSubject
     return a.data[i]
 end
+=#
 
 #-------------------------------------------------------------------------------
 function obsnum(data::T) where T <:  AbstractSubject

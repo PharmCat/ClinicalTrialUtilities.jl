@@ -43,35 +43,8 @@ function Base.show(io::IO, obj::OneGroup)
         print(io, "OneGroup")
 end
 
-
 #-------------------------------------------------------------------------------
 # Objectives
-
-function Base.show(io::IO, obj::SampleSize)
-        print(io, "SampleSize (β: $(obj.val))")
-end
-function Base.show(io::IO, obj::Power)
-        print(io, "Power (n: $(obj.val))")
-end
-function Base.show(io::IO, obj::Crossover{:d2x4x4})
-        print(io, "2x4x4 Design")
-end
-function Base.show(io::IO, obj::Crossover{:d2x3x3})
-        print(io, "2x3x3 Design")
-end
-function Base.show(io::IO, obj::Crossover{:d3x3})
-        print(io, "3x3 Design")
-end
-function Base.show(io::IO, obj::Crossover{:d4x4})
-        print(io, "4x4 Design")
-end
-function Base.show(io::IO, obj::Crossover{:d3x6x3})
-        print(io, "3x6x3 Design")
-end
-
-#-------------------------------------------------------------------------------
-# Objectives
-
 function Base.show(io::IO, obj::SampleSize)
         print(io, "SampleSize (β: $(obj.val))")
 end
@@ -80,11 +53,8 @@ function Base.show(io::IO, obj::Power)
 end
 
 #-------------------------------------------------------------------------------
-#Task result
-
 #-------------------------------------------------------------------------------
 #Task result
-
 function Base.show(io::IO, obj::TaskResult{CT}) where CT <:  CTask{T, D, H, O} where T where D where H where O <: Union{SampleSize, Power}
         println(io, objectivename(obj.task.objective))
         println(io,"-----------------------------------------")
@@ -169,7 +139,6 @@ end
 
 #-------------------------------------------------------------------------------
 #Parameters
-
 function Base.show(io::IO, p::Proportion)
         print(io,"  Proportion: ", p.x, "/", p.n)
 end
@@ -212,10 +181,8 @@ function Base.show(io::IO, m::Mean{Nothing})
         print(io,"  Mean(SD): ", m.m, " ± ", m.sd)
 end
 
-
 #-------------------------------------------------------------------------------
 # Hypothesis
-
 function Base.show(io::IO, h::Equality)
         println(io,"Equality")
         println(io,"  H₀: A = B")
@@ -245,14 +212,11 @@ function Base.show(io::IO, e::TaskEstimate)
         end
 end
 
-
 #-------------------------------------------------------------------------------
 # Confidence intervals
-
 function Base.show(io::IO, obj::ConfInt)
         print(io, "Estimate: $(obj.estimate) ($(obj.lower) - $(obj.upper))")
 end
-
 
 #-------------------------------------------------------------------------------
 # OUTPUT
@@ -281,3 +245,4 @@ function printsortval(io::IO, d::Dict)
    end
    println(io, "\b ")
 end
+#-------------------------------------------------------------------------------

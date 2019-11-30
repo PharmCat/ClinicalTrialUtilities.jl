@@ -1,10 +1,11 @@
+## Power
 
-### ClinicalTrialUtilities.ctpower
+### ctpower
 ```@docs
 ClinicalTrialUtilities.ctpower
 ```
 
-### ClinicalTrialUtilities.bepower
+### bepower
 ```@docs
 ClinicalTrialUtilities.bepower
 ```

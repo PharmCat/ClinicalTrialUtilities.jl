@@ -1,5 +1,6 @@
+## Simulations
 
-### ClinicalTrialUtilities.ctsim
+### ctsim
 ```@docs
 ClinicalTrialUtilities.ctsim
 ```

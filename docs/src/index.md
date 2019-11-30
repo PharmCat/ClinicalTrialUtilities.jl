@@ -1,4 +1,4 @@
-## ClinicalTrialUtilities
+# ClinicalTrialUtilities
 
 **VERSION 0.2.0 INCOMATIBLE WITH 0.1.x**
 
@@ -10,12 +10,11 @@
 [![Coverage Status](https://coveralls.io/repos/github/PharmCat/ClinicalTrialUtilities.jl/badge.svg?branch=master)](https://coveralls.io/github/PharmCat/ClinicalTrialUtilities.jl?branch=master)
 [![Latest docs](https://img.shields.io/badge/docs-latest-blue.svg)](https://pharmcat.github.io/ClinicalTrialUtilities.jl/dev/)
 
-### Description
+## Description
 
 The package is designed to perform calculations related to the planning and analysis of the results of clinical trials. The package includes the basic functions described below, as well as a few modules to perform specific calculations.
 
-### Installation
-
+## Installation
 ```
 using Pkg; Pkg.add("ClinicalTrialUtilities");
 ```
@@ -30,7 +29,7 @@ When ctpower/ctsamplen used:
 - :ei - Equivalencens: two one-sided hypothesis;
 - :ns - Non-Inferiority / Superiority: one-sided hypothesis, for some cases you should use two-sided hypothesis for  Non-Inferiority/Superiority, you can use alpha/2 for this;
 
-### Contents
+## Contents
 
 ```@contents
 Pages = [
@@ -49,10 +48,10 @@ Pages = [
         "export.md",
         "validation.md",
         "ref.md"]
-Depth = 3
+Depth = 4
 ```
 
-### Copyrights
+## Copyrights
 
 
 Clinical Trial Utilities

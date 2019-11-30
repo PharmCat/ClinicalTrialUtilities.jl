@@ -4,7 +4,15 @@ using Distributions, Random, DataFrames, CSV, Test
 
 include("testdata.jl")
 
-io = IOBuffer();
+path    = dirname(@__FILE__)
+io      = IOBuffer();
+
+# Multiple subjects PK DataFrame
+pkdata2 = CSV.File(path*"/csv/pkdata2.csv") |> DataFrame
+#Glucose2
+#Pinheiro, J. C. and Bates, D. M. (2000), Mixed-Effects Models in S and S-PLUS, Springer, New York. (Appendix A.10)
+#Hand, D. and Crowder, M. (1996), Practical Longitudinal Data Analysis, Chapman and Hall, London.
+glucose2 = CSV.File(path*"/csv/glucose2.csv") |> DataFrame
 
 @testset "  Info:                 " begin
     ClinicalTrialUtilities.info()
@@ -478,17 +486,15 @@ println(" ---------------------------------- ")
     Base.show(io, ds[1])
 
 
-
-    @test ds[5, :mean] ≈ 7431.283916666667
-    #@test res[3, :mean] ≈ 8607.09
+    @test ds[Dict(:Variable=>:AUClast,:Formulation=>"R")][:mean] ≈ 7431.283916666667
 
     pdds = ClinicalTrialUtilities.pdimport(pkdata2, [:Subject, :Formulation]; time = :Time, resp = :Concentration)
     pd   = ClinicalTrialUtilities.nca!(pdds)
     df   = ClinicalTrialUtilities.DataFrame(pd; unst = true)
     ds   = ClinicalTrialUtilities.descriptive(df, stats = :default, sort = [:Formulation])
 
-    @test ds[2, :mean] ≈ 7431.283916666667
-
+    @test ds[Dict(:Variable=>:AUCBLNET,:Formulation=>"T")][:mean] ≈ 8607.09
+    @test ds[(:Variable=>:AUCBLNET,:Formulation=>"R")][:sd] ≈ 1919.7954123986283
 
 end
 
