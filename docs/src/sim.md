@@ -1,4 +1,4 @@
-## Simulations
+# Simulations
 
 ### ctsim
 ```@docs

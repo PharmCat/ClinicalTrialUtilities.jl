@@ -1,3 +1,3 @@
-## Validation
+# Validation
 
 See test procedures.

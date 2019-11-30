@@ -1,4 +1,4 @@
-## Randomization
+# Randomization
 
 ### randomseq
 ```@docs

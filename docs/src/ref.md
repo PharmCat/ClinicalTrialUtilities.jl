@@ -1,4 +1,4 @@
-## References
+# References
 
 ### Sample size / power
 

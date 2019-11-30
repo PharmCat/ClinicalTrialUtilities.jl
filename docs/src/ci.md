@@ -1,40 +1,40 @@
-## Confidence Intervals
+# Confidence Intervals
 
-### Proportions
+## Proportions
 
-#### propci
+### propci
 ```@docs
 ClinicalTrialUtilities.propci
 ```
 
-#### diffpropci
+### diffpropci
 ```@docs
 ClinicalTrialUtilities.diffpropci
 ```
 
-#### rrpropci
+### rrpropci
 ```@docs
 ClinicalTrialUtilities.rrpropci
 ```
 
-#### orpropci
+### orpropci
 ```@docs
 ClinicalTrialUtilities.orpropci
 ```
 
-### Means
+## Means
 
-#### meanci
+### meanci
 ```@docs
 ClinicalTrialUtilities.meanci
 ```
 
-#### .diffmeanci
+### .diffmeanci
 ```@docs
 ClinicalTrialUtilities.diffmeanci
 ```
 
-### Cochran–Mantel–Haenszel confidence intervals
+## Cochran–Mantel–Haenszel confidence intervals
 
 Table cell map:
 
@@ -43,17 +43,17 @@ Table cell map:
 | group 1 |     a     |     b     |
 | group 2 |     c     |     d     |
 
-#### diffcmhci
+### diffcmhci
 ```@docs
 ClinicalTrialUtilities.diffcmhci
 ```
 
-#### orcmhci
+### orcmhci
 ```@docs
 ClinicalTrialUtilities.orcmhci
 ```
 
-#### rrcmhci
+### rrcmhci
 ```@docs
 ClinicalTrialUtilities.rrcmhci
 ```
