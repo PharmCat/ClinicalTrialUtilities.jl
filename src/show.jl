@@ -73,7 +73,7 @@ function Base.show(io::IO, obj::TaskResult{CT}) where CT <:  CTask{T, D, Bioequi
         println(io, objectivename(obj.task.objective))
         println(io,"-----------------------------------------")
         println(io,"  Parameter type: ",  paramname(obj.task.param))
-        println(io,"  Design: ",  designinfo(obj.task.design))
+        println(io,"  Design: $(obj.task.design)")
         println(io,"  Hypothesis: ", obj.task.hyp)
         #println(io,"  Lower limit: ", round(obj.task.llim, sigdigits = 4))
         #println(io,"  Upper limit: ", round(obj.task.ulim, sigdigits = 4))
