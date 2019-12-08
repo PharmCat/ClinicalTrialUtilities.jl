@@ -44,97 +44,97 @@ println(" ---------------------------------- ")
     #---- twoProp
     #-- mn
 
-    ci = ClinicalTrialUtilities.twoprop(30, 100, 40, 90; alpha=0.05, type=:or, method=:mn)
+    ci = ClinicalTrialUtilities.orpropci(30, 100, 40, 90; alpha=0.05, method=:mn)
     @test ci.lower    ≈ 0.29537414 atol=1E-6
     @test ci.upper    ≈ 0.97166697 atol=1E-6
     @test ci.estimate ≈ 0.53571428 atol=1E-6
 
-    ci = ClinicalTrialUtilities.twoprop(100, 100, 90, 90; alpha=0.05, type=:or, method=:mn)
+    ci = ClinicalTrialUtilities.orpropci(100, 100, 90, 90; alpha=0.05, method=:mn)
     @test ci.lower    ≈ 0.0
     @test ci.upper    ≈ Inf
     #@test ci.estimate == NaN
 
-    ci = ClinicalTrialUtilities.twoprop(0, 100, 90, 90; alpha=0.05, type=:or, method=:mn)
+    ci = ClinicalTrialUtilities.orpropci(0, 100, 90, 90; alpha=0.05, method=:mn)
     @test ci.lower    ≈ 0.0
     @test ci.upper    ≈ 0.00041425995552740226  atol=1E-6
     @test ci.estimate ≈ 0.0
 
-    ci = ClinicalTrialUtilities.twoprop(100, 100, 0, 90; alpha=0.05, type=:or, method=:mn)
+    ci = ClinicalTrialUtilities.orpropci(100, 100, 0, 90; alpha=0.05, method=:mn)
     @test ci.lower    ≈ 2413.9431770847045 atol=1E-6
     @test ci.upper    ≈ Inf
     @test ci.estimate ≈ Inf
 
     #-- mn2
 
-    ci = ClinicalTrialUtilities.twoprop(30, 100, 40, 90; alpha=0.05, type=:or, method=:mn2)
+    ci = ClinicalTrialUtilities.orpropci(30, 100, 40, 90; alpha=0.05, method=:mn2)
     @test ci.lower    ≈ 0.2951669 atol=1E-6
     @test ci.upper    ≈ 0.9722965 atol=1E-6
     @test ci.estimate ≈ 0.5357142 atol=1E-6
 
-    ci = ClinicalTrialUtilities.twoprop(100, 100, 90, 90; alpha=0.05, type=:or, method=:mn2)
+    ci = ClinicalTrialUtilities.orpropci(100, 100, 90, 90; alpha=0.05, method=:mn2)
     @test ci.lower    ≈ 0.0
     @test ci.upper    ≈ Inf
     #@test ci.estimate == NaN
 
-    ci = ClinicalTrialUtilities.twoprop(0, 100, 90, 90; alpha=0.05, type=:or, method=:mn2)
+    ci = ClinicalTrialUtilities.orpropci(0, 100, 90, 90; alpha=0.05,  method=:mn2)
     @test ci.lower    ≈ 0.0
     @test ci.upper    ≈ 0.0004144169697670039  atol=1E-6
     @test ci.estimate ≈ 0.0
 
-    ci = ClinicalTrialUtilities.twoprop(100, 100, 0, 90; alpha=0.05, type=:or, method=:mn2)
+    ci = ClinicalTrialUtilities.orpropci(100, 100, 0, 90; alpha=0.05,  method=:mn2)
     @test ci.lower    ≈ 2411.6137253788347 atol=1E-6
     @test ci.upper    ≈ Inf
     @test ci.estimate ≈ Inf
 
-    ci = ClinicalTrialUtilities.twoprop(30, 100, 40, 90; alpha=0.05, type=:or, method=:awoolf)
+    ci = ClinicalTrialUtilities.orpropci(30, 100, 40, 90; alpha=0.05,  method=:awoolf)
     @test ci.lower    ≈ 0.2982066 atol=1E-6
     @test ci.upper    ≈ 0.9758363 atol=1E-6
     @test ci.estimate ≈ 0.5394449 atol=1E-6
 
-    ci = ClinicalTrialUtilities.twoprop(30, 100, 40, 90; alpha=0.05, type=:or, method=:woolf)
+    ci = ClinicalTrialUtilities.orpropci(30, 100, 40, 90; alpha=0.05,  method=:woolf)
     @test ci.lower    ≈ 0.29504200273798975 atol=1E-6
     @test ci.upper    ≈ 0.9727082695179062 atol=1E-6
     @test ci.estimate ≈ 0.5357142857142857 atol=1E-6
 
-    ci = ClinicalTrialUtilities.twoprop(30, 100, 40, 90; alpha=0.05, type=:or, method=:mover)
+    ci = ClinicalTrialUtilities.orpropci(30, 100, 40, 90; alpha=0.05, method=:mover)
     @test ci.lower    ≈ 0.2963748435372293 atol=1E-6
     @test ci.upper    ≈ 0.9689058534780502 atol=1E-6
     @test ci.estimate ≈ 0.5357142857142857 atol=1E-6
 
     #----
 
-    ci = ClinicalTrialUtilities.twoprop(30, 100, 40, 90; alpha=0.05, type=:diff, method=:nhs)
+    ci = ClinicalTrialUtilities.diffpropci(30, 100, 40, 90; alpha=0.05, method=:nhs)
     @test ci.lower    ≈ -0.275381800 atol=1E-6
     @test ci.upper    ≈ -0.007158419 atol=1E-6
     @test ci.estimate ≈ -0.1444444   atol=1E-6
 
-    ci = ClinicalTrialUtilities.twoprop(30, 100, 40, 90; alpha=0.05, type=:diff, method=:ac)
+    ci = ClinicalTrialUtilities.diffpropci(30, 100, 40, 90; alpha=0.05, method=:ac)
     @test ci.lower    ≈ -0.276944506 atol=1E-6
     @test ci.upper    ≈ -0.006516705 atol=1E-6
     @test ci.estimate ≈ -0.1444444   atol=1E-6
 
-    ci = ClinicalTrialUtilities.twoprop(30, 100, 40, 90; alpha=0.05, type=:diff, method=:mn)
+    ci = ClinicalTrialUtilities.diffpropci(30, 100, 40, 90; alpha=0.05, method=:mn)
     @test ci.lower    ≈ -0.2781290897168457 atol=1E-6
     @test ci.upper    ≈ -0.006708341755865329 atol=1E-6
     @test ci.estimate ≈ -0.1444444   atol=1E-6
 
-    ci = ClinicalTrialUtilities.twoprop(30, 100, 40, 90; alpha=0.05, type=:diff, method=:mee)
+    ci = ClinicalTrialUtilities.diffpropci(30, 100, 40, 90; alpha=0.05, method=:mee)
     @test ci.lower    ≈ -0.27778775409226936 atol=1E-6
     @test ci.upper    ≈ -0.007071205228197489 atol=1E-6
     @test ci.estimate ≈ -0.14444444444 atol=1E-6
 
-    ci = ClinicalTrialUtilities.twoprop(30, 100, 40, 90; alpha=0.05, type=:diff, method=:mee2)
+    ci = ClinicalTrialUtilities.diffpropci(30, 100, 40, 90; alpha=0.05,  method=:mee2)
     #Roots 0.7.4 CTU 0.1.7
     @test ci.lower    ≈ -0.27778778455 atol=1E-5 #Chang atol for validation
     @test ci.upper    ≈ -0.00707120778 atol=1E-5
     @test ci.estimate ≈ -0.14444444444 atol=1E-7
 
-    ci = ClinicalTrialUtilities.twoprop(30, 100, 40, 90; alpha=0.05, type=:diff, method=:wald)
+    ci = ClinicalTrialUtilities.diffpropci(30, 100, 40, 90; alpha=0.05, method=:wald)
     @test ci.lower    ≈ -0.28084842238 atol=1E-6
     @test ci.upper    ≈ -0.00804046650 atol=1E-6
     @test ci.estimate ≈ -0.14444444444 atol=1E-6
 
-    ci = ClinicalTrialUtilities.twoprop(30, 100, 40, 90; alpha=0.05, type=:diff, method=:waldcc)
+    ci = ClinicalTrialUtilities.diffpropci(30, 100, 40, 90; alpha=0.05, method=:waldcc)
     @test ci.lower    ≈ -0.29140397794 atol=1E-6
     @test ci.upper    ≈  0.00251508905 atol=1E-6
     @test ci.estimate ≈ -0.14444444444 atol=1E-6
@@ -142,44 +142,44 @@ println(" ---------------------------------- ")
     #---- RR
     #-- mn
 
-    ci = ClinicalTrialUtilities.twoprop(30, 100, 40, 90; alpha=0.05, type=:rr, method=:mn)
+    ci = ClinicalTrialUtilities.rrpropci(30, 100, 40, 90; alpha=0.05, method=:mn)
     @test ci.lower    ≈ 0.46636099123297575 atol=1E-6
     @test ci.upper    ≈ 0.9799258384796817 atol=1E-6
     @test ci.estimate ≈ 0.675 atol=1E-6
 
-    ci = ClinicalTrialUtilities.twoprop(100, 100, 90, 90; alpha=0.05, type=:rr, method=:mn)
+    ci = ClinicalTrialUtilities.rrpropci(100, 100, 90, 90; alpha=0.05, method=:mn)
     @test ci.lower    ≈ 0.0
     @test ci.upper    ≈ Inf
     #@test ci.estimate == NaN
 
-    ci = ClinicalTrialUtilities.twoprop(0, 100, 90, 90; alpha=0.05, type=:rr, method=:mn)
+    ci = ClinicalTrialUtilities.rrpropci(0, 100, 90, 90; alpha=0.05, method=:mn)
     @test ci.lower    ≈ 0.0
     @test ci.upper    ≈ 0.018137090385952483  atol=1E-6
     @test ci.estimate ≈ 0.0
 
-    ci = ClinicalTrialUtilities.twoprop(100, 100, 0, 90; alpha=0.05, type=:rr, method=:mn)
+    ci = ClinicalTrialUtilities.rrpropci(100, 100, 0, 90; alpha=0.05, method=:mn)
     @test ci.lower    ≈ 44.8498645475395 atol=1E-6
     @test ci.upper    ≈ Inf
     @test ci.estimate ≈ Inf
 
     #-- cli
 
-    ci = ClinicalTrialUtilities.twoprop(30, 100, 40, 90; alpha=0.05, type=:rr, method=:cli)
+    ci = ClinicalTrialUtilities.rrpropci(30, 100, 40, 90; alpha=0.05, method=:cli)
     @test ci.lower    ≈ 0.4663950 atol=1E-6
     @test ci.upper    ≈ 0.9860541 atol=1E-6
     @test ci.estimate ≈ 0.675     atol=1E-4
 
-    ci = ClinicalTrialUtilities.twoprop(30, 100, 40, 90; alpha=0.05, type=:rr, method=:mover)
+    ci = ClinicalTrialUtilities.rrpropci(30, 100, 40, 90; alpha=0.05, method=:mover)
     @test ci.lower    ≈ 0.4634443 atol=1E-6
     @test ci.upper    ≈ 0.9808807 atol=1E-6
     @test ci.estimate ≈ 0.675     atol=1E-4
 
-    ci = ClinicalTrialUtilities.twoprop(30, 100, 40, 90; alpha=0.05, type=:rr, method=:mover)
+    ci = ClinicalTrialUtilities.rrpropci(30, 100, 40, 90; alpha=0.05, method=:mover)
     @test ci.lower    ≈ 0.4634443 atol=1E-6
     @test ci.upper    ≈ 0.9808807 atol=1E-6
     @test ci.estimate ≈ 0.675     atol=1E-4
     #katz
-    ci = ClinicalTrialUtilities.twoprop(30, 100, 40, 90; alpha=0.05, type=:rr, method=:katz)
+    ci = ClinicalTrialUtilities.rrpropci(30, 100, 40, 90; alpha=0.05, method=:katz)
     @test ci.lower    ≈ 0.4624671 atol=1E-6
     @test ci.upper    ≈ 0.9852050 atol=1E-6
     @test ci.estimate ≈ 0.675     atol=1E-4
