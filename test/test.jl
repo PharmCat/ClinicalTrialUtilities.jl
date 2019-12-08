@@ -335,6 +335,17 @@ println(" ---------------------------------- ")
     #ERROR: ArgumentError: Design not known!
     @test_throws ArgumentError ClinicalTrialUtilities.Design(:ddd)
 
+    #ERROR: ArgumentError: !(theta2 > thetao > theta1), check settings!
+    @test_throws ArgumentError ClinicalTrialUtilities.besamplen(;cv=0.35, theta1 = 1.0)
+    #ERROR: ArgumentError: Beta ≥ 1.0 or ≤ 0.0!
+    @test_throws ArgumentError ClinicalTrialUtilities.besamplen(;cv=0.35, beta = 1.0)
+
+    @test_throws ArgumentError ClinicalTrialUtilities.besamplen(;cv=0.35, alpha = 1.0)
+
+    @test_throws ArgumentError ClinicalTrialUtilities.besamplen(;cv=-0.35)
+
+
+
 end
 
 #println(" ---------------------------------- ")

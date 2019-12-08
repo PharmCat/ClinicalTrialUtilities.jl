@@ -129,11 +129,12 @@ struct LimitRule
     lloq::Real
     btmax::Real
     atmax::Real
+    rm::Bool
     function LimitRule(lloq, btmax, atmax)
-        new(lloq, btmax, atmax)::LimitRule
+        new(lloq, btmax, atmax, true)::LimitRule
     end
     function LimitRule()
-        new(NaN, NaN, NaN)::LimitRule
+        new(NaN, NaN, NaN, false)::LimitRule
     end
 end
 
