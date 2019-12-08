@@ -633,7 +633,7 @@ Bioequivalence sample size estimation.
 function besamplen(;alpha::Real=0.05, beta::Real=0.2, theta0::Real=0.95, theta1::Real=0.8, theta2::Real=1.25, cv::Real=0.0, sd::Real=0.0, design::Symbol=:d2x2, method::Symbol=:owenq, logscale::Bool=true)::TaskResult
     if !(0 < beta < 1) throw(ArgumentError("Beta ≥ 1.0 or ≤ 0.0!")) end
     if !(0 < alpha < 1) throw(ArgumentError("Alfa ≥ 1.0 or ≤ 0.0!")) end
-    if theta1 ≥ theta2  throw(ArgumentError("theta1 ≥ theta2!")) end
+    if !(theta2 > theta0 > theta1)  throw(ArgumentError("!(theta2 > thetao > theta1), check settings!")) end
     if !logscale && cv > 0.0 && sd ≤ 0.0 throw(ArgumentError("Use sd instead cv for non-logscale parameters!")) end
     if !logscale && sd ≤ 0.0 throw(ArgumentError("sd ≤ 0.0!")) end
     if !logscale && cv > 0.0 @warn "sd and cv provided for non-logscale parameters, only sd used!" end

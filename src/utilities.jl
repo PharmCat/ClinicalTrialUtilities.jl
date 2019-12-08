@@ -84,6 +84,9 @@ function cvfromci(;alpha = 0.05, theta1 = 0.8, theta2 = 1.25, n, design=:d2x2, m
     if mso return ms end
     return cvfromvar(ms)
 end
+function cvfromci(theta1, theta2, n; alpha = 0.05, design=:d2x2, mso=false, cvms=false)
+    return cvfromci(;alpha = alpha, theta1 = theta1, theta2 = theta2, n = n, design = design, mso = mso, cvms = cvms)
+end
 
 """
     pooledcv(data::DataFrame; cv=:cv, df=:df, alpha=0.05, returncv=true)::ConfInt
@@ -104,13 +107,24 @@ Pooled CV from multiple sources.
 - false - return var
 
 """
-function pooledcv(data::DataFrame; cv=:cv, df=:df, alpha=0.05, returncv=true)::ConfInt
+function pooledcv(data::DataFrame; cv = :cv, df = :df, alpha::Real = 0.05, returncv::Bool = true)::ConfInt
     if isa(cv, String)  cv = Symbol(cv) end
     if isa(df, String)  df = Symbol(df) end
-    tdf = sum(data[:, df])
-    result = sum(varfromcv.(data[:, cv]) .* data[:, df])/tdf
+    return pooledcv(data[!, cv], data[!, df]; alpha = alpha, returncv = returncv)
+end
+function pooledcv(cv::Vector, df::Vector; alpha=0.05, returncv = true)::ConfInt
+    tdf = sum(df)
+    result = sum(varfromcv.(cv) .* df)/tdf
     CHSQ = Chisq(tdf)
     if returncv return ConfInt(cvfromvar(result*tdf/quantile(CHSQ, 1-alpha/2)), cvfromvar(result*tdf/quantile(CHSQ, alpha/2)), cvfromvar(result))
     else ConfInt(result*tdf/quantile(CHSQ, 1-alpha/2), result*tdf/quantile(CHSQ, alpha/2), result)
     end
+end
+function pooledcv(cv::Vector, n::Vector, design::Vector; alpha=0.05, returncv = true)::ConfInt
+    d  = Design.(design)
+    df = Array{Int, 1}(undef, length(d))
+    for i = 1:length(d)
+        df[i] = d[i].df(n[i])
+    end
+    return pooledcv(cv, df; alpha = alpha, returncv = returncv)
 end
