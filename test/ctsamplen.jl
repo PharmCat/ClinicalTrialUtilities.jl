@@ -36,7 +36,7 @@
     #9
     t = ClinicalTrialUtilities.ctsamplen(param=:prop, type=:ns, group=:one, alpha=0.05, beta=0.2, diff=-0.1, a=0.5, b=0.3)
     @test ceil(t.result) == ceil(ClinicalTrialUtilities.ctsamplen(t.task).result) == 18
-    Base.show(io, t)
+        Base.show(io, t)
     #10    p.92
     t = ClinicalTrialUtilities.ctsamplen(param=:prop, type=:ea, group=:two, alpha=0.05, beta=0.2, a=0.65, b=0.85)
     @test ceil(t.result) == ceil(ClinicalTrialUtilities.ctsamplen(t.task).result) == 70
@@ -48,6 +48,7 @@
     #12    p.92
     t = ClinicalTrialUtilities.ctsamplen(param=:prop, type=:ns, group=:two, alpha=0.05, beta=0.2, diff=-0.1, a=0.85, b=0.65)
     @test ceil(t.result) == ceil(ClinicalTrialUtilities.ctsamplen(t.task).result) == 25
+    @test ceil(ClinicalTrialUtilities.pdiffnsn(0.85, 0.65, -0.1).result) == 25
     Base.show(io, t)
     #13    p.108
     t = ClinicalTrialUtilities.ctsamplen(param=:or, type=:ea,  alpha=0.05, beta=0.2, a=0.4, b=0.25)

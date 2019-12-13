@@ -389,6 +389,10 @@ end
 function ctsamplen(t::CTask{T, D, H, O}) where T <: DiffProportion{P, P} where P <: AbstractSimpleProportion  where D <: AbstractDesign where H <: Equivalence where O <: SampleSize
     return TaskResult(t, :chow, two_proportion_equivalence(getval(t.param.a), getval(t.param.b),  mdiff(t.hyp), t.alpha, t.objective.val, t.k))
 end
+function pdiffnsn(a, b, diff; alpha = 0.05, beta = 0.2, k = 1.0)
+    t = CTask(DiffProportion(Probability(a), Probability(b)), Parallel(), Superiority(diff, diff), SampleSize(beta), alpha, k)
+    ctsamplen(t)
+end
 function ctsamplen(t::CTask{T, D, H, O}) where T <: DiffProportion{P, P} where P <: AbstractSimpleProportion  where D <: AbstractDesign where H <: Superiority where O <: SampleSize
     return TaskResult(t, :chow, two_proportion_superiority(getval(t.param.a), getval(t.param.b), t.hyp.diff, t.alpha, t.objective.val, t.k))
 end
