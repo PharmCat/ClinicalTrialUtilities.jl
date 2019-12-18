@@ -1085,10 +1085,9 @@ function DataFrames.DataFrame(data::DataSet{T}; unst = false, us = false) where 
         end
 end
 
-
 #-------------------------------------------------------------------------------
 # PLOTS
-
+# Rebuild with RecipesBase !!!
 function plotpk(ds::DataSet{PKSubject}; groupby = nothing, label = nothing)
     pv      = Vector{Any}(undef, 0)
     ugroup  = Vector{Any}(undef, 0)
@@ -1102,7 +1101,6 @@ function plotpk(ds::DataSet{PKSubject}; groupby = nothing, label = nothing)
     for i = 1:length(ulabel)
         coldict[ulabel[i]] = colors[i]
     end
-
     for u in ugroup
         labels = Vector{String}(undef, 0)
         p     = plot(
