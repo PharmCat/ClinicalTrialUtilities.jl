@@ -1,6 +1,3 @@
-abstract type AbstractData end
-abstract type AbstractDataSet end
-
 """
     Descriptive statistics type
 """
@@ -33,9 +30,6 @@ function Base.show(io::IO, obj::Descriptive)
 end
 function Base.getindex(a::Descriptive, s::Symbol)::Real
     return a.result[s]
-end
-struct DataSet{T <: AbstractData}
-    data::Vector{T}
 end
 function Base.show(io::IO, obj::DataSet{Descriptive})
     println(io, "Descriptive statistics set")
