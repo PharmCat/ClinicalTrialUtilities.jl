@@ -112,15 +112,51 @@ function pooledcv(data::DataFrame; cv = :cv, df = :df, alpha::Real = 0.05, retur
     if isa(df, String)  df = Symbol(df) end
     return pooledcv(data[!, cv], data[!, df]; alpha = alpha, returncv = returncv)
 end
-function pooledcv(cv::Vector, df::Vector; alpha=0.05, returncv = true)::ConfInt
-    tdf = sum(df)
+"""
+    pooledcv(cv::Vector, df::Vector; alpha = 0.05, returncv = true)::ConfInt
+
+Pooled CV from multiple sources.
+
+**cv** - CV Vector
+
+**df** - DF Vector
+
+**alpha** - Alpha for var/cv confidence interval.
+
+**returncv** - Return CV or var:
+
+- true  - return cv
+- false - return var
+
+"""
+function pooledcv(cv::Vector, df::Vector; alpha = 0.05, returncv = true)::ConfInt
+    tdf    = sum(df)
     result = sum(varfromcv.(cv) .* df)/tdf
-    CHSQ = Chisq(tdf)
+    CHSQ   = Chisq(tdf)
     if returncv return ConfInt(cvfromvar(result*tdf/quantile(CHSQ, 1-alpha/2)), cvfromvar(result*tdf/quantile(CHSQ, alpha/2)), cvfromvar(result))
     else ConfInt(result*tdf/quantile(CHSQ, 1-alpha/2), result*tdf/quantile(CHSQ, alpha/2), result)
     end
 end
-function pooledcv(cv::Vector, n::Vector, design::Vector; alpha=0.05, returncv = true)::ConfInt
+"""
+    pooledcv(cv::Vector, n::Vector, design::Vector; alpha = 0.05, returncv = true)::ConfInt
+
+Pooled CV from multiple sources.
+
+**cv** - CV Vector
+
+**n** - n Vector
+
+**design** - design Vector
+
+**alpha** - Alpha for var/cv confidence interval.
+
+**returncv** - Return CV or var:
+
+- true  - return cv
+- false - return var
+
+"""
+function pooledcv(cv::Vector, n::Vector, design::Vector; alpha = 0.05, returncv = true)::ConfInt
     d  = Design.(design)
     df = Array{Int, 1}(undef, length(d))
     for i = 1:length(d)
