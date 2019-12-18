@@ -13,13 +13,14 @@
 # If you want to check and get R code you can find some here: http://powerandsamplesize.com/Calculators/
 __precompile__(true)
 module ClinicalTrialUtilities
-using Distributions, StatsBase, Random, Roots, QuadGK, DataFrames
+using Distributions, StatsBase, Random, Roots, QuadGK, DataFrames, RecipesBase, Plots
 import SpecialFunctions
 import Base.show
 import Base.showerror
 import Base.getindex
 import Base.length
 import Base.in
+import Base.iterate
 import StatsBase.confint
 import DataFrames.DataFrame
 
@@ -35,6 +36,7 @@ const PI2INV = 0.5 / π
 const VERSION = "0.2.0"
 #Exceptions
 
+include("abstracttypes.jl")
 #Owen function calc: owensQ, owensQo, ifun1, owensTint2, owensT, tfn
 include("owensq.jl")
 #powerTOST calc: powerTOST, powertostint, powerTOSTOwenQ, approxPowerTOST, power1TOST, approx2PowerTOST, cv2se, designProp
@@ -49,6 +51,8 @@ include("ci.jl")
 include("sim.jl")
 #info function
 include("info.jl")
+#DataSET
+include("dataset.jl")
 #Descriptive statistics
 include("descriptives.jl")
 #PK

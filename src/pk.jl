@@ -1,7 +1,6 @@
 #Pharmacokinetics
 #Makoid C, Vuchetich J, Banakar V. 1996-1999. Basic Pharmacokinetics.
 
-abstract type AbstractSubject <: AbstractData end
 #!!!
 function in(a::Dict, b::Dict)
     k = collect(keys(a))
@@ -1084,4 +1083,41 @@ function DataFrames.DataFrame(data::DataSet{T}; unst = false, us = false) where 
         else
             return df
         end
+end
+
+
+#-------------------------------------------------------------------------------
+# PLOTS
+
+function plotpk(ds::DataSet{PKSubject}; groupby = nothing, label = nothing)
+    pv      = Vector{Any}(undef, 0)
+    ugroup  = Vector{Any}(undef, 0)
+    ulabel  = Vector{Any}(undef, 0)
+    coldict = Dict{Any, Any}()
+    for i in ds
+        if i.sort[groupby] ∉ ugroup push!(ugroup, i.sort[groupby]) end
+        if i.sort[label]   ∉ ulabel push!(ulabel, i.sort[label]) end
+    end
+    colors = [:blue, :red, :green]
+    for i = 1:length(ulabel)
+        coldict[ulabel[i]] = colors[i]
+    end
+
+    for u in ugroup
+        labels = Vector{String}(undef, 0)
+        p     = plot(
+        xlabel = "Time",
+        ylabel = "Concentration",
+        title  = "$(groupby) : $(u)")
+        for i in ds
+            if i.sort[groupby] == u
+                push!(labels, string(i.sort[label]))
+                plot!(p, i.time, i.obs,
+                    label = labels,
+                    line = (coldict[i.sort[label]], 1, 1.0))
+            end
+        end
+        push!(pv, p)
+    end
+    pv
 end
