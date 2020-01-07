@@ -259,8 +259,8 @@ println(" ---------------------------------- ")
     pk   = ClinicalTrialUtilities.nca!(pkds)
     df   = DataFrame(pk; unst = true)
 
-
-
+    
+    print(io, pk[1].subject.keldata)
 end
 
 
@@ -290,5 +290,10 @@ println(" ---------------------------------- ")
     ClinicalTrialUtilities.setth!(pdds, 0.2)
     pd   = ClinicalTrialUtilities.nca!(pdds)
     @test pd[3, :AUCDBLTH] ≈ 0.3428571428571429 atol=1E-5
+
+    print(io, pdds)
+    print(io, pdds[1])
+    print(io, pd)
+    print(io, pd[1])
 
 end

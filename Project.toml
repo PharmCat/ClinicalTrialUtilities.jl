@@ -1,7 +1,7 @@
 authors = ["Vladimir Arnautov (mail@pharmcat.net)"]
 name = "ClinicalTrialUtilities"
 uuid = "535c2557-d7d0-564d-8ff9-4ae146c18cfe"
-version = "0.2.1"
+version = "0.2.2"
 
 [deps]
 Random = "9a3f8284-a2c9-5f02-9a11-845980a1fd5c"

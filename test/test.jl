@@ -253,13 +253,7 @@ end
 
 include("citest.jl")
 
-println(" ---------------------------------- ")
-@testset "  Simulations           " begin
-
-    t      = ClinicalTrialUtilities.bepower(cv=0.2, n=20).task
-    result = ClinicalTrialUtilities.ctsim(t; nsim = 100, seed=1234)
-    @test result == 0.83
-end
+include("sim.jl")
 
 include("dstest.jl")
 
@@ -334,6 +328,17 @@ println(" ---------------------------------- ")
     @test_throws ArgumentError ClinicalTrialUtilities.ctsamplen(param=:mean, type=:ea, group=:one, alpha=0.05, beta=0.2, diff=1, sd=1, a=0, b=0, k=0)
     #ERROR: ArgumentError: Design not known!
     @test_throws ArgumentError ClinicalTrialUtilities.Design(:ddd)
+
+    #ERROR: ArgumentError: !(theta2 > thetao > theta1), check settings!
+    @test_throws ArgumentError ClinicalTrialUtilities.besamplen(;cv=0.35, theta1 = 1.0)
+    #ERROR: ArgumentError: Beta ≥ 1.0 or ≤ 0.0!
+    @test_throws ArgumentError ClinicalTrialUtilities.besamplen(;cv=0.35, beta = 1.0)
+
+    @test_throws ArgumentError ClinicalTrialUtilities.besamplen(;cv=0.35, alpha = 1.0)
+
+    @test_throws ArgumentError ClinicalTrialUtilities.besamplen(;cv=-0.35)
+
+
 
 end
 

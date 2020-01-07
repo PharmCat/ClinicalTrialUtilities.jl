@@ -3,24 +3,6 @@
 # Copyright © 2019 Vladimir Arnautov aka PharmCat (mail@pharmcat.net)
 
 #ctsamplen, ctpower, besamplen, bepower
-
-abstract type AbstractTask end
-abstract type AbstractParameter end
-
-abstract type AbstractProportion  <:  AbstractParameter end
-abstract type AbstractMean  <:  AbstractParameter end
-
-abstract type AbstractSimpleProportion <:  AbstractProportion end
-
-abstract type AbstractCompositeProportion{T}  <:  AbstractProportion end
-abstract type AbstractCompositeMean{T}  <:  AbstractMean end
-
-abstract type AbstractObjective end
-abstract type AbstractHypothesis end
-abstract type AbstractEquivalenceHypothesis <: AbstractHypothesis end
-
-abstract type AbstractDesign end
-
 struct Parallel <: AbstractDesign
     df::Function
     bkni::Real
@@ -117,53 +99,17 @@ struct Superiority <: AbstractHypothesis
 end
 struct McNemars <: AbstractHypothesis end
 
-struct Power <: AbstractObjective
+struct Power <: AbstractPower
     val::Int
 end
-struct SampleSize <: AbstractObjective
-    val::Float64
-    function SampleSize(val)
+struct SampleSize{T} <: AbstractSampleSize where T <: AbstractFloat
+    val::T
+    function SampleSize(val::T) where T <: AbstractFloat
         if val ≥ 1.0 || val ≤ 0.0 throw(ArgumentError("Beta ≥ 1.0 or ≤ 0.0!")) end
-        new(val)::SampleSize
+        new{T}(val)::SampleSize
     end
 end
 
-struct Proportion <: AbstractSimpleProportion
-    x::Int
-    n::Int
-    function Proportion(x::Int, n::Int)
-        if x > n throw(ArgumentError("Error: X > N!")) end
-        new(x, n)::Proportion
-    end
-end
-struct Probability <: AbstractSimpleProportion
-    p::Float64
-    function Probability(p::Float64)
-        if p ≥ 1.0 || p ≤ 0.0 throw(ArgumentError("Probability can't be ≥ 1.0 or ≤ 0.0!")) end
-        new(p::Float64)::Probability
-    end
-    function Probability(p::Proportion)
-        new(p.x/p.n)::Probability
-    end
-end
-function getval(p::Proportion)::Float64
-    return p.x/p.n
-end
-function getval(p::Probability)::Float64
-    return p.p
-end
-#=
-struct Probability{T<: Float64, N <: Union{Int, Nothing}} <: AbstractParameter
-    p::T
-    n::N
-    function Probability(p::T, n::N) where T <: Float64 where N <: Int
-        new{T, N}(p, n)::Probability
-    end
-    function Probability(p::T, n::N = nothing) where T <: Float64 where N <: Nothing
-        new{T, N}(p, nothing)::Probability
-    end
-end
-=#
 struct Mean{T <: Union{Int, Nothing}} <: AbstractMean
     m::Real
     sd::Real
@@ -185,19 +131,6 @@ struct DiffMean{T <: Union{Mean, Real}} <: AbstractCompositeMean{T}
     a::Mean
     b::T
 end
-struct DiffProportion{S <: AbstractSimpleProportion, T <: Union{Proportion, Probability, Real}}  <: AbstractCompositeProportion{T}
-    a::S
-    b::T
-end
-struct OddRatio{T <: AbstractSimpleProportion} <: AbstractCompositeProportion{T}
-    a::T
-    b::T
-end
-struct RiskRatio{T <: AbstractSimpleProportion} <: AbstractCompositeProportion{T}
-    a::T
-    b::T
-end
-
 struct TaskResult{T <: AbstractTask}
     task::T
     method::Symbol
@@ -353,61 +286,65 @@ function ctsamplen(;param::Symbol, type::Symbol, group::Symbol = :notdef, alpha:
     return TaskResult(task, :chow, n)
 end #sampleSize
 
-function ctsamplen(t::CTask{T, D, H, O}) where T <: DiffMean{R} where R <: Real where D <: AbstractDesign where H <: Equality where O <: SampleSize
+function ctsamplen(t::CTask{T, D, H, O}) where T <: DiffMean{R} where R <: Real where D <: AbstractDesign where H <: Equality where O <: AbstractSampleSize
     return TaskResult(t, :chow, one_mean_equality(t.param.a.m, t.param.b, t.param.a.sd, t.alpha, t.objective.val))
 end
-function ctsamplen(t::CTask{T, D, H, O}) where T <: DiffMean{R} where R <: Real where D <: AbstractDesign where H <: Equivalence where O <: SampleSize
+function ctsamplen(t::CTask{T, D, H, O}) where T <: DiffMean{R} where R <: Real where D <: AbstractDesign where H <: Equivalence where O <: AbstractSampleSize
     return TaskResult(t, :chow, one_mean_equivalence(t.param.a.m, t.param.b, t.param.a.sd, mdiff(t.hyp), t.alpha, t.objective.val))
 end
-function ctsamplen(t::CTask{T, D, H, O}) where T <: DiffMean{R} where R <: Real where D <: AbstractDesign where H <: Superiority where O <: SampleSize
+function ctsamplen(t::CTask{T, D, H, O}) where T <: DiffMean{R} where R <: Real where D <: AbstractDesign where H <: Superiority where O <: AbstractSampleSize
     return TaskResult(t, :chow, one_mean_superiority(t.param.a.m, t.param.b, t.param.a.sd, t.hyp.diff, t.alpha, t.objective.val))
 end
 #---
-function ctsamplen(t::CTask{T, D, H, O}) where T <: DiffMean{M} where M <: AbstractMean where D <: AbstractDesign where H <: Equality where O <: SampleSize
+function ctsamplen(t::CTask{T, D, H, O}) where T <: DiffMean{M} where M <: AbstractMean where D <: AbstractDesign where H <: Equality where O <: AbstractSampleSize
     return TaskResult(t, :chow, two_mean_equality(t.param.a.m, t.param.b.m, t.param.a.sd, t.alpha, t.objective.val, t.k))
 end
-function ctsamplen(t::CTask{T, D, H, O}) where T <: DiffMean{M} where M <: AbstractMean  where D <: AbstractDesign where H <: Equivalence where O <: SampleSize
+function ctsamplen(t::CTask{T, D, H, O}) where T <: DiffMean{M} where M <: AbstractMean  where D <: AbstractDesign where H <: Equivalence where O <: AbstractSampleSize
     return TaskResult(t, :chow, two_mean_equivalence(t.param.a.m, t.param.b.m, t.param.a.sd,  mdiff(t.hyp), t.alpha, t.objective.val, t.k))
 end
-function ctsamplen(t::CTask{T, D, H, O}) where T <: DiffMean{M} where M <: AbstractMean  where D <: AbstractDesign where H <: Superiority where O <: SampleSize
+function ctsamplen(t::CTask{T, D, H, O}) where T <: DiffMean{M} where M <: AbstractMean  where D <: AbstractDesign where H <: Superiority where O <: AbstractSampleSize
     return TaskResult(t, :chow, two_mean_superiority(t.param.a.m, t.param.b.m, t.param.a.sd, t.hyp.diff, t.alpha, t.objective.val, t.k))
 end
 #------
-function ctsamplen(t::CTask{T, D, H, O}) where T <: DiffProportion{P, R} where P <: AbstractSimpleProportion where R <: Real  where D  <: AbstractDesign where H <: Equality where O <: SampleSize
+function ctsamplen(t::CTask{T, D, H, O}) where T <: DiffProportion{P, R} where P <: AbstractSimpleProportion where R <: Real  where D  <: AbstractDesign where H <: Equality where O <: AbstractSampleSize
     return TaskResult(t, :chow, one_proportion_equality(getval(t.param.a), t.param.b, t.alpha, t.objective.val))
 end
-function ctsamplen(t::CTask{T, D, H, O}) where T <: DiffProportion{P, R} where P <: AbstractSimpleProportion where R <: Real  where D <: AbstractDesign where H <: Equivalence where O <: SampleSize
+function ctsamplen(t::CTask{T, D, H, O}) where T <: DiffProportion{P, R} where P <: AbstractSimpleProportion where R <: Real  where D <: AbstractDesign where H <: Equivalence where O <: AbstractSampleSize
     return TaskResult(t, :chow, one_proportion_equivalence(getval(t.param.a), t.param.b,  mdiff(t.hyp), t.alpha, t.objective.val))
 end
-function ctsamplen(t::CTask{T, D, H, O}) where T <: DiffProportion{P, R} where P <: AbstractSimpleProportion where R <: Real  where D <: AbstractDesign where H <: Superiority where O <: SampleSize
+function ctsamplen(t::CTask{T, D, H, O}) where T <: DiffProportion{P, R} where P <: AbstractSimpleProportion where R <: Real  where D <: AbstractDesign where H <: Superiority where O <: AbstractSampleSize
     return TaskResult(t, :chow, one_proportion_superiority(getval(t.param.a), t.param.b, t.hyp.diff, t.alpha, t.objective.val))
 end
 #---
-function ctsamplen(t::CTask{T, D, H, O}) where T <: DiffProportion{P, P} where P <: AbstractSimpleProportion  where D <: AbstractDesign where H <: Equality where O <: SampleSize
+function ctsamplen(t::CTask{T, D, H, O}) where T <: DiffProportion{P, P} where P <: AbstractSimpleProportion  where D <: AbstractDesign where H <: Equality where O <: AbstractSampleSize
     return TaskResult(t, :chow, two_proportion_equality(getval(t.param.a), getval(t.param.b), t.alpha, t.objective.val, t.k))
 end
-function ctsamplen(t::CTask{T, D, H, O}) where T <: DiffProportion{P, P} where P <: AbstractSimpleProportion  where D <: AbstractDesign where H <: Equivalence where O <: SampleSize
+function ctsamplen(t::CTask{T, D, H, O}) where T <: DiffProportion{P, P} where P <: AbstractSimpleProportion  where D <: AbstractDesign where H <: Equivalence where O <: AbstractSampleSize
     return TaskResult(t, :chow, two_proportion_equivalence(getval(t.param.a), getval(t.param.b),  mdiff(t.hyp), t.alpha, t.objective.val, t.k))
 end
-function ctsamplen(t::CTask{T, D, H, O}) where T <: DiffProportion{P, P} where P <: AbstractSimpleProportion  where D <: AbstractDesign where H <: Superiority where O <: SampleSize
+function pdiffnsn(a, b, diff; alpha = 0.05, beta = 0.2, k = 1.0)
+    t = CTask(DiffProportion(Probability(a), Probability(b)), Parallel(), Superiority(diff, diff), SampleSize(beta), alpha, k)
+    ctsamplen(t)
+end
+function ctsamplen(t::CTask{T, D, H, O}) where T <: DiffProportion{P, P} where P <: AbstractSimpleProportion  where D <: AbstractDesign where H <: Superiority where O <: AbstractSampleSize
     return TaskResult(t, :chow, two_proportion_superiority(getval(t.param.a), getval(t.param.b), t.hyp.diff, t.alpha, t.objective.val, t.k))
 end
 #------
-function ctsamplen(t::CTask{T, D, H, O}) where T <: OddRatio{P} where P <:  AbstractSimpleProportion  where D <: AbstractDesign where H <: Equality where O <: SampleSize
+function ctsamplen(t::CTask{T, D, H, O}) where T <: OddRatio{P} where P <:  AbstractSimpleProportion  where D <: AbstractDesign where H <: Equality where O <: AbstractSampleSize
     return TaskResult(t, :chow, or_equality(getval(t.param.a), getval(t.param.b), t.alpha, t.objective.val, t.k))
 end
-function ctsamplen(t::CTask{T, D, H, O}) where T <: OddRatio{P} where P <:  AbstractSimpleProportion  where D <: AbstractDesign where H <: Equivalence where O <: SampleSize
+function ctsamplen(t::CTask{T, D, H, O}) where T <: OddRatio{P} where P <:  AbstractSimpleProportion  where D <: AbstractDesign where H <: Equivalence where O <: AbstractSampleSize
     return TaskResult(t, :chow, or_equivalence(getval(t.param.a), getval(t.param.b),  mdiff(t.hyp), t.alpha, t.objective.val, t.k))
 end
-function ctsamplen(t::CTask{T, D, H, O}) where T <: OddRatio{P} where P <:  AbstractSimpleProportion  where D <: AbstractDesign where H <: Superiority where O <: SampleSize
+function ctsamplen(t::CTask{T, D, H, O}) where T <: OddRatio{P} where P <:  AbstractSimpleProportion  where D <: AbstractDesign where H <: Superiority where O <: AbstractSampleSize
     return TaskResult(t, :chow, or_superiority(getval(t.param.a), getval(t.param.b), t.hyp.diff, t.alpha, t.objective.val, t.k))
 end
 #------------
-function ctsamplen(t::CTask{T, D, H, O}) where T <: DiffProportion{P, P} where P <: AbstractProportion  where D <: AbstractDesign where H <: McNemars where O <: SampleSize
+function ctsamplen(t::CTask{T, D, H, O}) where T <: DiffProportion{P, P} where P <: AbstractProportion  where D <: AbstractDesign where H <: McNemars where O <: AbstractSampleSize
     return TaskResult(t, :chow, mcnm(getval(t.param.a), getval(t.param.b), t.alpha, t.objective.val))
 end
 #------------
-function ctsamplen(t::CTask{T, D, Bioequivalence, SampleSize}; method::Symbol = :owenq)  where T where D
+function ctsamplen(t::CTask{T, D, Bioequivalence, O}; method::Symbol = :owenq)  where T where D where O <: AbstractSampleSize
     return besamplen(t; method = method)
 end
 
