@@ -37,6 +37,10 @@ const VERSION = "0.2.0"
 #Exceptions
 
 include("abstracttypes.jl")
+
+include("proportion.jl")
+
+
 #Owen function calc: owensQ, owensQo, ifun1, owensTint2, owensT, tfn
 include("owensq.jl")
 #powerTOST calc: powerTOST, powertostint, powerTOSTOwenQ, approxPowerTOST, power1TOST, approx2PowerTOST, cv2se, designProp

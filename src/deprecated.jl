@@ -274,7 +274,18 @@ function descriptive_deprecated(data::DataFrame;
     return dfs
 end
 
-
+#=
+struct Probability{T<: Float64, N <: Union{Int, Nothing}} <: AbstractParameter
+    p::T
+    n::N
+    function Probability(p::T, n::N) where T <: Float64 where N <: Int
+        new{T, N}(p, n)::Probability
+    end
+    function Probability(p::T, n::N = nothing) where T <: Float64 where N <: Nothing
+        new{T, N}(p, nothing)::Probability
+    end
+end
+=#
 #=
 function nca(data::DataFrame; conc = NaN, effect = NaN, time=:Time, sort = NaN, calcm = :lint, bl::Float64 = NaN, th::Float64 = NaN)::NCA
     columns  = DataFrames.names(data)

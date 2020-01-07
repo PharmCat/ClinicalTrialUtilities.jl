@@ -110,43 +110,6 @@ struct SampleSize{T} <: AbstractSampleSize where T <: AbstractFloat
     end
 end
 
-struct Proportion <: AbstractSimpleProportion
-    x::Int
-    n::Int
-    function Proportion(x::Int, n::Int)
-        if x > n throw(ArgumentError("Error: X > N!")) end
-        new(x, n)::Proportion
-    end
-end
-struct Probability{T} <: AbstractSimpleProportion where T <: AbstractFloat
-    p::T
-    function Probability(p::T) where T <: AbstractFloat
-        if p ≥ 1.0 || p ≤ 0.0 throw(ArgumentError("Probability can't be ≥ 1.0 or ≤ 0.0!")) end
-        new{T}(p)::Probability
-    end
-    function Probability(p::Proportion)
-        prob = p.x/p.n
-        new{typeof(prob)}(prob)::Probability
-    end
-end
-function getval(p::Proportion)::Float64
-    return p.x/p.n
-end
-function getval(p::Probability)::Float64
-    return p.p
-end
-#=
-struct Probability{T<: Float64, N <: Union{Int, Nothing}} <: AbstractParameter
-    p::T
-    n::N
-    function Probability(p::T, n::N) where T <: Float64 where N <: Int
-        new{T, N}(p, n)::Probability
-    end
-    function Probability(p::T, n::N = nothing) where T <: Float64 where N <: Nothing
-        new{T, N}(p, nothing)::Probability
-    end
-end
-=#
 struct Mean{T <: Union{Int, Nothing}} <: AbstractMean
     m::Real
     sd::Real
@@ -168,19 +131,6 @@ struct DiffMean{T <: Union{Mean, Real}} <: AbstractCompositeMean{T}
     a::Mean
     b::T
 end
-struct DiffProportion{S <: AbstractSimpleProportion, T <: Union{Proportion, Probability, Real}}  <: AbstractCompositeProportion{T}
-    a::S
-    b::T
-end
-struct OddRatio{T <: AbstractSimpleProportion} <: AbstractCompositeProportion{T}
-    a::T
-    b::T
-end
-struct RiskRatio{T <: AbstractSimpleProportion} <: AbstractCompositeProportion{T}
-    a::T
-    b::T
-end
-
 struct TaskResult{T <: AbstractTask}
     task::T
     method::Symbol

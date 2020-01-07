@@ -253,13 +253,7 @@ end
 
 include("citest.jl")
 
-println(" ---------------------------------- ")
-@testset "  Simulations           " begin
-
-    t      = ClinicalTrialUtilities.bepower(cv=0.2, n=20).task
-    result = ClinicalTrialUtilities.ctsim(t; nsim = 100, seed=1234)
-    @test result == 0.83
-end
+include("sim.jl")
 
 include("dstest.jl")
 
