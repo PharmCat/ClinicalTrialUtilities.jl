@@ -11,7 +11,7 @@ println(" ---------------------------------- ")
     ClinicalTrialUtilities.Superiority(-0.15, -0.15),
     ClinicalTrialUtilities.Power(100), 0.05, 1.0)
 
-    result = ClinicalTrialUtilities.ctsim(task, nsim = 1000, method = :nhs, seed = 1234)
+    result = ClinicalTrialUtilities.ctsim(t, nsim = 1000, method = :nhs, seed = 1234)
 
     @test result == 0.169
 
