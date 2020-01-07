@@ -13,7 +13,7 @@
 # If you want to check and get R code you can find some here: http://powerandsamplesize.com/Calculators/
 __precompile__(true)
 module ClinicalTrialUtilities
-using Distributions, StatsBase, Random, Roots, QuadGK, DataFrames, RecipesBase, Plots
+using Distributions, StatsBase, Random, Roots, QuadGK, DataFrames#, RecipesBase, Plots
 import SpecialFunctions
 import Base.show
 import Base.showerror
