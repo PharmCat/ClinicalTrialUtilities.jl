@@ -10,7 +10,7 @@
 
 LnSD from CV.
 """
-@inline function sdfromcv(cv::Real)::Float64
+@inline function sdfromcv(cv::T)::AbstractFloat where T <: Real
     return sqrt(varfromcv(cv))
 end
 """
@@ -18,7 +18,7 @@ end
 
 LnVariance from CV.
 """
-function varfromcv(cv::Real)::Float64
+function varfromcv(cv::T)::AbstractFloat where T <: Real
      return log(1+cv^2)
 end
 """
@@ -26,11 +26,16 @@ end
 
 CV from variance.
 """
-function cvfromvar(σ²::Real)::Float64
+function cvfromvar(σ²::T)::AbstractFloat where T <: Real
     return sqrt(exp(σ²)-1)
 end
 #CV2se
-@inline function cvfromsd(σ::Real)::Float64
+"""
+    cvfromsd(σ::Real)::Float64
+
+CV from variance.
+"""
+function cvfromsd(σ::T)::AbstractFloat where T <: Real
     return sqrt(exp(σ^2)-1)
 end
 
@@ -66,13 +71,15 @@ Calculate MS only
 - false(default)
 - true
 
-**cvms**
 
+Deprecated:
+
+**cvms**
 Calculate CV and MS
 - false(default)
 - true
 """
-function cvfromci(;alpha = 0.05, theta1 = 0.8, theta2 = 1.25, n, design=:d2x2, mso=false, cvms=false)::Union{Float64, Tuple{Float64, Float64}}
+function cvfromci(;alpha = 0.05, theta1 = 0.8, theta2 = 1.25, n, design=:d2x2, mso=false, cvms=false)
     d     = Design(design)
     df    = d.df(n)
     if df < 1 throw(ArgumentError("df < 1, check n!")) end
@@ -80,7 +87,7 @@ function cvfromci(;alpha = 0.05, theta1 = 0.8, theta2 = 1.25, n, design=:d2x2, m
     sef = sediv(d, n)
 
     ms = ((log(theta2/theta1)/2/quantile(TDist(df), 1-alpha))/sef)^2
-    if cvms return cvfromvar(ms), ms end
+    #if cvms return cvfromvar(ms), ms end
     if mso return ms end
     return cvfromvar(ms)
 end
