@@ -2,8 +2,8 @@ println(" ---------------------------------- ")
 @testset "#5  utils Test          " begin
 
 @testset "  ci2cv Test            " begin
-    cvms = ClinicalTrialUtilities.cvfromci(;alpha = 0.05, theta1 = 0.9, theta2 = 1.25, n=30, design=:d2x2x4, cvms=true)
-    @test cvms[1] ≈ 0.583175066140736 && cvms[2] ≈ 0.29273913226894244
+    #cvms = ClinicalTrialUtilities.cvfromci(;alpha = 0.05, theta1 = 0.9, theta2 = 1.25, n=30, design=:d2x2x4, cvms=true)
+    #@test cvms[1] ≈ 0.583175066140736 && cvms[2] ≈ 0.29273913226894244
     @test ClinicalTrialUtilities.cvfromci(;alpha = 0.05, theta1 = 0.9, theta2 = 1.25, n=30, design=:d2x2x4, mso=true) ≈ 0.29273913226894244
     @test ClinicalTrialUtilities.cvfromci(;alpha = 0.05, theta1 = 0.9, theta2 = 1.25, n=30) ≈ 0.387417014838382
     @test ClinicalTrialUtilities.cvfromci(;alpha = 0.05, theta1 = 0.8, theta2 = 1.25, n=30) ≈ 0.5426467811605913
