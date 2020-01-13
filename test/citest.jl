@@ -265,11 +265,11 @@ println(" ---------------------------------- ")
     #CI Test for random sample
     m1  = rand(Normal(), 100)
     m2  = rand(Normal(), 100)
-    ci1 = ClinicalTrialUtilities.meanDiffUV(m1, m2, 0.05)
-    ci2 = ClinicalTrialUtilities.meanDiffUV(mean(m1), var(m1), length(m1), mean(m2), var(m2), length(m2), 0.05)
+    ci1 = ClinicalTrialUtilities.meandiffuv(m1, m2, 0.05)
+    ci2 = ClinicalTrialUtilities.meandiffuv(mean(m1), var(m1), length(m1), mean(m2), var(m2), length(m2), 0.05)
     @test ci1 == ci2
-    ci1 = ClinicalTrialUtilities.meanDiffEV(m1, m2, 0.05)
-    ci2 = ClinicalTrialUtilities.meanDiffEV(mean(m1), var(m1), length(m1), mean(m2), var(m2), length(m2), 0.05)
+    ci1 = ClinicalTrialUtilities.meandiffev(m1, m2, 0.05)
+    ci2 = ClinicalTrialUtilities.meandiffev(mean(m1), var(m1), length(m1), mean(m2), var(m2), length(m2), 0.05)
     @test ci1 == ci2
 
     #CMH
