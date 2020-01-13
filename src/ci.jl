@@ -746,6 +746,8 @@ Cochran–Mantel–Haenszel confidence intervals for proportion difference.
 
 """
     function diffcmhci(data::DataFrame; a = :a, b = :b, c = :c, d = :d, alpha = 0.05, method = :default)::ConfInt
+        return diffcmhci(data[:, a], data[:, b], data[:, c], data[:, d]; alpha = alpha, method = method)
+        #=
         n1 = data[:, a] + data[:, b]
         n2 = data[:, c] + data[:, d]
         N  = data[:, a] + data[:, b] + data[:, c] + data[:, d]
@@ -762,6 +764,34 @@ Cochran–Mantel–Haenszel confidence intervals for proportion difference.
             throw(ArgumentError("Method unknown!"))
         end
         return ConfInt(estimate - z*se, estimate + z*se, estimate, alpha)
+        =#
+    end
+    """
+        diffcmhci(a::Vector, b::Vector, c::Vector, d::Vector;
+            alpha = 0.05, method = :default)::ConfInt
+
+    Cochran–Mantel–Haenszel confidence intervals for proportion difference.
+
+    **a** **b** **c** **d** - vector of cells in in 2X2 tables:
+
+    """
+    function diffcmhci(a::Vector, b::Vector, c::Vector, d::Vector; alpha = 0.05, method = :default)::ConfInt
+        n1 = a + b
+        n2 = c + d
+        N  = a + b + c + d
+        z = quantile(ZDIST, 1 - alpha/2)
+
+        estimate = sum( a .* (n2 ./ N) - c .* (n1 ./ N)) / sum(n1 .* (n2 ./ N))
+        #1
+        if method == :sato || method == :default
+            se   = sqrt((estimate * (sum(c .* (n1 ./ N) .^ 2 - a .* (n2 ./ N) .^2 + (n1 ./ N) .* (n2 ./ N) .* (n2-n1) ./ 2)) + sum(a .* (n2 - c) ./ N + c .* (n1 - a) ./ N)/2) / sum(n1 .* (n2 ./ N)) .^ 2) # equation in: Sato, Greenland, & Robins (1989)
+        #2
+        elseif method == :gr
+            se   = sqrt(sum(((a ./N .^2) .* b .* (n2 .^2 ./ n1) + (c ./N .^2) .* d .* (n1 .^2 ./ n2))) / sum(n1 .*(n2 ./ N))^2) # equation in: Greenland & Robins (1985)
+        else
+            throw(ArgumentError("Method unknown!"))
+        end
+        return ConfInt(estimate - z*se, estimate + z*se, estimate, alpha)
     end
 
     """
@@ -771,8 +801,8 @@ Cochran–Mantel–Haenszel confidence intervals for proportion difference.
     Cochran–Mantel–Haenszel confidence intervals for odd ratio.
     """
     function orcmhci(data::DataFrame; a = :a, b = :b, c = :c, d = :d, alpha = 0.05, logscale = false)::ConfInt
-        #n1 = data[:, a] + data[:, b]
-        #n2 = data[:, c] + data[:, d]
+        return orcmhci(data[:, a], data[:, b], data[:, c], data[:, d]; alpha = alpha, logscale = logscale)
+        #=
         N  = data[:, a] + data[:, b] + data[:, c] + data[:, d]
         z = quantile(ZDIST, 1 - alpha/2)
 
@@ -788,8 +818,22 @@ Cochran–Mantel–Haenszel confidence intervals for proportion difference.
         #zval= est / se
         #pval= 2*(1-cdf(Normal(), abs(zval)))
         if logscale return ConfInt(estimate - z*se, estimate + z*se, estimate, alpha) else return ConfInt(exp(estimate - z*se), exp(estimate + z*se), exp(estimate), alpha) end
+        =#
     end
-
+    function orcmhci(a::Vector, b::Vector, c::Vector, d::Vector; alpha = 0.05, logscale = false)::ConfInt
+        N  = a + b + c + d
+        z = quantile(ZDIST, 1 - alpha/2)
+        Pi = (a ./ N) + (d ./ N)
+        Qi = (b ./ N) + (c ./ N)
+        Ri = (a ./ N) .* d
+        Si = (b ./ N) .* c
+        R  = sum(Ri)
+        S  = sum(Si)
+        if R == 0 || S == 0 return ConfInt(NaN, NaN, NaN) end
+        estimate = log(R/S)
+        se  = sqrt(1/2 * (sum(Pi .* Ri)/R^2 + sum(Pi .* Si + Qi .* Ri)/(R*S) + sum(Qi .* Si)/S^2)) # based on Robins et al. (1986)
+        if logscale return ConfInt(estimate - z*se, estimate + z*se, estimate, alpha) else return ConfInt(exp(estimate - z*se), exp(estimate + z*se), exp(estimate), alpha) end
+    end
     """
         rrcmhci(data::DataFrame; a = :a, b = :b, c = :c, d = :d,
             alpha = 0.05, logscale = false)::ConfInt
@@ -797,6 +841,8 @@ Cochran–Mantel–Haenszel confidence intervals for proportion difference.
     Cochran–Mantel–Haenszel confidence intervals for risk ratio.
     """
     function rrcmhci(data::DataFrame; a = :a, b = :b, c = :c, d = :d, alpha = 0.05, logscale = false)::ConfInt
+        return rrcmhci(data[:, a], data[:, b], data[:, c], data[:, d]; alpha = alpha, logscale = logscale)
+        #=
         n1 = data[:, a] + data[:, b]
         n2 = data[:, c] + data[:, d]
         N  = data[:, a] + data[:, b] + data[:, c] + data[:, d]
@@ -807,6 +853,22 @@ Cochran–Mantel–Haenszel confidence intervals for proportion difference.
         if sum(data[:, a]) == 0 || sum(data[:, c]) == 0 return ConfInt(NaN, NaN, NaN) end
         estimate = log(R/S)
         se  = sqrt(sum(((n1 ./ N) .* (n2 ./ N) .* (data[:, a] + data[:, c]) - (data[:, a] ./ N) .* data[:, c])) / (R*S))
+        #zval= est / se
+        #pval= 2*(1-cdf(Normal(), abs(zval)))
+        if logscale return ConfInt(estimate  - z*se, estimate  + z*se, estimate , alpha) else return ConfInt(exp(estimate  - z*se), exp(estimate  + z*se), exp(estimate ), alpha) end
+        =#
+    end
+    function rrcmhci(a::Vector, b::Vector, c::Vector, d::Vector; alpha = 0.05, logscale = false)::ConfInt
+        n1 = a + b
+        n2 = c + d
+        N  = a + b + c + d
+        z = quantile(ZDIST, 1 - alpha/2)
+            #...
+        R = sum(a .* (n2 ./ N))
+        S = sum(c .* (n1 ./ N))
+        if sum(a) == 0 || sum(c) == 0 return ConfInt(NaN, NaN, NaN) end
+        estimate = log(R/S)
+        se  = sqrt(sum(((n1 ./ N) .* (n2 ./ N) .* (a + c) - (a ./ N) .* c)) / (R*S))
         #zval= est / se
         #pval= 2*(1-cdf(Normal(), abs(zval)))
         if logscale return ConfInt(estimate  - z*se, estimate  + z*se, estimate , alpha) else return ConfInt(exp(estimate  - z*se), exp(estimate  + z*se), exp(estimate ), alpha) end
