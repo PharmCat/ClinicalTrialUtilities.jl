@@ -83,43 +83,43 @@ function twoprop(x1::Int, n1::Int, x2::Int, n2::Int; alpha=0.05, type::Symbol, m
     if alpha >= 1.0 || alpha <= 0.0 throw(ArgumentError("Alpha shold be > 0.0 and < 1.0")) end
     if type==:diff
         if method ==:nhs
-            return propDiffNHSCI(x1, n1, x2, n2, alpha)
+            return propdiffnhsci(x1, n1, x2, n2, alpha)
         elseif method ==:nhscc
-            return propDiffNHSCCCI(x1, n1, x2, n2, alpha)
+            return propdiffnhsccci(x1, n1, x2, n2, alpha)
         elseif method ==:ac
-            return propDiffACCI(x1, n1, x2, n2, alpha)
+            return propdiffacci(x1, n1, x2, n2, alpha)
         elseif method ==:mn
-            return propDiffMNCI(x1, n1, x2, n2, alpha)
+            return propdiffmnci(x1, n1, x2, n2, alpha)
         elseif method ==:mee2
-            return propDiffMeeCI(x1, n1, x2, n2, alpha)
+            return propdiffmeeci(x1, n1, x2, n2, alpha)
         elseif method ==:mee || method == :fm
-            return propDiffFMCI(x1, n1, x2, n2, alpha)
+            return propdifffmci(x1, n1, x2, n2, alpha)
         elseif method ==:wald
-            return propDiffWaldCI(x1, n1, x2, n2, alpha)
+            return propdiffwaldci(x1, n1, x2, n2, alpha)
         elseif method ==:waldcc
-            return propDiffWaldCCCI(x1, n1, x2, n2, alpha)
+            return propdiffwaldccci(x1, n1, x2, n2, alpha)
         end
     elseif type==:rr
         if method==:mn
-            return propRRMNCI(x1, n1, x2, n2, alpha)
+            return proprrmnci(x1, n1, x2, n2, alpha)
         elseif method == :cli || method == :walters
-            return propRRCLICI(x1, n1, x2, n2, alpha)
+            return proprrclici(x1, n1, x2, n2, alpha)
         elseif method == :li || method == :katz
             return proprrkatzci(x1, n1, x2, n2, alpha)
         elseif method ==:mover
-            return  propRRMOVERCI(x1, n1, x2, n2, alpha)
+            return  proprrmoverci(x1, n1, x2, n2, alpha)
         end
     elseif type==:or
         if method==:mn
-            return propORMNCI(x1, n1, x2, n2, alpha)
+            return propormnci(x1, n1, x2, n2, alpha)
         elseif method==:awoolf || method==:gart
-            return propORaWoolfCI(x1, n1, x2, n2, alpha)
+            return proporawoolfci(x1, n1, x2, n2, alpha)
         elseif method==:woolf
-            return propORWoolfCI(x1, n1, x2, n2, alpha)
+            return proporwoolfci(x1, n1, x2, n2, alpha)
         elseif method==:mover
-            return propORMOVERCI(x1, n1, x2, n2, alpha)
+            return propormoverci(x1, n1, x2, n2, alpha)
         elseif method==:mn2
-            return propORCI(x1, n1, x2, n2, alpha)
+            return proporci(x1, n1, x2, n2, alpha)
         end
     end
 end #twoProp

@@ -5,33 +5,6 @@
 #ctsamplen, ctpower, besamplen, bepower
 
 
-struct Equivalence <:AbstractEquivalenceHypothesis
-    llim::Real          #Lower lmit for Test group
-    ulim::Real          #Upper lmit for Test group
-    #diff::Real          #Margin difference
-    function Equivalence(llim, ulim; bio::Bool = false)
-        if llim == ulim throw(ArgumentError("llim == ulim!")) end
-        if bio return Bioequivalence(llim, ulim) end
-        new(llim, ulim)::Equivalence
-    end
-end
-function mdiff(h::Equivalence)::Float64
-    (h.ulim - h.llim)/2
-end
-
-struct Bioequivalence <: AbstractEquivalenceHypothesis
-    llim::Real          #Lower lmit for Test group
-    ulim::Real          #Upper lmit for Test group
-end
-
-struct Equality <: AbstractHypothesis
-end
-struct Superiority <: AbstractHypothesis
-    llim::Real          #Lower lmit for Test group
-    diff::Real          #Margin difference
-end
-struct McNemars <: AbstractHypothesis end
-
 struct Power <: AbstractPower
     val::Int
 end
