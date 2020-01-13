@@ -6,7 +6,7 @@
 
 #CV2se
 """
-    sdfromcv(cv::Real)::Float64
+    sdfromcv(cv::Real)::AbstractFloat
 
 LnSD from CV.
 """
@@ -14,7 +14,7 @@ LnSD from CV.
     return sqrt(varfromcv(cv))
 end
 """
-    varfromcv(cv::Real)::Float64
+    varfromcv(cv::Real)::AbstractFloat
 
 LnVariance from CV.
 """
@@ -22,7 +22,7 @@ function varfromcv(cv::T)::AbstractFloat where T <: Real
      return log(1+cv^2)
 end
 """
-    cvfromvar(σ²::Real)::Float64
+    cvfromvar(σ²::Real)::AbstractFloat
 
 CV from variance.
 """
@@ -31,7 +31,7 @@ function cvfromvar(σ²::T)::AbstractFloat where T <: Real
 end
 #CV2se
 """
-    cvfromsd(σ::Real)::Float64
+    cvfromsd(σ::Real)::AbstractFloat
 
 CV from variance.
 """
@@ -40,8 +40,7 @@ function cvfromsd(σ::T)::AbstractFloat where T <: Real
 end
 
 """
-    cvfromci(;alpha = 0.05, theta1 = 0.8, theta2 = 1.25, n, design=:d2x2,
-        mso=false, cvms=false)::Union{Float64, Tuple{Float64, Float64}}
+    cvfromci(;alpha = 0.05, theta1 = 0.8, theta2 = 1.25, n, design=:d2x2, mso=false, cvms=false)::AbstractFloat
 
 CV from bioequivalence confidence inerval.
 
@@ -79,7 +78,7 @@ Calculate CV and MS
 - false(default)
 - true
 """
-function cvfromci(;alpha = 0.05, theta1 = 0.8, theta2 = 1.25, n, design=:d2x2, mso=false, cvms=false)
+function cvfromci(;alpha = 0.05, theta1 = 0.8, theta2 = 1.25, n, design=:d2x2, mso=false, cvms=false)::AbstractFloat
     d     = Design(design)
     df    = d.df(n)
     if df < 1 throw(ArgumentError("df < 1, check n!")) end
