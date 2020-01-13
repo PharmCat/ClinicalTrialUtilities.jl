@@ -39,6 +39,7 @@ const VERSION = "0.2.0"
 include("abstracttypes.jl")
 
 include("design.jl")
+include("hypothesis.jl")
 
 include("proportion.jl")
 
