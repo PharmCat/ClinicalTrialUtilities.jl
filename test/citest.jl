@@ -237,28 +237,28 @@ println(" ---------------------------------- ")
     @test ci.upper    ≈ 0.1684 atol=1E-4
 
     #Recommended confidence intervals for two independent binomial proportions DOI: 10.1177/0962280211415469
-    ci = ClinicalTrialUtilities.twoprop(7, 34, 1, 34; alpha=0.05, type=:diff, method=:nhs)
+    ci = ClinicalTrialUtilities.diffpropci(7, 34, 1, 34; alpha = 0.05, method = :nhs)
     @test ci.lower    ≈ 0.019 atol=1E-3
     @test ci.upper    ≈ 0.34 atol=1E-2
 
     #https://www.researchgate.net/publication/328407614_Score_intervals_for_the_difference_of_two_binomial_proportions
-    ci = ClinicalTrialUtilities.twoprop(4, 5, 2, 5; alpha=0.05, type=:diff, method=:mn)
+    ci = ClinicalTrialUtilities.diffpropci(4, 5, 2, 5; alpha = 0.05, method=:mn)
     @test ci.lower    ≈ -0.228 atol=1E-3
     @test ci.upper    ≈ 0.794 atol=1E-3
     #https://www.lexjansen.com/wuss/2016/127_Final_Paper_PDF.pdf
     #Constructing Confidence Intervals for the Differences of Binomial Proportions in SAS® Will Garner, Gilead Sciences, Inc., Foster City, CA
-    ci = ClinicalTrialUtilities.twoprop(56, 70, 48, 80; alpha=0.05, type=:diff, method=:mn)
+    ci = ClinicalTrialUtilities.diffpropci(56, 70, 48, 80; alpha=0.05,  method=:mn)
     @test ci.lower    ≈  0.0528 atol=1E-4
     @test ci.upper    ≈  0.3382 atol=1E-4
-    ci = ClinicalTrialUtilities.twoprop(56, 70, 48, 80; alpha=0.05, type=:diff, method=:mee)
+    ci = ClinicalTrialUtilities.diffpropci(56, 70, 48, 80; alpha=0.05,  method=:mee)
     @test ci.lower    ≈  0.0533 atol=1E-4
     @test ci.upper    ≈  0.3377 atol=1E-4
-    ci = ClinicalTrialUtilities.twoprop(56, 70, 48, 80; alpha=0.05, type=:diff, method=:nhscc)
+    ci = ClinicalTrialUtilities.diffpropci(56, 70, 48, 80; alpha=0.05,  method=:nhscc)
     @test ci.lower    ≈  0.0428 atol=1E-4
     @test ci.upper    ≈  0.3422 atol=1E-4
 
     #https://rdrr.io/cran/ORCI/man/Woolf.CI.html
-    ci = ClinicalTrialUtilities.twoprop(2, 14, 1, 11; alpha=0.05, type=:or,method=:woolf)
+    ci = ClinicalTrialUtilities.orpropci(2, 14, 1, 11; alpha  =0.05, method=:woolf)
     @test ci.lower    ≈  0.1310604 atol=1E-7
     @test ci.upper    ≈  21.1946394 atol=1E-7
 
@@ -277,6 +277,7 @@ println(" ---------------------------------- ")
     data = DataFrame(a = Int[], b = Int[], c = Int[], d = Int[])
     push!(data, (8, 98, 5, 115))
     push!(data, (22, 76, 16, 69))
+
     ci = ClinicalTrialUtilities.diffcmhci(data, alpha = 0.1)
     @test ci.estimate ≈  0.03490026933691816 atol=1E-4
     @test ci.lower    ≈  -0.01757497925425447 atol=1E-4

@@ -83,11 +83,8 @@ function cvfromci(;alpha = 0.05, theta1 = 0.8, theta2 = 1.25, n, design=:d2x2, m
     d     = Design(design)
     df    = d.df(n)
     if df < 1 throw(ArgumentError("df < 1, check n!")) end
-
     sef = sediv(d, n)
-
     ms = ((log(theta2/theta1)/2/quantile(TDist(df), 1-alpha))/sef)^2
-    #if cvms return cvfromvar(ms), ms end
     if mso return ms end
     return cvfromvar(ms)
 end
