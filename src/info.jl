@@ -2,7 +2,7 @@
 
 function info(;io::IO = Base.stdout)
     println(io, "")
-    println(io, "Package name: ClinicalTrialUtilities, Version: "*VERSION)
+    println(io, "Package name: ClinicalTrialUtilities, Version: $(Pkg.installed()["ClinicalTrialUtilities"])")
     println(io, "Clinical Trial Power and Sample Size Utilities")
     println(io, "Copyright © 2019 Vladimir Arnautov aka PharmCat (mail@pharmcat.net)")
     println(io, "For references, citations and copyrights run: ClinicalTrialUtilities.citation()")
