@@ -13,7 +13,7 @@
 # If you want to check and get R code you can find some here: http://powerandsamplesize.com/Calculators/
 __precompile__(true)
 module ClinicalTrialUtilities
-using Distributions, StatsBase, Random, Roots, QuadGK, DataFrames#, RecipesBase, Plots
+using Distributions, StatsBase, Random, Roots, QuadGK, DataFrames, RecipesBase
 import SpecialFunctions
 import Base.show
 import Base.showerror
@@ -23,6 +23,7 @@ import Base.in
 import Base.iterate
 import StatsBase.confint
 import DataFrames.DataFrame
+import Pkg.installed
 
 
 function lgamma(x)
@@ -33,7 +34,6 @@ const ZDIST  = Normal()
 const LOG2   = log(2)
 const PI2    = π * 2.0
 const PI2INV = 0.5 / π
-const VERSION = "0.2.0"
 #Exceptions
 
 include("abstracttypes.jl")
@@ -74,6 +74,8 @@ include("randomization.jl")
 include("utilities.jl")
 #Show
 include("show.jl")
+#Plots
+include("plots.jl")
 
 #Deprecated
 include("deprecated.jl")
@@ -122,7 +124,9 @@ DoseTime,
 LimitRule,
 keldata,
 # Simulation
-ctsim
+ctsim,
+#Plots
+plot
 
 
 
