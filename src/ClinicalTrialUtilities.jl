@@ -23,7 +23,6 @@ import Base.in
 import Base.iterate
 import StatsBase.confint
 import DataFrames.DataFrame
-import Pkg.installed
 
 
 function lgamma(x)
