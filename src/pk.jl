@@ -450,6 +450,11 @@ calcm - calculation method;
 - :luld  - Linear Up - Log Down everywhere if c₁ > c₂ > 0, else Linear trapezoidal used;
 - :luldt - Linear Up - Log Down  after Tmax if c₁ > c₂ > 0, else Linear trapezoidal used;
 
+intp - interpolation rule;
+- :lint - linear interpolation;
+- :logt - log interpolation;
+
+
 verbose - print to out stream if "true";
 
 - true;
@@ -479,7 +484,7 @@ function nca!(data::PKSubject; calcm = :lint, intp = :lint, verbose = false, io:
                 break
             end
         end
-        result[:Cmax], result[:Tmax], result[:Tmaxn] = ctmax(data, data.dosetime.time, data.dosetime.tau)
+        result[:Cmax], result[:Tmax], result[:Tmaxn] = ctmax(data, data.dosetime.time, data.dosetime.tau) #????!!!!
         #-----------------------------------------------------------------------
         if verbose
             println(io, "Non-compartmental Pharmacokinetic Analysis")
@@ -509,7 +514,7 @@ function nca!(data::PKSubject; calcm = :lint, intp = :lint, verbose = false, io:
                     break
                 end
                 result[:Cdose] = linpredict(data.time[i] , data.time[i+1], data.dosetime.time, data.obs[i], data.obs[i+1])
-                aucpartl[i], aumcpartl[i] = aucpart(data.dosetime.time, data.time[i+1], result[:Cdose], data.obs[i+1], :lint, false)
+                aucpartl[i], aumcpartl[i] = aucpart(data.dosetime.time, data.time[i+1], result[:Cdose], data.obs[i+1], :lint, false) #? only :lint? always aftertmax = false?
                 break
             else
                 aucpartl[i]  = 0
@@ -591,14 +596,21 @@ function nca!(data::PKSubject; calcm = :lint, intp = :lint, verbose = false, io:
             tautime = data.dosetime.time + data.dosetime.tau
             if tautime < data.time[end]
                 #result[:Ctau] = linpredict(data.time[ncae] , data.time[ncae+1], tautime, data.obs[ncae], data.obs[ncae+1])
+                if tautime > result[:Tmax] aftertmax = true else aftertmax = false end
                 result[:Ctau] = cpredict(data.time[ncae], data.time[ncae+1], tautime, data.obs[ncae], data.obs[ncae+1], intp)
-                aucpartl[ncae], aumcpartl[ncae] = aucpart(data.time[ncae], tautime, data.obs[ncae], result[:Ctau], calcm, false)
+                aucpartl[ncae], aumcpartl[ncae] = aucpart(data.time[ncae], tautime, data.obs[ncae], result[:Ctau], calcm, aftertmax)
+                if verbose
+                    println(io, "Tau + dosetime is less then end time. Inrapolation used.")
+                    println(io, "Interpolation between: $(data.time[ncae]) - $( data.time[ncae+1]), method: $(intp)")
+                    println(io, "Ctau: $(result[:Ctau])")
+                    println(io, "AUC final part: $(aucpartl[ncae])")
+                end
                 #remoove part after tau
                 if ncae < result[:Obsnum] - 1 pmask[ncae+1:end] .= false end
             elseif tautime > data.time[end]
                 #extrapolation
-                result[:Ctau] = exp(result[:LZint] + result[:LZ]*tautime)
-                aucpartl[ncae], aumcpartl[ncae] = aucpart(data.time[ncae], tautime, data.obs[ncae], result[:Ctau], calcm, false)
+                result[:Ctau] = exp(result[:LZint] + result[:LZ] * tautime)
+                aucpartl[ncae], aumcpartl[ncae] = aucpart(data.time[ncae], tautime, data.obs[ncae], result[:Ctau], calcm, true)
                 #!!!
             else
                 result[:Ctau] = data.obs[end]

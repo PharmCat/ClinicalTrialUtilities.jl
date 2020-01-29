@@ -190,6 +190,70 @@ println(" ---------------------------------- ")
     1417.942
     1167.911], sigdigits = 6)
 
+    # --------------------------------------------------------------------------
+    # TAU 0 - 36
+    ClinicalTrialUtilities.setdosetime!(pkds, ClinicalTrialUtilities.DoseTime(dose = 100, time = 0, tau = 36))
+    pk   = ClinicalTrialUtilities.nca!(pkds, calcm = :luldt, intp = :logt)
+    df   = DataFrame(pk; unst = true)
+    sort!(df, :Subject)
+
+    @test round.(df[!, :Ctau], sigdigits = 6) == round.([135.2155
+    132.9739623
+    75.47731257
+    135.0568587
+    133.7790224
+    96.70617845
+    99.89068375
+    103.1329035
+    113.3749669
+    72.57153458], sigdigits = 6)
+
+    #AUCtau
+    #=
+    4947.052768
+    6265.637822
+    2863.392745
+    5008.644865
+    5415.246398
+    3882.203934
+    4096.937951 (!)
+    3802.30601
+    4531.779637
+    3744.768624
+    =#
+
+    # TAU 0.25 - 9
+    ClinicalTrialUtilities.setdosetime!(pkds, ClinicalTrialUtilities.DoseTime(dose = 100, time = 0.25, tau = 9))
+    pk   = ClinicalTrialUtilities.nca!(pkds, calcm = :luldt, intp = :logt)
+    df   = DataFrame(pk; unst = true)
+    sort!(df, :Subject)
+
+    @test round.(df[!, :Ctau], sigdigits = 6) == round.([137.721875
+    204.9625055
+    84.915625
+    141.9969549
+    160.0570781
+    106.9862605
+    123.572375
+    84.9595
+    142.566125
+    122.7865], sigdigits = 6)
+
+    #AUC Tau
+    #=
+    1268.275631
+    1831.820528
+    754.6493604
+    1336.480932
+    1310.904516
+    1114.240351
+    1079.366854
+    766.620245
+    1219.631864
+    970.3062692
+    =#
+
+
 
     # Log-trapezoidal Linear Interpolation
 
@@ -259,7 +323,7 @@ println(" ---------------------------------- ")
     pk   = ClinicalTrialUtilities.nca!(pkds)
     df   = DataFrame(pk; unst = true)
 
-    
+
     print(io, pk[1].subject.keldata)
 end
 
