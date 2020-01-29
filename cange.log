@@ -3,6 +3,11 @@ v0.2.3
   - Distributions bump
   - cvfromci cvms deprecated
   - cmh methods
+  - Plots for PK with RecipesBase
+  - NCA Ctau intrapolation/extrapolation fix and validate
+  - fisher & pirson non-public methods for frequencies
+  - minor fix
+  - cosmitics
 
 v0.2.2
   - add sim
