@@ -77,16 +77,16 @@ end
 
 #Connor R. J. 1987. Sample size for testing differences in proportions for the paired-sample design. Biometrics 43(1):207-211. page 209.
 function mcnm(p10::Float64, p01::Float64, α::Real, β::Real)::Float64
-    pdisc=p10+p01
-    pdiff=p10-p01
+    pdisc = p10 + p01
+    pdiff = p10 - p01
     return ((quantile(ZDIST, 1-α/2)*sqrt(pdisc)+quantile(ZDIST, 1 - β)*sqrt(pdisc-pdiff^2))/pdiff)^2
 end
 
 function mcnm_pow(p10::Float64, p01::Float64, α::Float64, n::Int)::Float64
-    pdisc=p10+p01
-    pdiff=p10-p01
-    x1=(pdiff*sqrt(n)-quantile(ZDIST, 1-α/2)*sqrt(pdisc))/sqrt(pdisc-pdiff^2);
-    x2=(-pdiff*sqrt(n)-quantile(ZDIST, 1-α/2)*sqrt(pdisc))/sqrt(pdisc-pdiff^2);
+    pdisc = p10 + p01
+    pdiff = p10 - p01
+    x1 = ( pdiff * sqrt(n) - quantile(ZDIST, 1 - α / 2) * sqrt(pdisc))/sqrt(pdisc - pdiff^2);
+    x2 = (-pdiff * sqrt(n) - quantile(ZDIST, 1 - α / 2) * sqrt(pdisc))/sqrt(pdisc - pdiff^2);
     return cdf(ZDIST, x1)+cdf(ZDIST, x2)
 end
 #-------------------------------------------------------------------------------
@@ -94,29 +94,29 @@ end
 # Mean
 # One
 function one_mean_equality_pow(μ₀::Real, μ₁::Real, σ::Real, α::Float64, n::Int)::Float64
-    z = (μ₀-μ₁)/σ*sqrt(n)
+    z = (μ₀ - μ₁)/σ * sqrt(n)
     return cdf(ZDIST, z - quantile(ZDIST, 1 - α / 2)) + cdf(ZDIST, - z - quantile(ZDIST, 1 - α / 2))
 end
 function one_mean_equivalence_pow(μ₀::Real, μ₁::Real, σ::Real, δ::Real, α::Float64, n::Int)::Float64
-    z=(abs(μ₀-μ₁)-δ)/σ*sqrt(n)
-    return 2*(cdf(ZDIST,z-quantile(ZDIST,1-α))+cdf(ZDIST,-z-quantile(ZDIST,1-α)))-1
+    z = (abs(μ₀ - μ₁) - δ)/σ * sqrt(n)
+    return 2 * (cdf(ZDIST,z - quantile(ZDIST, 1 - α)) + cdf(ZDIST, -z - quantile(ZDIST, 1 - α))) - 1
 end
 function one_mean_superiority_pow(μ₀::Real, μ₁::Real, σ::Real, δ::Real, α::Float64, n::Int)::Float64 #Non-inferiority / Superiority
-    z=(μ₀ - μ₁ - δ) / σ*sqrt(n)
-    return cdf(ZDIST, z-quantile(ZDIST, 1 - α))+cdf(ZDIST, -z-quantile(ZDIST, 1 - α))
+    z = (μ₀ - μ₁ - δ) / σ*sqrt(n)
+    return cdf(ZDIST, z - quantile(ZDIST, 1 - α)) + cdf(ZDIST, -z - quantile(ZDIST, 1 - α))
 end
 #Two
 function two_mean_equality_pow(μ₀::Real, μ₁::Real, σ::Real, α::Float64, n::Int, k::Real)::Float64
-    z=(μ₀ - μ₁)/(σ*sqrt((1 + 1 / k)/n))
+    z=(μ₀ - μ₁)/(σ * sqrt((1 + 1 / k)/n))
     return cdf(ZDIST, z - quantile(ZDIST, 1 - α / 2)) + cdf(ZDIST, - z - quantile(ZDIST, 1 - α / 2))
 end
 function two_mean_equivalence_pow(μ₀::Real, μ₁::Real, σ::Real, δ::Real, α::Float64, n::Int, k::Real)::Float64
-    z=(abs(μ₀-μ₁)-δ)/(σ*sqrt((1+1/k)/n))
-    return 2*(cdf(ZDIST,z-quantile(ZDIST,1-α))+cdf(ZDIST,-z-quantile(ZDIST,1-α)))-1
+    z=(abs(μ₀ - μ₁) - δ)/(σ * sqrt((1 + 1/k)/n))
+    return 2 * (cdf(ZDIST, z - quantile(ZDIST, 1 - α)) + cdf(ZDIST, -z - quantile(ZDIST, 1 - α))) - 1
 end
 function two_mean_superiority_pow(μ₀::Real, μ₁::Real, σ::Real, δ::Real, α::Float64, n::Int, k::Real)::Float64 #Non-inferiority / Superiority
-    z=(μ₀-μ₁-δ)/(σ*sqrt((1+1/k)/n))
-    return cdf(ZDIST, z-quantile(ZDIST, 1-α))+cdf(ZDIST, -z-quantile(ZDIST, 1 - α))
+    z = (μ₀ - μ₁ - δ)/(σ * sqrt((1 + 1/k)/n))
+    return cdf(ZDIST, z - quantile(ZDIST, 1 - α)) + cdf(ZDIST, -z - quantile(ZDIST, 1 - α))
 end
 #Compare Proportion
 #One Sample
@@ -154,12 +154,12 @@ function or_equality_pow(p₀::Real, p₁::Real, α::Float64, n::Int, k::Real)::
 end
 function or_equivalence_pow(p₀::Real, p₁::Real, δ::Real, α::Float64, n::Int, k::Real)::Float64
     #println("$p₀ $p₁ $δ $α $n $k")
-    OR=p₀*(1-p₁)/p₁/(1-p₀)
-    z=(abs(log(OR))-δ)*sqrt(n)/sqrt(1/(k*p₀*(1-p₀))+1/(p₁*(1-p₁)))
-    return  2*(cdf(ZDIST,z-quantile(ZDIST,1-α)) + cdf(ZDIST,-z-quantile(ZDIST,1-α)))-1
+    OR = p₀ * (1 - p₁)/p₁/(1 - p₀)
+    z  = (abs(log(OR)) - δ) * sqrt(n)/sqrt(1/(k * p₀ * (1 - p₀)) + 1/(p₁ * (1 - p₁)))
+    return  2 * (cdf(ZDIST, z - quantile(ZDIST, 1 - α)) + cdf(ZDIST,-z - quantile(ZDIST, 1 - α))) - 1
 end
 function or_superiority_pow(p₀::Real, p₁::Real, δ::Real, α::Float64, n::Int, k::Real)::Float64
-    OR=p₀*(1-p₁)/p₁/(1-p₀)
-    z=(log(OR)-δ)*sqrt(n)/sqrt(1/(k*p₀*(1-p₀))+1/(p₁*(1-p₁)))
-    return cdf(ZDIST, z-quantile(ZDIST, 1-α)) + cdf(ZDIST, -z-quantile(ZDIST, 1 - α))
+    OR = p₀ * (1 - p₁)/p₁/(1 - p₀)
+    z  = (log(OR) - δ) * sqrt(n)/sqrt(1/(k * p₀ * (1 - p₀)) + 1/(p₁ * (1 - p₁)))
+    return cdf(ZDIST, z - quantile(ZDIST, 1 - α)) + cdf(ZDIST, -z - quantile(ZDIST, 1 - α))
 end
