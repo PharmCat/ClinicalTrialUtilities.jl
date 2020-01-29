@@ -484,7 +484,7 @@ function nca!(data::PKSubject; calcm = :lint, intp = :lint, verbose = false, io:
                 break
             end
         end
-        result[:Cmax], result[:Tmax], result[:Tmaxn] = ctmax(data, data.dosetime.time, data.dosetime.tau) #????!!!!
+        result[:Cmax], result[:Tmax], result[:Tmaxn] = ctmax(data) #????!!!!
         #-----------------------------------------------------------------------
         if verbose
             println(io, "Non-compartmental Pharmacokinetic Analysis")
@@ -593,7 +593,8 @@ function nca!(data::PKSubject; calcm = :lint, intp = :lint, verbose = false, io:
         #Steady-state
         if data.dosetime.tau > 0
             ncas, ncae = ncarange(data, data.dosetime.time, data.dosetime.tau)
-            tautime = data.dosetime.time + data.dosetime.tau
+            tautime    = data.dosetime.time + data.dosetime.tau
+            eaucpartl  = eaumcpartl = 0.0
             if tautime < data.time[end]
                 #result[:Ctau] = linpredict(data.time[ncae] , data.time[ncae+1], tautime, data.obs[ncae], data.obs[ncae+1])
                 if tautime > result[:Tmax] aftertmax = true else aftertmax = false end
@@ -610,17 +611,26 @@ function nca!(data::PKSubject; calcm = :lint, intp = :lint, verbose = false, io:
             elseif tautime > data.time[end]
                 #extrapolation
                 result[:Ctau] = exp(result[:LZint] + result[:LZ] * tautime)
-                aucpartl[ncae], aumcpartl[ncae] = aucpart(data.time[ncae], tautime, data.obs[ncae], result[:Ctau], calcm, true)
+                eaucpartl, eaumcpartl = aucpart(data.time[ncae], tautime, data.obs[ncae], result[:Ctau], calcm, true)
+
                 #!!!
             else
                 result[:Ctau] = data.obs[end]
             end
             result[:Ctaumin]  = min(result[:Ctau], result[:Cdose], minimum(data.obs[ncas+1:ncae]))
-            result[:AUCtau]   = sum(aucpartl[pmask])
-            result[:AUMCtau]  = sum(aumcpartl[pmask])
+            result[:AUCtau]   = sum(aucpartl[pmask])  + eaucpartl
+            result[:AUMCtau]  = sum(aumcpartl[pmask]) + eaumcpartl
             result[:Cavg]     = result[:AUCtau]/data.dosetime.tau
-            result[:Swing]    = (result[:Cmax] - result[:Ctaumin])/result[:Ctaumin]
-            result[:Swingtau] = (result[:Cmax] - result[:Ctau])/result[:Ctau]
+            if result[:Ctaumin] != 0
+                result[:Swing]    = (result[:Cmax] - result[:Ctaumin])/result[:Ctaumin]
+            else
+                result[:Swing]    = NaN
+            end
+            if result[:Ctau] != 0
+                result[:Swingtau] = (result[:Cmax] - result[:Ctau])/result[:Ctau]
+            else
+                result[:Swingtau] = NaN
+            end
             result[:Fluc]     = (result[:Cmax] - result[:Ctaumin])/result[:Cavg]
             result[:Fluctau]  = (result[:Cmax] - result[:Ctau])/result[:Cavg]
             #result[:AccInd]

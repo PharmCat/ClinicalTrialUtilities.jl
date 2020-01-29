@@ -253,7 +253,22 @@ println(" ---------------------------------- ")
     970.3062692
     =#
 
+    # TAU 0.0 - 100
+    ClinicalTrialUtilities.setdosetime!(pkds, ClinicalTrialUtilities.DoseTime(dose = 100, time = 0.0, tau = 100))
+    pk   = ClinicalTrialUtilities.nca!(pkds, calcm = :luldt, intp = :logt)
+    df   = DataFrame(pk; unst = true)
+    sort!(df, :Subject)
 
+    @test round.(df[!, :Ctau], sigdigits = 6) == round.([106.6989373
+    55.60460942
+    61.0383917
+    81.23535402
+    87.01010737
+    58.00027625
+    43.15724396
+    58.8781831
+    80.05171762
+    23.98401112], sigdigits = 6)
 
     # Log-trapezoidal Linear Interpolation
 
