@@ -52,6 +52,6 @@ function pirson(a::Matrix{Int})
 end
 
 function fisher(a::Matrix{Int})
-    dist  = Hypergeometric(sum(a[1,:]), sum(a[2,:]), sum(a[:,1]))
-    value = min(2 * min(cdf(dist, a[1,1]), ccdf(dist, a[1,1])), 1.0)
+    dist  = Hypergeometric(sum(a[1, :]), sum(a[2, :]), sum(a[:, 1]))
+    value = min(2 * min(cdf(dist, a[1, 1]), ccdf(dist, a[1, 1])), 1.0)
 end

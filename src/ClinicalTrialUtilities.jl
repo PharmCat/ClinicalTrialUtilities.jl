@@ -75,7 +75,6 @@ include("utilities.jl")
 include("show.jl")
 #Plots
 include("plots.jl")
-
 #Deprecated
 include("deprecated.jl")
 
