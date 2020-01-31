@@ -128,12 +128,19 @@ struct LimitRule
     lloq::Real
     btmax::Real
     atmax::Real
+    nan::Real
     rm::Bool
+    function LimitRule(lloq, btmax, atmax, nan, rm)
+        new(lloq, btmax, atmax, nan, rm)::LimitRule
+    end
+    function LimitRule(lloq, btmax, atmax, nan)
+        new(lloq, btmax, atmax, nan, false)::LimitRule
+    end
     function LimitRule(lloq, btmax, atmax)
-        new(lloq, btmax, atmax, true)::LimitRule
+        new(lloq, btmax, atmax, NaN, true)::LimitRule
     end
     function LimitRule()
-        new(NaN, NaN, NaN, false)::LimitRule
+        new(NaN, NaN, NaN, NaN, false)::LimitRule
     end
 end
 
@@ -234,7 +241,14 @@ function ncarule!(data::DataFrame, conc::Symbol, time::Symbol, rule::LimitRule)
         sort!(data, [time])
 
         cmax, tmax, tmaxn = ctmax(data, conc, time)
-        filterv = Array{Int, 1}(undef, 0)
+        #NaN Rule
+        if rule.nan !== NaN
+            for i = 1:nrow(data)
+                if data[i, conc] === NaN data[i, conc] = rule.nan end
+            end
+        end
+
+        #LLOQ rule
         for i = 1:nrow(data)
             if data[i, conc] < rule.lloq
                 if i <= tmaxn
@@ -244,11 +258,16 @@ function ncarule!(data::DataFrame, conc::Symbol, time::Symbol, rule::LimitRule)
                 end
             end
         end
-        for i = 1:nrow(data)
-            if data[i, conc] === NaN push!(filterv, i) end
-        end
-        if length(filterv) > 0
-            deleterows!(data, filterv)
+
+        #NaN Remove rule
+        if rule.rm
+            filterv = Array{Int, 1}(undef, 0)
+            for i = 1:nrow(data)
+                if data[i, conc] === NaN push!(filterv, i) end
+            end
+            if length(filterv) > 0
+                deleterows!(data, filterv)
+            end
         end
 end
 function ncarule!(data::PKSubject, rule::LimitRule)
@@ -262,7 +281,7 @@ end
     """
     function ctmax(time::Vector, obs::Vector)
         if length(time) != length(obs) throw(ArgumentError("Unequal vector length!")) end
-        cmax  = maximum(obs)
+        cmax  = maximum(obs[obs .!== NaN]);
         tmax  = NaN
         tmaxn = 0
         for i = 1:length(time)
@@ -275,7 +294,7 @@ end
         return cmax, tmax, tmaxn
     end
     function ctmax(data::DataFrame, conc::Symbol, time::Symbol)
-        return ctmax(data[!,time], data[!,obs])
+        return ctmax(data[!, time], data[!, conc])
     end
     function ctmax(data::PKSubject)
         return ctmax(data.time, data.obs)
@@ -291,26 +310,6 @@ end
         mask[1:s] .= false
         cmax, tmax, tmaxn = ctmax(data.time[mask], data.obs[mask])
         if cmax > cpredict return cmax, tmax, tmaxn + s else return cpredict, data.dosetime.time, s end
-    end
-    """
-    Range for AUC
-        return start point number, end point number
-    """
-    function ncarange(data::PKSubject, dosetime, tau)
-        tautime = dosetime + tau
-        s     = 0
-        e     = 0
-        for i = 1:length(data) - 1
-            if dosetime >= data.time[i] && dosetime < data.time[i+1] s = i; break end
-        end
-        if tautime >= data.time[end]
-            e = length(data.time)
-        else
-            for i = s:length(data) - 1
-                if tautime >= data.time[i] && tautime < data.time[i+1] e = i; break end
-            end
-        end
-        return s, e
     end
     function ctmax(data::PKSubject, dosetime, tau)
         if tau === NaN || tau <= 0 return ctmax(data, dosetime) end
@@ -335,6 +334,26 @@ end
                 return ecpredict, tautime, e
             end
         elseif cmax > scpredict return max, tmax, tmaxn + s else return scpredict, data.dosetime.time, s end
+    end
+    """
+    Range for AUC
+        return start point number, end point number
+    """
+    function ncarange(data::PKSubject, dosetime, tau)
+        tautime = dosetime + tau
+        s     = 0
+        e     = 0
+        for i = 1:length(data) - 1
+            if dosetime >= data.time[i] && dosetime < data.time[i+1] s = i; break end
+        end
+        if tautime >= data.time[end]
+            e = length(data.time)
+        else
+            for i = s:length(data) - 1
+                if tautime >= data.time[i] && tautime < data.time[i+1] e = i; break end
+            end
+        end
+        return s, e
     end
 
     #---------------------------------------------------------------------------
@@ -780,6 +799,14 @@ function pkimport(data::DataFrame, sort::Array, rule::LimitRule; conc::Symbol, t
                     push!(datai, [data[c, time], data[c, conc]])
                 end
             end
+            if !(eltype(datai.Time) <: Real)
+                datai.Time[.!isa.(datai.Time, Real)] .= NaN
+                datai.Time = float.(datai.Time)
+            end
+            if !(eltype(datai.Conc) <: Real)
+                datai.Conc[.!isa.(datai.Conc, Real)] .= NaN
+                datai.Conc = float.(datai.Conc)
+            end
             if rule.lloq !== NaN
                 ncarule!(datai, :Conc, :Time, rule)
             else
@@ -816,7 +843,7 @@ Pharmacokinetics data import from DataFrame for one subject.
 - time - time column.
 """
 function pkimport(data::DataFrame, rule::LimitRule; time::Symbol, conc::Symbol)
-        rule = LimitRule()
+        #rule = LimitRule()
         datai = ncarule!(copy(data[!,[time, conc]]), conc, time, rule)
         return DataSet([PKSubject(datai[!, time], datai[!, conc])])
 end
