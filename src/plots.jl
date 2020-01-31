@@ -83,23 +83,36 @@ function usort(data::DataSet{T}, list) where T <: AbstractData
 end
 
 function plot(data::DataSet{T}; pagesort = nothing, typesort = nothing) where T <: AbstractSubject
-    typedict = usort(data, typesort)
-    pagedict = usort(data, pagesort)
+    #typedict = usort(data, typesort)
     plots    = Vector{Any}(undef, 0)
     p        = nothing
-    for i in pagedict
+    if pagesort !== nothing
+        pagedict = usort(data, pagesort)
+        for i in pagedict
+            fst = true
+            for d in data
+                if i ∈ d.sort
+                    #println(i , " --- ", d.sort)
+                    if fst
+                        #p = pkplot(d.time, d.obs)
+                        p = plot(d)
+                        fst = false
+                    else
+                        #pkplot!(p, d.time, d.obs)
+                        plot!(d)
+                    end
+                end
+            end
+            push!(plots, p)
+        end
+    else
         fst = true
         for d in data
-            if i ∈ d.sort
-                #println(i , " --- ", d.sort)
-                if fst
-                    #p = pkplot(d.time, d.obs)
-                    p = plot(d)
-                    fst = false
-                else
-                    #pkplot!(p, d.time, d.obs)
-                    plot!(d)
-                end
+            if fst
+                p = plot(d)
+                fst = false
+            else
+                plot!(d)
             end
         end
         push!(plots, p)
