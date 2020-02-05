@@ -128,19 +128,28 @@ struct LimitRule
     lloq::Real
     btmax::Real
     atmax::Real
+    nan::Real
     rm::Bool
+    function LimitRule(lloq, btmax, atmax, nan, rm)
+        new(lloq, btmax, atmax, nan, rm)::LimitRule
+    end
+    function LimitRule(lloq, btmax, atmax, nan)
+        new(lloq, btmax, atmax, nan, false)::LimitRule
+    end
     function LimitRule(lloq, btmax, atmax)
-        new(lloq, btmax, atmax, true)::LimitRule
+        new(lloq, btmax, atmax, NaN, true)::LimitRule
     end
     function LimitRule()
-        new(NaN, NaN, NaN, false)::LimitRule
+        new(NaN, NaN, NaN, NaN, false)::LimitRule
     end
 end
 
-#=
+
 function Base.getindex(a::PKPDProfile{T}, s::Symbol)::Real where T <: AbstractSubject
     return a.result[s]
 end
+
+#=
 function Base.getindex(a::DataSet{PKPDProfile}, i::Int)
     return a.data[i]
 end
@@ -201,6 +210,16 @@ function Base.show(io::IO, obj::PKSubject)
         println(io, obj.time[i], " => ", obj.obs[i])
     end
 end
+function Base.show(io::IO, obj::PKPDProfile)
+    println(io, "PK/PD Profile")
+    println(io, "Type: $(obj.subject)")
+    println(io, "Method: $(obj.method)")
+    print(io, "Results:")
+    for k in keys(obj.result)
+        print(io, " $(k)")
+    end
+    println(io, ";")
+end
 function Base.show(io::IO, obj::PDSubject)
     println(io, "Pharmacodynamic subject")
     println(io, "Observations: $(length(obj))")
@@ -234,7 +253,14 @@ function ncarule!(data::DataFrame, conc::Symbol, time::Symbol, rule::LimitRule)
         sort!(data, [time])
 
         cmax, tmax, tmaxn = ctmax(data, conc, time)
-        filterv = Array{Int, 1}(undef, 0)
+        #NaN Rule
+        if rule.nan !== NaN
+            for i = 1:nrow(data)
+                if data[i, conc] === NaN data[i, conc] = rule.nan end
+            end
+        end
+
+        #LLOQ rule
         for i = 1:nrow(data)
             if data[i, conc] < rule.lloq
                 if i <= tmaxn
@@ -244,11 +270,16 @@ function ncarule!(data::DataFrame, conc::Symbol, time::Symbol, rule::LimitRule)
                 end
             end
         end
-        for i = 1:nrow(data)
-            if data[i, conc] === NaN push!(filterv, i) end
-        end
-        if length(filterv) > 0
-            deleterows!(data, filterv)
+
+        #NaN Remove rule
+        if rule.rm
+            filterv = Array{Int, 1}(undef, 0)
+            for i = 1:nrow(data)
+                if data[i, conc] === NaN push!(filterv, i) end
+            end
+            if length(filterv) > 0
+                deleterows!(data, filterv)
+            end
         end
 end
 function ncarule!(data::PKSubject, rule::LimitRule)
@@ -262,7 +293,7 @@ end
     """
     function ctmax(time::Vector, obs::Vector)
         if length(time) != length(obs) throw(ArgumentError("Unequal vector length!")) end
-        cmax  = maximum(obs)
+        if length(obs[obs .!== NaN]) > 0 cmax  = maximum(obs[obs .!== NaN]) else cmax = NaN end
         tmax  = NaN
         tmaxn = 0
         for i = 1:length(time)
@@ -275,7 +306,7 @@ end
         return cmax, tmax, tmaxn
     end
     function ctmax(data::DataFrame, conc::Symbol, time::Symbol)
-        return ctmax(data[!,time], data[!,obs])
+        return ctmax(data[!, time], data[!, conc])
     end
     function ctmax(data::PKSubject)
         return ctmax(data.time, data.obs)
@@ -291,26 +322,6 @@ end
         mask[1:s] .= false
         cmax, tmax, tmaxn = ctmax(data.time[mask], data.obs[mask])
         if cmax > cpredict return cmax, tmax, tmaxn + s else return cpredict, data.dosetime.time, s end
-    end
-    """
-    Range for AUC
-        return start point number, end point number
-    """
-    function ncarange(data::PKSubject, dosetime, tau)
-        tautime = dosetime + tau
-        s     = 0
-        e     = 0
-        for i = 1:length(data) - 1
-            if dosetime >= data.time[i] && dosetime < data.time[i+1] s = i; break end
-        end
-        if tautime >= data.time[end]
-            e = length(data.time)
-        else
-            for i = s:length(data) - 1
-                if tautime >= data.time[i] && tautime < data.time[i+1] e = i; break end
-            end
-        end
-        return s, e
     end
     function ctmax(data::PKSubject, dosetime, tau)
         if tau === NaN || tau <= 0 return ctmax(data, dosetime) end
@@ -335,6 +346,26 @@ end
                 return ecpredict, tautime, e
             end
         elseif cmax > scpredict return max, tmax, tmaxn + s else return scpredict, data.dosetime.time, s end
+    end
+    """
+    Range for AUC
+        return start point number, end point number
+    """
+    function ncarange(data::PKSubject, dosetime, tau)
+        tautime = dosetime + tau
+        s     = 0
+        e     = 0
+        for i = 1:length(data) - 1
+            if dosetime >= data.time[i] && dosetime < data.time[i+1] s = i; break end
+        end
+        if tautime >= data.time[end]
+            e = length(data.time)
+        else
+            for i = s:length(data) - 1
+                if tautime >= data.time[i] && tautime < data.time[i+1] e = i; break end
+            end
+        end
+        return s, e
     end
 
     #---------------------------------------------------------------------------
@@ -450,6 +481,11 @@ calcm - calculation method;
 - :luld  - Linear Up - Log Down everywhere if c₁ > c₂ > 0, else Linear trapezoidal used;
 - :luldt - Linear Up - Log Down  after Tmax if c₁ > c₂ > 0, else Linear trapezoidal used;
 
+intp - interpolation rule;
+- :lint - linear interpolation;
+- :logt - log interpolation;
+
+
 verbose - print to out stream if "true";
 
 - true;
@@ -479,7 +515,7 @@ function nca!(data::PKSubject; calcm = :lint, intp = :lint, verbose = false, io:
                 break
             end
         end
-        result[:Cmax], result[:Tmax], result[:Tmaxn] = ctmax(data, data.dosetime.time, data.dosetime.tau)
+        result[:Cmax], result[:Tmax], result[:Tmaxn] = ctmax(data) #????!!!!
         #-----------------------------------------------------------------------
         if verbose
             println(io, "Non-compartmental Pharmacokinetic Analysis")
@@ -509,7 +545,7 @@ function nca!(data::PKSubject; calcm = :lint, intp = :lint, verbose = false, io:
                     break
                 end
                 result[:Cdose] = linpredict(data.time[i] , data.time[i+1], data.dosetime.time, data.obs[i], data.obs[i+1])
-                aucpartl[i], aumcpartl[i] = aucpart(data.dosetime.time, data.time[i+1], result[:Cdose], data.obs[i+1], :lint, false)
+                aucpartl[i], aumcpartl[i] = aucpart(data.dosetime.time, data.time[i+1], result[:Cdose], data.obs[i+1], :lint, false) #? only :lint? always aftertmax = false?
                 break
             else
                 aucpartl[i]  = 0
@@ -588,27 +624,44 @@ function nca!(data::PKSubject; calcm = :lint, intp = :lint, verbose = false, io:
         #Steady-state
         if data.dosetime.tau > 0
             ncas, ncae = ncarange(data, data.dosetime.time, data.dosetime.tau)
-            tautime = data.dosetime.time + data.dosetime.tau
+            tautime    = data.dosetime.time + data.dosetime.tau
+            eaucpartl  = eaumcpartl = 0.0
             if tautime < data.time[end]
                 #result[:Ctau] = linpredict(data.time[ncae] , data.time[ncae+1], tautime, data.obs[ncae], data.obs[ncae+1])
+                if tautime > result[:Tmax] aftertmax = true else aftertmax = false end
                 result[:Ctau] = cpredict(data.time[ncae], data.time[ncae+1], tautime, data.obs[ncae], data.obs[ncae+1], intp)
-                aucpartl[ncae], aumcpartl[ncae] = aucpart(data.time[ncae], tautime, data.obs[ncae], result[:Ctau], calcm, false)
+                aucpartl[ncae], aumcpartl[ncae] = aucpart(data.time[ncae], tautime, data.obs[ncae], result[:Ctau], calcm, aftertmax)
+                if verbose
+                    println(io, "Tau + dosetime is less then end time. Inrapolation used.")
+                    println(io, "Interpolation between: $(data.time[ncae]) - $( data.time[ncae+1]), method: $(intp)")
+                    println(io, "Ctau: $(result[:Ctau])")
+                    println(io, "AUC final part: $(aucpartl[ncae])")
+                end
                 #remoove part after tau
                 if ncae < result[:Obsnum] - 1 pmask[ncae+1:end] .= false end
             elseif tautime > data.time[end]
                 #extrapolation
-                result[:Ctau] = exp(result[:LZint] + result[:LZ]*tautime)
-                aucpartl[ncae], aumcpartl[ncae] = aucpart(data.time[ncae], tautime, data.obs[ncae], result[:Ctau], calcm, false)
+                result[:Ctau] = exp(result[:LZint] + result[:LZ] * tautime)
+                eaucpartl, eaumcpartl = aucpart(data.time[ncae], tautime, data.obs[ncae], result[:Ctau], calcm, true)
+
                 #!!!
             else
                 result[:Ctau] = data.obs[end]
             end
             result[:Ctaumin]  = min(result[:Ctau], result[:Cdose], minimum(data.obs[ncas+1:ncae]))
-            result[:AUCtau]   = sum(aucpartl[pmask])
-            result[:AUMCtau]  = sum(aumcpartl[pmask])
+            result[:AUCtau]   = sum(aucpartl[pmask])  + eaucpartl
+            result[:AUMCtau]  = sum(aumcpartl[pmask]) + eaumcpartl
             result[:Cavg]     = result[:AUCtau]/data.dosetime.tau
-            result[:Swing]    = (result[:Cmax] - result[:Ctaumin])/result[:Ctaumin]
-            result[:Swingtau] = (result[:Cmax] - result[:Ctau])/result[:Ctau]
+            if result[:Ctaumin] != 0
+                result[:Swing]    = (result[:Cmax] - result[:Ctaumin])/result[:Ctaumin]
+            else
+                result[:Swing]    = NaN
+            end
+            if result[:Ctau] != 0
+                result[:Swingtau] = (result[:Cmax] - result[:Ctau])/result[:Ctau]
+            else
+                result[:Swingtau] = NaN
+            end
             result[:Fluc]     = (result[:Cmax] - result[:Ctaumin])/result[:Cavg]
             result[:Fluctau]  = (result[:Cmax] - result[:Ctau])/result[:Cavg]
             #result[:AccInd]
@@ -721,7 +774,7 @@ function nca!(data::PDSubject; verbose = false, io::IO = stdout)::PKPDProfile{PD
             result[:AUCTHNET] = result[:AUCATH] - result[:AUCBTH]
         end
         result[:AUCBLNET] = result[:AUCABL] - result[:AUCBBL]
-        return PKPDProfile(data, result)
+        return PKPDProfile(data, result; method = :lint)
     end
 """
     nca!(data::PDSubject; verbose = false, io::IO = stdout)::PKPDProfile{PDSubject}
@@ -757,6 +810,14 @@ function pkimport(data::DataFrame, sort::Array, rule::LimitRule; conc::Symbol, t
                 if data[c, sort] == sortlist[i,:]
                     push!(datai, [data[c, time], data[c, conc]])
                 end
+            end
+            if !(eltype(datai.Time) <: Real)
+                datai.Time[.!isa.(datai.Time, Real)] .= NaN
+                datai.Time = float.(datai.Time)
+            end
+            if !(eltype(datai.Conc) <: Real)
+                datai.Conc[.!isa.(datai.Conc, Real)] .= NaN
+                datai.Conc = float.(datai.Conc)
             end
             if rule.lloq !== NaN
                 ncarule!(datai, :Conc, :Time, rule)
@@ -794,7 +855,7 @@ Pharmacokinetics data import from DataFrame for one subject.
 - time - time column.
 """
 function pkimport(data::DataFrame, rule::LimitRule; time::Symbol, conc::Symbol)
-        rule = LimitRule()
+        #rule = LimitRule()
         datai = ncarule!(copy(data[!,[time, conc]]), conc, time, rule)
         return DataSet([PKSubject(datai[!, time], datai[!, conc])])
 end
@@ -811,6 +872,10 @@ Pharmacokinetics data import from DataFrame for one subject.
 function pkimport(data::DataFrame; time::Symbol, conc::Symbol)
         datai = sort(data[!,[time, conc]], time)
         return DataSet([PKSubject(datai[!, time], datai[!, conc])])
+end
+
+function pkimport(time::Vector, conc::Vector; sort = Dict())
+     PKSubject(time, conc; sort = sort)
 end
     #---------------------------------------------------------------------------
 """
@@ -1083,39 +1148,4 @@ function DataFrames.DataFrame(data::DataSet{T}; unst = false, us = false) where 
         else
             return df
         end
-end
-
-#-------------------------------------------------------------------------------
-# PLOTS
-# Rebuild with RecipesBase !!!
-function plotpk(ds::DataSet{PKSubject}; groupby = nothing, label = nothing)
-    pv      = Vector{Any}(undef, 0)
-    ugroup  = Vector{Any}(undef, 0)
-    ulabel  = Vector{Any}(undef, 0)
-    coldict = Dict{Any, Any}()
-    for i in ds
-        if i.sort[groupby] ∉ ugroup push!(ugroup, i.sort[groupby]) end
-        if i.sort[label]   ∉ ulabel push!(ulabel, i.sort[label]) end
-    end
-    colors = [:blue, :red, :green]
-    for i = 1:length(ulabel)
-        coldict[ulabel[i]] = colors[i]
-    end
-    for u in ugroup
-        labels = Vector{String}(undef, 0)
-        p     = plot(
-        xlabel = "Time",
-        ylabel = "Concentration",
-        title  = "$(groupby) : $(u)")
-        for i in ds
-            if i.sort[groupby] == u
-                push!(labels, string(i.sort[label]))
-                plot!(p, i.time, i.obs,
-                    label = labels,
-                    line = (coldict[i.sort[label]], 1, 1.0))
-            end
-        end
-        push!(pv, p)
-    end
-    pv
 end

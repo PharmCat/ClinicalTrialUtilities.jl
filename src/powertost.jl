@@ -39,27 +39,27 @@ function samplentostint(α::Real, θ₁::Real, θ₂::Real, δ::Real, σ::Real, 
 
     powertostf = powertostintf(method) #PowerTOST function
 
-    pow = powertostf(α, θ₁, θ₂, δ, σ̵ₓ, df)
-    np::Int = 2
-    powp::Float64 = pow
+    pow  = powertostf(α, θ₁, θ₂, δ, σ̵ₓ, df)
+    np   = 2
+    powp = pow
     if pow > tp
         while (pow > tp)
-            np = n₀
+            np   = n₀
             powp = pow
-            n₀ = n₀ - 2
+            n₀   = n₀ - 2
             #pow = powerTOST(;alpha=alpha, logscale=false, theta1=ltheta1, theta2=ltheta2, theta0=diffm, cv=se, n=n0, design=design, method=method)
             if n₀ < 4 break end #n0, pow end
             df    = d.df(n₀)
             σ̵ₓ    = σ*sediv(d, n₀)
-            pow = powertostf(α, θ₁, θ₂, δ, σ̵ₓ, df)
+            pow  = powertostf(α, θ₁, θ₂, δ, σ̵ₓ, df)
         end
         estpower = powp
         estn     = np
     elseif pow < tp
         while (pow < tp)
-            np = n₀
+            np   = n₀
             powp = pow
-            n₀ = n₀ + 2
+            n₀   = n₀ + 2
             #pow = powerTOST(;alpha=alpha, logscale=false, theta1=ltheta1, theta2=ltheta2, theta0=diffm, cv=se, n=n0, design=design, method=method)
             df    = d.df(n₀)
             σ̵ₓ    = σ*sediv(d, n₀)

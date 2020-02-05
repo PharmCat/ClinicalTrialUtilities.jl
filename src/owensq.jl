@@ -10,7 +10,7 @@
 
 #pnorm = cdf(ZDIST,  )
 #dnorm = pdf(ZDIST, )
-function owensq(nu::Real, t::Float64, delta::Float64, a::Float64, b::Float64)::Float64
+function owensq(nu::Real, t::Real, delta::Real, a::Real, b::Real)::AbstractFloat
     if a < 0 return  throw(CTUException(1011,"owensQ: a can not be < 0")) end
     if a==b return(0) end
     if a > b return throw(CTUException(1012,"owensQ: a can not be > b")) end
@@ -43,16 +43,16 @@ end #owensQ
 # Port from PowerTOST - dlabes Mar 2012
 
 #OwensQOwen
-function owensqo(nu::Real, t::Float64, delta::Float64, b::Float64; a::Float64=0.0)::Float64
+function owensqo(nu::Real, t::Real, delta::Real, b::Real; a::Real = 0.0)::AbstractFloat
     if nu < 1  throw(CTUException(1001,"owensQo: nu can not be < 1")) end
     if a != 0.0 throw(CTUException(1002,"owensQo: a can not be not 0")) end
     if isinf(b) return cdf(NoncentralT(nu,delta),t) end
     if isinf(delta) delta = sign(delta)*1e20 end
-    A::Float64 = t/sqrt(nu)
-    B::Float64 = nu/(nu + t*t)
+    A   = t/sqrt(nu)
+    B   = nu/(nu + t*t)
     upr = nu-2
     #some code abs L vector H vector M vector
-    av = Array{Float64}(undef, nu)
+    av  = Array{Float64}(undef, nu)
     for i = 1:length(av)
         if i==1||i==2 av[i] = 1 else av[i] = 1/((i-2)*av[i-1]) end
     end
@@ -73,15 +73,15 @@ function owensqo(nu::Real, t::Float64, delta::Float64, b::Float64; a::Float64=0.
         end
     end
     #pass1
-    M = Array{Float64}(undef, ll)
-    sB::Float64 = sqrt(B)
+    M   = Array{Float64}(undef, ll)
+    sB  = sqrt(B)
     for i = 1:length(M)
         if i==1 M[1] = A*sB*pdf(ZDIST,delta*sB)*(cdf(ZDIST,delta*A*sB)-cdf(ZDIST,(delta*A*B-b)/sB)) end
         if i==2 M[2] = B*(delta*A*M[1]+A*pdf(ZDIST,delta*sB)*(pdf(ZDIST,delta*A*sB)-pdf(ZDIST,(delta*A*B-b)/sB))) end
         if i>2 M[i] = ((i-2)/(i-1))*B*(av[i-1]*delta*A*M[i-1]+M[i-2]) - L[i-2] end
     end
     #pass
-    sumt::Float64 = 0;
+    sumt  = 0.0;
     if nu%2 > 0
         if upr>=1
             for i = 1:2:upr
@@ -105,11 +105,11 @@ end #OwensQo
 #-------------------------------------------------------------------------------
 # functions bellow used in owensQ
 #PowerTost owensQ #37 and impl b for #52-54
-@inline function ifun1(x::Float64, nu::Real, t::Float64, delta::Float64; b=0.0::Float64)::Float64
+@inline function ifun1(x::Real, nu::Real, t::Real, delta::Real; b=0.0::Real)::AbstractFloat
     return owenstint2(b + x / (1 - x), nu, t, delta) * 1 / (1 - x) ^ 2
 end
 #.Q.integrand
-@inline function owenstint2(x::Float64, nu::Real, t::Float64, delta::Float64)::Float64
+@inline function owenstint2(x::Real, nu::Real, t::Real, delta::Real)::AbstractFloat
     if x == 0 return 0 end
     #Qconst::Float64 = -((nu/2.0)-1.0)*log(2.0)-lgamma(nu/2.0)
     #return sign(x)^(nu-1)*cdf(ZDIST,t*x/sqrt(nu)-delta)*exp((nu-1)*log(abs(x))-0.5*x^2+Qconst)
@@ -125,7 +125,7 @@ end
 # https://people.sc.fsu.edu/~jburkardt/m_src/asa076/asa076.html
 # by J. Burkhardt, license GNU LGPL
 # rewrite from PowerTOST
-function owenst(h::Float64, a::Float64)::Float64
+function owenst(h::Real, a::Real)::AbstractFloat
     #not implemented
     epsilon = eps()
     # special cases
@@ -142,16 +142,16 @@ function owenst(h::Float64, a::Float64)::Float64
             return sign(a) * tha
         end
     end
-    aa::Float64 = abs(a)
+    aa = abs(a)
     if aa <= 1.0
         #tha::Float64 = tfn(h, a)
         #return tha
         return tfn(h, a)
     else
-        ah::Float64  = aa * h
-        gh::Float64  = cdf(ZDIST, h)
-        gah::Float64 = cdf(ZDIST, ah)
-        tha = 0.5 * (gh + gah) - gh * gah - tfn(ah, 1.0/aa)
+        ah   = aa * h
+        gh   = cdf(ZDIST, h)
+        gah  = cdf(ZDIST, ah)
+        tha  = 0.5 * (gh + gah) - gh * gah - tfn(ah, 1.0/aa)
     end
     if a < 0.0 return -tha else return tha end
 end #OwensT(h,a)
@@ -165,21 +165,19 @@ end #OwensT(h,a)
 # by J. Burkhardt license GNU LGPL
 # is called as tfn(h, a) if a<=1
 # otherwise as tfn(a*h, 1/a)
-@inline function tfn(x::Real, fx::Real)::Float64
+@inline function tfn(x::Real, fx::Real)::AbstractFloat
     ng  = 5
-    r   = Float64[0.1477621, 0.1346334, 0.1095432, 0.0747257, 0.0333357]
-    u   = Float64[0.0744372, 0.2166977, 0.3397048, 0.4325317, 0.4869533]
-    #tp::Float64  = 1 / 2 / pi
-    #tp::Float64  = 0.15915494309189535
+    r   = [0.1477621, 0.1346334, 0.1095432, 0.0747257, 0.0333357]
+    u   = [0.0744372, 0.2166977, 0.3397048, 0.4325317, 0.4869533]
     tv1 = eps();
-    tv2::Float64 = tv3::Float64 = 15.0
-    tv4::Float64 = 1.0E-05
+    tv2  = tv3 = 15.0
+    tv4  = 1.0E-05
     if tv2 < abs(x) return 0 end
-    xs::Float64  = -0.5 * x * x
-    x2::Float64  = fx
-    fxs::Float64 = fx * fx
+    xs   = -0.5 * x * x
+    x2   = fx
+    fxs  = fx * fx
     if tv3 <= (log(1.0 + fxs) - xs * fxs)
-        x1::Float64  = 0.5 * fx
+        x1  = 0.5 * fx
         fxs = 0.25 * fxs
         while true
             rt  = fxs + 1.0
