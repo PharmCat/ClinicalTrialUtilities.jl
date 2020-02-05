@@ -183,7 +183,8 @@ println(" ---------------------------------- ")
     df   = DataFrame(pk; unst = true)
     sort!(df, :Subject)
 
-    @test round.(df[!, :AUCtau], sigdigits = 6) == round.([1367.7388
+    @test round.(df[!, :AUCtau], sigdigits = 6) == round.([
+    1367.7388
     2043.0158
     838.8295
     1444.7985
@@ -195,6 +196,7 @@ println(" ---------------------------------- ")
     1167.911], sigdigits = 6)
 
     # --------------------------------------------------------------------------
+    # Linear Up Log Down - Log Interpolation
     # TAU 0 - 36
     ClinicalTrialUtilities.setdosetime!(pkds, ClinicalTrialUtilities.DoseTime(dose = 100, time = 0, tau = 36))
     pk   = ClinicalTrialUtilities.nca!(pkds, calcm = :luldt, intp = :logt)
@@ -243,7 +245,7 @@ println(" ---------------------------------- ")
     142.566125
     122.7865], sigdigits = 6)
 
-    #AUC Tau
+    #AUC Tau (!!!)
     #=
     1268.275631
     1831.820528
@@ -274,10 +276,23 @@ println(" ---------------------------------- ")
     80.05171762
     23.98401112], sigdigits = 6)
 
+#=
+    12646.63632
+    11996.6718
+    7195.902904
+    11794.11692
+    12274.83395
+    8729.151856
+    8395.400098 (!)
+    8930.999936 (!)
+    10727.4135 (!)
+    6389.420453
+=#
+
     # Log-trapezoidal Linear Interpolation
 
     pkds = ClinicalTrialUtilities.pkimport(pkdata2, [:Subject, :Formulation]; conc = :Concentration, time = :Time)
-    pk   = ClinicalTrialUtilities.nca!(pkds, calcm = :logt)
+    pk   = ClinicalTrialUtilities.nca!(pkds, calcm = :logt, intp = :lint)
     df   = DataFrame(pk; unst = true)
     sort!(df, :Subject)
 

@@ -6,8 +6,9 @@ v0.2.3
   - Plots for PK with RecipesBase
   - NCA Ctau intrapolation/extrapolation fix and validate
   - fisher & pirson non-public methods for frequencies
+  - add Show methods
   - minor fix
-  - cosmitics
+  - cosmetics
 
 v0.2.2
   - add sim
