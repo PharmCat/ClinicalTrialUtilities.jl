@@ -1,7 +1,5 @@
 # ClinicalTrialUtilities
 
-**VERSION 0.2.0 INCOMATIBLE WITH 0.1.x**
-
  Clinical trial related calculation: descriptive statistics, power and sample size calculation, power simulations, confidence interval, pharmacokinetics/pharmacodynamics parameters calculation.
 
 [![Build Status](https://travis-ci.com/PharmCat/ClinicalTrialUtilities.jl.svg?branch=master)](https://travis-ci.com/PharmCat/ClinicalTrialUtilities.jl)
