@@ -29,6 +29,10 @@ println(" ---------------------------------- ")
     @test pk[1, :MRTlast] ≈ 3.10345 atol=1E-5
     @test pk[1, :Tmax]    ≈ 3.0 atol=1E-5
 
+    pkds = ClinicalTrialUtilities.pkimport(pkdata[1:7,2], pkdata[1:7,1])
+    pk   = ClinicalTrialUtilities.nca!(pkds)
+    @test pk[:AUClast]    ≈ 1.4499999999999997
+
     pkds = ClinicalTrialUtilities.pkimport(pkdata2, [:Subject, :Formulation]; conc = :Concentration, time = :Time)
     pk   = ClinicalTrialUtilities.nca!(pkds)
     df   = DataFrame(pk; unst = true)
