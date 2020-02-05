@@ -1,5 +1,5 @@
-v0.2.3
 
+v0.2.2
   - Distributions bump
   - cvfromci cvms deprecated
   - cmh methods
@@ -9,8 +9,6 @@ v0.2.3
   - add Show methods
   - minor fix
   - cosmetics
-
-v0.2.2
   - add sim
   - cosmetics
 
