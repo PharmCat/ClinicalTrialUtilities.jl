@@ -144,10 +144,12 @@ struct LimitRule
     end
 end
 
-#=
+
 function Base.getindex(a::PKPDProfile{T}, s::Symbol)::Real where T <: AbstractSubject
     return a.result[s]
 end
+
+#=
 function Base.getindex(a::DataSet{PKPDProfile}, i::Int)
     return a.data[i]
 end
@@ -207,6 +209,16 @@ function Base.show(io::IO, obj::PKSubject)
     for i = 1:length(obj)
         println(io, obj.time[i], " => ", obj.obs[i])
     end
+end
+function Base.show(io::IO, obj::PKPDProfile)
+    println(io, "PK/PD Profile")
+    println(io, "Type: $(obj.subject)")
+    println(io, "Method: $(obj.method)")
+    print(io, "Results:")
+    for k in keys(obj.result)
+        print(io, " $(k)")
+    end
+    println(io, ";")
 end
 function Base.show(io::IO, obj::PDSubject)
     println(io, "Pharmacodynamic subject")
@@ -281,7 +293,7 @@ end
     """
     function ctmax(time::Vector, obs::Vector)
         if length(time) != length(obs) throw(ArgumentError("Unequal vector length!")) end
-        cmax  = maximum(obs[obs .!== NaN]);
+        if length(obs[obs .!== NaN]) > 0 cmax  = maximum(obs[obs .!== NaN]) else cmax = NaN end
         tmax  = NaN
         tmaxn = 0
         for i = 1:length(time)
@@ -860,6 +872,10 @@ Pharmacokinetics data import from DataFrame for one subject.
 function pkimport(data::DataFrame; time::Symbol, conc::Symbol)
         datai = sort(data[!,[time, conc]], time)
         return DataSet([PKSubject(datai[!, time], datai[!, conc])])
+end
+
+function pkimport(time::Vector, conc::Vector; sort = Dict())
+     PKSubject(time, conc; sort = sort)
 end
     #---------------------------------------------------------------------------
 """
