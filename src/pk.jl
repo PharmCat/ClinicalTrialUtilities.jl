@@ -774,7 +774,7 @@ function nca!(data::PDSubject; verbose = false, io::IO = stdout)::PKPDProfile{PD
             result[:AUCTHNET] = result[:AUCATH] - result[:AUCBTH]
         end
         result[:AUCBLNET] = result[:AUCABL] - result[:AUCBBL]
-        return PKPDProfile(data, result)
+        return PKPDProfile(data, result; method = :lint)
     end
 """
     nca!(data::PDSubject; verbose = false, io::IO = stdout)::PKPDProfile{PDSubject}
