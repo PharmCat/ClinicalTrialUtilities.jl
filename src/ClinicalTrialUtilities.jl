@@ -21,6 +21,7 @@ import Base.getindex
 import Base.length
 import Base.in
 import Base.iterate
+import Base.eltype
 import StatsBase.confint
 import DataFrames.DataFrame
 
