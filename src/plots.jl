@@ -49,7 +49,7 @@ end
     xlabel      --> "Time"
     ylabel      --> "Concentration"
     link        --> :both
-    legend      --> false
+    legend      --> true
     grid        --> false
     #ticks       := [nothing :auto nothing]
     xlims       --> (minimum(x), maximum(x)),
@@ -68,12 +68,12 @@ function plotlabel(d)
         for (k, v) in d
             title *= "$(k) = $(v); "
         end
-        title = title[1:end-2]
+        title = title[1:length(title)]
     end
     return title
 end
 
-function plot(subj::T; title = nothing, legend = false, label = "AUTO", xlims = nothing, plotstyle::PKPlotStyle = PKPLOTSTYLE[1]) where T <: AbstractSubject
+function plot(subj::T; title = nothing, legend = true, label = "AUTO", xlims = nothing, plotstyle::PKPlotStyle = PKPLOTSTYLE[1]) where T <: AbstractSubject
 
     if title === nothing
         title = plotlabel(subj.sort)
@@ -92,7 +92,7 @@ function plot(subj::T; title = nothing, legend = false, label = "AUTO", xlims = 
     return p
 
 end
-function plot!(subj::T; legend = false, label = "AUTO", xlims = nothing,  plotstyle::PKPlotStyle = PKPLOTSTYLE[1]) where T <: AbstractSubject
+function plot!(subj::T; legend = true, label = "AUTO", xlims = nothing,  plotstyle::PKPlotStyle = PKPLOTSTYLE[1]) where T <: AbstractSubject
     if xlims === nothing xlims = (minimum(subj.time), maximum(subj.time)) end
     p = pkplot!(subj.time, subj.obs;
         linestyle   = plotstyle.linestyle,
@@ -115,9 +115,54 @@ function usort(data::DataSet{T}, list) where T <: AbstractData
     dl
 end
 
-function plot(data::DataSet{T}; title = nothing, legend = false, xlims = nothing, pagesort = nothing, typesort = nothing) where T <: AbstractSubject
+function pageplot(pagedatatmp, styledict, typesort; title = "", legend = true, xlims = nothing)
+    utypes    = keys(styledict)
+    labels    = Vector{String}(undef, 0)
+    fst       = true
+    p         = nothing
+    for u in utypes
+        for d in pagedatatmp
+            if u ∈ d.sort
+                label = "AUTO"
+                if typesort !== nothing
+                    tempsd = Dict(k => d.sort[k] for k in typesort)
+                    style  = styledict[tempsd]
+                    label  = plotlabel(tempsd)
+                    if label ∉ labels
+                        push!(labels, label)
+                    else
+                        label = ""
+                    end
+                end
+                if fst
+                    p = plot(d; title = title, legend = legend, xlims = xlims, plotstyle = style, label = label)
+                    fst = false
+                else
+                    plot!(                  d; legend = legend, xlims = xlims, plotstyle = style, label = label)
+                end
+            end
+        end
+    end
+    p
+end
+function pageplot(pagedatatmp; title = "", legend = true, xlims = nothing)
+    fst       = true
+    p         = nothing
+    for d in pagedatatmp
+        label = "AUTO"
+        if fst
+            p = plot(d; title = title, legend = legend, xlims = xlims, plotstyle = PKPLOTSTYLE[1], label = label)
+            fst = false
+        else
+            plot!(                  d; legend = legend, xlims = xlims, plotstyle = PKPLOTSTYLE[1], label = label)
+        end
+    end
+    p
+end
+
+function plot(data::DataSet{T}; title = nothing, legend = true, xlims = nothing, pagesort = nothing, typesort = nothing) where T <: AbstractSubject
     # Style types
-    labels     = Vector{String}(undef, 0)
+
     styledict  = Dict()
     style      = PKPLOTSTYLE[1]
     if typesort !== nothing
@@ -133,59 +178,33 @@ function plot(data::DataSet{T}; title = nothing, legend = false, xlims = nothing
     autotitle = false
     if title === nothing autotitle = true end
     #---------------------------------------------------------------------------
+    # PAGES
     plots    = Vector{Any}(undef, 0)
     p        = nothing
     if pagesort !== nothing
-        pagedict = usort(data, pagesort)
+        pagedict   = usort(data, pagesort)
         for i in pagedict
             if autotitle
-                title = plotlabel(i)
+                title  = plotlabel(i)
             end
-            fst = true
+            pagedatatmp = Vector{eltype(data)}(undef, 0)
             for d in data
                 if i ∈ d.sort
-                    label = "AUTO"
-                    if typesort !== nothing
-                        tempsd = Dict(k => d.sort[k] for k in typesort)
-                        style  = styledict[tempsd]
-                        label = plotlabel(tempsd)
-                        if label ∉ labels
-                            push!(labels, label)
-                        else
-                            label = ""
-                        end
-                    end
-                    if fst
-                        p = plot(d; title = title, legend = legend, xlims = xlims, plotstyle = style, label = label)
-                        fst = false
-                    else
-                        plot!(d; plotstyle = style, legend = legend, xlims = xlims, label = label)
-                    end
+                    push!(pagedatatmp, d)
                 end
+            end
+            if typesort !== nothing
+                p = pageplot(pagedatatmp, styledict, typesort; title = title, legend = legend, xlims = xlims)
+            else
+                p = pageplot(pagedatatmp; title = title, legend = legend, xlims = xlims)
             end
             push!(plots, p)
         end
     else
-        fst = true
-        for d in data
-            label = "AUTO"
-            if typesort !== nothing
-                tempsd = Dict(k => d.sort[k] for k in typesort)
-                style  = styledict[tempsd]
-                label = plotlabel(tempsd)
-                if label ∉ labels
-                    push!(labels, label)
-                else
-                    label = ""
-                end
-            end
-
-            if fst
-                p = plot(d; title = title, legend = legend, xlims = xlims, plotstyle = style, label = label)
-                fst = false
-            else
-                plot!(d; plotstyle = style, legend = legend, xlims = xlims, label = label)
-            end
+        if typesort !== nothing
+            p = pageplot(data, styledict, typesort; title = title, legend = legend, xlims = xlims)
+        else
+            p = pageplot(data; title = title, legend = legend, xlims = xlims)
         end
         push!(plots, p)
     end
