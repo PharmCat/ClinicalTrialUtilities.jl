@@ -544,7 +544,12 @@ function nca!(data::PKSubject; calcm = :lint, intp = :lint, verbose = false, io:
                     result[:Cdose] = data.obs[i]
                     break
                 end
-                result[:Cdose] = linpredict(data.time[i] , data.time[i+1], data.dosetime.time, data.obs[i], data.obs[i+1])
+                #Cdose calculation
+                if data.obs[i] > 0
+                    result[:Cdose] = linpredict(data.time[i] , data.time[i+1], data.dosetime.time, data.obs[i], data.obs[i+1])
+                else
+                    result[:Cdose] = 0
+                end
                 aucpartl[i], aumcpartl[i] = aucpart(data.dosetime.time, data.time[i+1], result[:Cdose], data.obs[i+1], :lint, false) #? only :lint? always aftertmax = false?
                 break
             else
