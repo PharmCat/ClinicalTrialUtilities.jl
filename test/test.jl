@@ -261,7 +261,7 @@ println(" ---------------------------------- ")
 @testset "  Frequency             " begin
     df   = freqdat
     ctab =  ClinicalTrialUtilities.contab(df, row = :row, col = :col)
-    @test ctab == [9 8; 5 21]
+    @test ctab.tab == [9 8; 5 21]
 
     frtab =  ClinicalTrialUtilities.freque(df; vars=:row, alpha = 0.05)
     @test frtab[1,2] == 17

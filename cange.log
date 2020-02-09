@@ -1,3 +1,7 @@
+v0.2.3
+
+  - ConTab struct
+
 
 v0.2.2
   - Distributions bump
@@ -8,7 +12,6 @@ v0.2.2
   - fisher & pirson non-public methods for frequencies
   - add Show methods
   - minor fix
-  - cosmetics
   - add sim
   - cosmetics
 
