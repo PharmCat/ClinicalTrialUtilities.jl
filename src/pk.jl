@@ -76,9 +76,10 @@ struct DoseTime
 end
 
 
+#Plasma PK subject
 mutable struct PKSubject <: AbstractSubject
-    time::Array
-    obs::Array
+    time::Vector
+    obs::Vector
     kelauto::Bool
     kelrange::ElimRange
     dosetime::DoseTime
@@ -100,9 +101,22 @@ mutable struct PKSubject <: AbstractSubject
     end
 end
 
+#Urine PK subject
+mutable struct UPKSubject <: AbstractSubject
+    stime::Vector
+    etime::Vector
+    obs::Vector
+    vol::Vector
+    kelrange::ElimRange
+    dosetime::DoseTime
+    keldata::KelData
+    sort::Dict
+end
+
+#PD subject
 mutable struct PDSubject <: AbstractSubject
-    time::Array
-    obs::Array
+    time::Vector
+    obs::Vector
     bl::Real
     th::Real
     sort::Dict
@@ -369,7 +383,7 @@ end
     end
 
     #---------------------------------------------------------------------------
-    function slope(x::Vector, y::Vector)::Tuple{Number, Number, Number, Number}
+    function slope(x::Vector, y::Vector)
         if length(x) != length(y) throw(ArgumentError("Unequal vector length!")) end
         n   = length(x)
         if n < 2 throw(ArgumentError("n < 2!")) end
@@ -389,32 +403,32 @@ end
         return a, b, r2, ar
     end #end slope
         #Linear trapezoidal auc
-    function linauc(t₁, t₂, c₁, c₂)::Number
+    function linauc(t₁, t₂, c₁, c₂)
         return (t₂-t₁)*(c₁+c₂)/2
     end
         #Linear trapezoidal aumc
-    function linaumc(t₁, t₂, c₁, c₂)::Number
+    function linaumc(t₁, t₂, c₁, c₂)
         return (t₂-t₁)*(t₁*c₁+t₂*c₂)/2
     end
         #Log trapezoidal auc
-    function logauc(t₁, t₂, c₁, c₂)::Number
+    function logauc(t₁, t₂, c₁, c₂)
         return  (t₂-t₁)*(c₂-c₁)/log(c₂/c₁)
     end
         #Log trapezoidal aumc
-    function logaumc(t₁, t₂, c₁, c₂)::Number
+    function logaumc(t₁, t₂, c₁, c₂)
         return (t₂-t₁) * (t₂*c₂-t₁*c₁) / log(c₂/c₁) - (t₂-t₁)^2 * (c₂-c₁) / log(c₂/c₁)^2
     end
     #Intrapolation
         #linear prediction bx from ax, a1 < ax < a2
-    function linpredict(a₁, a₂, ax, b₁, b₂)::Number
+    function linpredict(a₁, a₂, ax, b₁, b₂)
         return abs((ax - a₁) / (a₂ - a₁))*(b₂ - b₁) + b₁
     end
 
-    function logtpredict(c₁, c₂, cx, t₁, t₂)::Number
+    function logtpredict(c₁, c₂, cx, t₁, t₂)
         return log(cx/c₁)/log(c₂/c₁)*(t₂-t₁)+t₁
     end
 
-    function logcpredict(t₁, t₂, tx, c₁, c₂)::Number
+    function logcpredict(t₁, t₂, tx, c₁, c₂)
         return exp(log(c₁) + abs((tx-t₁)/(t₂-t₁))*(log(c₂) - log(c₁)))
     end
     function cpredict(t₁, t₂, tx, c₁, c₂, calcm)
@@ -806,7 +820,7 @@ Pharmacokinetics data import from DataFrame.
 - conc - concentration column;
 - time - time column.
 """
-function pkimport(data::DataFrame, sort::Array, rule::LimitRule; conc::Symbol, time::Symbol)
+function pkimport(data::DataFrame, sort::Array, rule::LimitRule; conc::Symbol, time::Symbol)::DataSet
         sortlist = unique(data[:, sort])
         results  = Array{PKSubject, 1}(undef, 0)
         for i = 1:size(sortlist, 1) #For each line in sortlist
@@ -844,7 +858,7 @@ Pharmacokinetics data import from DataFrame.
 - conc - concentration column;
 - time - time column.
 """
-function pkimport(data::DataFrame, sort::Array; time::Symbol, conc::Symbol)
+function pkimport(data::DataFrame, sort::Array; time::Symbol, conc::Symbol)::DataSet
         rule = LimitRule()
         return pkimport(data, sort, rule; conc = conc, time = time)
 end
@@ -859,7 +873,7 @@ Pharmacokinetics data import from DataFrame for one subject.
 - conc - concentration column;
 - time - time column.
 """
-function pkimport(data::DataFrame, rule::LimitRule; time::Symbol, conc::Symbol)
+function pkimport(data::DataFrame, rule::LimitRule; time::Symbol, conc::Symbol)::DataSet
         #rule = LimitRule()
         datai = ncarule!(copy(data[!,[time, conc]]), conc, time, rule)
         return DataSet([PKSubject(datai[!, time], datai[!, conc])])
@@ -874,12 +888,12 @@ Pharmacokinetics data import from DataFrame for one subject.
 - conc - concentration column;
 - time - time column.
 """
-function pkimport(data::DataFrame; time::Symbol, conc::Symbol)
+function pkimport(data::DataFrame; time::Symbol, conc::Symbol)::DataSet
         datai = sort(data[!,[time, conc]], time)
         return DataSet([PKSubject(datai[!, time], datai[!, conc])])
 end
 
-function pkimport(time::Vector, conc::Vector; sort = Dict())
+function pkimport(time::Vector, conc::Vector; sort = Dict())::PKSubject
      PKSubject(time, conc; sort = sort)
 end
     #---------------------------------------------------------------------------
@@ -897,7 +911,7 @@ Pharmacodynamics data import from DataFrame.
 - bl - baseline;
 - th - treashold.
 """
-function pdimport(data::DataFrame, sort::Array; resp::Symbol, time::Symbol, bl::Real = 0, th::Real = NaN)
+function pdimport(data::DataFrame, sort::Array; resp::Symbol, time::Symbol, bl::Real = 0, th::Real = NaN)::DataSet
         sortlist = unique(data[:, sort])
         results  = Array{PDSubject, 1}(undef, 0)
         for i = 1:size(sortlist, 1) #For each line in sortlist
