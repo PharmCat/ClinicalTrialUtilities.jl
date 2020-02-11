@@ -1,6 +1,6 @@
 # Clinical Trial Utilities
 # Copyright © 2019 Vladimir Arnautov aka PharmCat (mail@pharmcat.net)
-using Distributions, Random, DataFrames, CSV, Test
+using Distributions, Random, DataFrames, CSV, Test, Plots
 
 path    = dirname(@__FILE__)
 io      = IOBuffer();

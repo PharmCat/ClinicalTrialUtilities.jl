@@ -56,7 +56,7 @@ end
     ylims       --> (0, maximum(y)*1.1)
     seriescolor --> :blue
     markershape --> :circle
-    markersize  --> 2
+    markersize  --> 3
     markercolor --> :match
     msalpha     --> 0
     (x, y)
@@ -163,9 +163,14 @@ end
 function plot(data::DataSet{T}; title = nothing, legend = true, xlims = nothing, pagesort = nothing, typesort = nothing) where T <: AbstractSubject
     # Style types
 
-    styledict  = Dict()
-    style      = PKPLOTSTYLE[1]
+    styledict  = nothing
+    #style      = PKPLOTSTYLE[1]
+    if pagesort !== nothing
+        if !isa(pagesort, Array) pagesort = [pagesort] end
+    end
     if typesort !== nothing
+        styledict  = Dict()
+        if !isa(typesort, Array) typesort = [typesort] end
         utypes = usort(data, typesort)
         for i = 1:length(utypes)
             if i <= 20

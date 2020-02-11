@@ -356,8 +356,8 @@ println(" ---------------------------------- ")
     pkds = ClinicalTrialUtilities.pkimport(glucose2, [:Subject, :Date]; conc = :glucose, time = :Time)
     pk   = ClinicalTrialUtilities.nca!(pkds)
     df   = DataFrame(pk; unst = true)
-
-
+    p    = ClinicalTrialUtilities.plot(pkds; pagesort = [:Date], typesort = [:Subject])
+    @test length(p) == 2
     print(io, pk[1].subject.keldata)
 end
 

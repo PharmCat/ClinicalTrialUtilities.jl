@@ -183,13 +183,21 @@ end
 
 #Statistics calculation
 
-@inline function descriptive_(data::Array{T,1}, stats::Union{Tuple{Vararg{Symbol}}, Array{Symbol,1}}) where T <: Real
+function notnan(x)
+    return !(x === NaN || x === nothing || x === missing)
+end
 
+@inline function descriptive_(data::Vector{T}, stats::Union{Tuple{Vararg{Symbol}}, Array{Symbol,1}}) where T <: Real
+
+    #=
     dlist = findall(x -> x === NaN || x === nothing || x === missing, data)
     if length(dlist) > 0
         data = copy(data)
         deleteat!(data, dlist)
     end
+    =#
+
+    data       = data[notnan.(data)]
 
     dn         = nothing
     dmin       = nothing
