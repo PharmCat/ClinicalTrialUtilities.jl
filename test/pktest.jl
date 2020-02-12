@@ -216,7 +216,7 @@ println(" ---------------------------------- ")
 
     #AUCtau
     #=
-    4947.052768
+    @test round.(df[!, :AUCtau], sigdigits = 6) == round.([4947.052768
     6265.637822
     2863.392745
     5008.644865
@@ -225,7 +225,7 @@ println(" ---------------------------------- ")
     4096.937951 (!)
     3802.30601
     4531.779637
-    3744.768624
+    3744.768624], sigdigits = 6)
     =#
 
     # TAU 0.25 - 9
@@ -245,9 +245,12 @@ println(" ---------------------------------- ")
     142.566125
     122.7865], sigdigits = 6)
 
-    #AUC Tau (!!!)
-    #=
-    1268.275631
+    pk   = ClinicalTrialUtilities.nca!(pkds, calcm = :luld, intp = :logt)
+    df   = DataFrame(pk; unst = true)
+    sort!(df, :Subject)
+
+    #AUC Tau
+    @test round.(df[!, :AUCtau], sigdigits = 6) == round.([1268.275631
     1831.820528
     754.6493604
     1336.480932
@@ -256,8 +259,8 @@ println(" ---------------------------------- ")
     1079.366854
     766.620245
     1219.631864
-    970.3062692
-    =#
+    970.3062692], sigdigits = 6)
+
 
     # TAU 0.0 - 100
     ClinicalTrialUtilities.setdosetime!(pkds, ClinicalTrialUtilities.DoseTime(dose = 100, time = 0.0, tau = 100))
@@ -277,7 +280,7 @@ println(" ---------------------------------- ")
     23.98401112], sigdigits = 6)
 
 #=
-    12646.63632
+    @test round.(df[!, :AUCtau], sigdigits = 6) == round.([12646.63632
     11996.6718
     7195.902904
     11794.11692
@@ -286,7 +289,7 @@ println(" ---------------------------------- ")
     8395.400098 (!)
     8930.999936 (!)
     10727.4135 (!)
-    6389.420453
+    6389.420453], sigdigits = 6)
 =#
 
     # Log-trapezoidal Linear Interpolation
@@ -359,8 +362,32 @@ println(" ---------------------------------- ")
     p    = ClinicalTrialUtilities.plot(pkds; pagesort = [:Date], typesort = [:Subject])
     @test length(p) == 2
     print(io, pk[1].subject.keldata)
+
+
+    # NaN PK LimitRule test
+    pkds = ClinicalTrialUtilities.pkimport(nanpkdata, [:Subject, :Formulation]; conc = :Concentration, time = :Time)
+    rule = ClinicalTrialUtilities.LimitRule(0, 0, NaN, 0, true)
+    ClinicalTrialUtilities.applyncarule!(pkds, rule)
+    @test length(pkds[1]) == 5
+    @test pkds[3].obs[1]  == 0.0
+    @test pkds[2].obs[5]  == 0.1
+    pkds = ClinicalTrialUtilities.pkimport(nanpkdata, [:Subject, :Formulation]; conc = :Concentration, time = :Time)
+    rule = ClinicalTrialUtilities.LimitRule(0, 0, NaN, -1, false)
+    ClinicalTrialUtilities.applyncarule!(pkds, rule)
+    @test pkds[3].obs[6]  === NaN
 end
 
+println(" ---------------------------------- ")
+@testset " UPK                    " begin
+    upk = ClinicalTrialUtilities.upkimport(upkdata, [:subj]; stime = :st, etime = :et, conc = :conc, vol = :vol)
+    unca = ClinicalTrialUtilities.nca!(upk[1])
+    unca = ClinicalTrialUtilities.nca!(upk)
+    @test unca[1][:maxrate] ≈ 4.0
+    @test unca[1][:mTmax]   ≈ 1.5
+    @test unca[1][:ar]      ≈ 16.0
+    @test unca[1][:volume]  ≈ 11.0
+     p    = ClinicalTrialUtilities.plot(upk, ylabel = "Excretion")
+end
 
 println(" ---------------------------------- ")
 @testset "  PD                    " begin

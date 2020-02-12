@@ -47,7 +47,6 @@ end
 
     seriestype  --> :line
     xlabel      --> "Time"
-    ylabel      --> "Concentration"
     link        --> :both
     legend      --> true
     grid        --> false
@@ -73,7 +72,7 @@ function plotlabel(d)
     return title
 end
 
-function plot(subj::T; title = nothing, legend = true, label = "AUTO", xlims = nothing, plotstyle::PKPlotStyle = PKPLOTSTYLE[1]) where T <: AbstractSubject
+function plot(subj::T; title = nothing, legend = true, label = "AUTO", ylabel = "Concentration", xlims = nothing, plotstyle::PKPlotStyle = PKPLOTSTYLE[1]) where T <: AbstractSubject
 
     if title === nothing
         title = plotlabel(subj.sort)
@@ -87,6 +86,7 @@ function plot(subj::T; title = nothing, legend = true, label = "AUTO", xlims = n
         markercolor = plotstyle.markercolor,
         legend      = legend,
         label       = label,
+        ylabel      = ylabel,
         xlims       = xlims,
         )
     return p
@@ -115,7 +115,7 @@ function usort(data::DataSet{T}, list) where T <: AbstractData
     dl
 end
 
-function pageplot(pagedatatmp, styledict, typesort; title = "", legend = true, xlims = nothing)
+function pageplot(pagedatatmp, styledict, typesort; title = "", ylabel = "Concentration", legend = true, xlims = nothing)
     utypes    = keys(styledict)
     labels    = Vector{String}(undef, 0)
     fst       = true
@@ -135,7 +135,7 @@ function pageplot(pagedatatmp, styledict, typesort; title = "", legend = true, x
                     end
                 end
                 if fst
-                    p = plot(d; title = title, legend = legend, xlims = xlims, plotstyle = style, label = label)
+                    p = plot(d; title = title, legend = legend, xlims = xlims, plotstyle = style, label = label, ylabel = ylabel)
                     fst = false
                 else
                     plot!(                  d; legend = legend, xlims = xlims, plotstyle = style, label = label)
@@ -145,13 +145,13 @@ function pageplot(pagedatatmp, styledict, typesort; title = "", legend = true, x
     end
     p
 end
-function pageplot(pagedatatmp; title = "", legend = true, xlims = nothing)
+function pageplot(pagedatatmp; title = "", ylabel = "Concentration", legend = true, xlims = nothing)
     fst       = true
     p         = nothing
     for d in pagedatatmp
         label = "AUTO"
         if fst
-            p = plot(d; title = title, legend = legend, xlims = xlims, plotstyle = PKPLOTSTYLE[1], label = label)
+            p = plot(d; title = title, legend = legend, xlims = xlims, plotstyle = PKPLOTSTYLE[1], label = label, ylabel = ylabel)
             fst = false
         else
             plot!(                  d; legend = legend, xlims = xlims, plotstyle = PKPLOTSTYLE[1], label = label)
@@ -160,7 +160,7 @@ function pageplot(pagedatatmp; title = "", legend = true, xlims = nothing)
     p
 end
 
-function plot(data::DataSet{T}; title = nothing, legend = true, xlims = nothing, pagesort = nothing, typesort = nothing) where T <: AbstractSubject
+function plot(data::DataSet{T}; title = nothing, ylabel = "Concentration", legend = true, xlims = nothing, pagesort = nothing, typesort = nothing) where T <: AbstractSubject
     # Style types
 
     styledict  = nothing
@@ -199,17 +199,17 @@ function plot(data::DataSet{T}; title = nothing, legend = true, xlims = nothing,
                 end
             end
             if typesort !== nothing
-                p = pageplot(pagedatatmp, styledict, typesort; title = title, legend = legend, xlims = xlims)
+                p = pageplot(pagedatatmp, styledict, typesort; title = title, legend = legend, xlims = xlims, ylabel = ylabel)
             else
-                p = pageplot(pagedatatmp; title = title, legend = legend, xlims = xlims)
+                p = pageplot(pagedatatmp; title = title, legend = legend, xlims = xlims, ylabel = ylabel)
             end
             push!(plots, p)
         end
     else
         if typesort !== nothing
-            p = pageplot(data, styledict, typesort; title = title, legend = legend, xlims = xlims)
+            p = pageplot(data, styledict, typesort; title = title, legend = legend, xlims = xlims, ylabel = ylabel)
         else
-            p = pageplot(data; title = title, legend = legend, xlims = xlims)
+            p = pageplot(data; title = title, legend = legend, xlims = xlims, ylabel = ylabel)
         end
         push!(plots, p)
     end
