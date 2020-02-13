@@ -199,7 +199,7 @@ println(" ---------------------------------- ")
     # Linear Up Log Down - Log Interpolation
     # TAU 0 - 36
     ClinicalTrialUtilities.setdosetime!(pkds, ClinicalTrialUtilities.DoseTime(dose = 100, time = 0, tau = 36))
-    pk   = ClinicalTrialUtilities.nca!(pkds, calcm = :luldt, intp = :logt)
+    pk   = ClinicalTrialUtilities.nca!(pkds, calcm = :luld, intp = :logt)
     df   = DataFrame(pk; unst = true)
     sort!(df, :Subject)
 
@@ -214,23 +214,35 @@ println(" ---------------------------------- ")
     113.3749669
     72.57153458], sigdigits = 6)
 
+    @test round.(df[!, :AUClast], sigdigits = 6) == round.([9573.810559
+    10054.28648
+    5392.457219
+    9297.096334
+    9519.180874
+    6948.985621
+    6988.772632
+    7073.092214
+    8303.358586
+    5486.838889], sigdigits = 6)
+
+
     #AUCtau
-    #=
+
     @test round.(df[!, :AUCtau], sigdigits = 6) == round.([4947.052768
     6265.637822
     2863.392745
     5008.644865
     5415.246398
     3882.203934
-    4096.937951 (!)
+    4096.937951
     3802.30601
     4531.779637
     3744.768624], sigdigits = 6)
-    =#
+
 
     # TAU 0.25 - 9
     ClinicalTrialUtilities.setdosetime!(pkds, ClinicalTrialUtilities.DoseTime(dose = 100, time = 0.25, tau = 9))
-    pk   = ClinicalTrialUtilities.nca!(pkds, calcm = :luldt, intp = :logt)
+    pk   = ClinicalTrialUtilities.nca!(pkds, calcm = :luld, intp = :logt)
     df   = DataFrame(pk; unst = true)
     sort!(df, :Subject)
 
@@ -262,9 +274,67 @@ println(" ---------------------------------- ")
     970.3062692], sigdigits = 6)
 
 
+    @test round.(df[!, :AUCall], sigdigits = 6) == round.([9566.596809
+    10054.28648
+    5392.457219
+    9297.096334
+    9519.180874
+    6948.985621
+    6988.772632
+    7058.818964
+    8302.368086
+    5486.838889], sigdigits = 6)
+    #Swing tau
+    @test round.(df[!, :Swingtau], sigdigits = 6) == round.([0.38590184
+    0.27426721
+    0.240584404
+    0.468637128
+    0.057960085
+    0.445494022
+    0.240196282
+    0.628152237
+    0.173820219
+    0.021952739], sigdigits = 6)
+
+    #Fluctuation%_Tau
+
+    @test round.(df[!, :Fluctau] * 100, sigdigits = 6) == round.([37.71452462
+    27.61899665
+    24.36421266
+    44.8121175
+    6.369060133
+    38.4975876
+    24.74919661
+    62.65259796
+    18.28649133
+    2.500189968], sigdigits = 6)
+
+    @test round.(df[!, :Kel], sigdigits = 6) == round.([0.003384744
+    0.014106315
+    0.00329143
+    0.007695344
+    0.006813328
+    0.007692281
+    0.012458956
+    0.00893008
+    0.005645865
+    0.017189737], sigdigits = 6)
+
+    @test round.(df[!, :Accind], sigdigits = 6) == round.([33.3295745
+    8.38726982
+    34.26016611
+    14.94451581
+    16.81301567
+    14.95026394
+    9.427514161
+    12.94903929
+    20.18432092
+    6.976692409], sigdigits = 6)
+
+
     # TAU 0.0 - 100
     ClinicalTrialUtilities.setdosetime!(pkds, ClinicalTrialUtilities.DoseTime(dose = 100, time = 0.0, tau = 100))
-    pk   = ClinicalTrialUtilities.nca!(pkds, calcm = :luldt, intp = :logt)
+    pk   = ClinicalTrialUtilities.nca!(pkds, calcm = :luld, intp = :logt)
     df   = DataFrame(pk; unst = true)
     sort!(df, :Subject)
 
@@ -279,18 +349,29 @@ println(" ---------------------------------- ")
     80.05171762
     23.98401112], sigdigits = 6)
 
-#=
+    @test round.(df[!, :AUClast], sigdigits = 6) == round.([9573.810559
+    10054.28648
+    5392.457219
+    9297.096334
+    9519.180874
+    6948.985621
+    6988.772632
+    7073.092214
+    8303.358586
+    5486.838889], sigdigits = 6)
+
+
     @test round.(df[!, :AUCtau], sigdigits = 6) == round.([12646.63632
     11996.6718
     7195.902904
     11794.11692
     12274.83395
     8729.151856
-    8395.400098 (!)
-    8930.999936 (!)
-    10727.4135 (!)
+    8395.400098
+    8930.999936
+    10727.4135
     6389.420453], sigdigits = 6)
-=#
+
 
     # Log-trapezoidal Linear Interpolation
 
@@ -321,6 +402,7 @@ println(" ---------------------------------- ")
     24849.129
     7940.0834], sigdigits = 6)
 
+    #LULDT
     pk   = ClinicalTrialUtilities.nca!(pkds, calcm = :luldt, io = io, verbose = true)
     df   = DataFrame(pk; unst = true)
     sort!(df, :Subject)
