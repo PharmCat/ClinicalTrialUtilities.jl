@@ -82,3 +82,8 @@ end
 function fisher(t::ConTab{2, 2})
     fisher(t.tab)
 end
+
+#=
+function StatsBase.confint(t::ConTab{2, 2})
+end
+=#
