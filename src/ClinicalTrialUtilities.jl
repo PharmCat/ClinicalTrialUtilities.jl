@@ -13,7 +13,11 @@
 # If you want to check and get R code you can find some here: http://powerandsamplesize.com/Calculators/
 __precompile__(true)
 module ClinicalTrialUtilities
-using Distributions, StatsBase, Random, Roots, QuadGK, DataFrames, RecipesBase
+
+using Distributions, Random, Roots, QuadGK, RecipesBase, Reexport
+
+@reexport using StatsBase
+
 import SpecialFunctions
 import Base.show
 import Base.showerror
@@ -21,9 +25,9 @@ import Base.getindex
 import Base.length
 import Base.in
 import Base.iterate
+import Base.eltype
 import StatsBase.confint
-import DataFrames.DataFrame
-
+import DataFrames: DataFrame, DataFrames, names!, unstack, deleterows!
 
 function lgamma(x)
     return SpecialFunctions.logabsgamma(x)[1]
