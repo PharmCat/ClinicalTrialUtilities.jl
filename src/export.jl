@@ -196,7 +196,7 @@ HTLM export for DataFrame.
             while s
                 s = false
                 for r = 2:rown
-                    if tablematrix[r,c] !=0 && data[r,c] == data[r-1,c]
+                    if tablematrix[r,c] !=0 && data[r,c] === data[r-1,c]
                         tablematrix[r,c] -= 1;
                         tablematrix[r-1,c] += 1;
                         s = true;
@@ -245,7 +245,7 @@ HTLM export for DataFrame.
     </TABLE>"""
         out *= html_f
 
-        return out
+         print(io, out)
 
     end
 
