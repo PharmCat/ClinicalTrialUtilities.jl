@@ -71,6 +71,73 @@ mutable struct CTask{T <: AbstractParameter, D <: AbstractDesign, H <: AbstractH
         return CTask(param, design, hyp, objective, alpha, 1)
     end
 end
+
+function setobjval!(task::CTask{T,D,H,O}, val) where T where D where H where O <: AbstractPower
+    task.objective = Power(val)
+end
+function setobjval!(task::CTask{T,D,H,O}, val) where T where D where H where O <: AbstractSampleSize
+    task.objective = SampleSize(val)
+end
+
+function ctask(;param::Symbol, type::Symbol, group::Symbol = :notdef, alpha::Real = 0.05, beta::Real = 0.2, diff::Real = 0, sd::Real = 0, a::Real = 0, b::Real = 0, k::Real = 1, logscale::Bool = true)::CTask
+    if param == :mean
+        if group == :one
+            if type == :ea
+                task = CTask(DiffMean(Mean(a, sd), b), OneGroup(), Equality(), SampleSize(beta), alpha)
+            elseif type == :ei
+                task = CTask(DiffMean(Mean(a, sd), b),  OneGroup(), Equivalence(b-diff, b+diff), SampleSize(beta), alpha)
+            elseif type == :ns
+                task = CTask(DiffMean(Mean(a, sd), b), OneGroup(), Superiority(b + diff, diff), SampleSize(beta), alpha)
+            else throw(ArgumentError("Keyword type unknown!")) end
+        elseif group == :two
+            if type == :ea
+                task = CTask(DiffMean(Mean(a, sd), Mean(b, sd)), Parallel(), Equality(), SampleSize(beta), alpha, k)
+            elseif type == :ei
+                task = CTask(DiffMean(Mean(a, sd), Mean(b, sd)), Parallel(), Equivalence(-diff, diff), SampleSize(beta), alpha, k)
+            elseif type == :ns
+                task = CTask(DiffMean(Mean(a, sd), Mean(b, sd)),  Parallel(), Superiority(diff, diff), SampleSize(beta), alpha, k)
+            else throw(ArgumentError("Keyword type unknown!")) end
+        elseif group == :co
+
+        else throw(ArgumentError("Keyword group unknown!")) end
+    elseif param == :prop
+        if group == :one
+            if type == :ea
+                task = CTask(DiffProportion(Probability(a), b), OneGroup(), Equality(), SampleSize(beta), alpha)
+            elseif type == :ei
+                task = CTask(DiffProportion(Probability(a), b), OneGroup(), Equivalence(b-diff, b+diff), SampleSize(beta), alpha)
+            elseif type == :ns
+                task = CTask(DiffProportion(Probability(a), b), OneGroup(), Superiority(b+diff, diff), SampleSize(beta), alpha)
+            else throw(ArgumentError("Keyword type unknown!")) end
+        elseif group == :two
+            if type == :ea
+                task = CTask(DiffProportion(Probability(a), Probability(b)), Parallel(), Equality(), SampleSize(beta), alpha, k)
+            elseif type == :ei
+                task = CTask(DiffProportion(Probability(a), Probability(b)), Parallel(), Equivalence(-diff, diff), SampleSize(beta), alpha, k)
+            elseif type == :ns
+                task = CTask(DiffProportion(Probability(a), Probability(b)), Parallel(), Superiority(diff, diff), SampleSize(beta), alpha, k)
+            else throw(ArgumentError("Keyword type unknown!")) end
+        elseif group == :co
+
+        else throw(ArgumentError("Keyword group unknown!")) end
+    elseif param == :or
+        if group == :two || group == :notdef
+            if type == :ea
+                task = CTask(OddRatio(Probability(a), Probability(b)), Parallel(),  Equality(), SampleSize(beta), alpha, k)
+            elseif type == :ei
+                if !logscale diff = log(diff) end
+                task = CTask(OddRatio(Probability(a), Probability(b)), Parallel(), Equivalence(-diff, diff), SampleSize(beta), alpha, k)
+            elseif type == :ns
+                if !logscale diff = log(diff) end
+                task = CTask(OddRatio(Probability(a), Probability(b)), Parallel(), Superiority(diff,  diff), SampleSize(beta), alpha, k)
+            else throw(ArgumentError("Keyword type unknown!")) end
+        elseif group == :co
+            
+        else throw(ArgumentError("Keyword group unknown!")) end
+    else throw(ArgumentError("Keyword param unknown!")) end
+    return task
+end
+
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
 #main sample size function
@@ -116,8 +183,8 @@ Clinical trial sample size estimation.
 - false - diff is not in log-scale, will be transformed;
 """
 function ctsamplen(;param::Symbol, type::Symbol, group::Symbol = :notdef, alpha::Real = 0.05, beta::Real = 0.2, diff::Real = 0, sd::Real = 0, a::Real = 0, b::Real = 0, k::Real = 1, logscale::Bool = true)::TaskResult
-    if alpha >= 1 || alpha <= 0 || beta >= 1 || beta <= 0  throw(ArgumentError("sampleSize: alpha and beta sould be > 0 and < 1.")) end
-    if param == :prop && !(group == :one || group == :two || type == :mcnm)  throw(ArgumentError("sampleSize: group should be defined or mcnm type.")) end
+    if alpha >= 1 || alpha <= 0 || beta >= 1 || beta <= 0  throw(ArgumentError("ctsamplen: alpha and beta sould be > 0 and < 1.")) end
+    if param == :prop && !(group == :one || group == :two || type == :mcnm)  throw(ArgumentError("ctsamplen: group should be defined or mcnm type.")) end
     if sd ≤ 0 && param == :mean throw(ArgumentError("SD can't be ≤ 0.0!")) end
     if k <= 0 throw(ArgumentError("Constant k can't be ≤ 0.0!")) end
     if param == :mean
