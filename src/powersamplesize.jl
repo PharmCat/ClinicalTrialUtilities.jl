@@ -86,8 +86,6 @@ function or_superiority(p₀::Real, p₁::Real, δ::Real, α::Real, β::Real, k:
     return (1/k/p₀/(1-p₀)+1/p₁/(1-p₁))*((quantile(ZDIST, 1-α)+quantile(ZDIST, 1 - β))/(log(OR)-δ))^2
 end
 
-
-
 #Connor R. J. 1987. Sample size for testing differences in proportions for the paired-sample design. Biometrics 43(1):207-211. page 209.
 function mcnm(p10::Float64, p01::Float64, α::Real, β::Real)::Float64
     pdisc = p10 + p01
@@ -101,6 +99,17 @@ function mcnm_pow(p10::Float64, p01::Float64, α::Float64, n::Int)::Float64
     x1 = ( pdiff * sqrt(n) - quantile(ZDIST, 1 - α / 2) * sqrt(pdisc))/sqrt(pdisc - pdiff^2);
     x2 = (-pdiff * sqrt(n) - quantile(ZDIST, 1 - α / 2) * sqrt(pdisc))/sqrt(pdisc - pdiff^2);
     return cdf(ZDIST, x1)+cdf(ZDIST, x2)
+end
+
+#COX
+function cox_equality(θ, θ₀, p, α::Float64, β::Real, k::Real)
+    1.0/p/(1.0/(1+k)*(1.0-1.0/(1+k)))*((quantile(ZDIST, 1 - α / 2) + quantile(ZDIST, 1 - β))/(log(θ)-log(θ₀)))^2
+end
+function cox_equivalence(θ, θ₀, p, α::Float64, β::Real, k::Real)
+    1.0/p/(1.0/(1+k)*(1.0-1.0/(1+k)))*((quantile(ZDIST, 1 - α) + quantile(ZDIST, 1 - β / 2))/(log(θ₀) - abs(log(θ))))^2
+end
+function cox_superiority(θ, θ₀, p, α::Float64, β::Real, k::Real)
+    1.0/p/(1.0/(1+k)*(1.0-1.0/(1+k)))*((quantile(ZDIST, 1 - α) + quantile(ZDIST, 1 - β))/(log(θ)-log(θ₀)))^2
 end
 #-------------------------------------------------------------------------------
 # Power Section
@@ -175,14 +184,4 @@ function or_superiority_pow(p₀::Real, p₁::Real, δ::Real, α::Float64, n::In
     OR = p₀ * (1 - p₁)/p₁/(1 - p₀)
     z  = (log(OR) - δ) * sqrt(n)/sqrt(1/(k * p₀ * (1 - p₀)) + 1/(p₁ * (1 - p₁)))
     return cdf(ZDIST, z - quantile(ZDIST, 1 - α)) + cdf(ZDIST, -z - quantile(ZDIST, 1 - α))
-end
-#COX
-function cox_equality(θ, θ₀, p, α::Float64, β::Real, k::Real)
-    1.0/p/(1.0/(1+k)*(1.0-1.0/(1+k)))*((quantile(ZDIST, 1 - α / 2) + quantile(ZDIST, 1 - β))/(log(θ)-log(θ₀)))^2
-end
-function cox_equivalence(θ, θ₀, p, α::Float64, β::Real, k::Real)
-    1.0/p/(1.0/(1+k)*(1.0-1.0/(1+k)))*((quantile(ZDIST, 1 - α) + quantile(ZDIST, 1 - β / 2))/(log(θ₀) - abs(log(θ))))^2
-end
-function cox_superiority(θ, θ₀, p, α::Float64, β::Real, k::Real)
-    1.0/p/(1.0/(1+k)*(1.0-1.0/(1+k)))*((quantile(ZDIST, 1 - α) + quantile(ZDIST, 1 - β))/(log(θ)-log(θ₀)))^2
 end

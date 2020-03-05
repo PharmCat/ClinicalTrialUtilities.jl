@@ -139,13 +139,18 @@ end
 
 #-------------------------------------------------------------------------------
 #Parameters
-function Base.show(io::IO, p::Proportion)
-        print(io,"  Proportion: ", p.x, "/", p.n)
+function Base.show(io::IO, p::Proportion{true})
+        print(io, p.x, "/", p.n)
 end
+function Base.show(io::IO, p::Proportion{false})
+        print(io, p.val)
+end
+#=
 function Base.show(io::IO, p::Probability)
-        print(io,"  Probability: ", p.p)
+        print(io, p.p)
 end
-
+=#
+#=
 function Base.show(io::IO, dp::DiffProportion{Probability, R}) where R <: Real
         println(io, "  A   = ", dp.a.p)
         print(io,   "  Ref = ", dp.b)
@@ -155,20 +160,21 @@ function Base.show(io::IO, dp::DiffProportion{Probability, Probability})
         println(io, "  A = ", dp.a.p)
         print(io,   "  B = ", dp.b.p)
 end
-#=
 function Base.show(io, dp::DiffProportion{Proportion})::String
         println(io,"  A: ", dp.a.x,"/",dp.a.n)
         println(io,"  B: ", dp.b.x,"/",dp.b.n)
 end
 =#
-function Base.show(io::IO, dp::T) where T <: Union{DiffProportion{P, P}, OddRatio{P}, RiskRatio{P}} where P <: Proportion
-        println(io,"  A: ", dp.a.x,"/",dp.a.n)
-        print(io,"  B: ", dp.b.x,"/",dp.b.n)
+function Base.show(io::IO, dp::T) where T <: AbstractCompositeProportion
+        println(io,"  A: ", dp.a)
+        print(io,"  B: ", dp.b)
 end
+#=
 function Base.show(io::IO, dp::T) where T <: Union{DiffProportion{P, P}, OddRatio{P}, RiskRatio{P}} where P <: Probability
         println(io,"  A: ", dp.a.p)
         print(io,"  B: ", dp.b.p)
 end
+=#
 function Base.show(io::IO, dm::DiffMean{T}) where T <: AbstractMean
         println(io,"  A: ", dm.a.m, " ± ", round(dm.a.sd, sigdigits = 4))
         print(io,"  B: ", dm.b.m, " ± ", round(dm.b.sd, sigdigits = 4))

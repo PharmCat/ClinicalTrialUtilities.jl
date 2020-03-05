@@ -51,13 +51,13 @@ end
 function StatsBase.confint(param::Proportion; level = 0.95, method = :default)::ConfInt
     propci(param.x, param.n; alpha = 1 - level, method = method)
 end
-function StatsBase.confint(param::DiffProportion{P, P}; level = 0.95, method = :default)::ConfInt  where P <: Proportion
+function StatsBase.confint(param::DiffProportion{P, P}; level = 0.95, method = :default)::ConfInt  where P <: Proportion{true}
     diffpropci(param.a.x, param.a.n, param.b.x, param.b.n; alpha = 1 - level, method = method)
 end
-function StatsBase.confint(param::OddRatio{P}; level = 0.95, method = :default)::ConfInt where P <: Proportion
+function StatsBase.confint(param::OddRatio{P, P}; level = 0.95, method = :default)::ConfInt where P <: Proportion{true}
     orpropci(param.a.x, param.a.n, param.b.x, param.b.n; alpha = 1 - level, method = method)
 end
-function StatsBase.confint(param::RiskRatio{P}; level = 0.95, method = :default)::ConfInt where P <: Proportion
+function StatsBase.confint(param::RiskRatio{P}; level = 0.95, method = :default)::ConfInt where P <: Proportion{true}
     rrpropci(param.a.x, param.a.n, param.b.x, param.b.n; alpha = 1 - level, method = method)
 end
 function StatsBase.confint(param::Mean; level = 0.95, method = :default)::ConfInt

@@ -1,11 +1,16 @@
-struct Proportion <: AbstractSimpleProportion
-    x::Int
-    n::Int
+struct Proportion{Bool} <: AbstractSimpleProportion
+    x::Real
+    n::Real
+    val::Real
     function Proportion(x::Int, n::Int)
         if x > n throw(ArgumentError("Error: X > N!")) end
-        new(x, n)::Proportion
+        new{true}(x, n, x/n)::Proportion
+    end
+    function Proportion(val::Real)
+        new{false}(NaN, NaN, val)::Proportion
     end
 end
+#=
 struct Probability{T} <: AbstractSimpleProportion where T <: AbstractFloat
     p::T
     function Probability(p::T) where T <: AbstractFloat
@@ -17,22 +22,71 @@ struct Probability{T} <: AbstractSimpleProportion where T <: AbstractFloat
         new{typeof(prob)}(prob)::Probability
     end
 end
-function getval(p::Proportion)::Float64
-    return p.x/p.n
-end
-function getval(p::Probability)::Float64
-    return p.p
+=#
+function getval(p::Proportion)
+    return p.val
 end
 
-struct DiffProportion{S <: AbstractSimpleProportion, T <: Union{Proportion, Probability, Real}}  <: AbstractCompositeProportion{T}
-    a::S
-    b::T
+#function getval(p::Probability)
+#    return p.p
+#end
+
+struct DiffProportion{T1 <: AbstractSimpleProportion, T2 <: AbstractSimpleProportion} <: AbstractCompositeProportion
+    a::T1
+    b::T2
+    function DiffProportion(a::T, b::T) where T <: AbstractSimpleProportion
+        new{typeof(a), typeof(b)}(a, b)::DiffProportion
+    end
+    function DiffProportion(a::T1, b::T2) where T1 <: AbstractSimpleProportion where T2 <: Real
+        b = Proportion(b)
+        new{typeof(a), typeof(b)}(a, b)::DiffProportion
+    end
+    function DiffProportion(a::T1, b::T2) where T1 <: Real where T2 <: AbstractSimpleProportion
+        a = Proportion(a)
+        new{typeof(a), typeof(b)}(a, b)::DiffProportion
+    end
+    function DiffProportion(a::T1, b::T2) where T1 <: Real where T2 <: Real
+        a = Proportion(a)
+        b = Proportion(b)
+        new{typeof(a), typeof(b)}(a, b)::DiffProportion
+    end
 end
-struct OddRatio{T <: AbstractSimpleProportion} <: AbstractCompositeProportion{T}
+struct OddRatio{T1 <: AbstractSimpleProportion, T2 <: AbstractSimpleProportion} <: AbstractCompositeProportion
+    a::T1
+    b::T2
+    val::Real
+    function OddRatio(a::T, b::T) where T <: AbstractSimpleProportion
+        new{typeof(a), typeof(b)}(a, b, getval(a)/getval(b))
+    end
+    function OddRatio(a::T1, b::T2) where T1 <: AbstractSimpleProportion where T2 <: Real
+        b = Proportion(b)
+        new{typeof(a), typeof(b)}(a, b, getval(a)/getval(b))::OddRatio
+    end
+    function OddRatio(a::T1, b::T2) where T1 <: Real where T2 <: AbstractSimpleProportion
+        a = Proportion(a)
+        new{typeof(a), typeof(b)}(a, b, getval(a)/getval(b))::OddRatio
+    end
+    function OddRatio(a::T1, b::T2) where T1 <: Real where T2 <: Real
+        a = Proportion(a)
+        b = Proportion(b)
+        new{typeof(a), typeof(b)}(a, b, getval(a)/getval(b))::OddRatio
+    end
+    function OddRatio(val::T) where T <: Real
+        a = Proportion(NaN)
+        b = Proportion(NaN)
+        new{typeof(a), typeof(b)}(NaN, NaN, val)
+    end
+end
+function getval(p::OddRatio)
+    return p.val
+end
+struct RiskRatio{T <: AbstractSimpleProportion} <: AbstractCompositeProportion
     a::T
     b::T
 end
-struct RiskRatio{T <: AbstractSimpleProportion} <: AbstractCompositeProportion{T}
-    a::T
-    b::T
+
+struct CoxHazardRatio <: AbstractParameter
+    a::Real
+    b::Real
+    p::Real
 end
