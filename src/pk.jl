@@ -269,6 +269,7 @@ function Base.show(io::IO, obj::KelData)
     print(io, m)
 end
 #-------------------------------------------------------------------------------
+#=
 function ncarule!(data::DataFrame, conc::Symbol, time::Symbol, rule::LimitRule)
         sort!(data, [time])
 
@@ -305,7 +306,7 @@ end
 function ncarule!(data::PKSubject, rule::LimitRule)
     #!!!!
 end
-
+=#
 function notnanormissing(x)
     if x === NaN || x === missing return false else true end
 end
@@ -330,12 +331,15 @@ end
         end
         return cmax, tmax, tmaxn
     end
+    #=
     function ctmax(data::DataFrame, conc::Symbol, time::Symbol)
         return ctmax(data[!, time], data[!, conc])
     end
+    =#
     function ctmax(data::PKSubject)
         return ctmax(data.time, data.obs)
     end
+    #=
     function ctmax(data::PKSubject, dosetime)
         s     = 0
         for i = 1:length(data) - 1
@@ -372,6 +376,7 @@ end
             end
         elseif cmax > scpredict return max, tmax, tmaxn + s else return scpredict, data.dosetime.time, s end
     end
+    =#
     """
     Range for AUC
         return start point number, end point number
