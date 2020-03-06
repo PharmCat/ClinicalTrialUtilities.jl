@@ -339,7 +339,7 @@ end
     function ctmax(data::PKSubject)
         return ctmax(data.time, data.obs)
     end
-    #=
+
     function ctmax(data::PKSubject, dosetime)
         s     = 0
         for i = 1:length(data) - 1
@@ -352,6 +352,7 @@ end
         cmax, tmax, tmaxn = ctmax(data.time[mask], data.obs[mask])
         if cmax > cpredict return cmax, tmax, tmaxn + s else return cpredict, data.dosetime.time, s end
     end
+    #=
     function ctmax(data::PKSubject, dosetime, tau)
         if tau === NaN || tau <= 0 return ctmax(data, dosetime) end
         tautime = dosetime + tau
@@ -377,24 +378,31 @@ end
         elseif cmax > scpredict return max, tmax, tmaxn + s else return scpredict, data.dosetime.time, s end
     end
     =#
+function dropbeforecmax(time::Vector, obs::Vector, dosetime::DoseTime)
+    s = 0
+    for i = 1:length(time)
+        if time[i] < dosetime.time s = i else break end
+    end
+    return time[s+1:end], obs[s+1:end]
+end
     """
     Range for AUC
         return start point number, end point number
     """
-    function ncarange(data::PKSubject, dosetime, tau)
+    function ncarange(time::Vector, dosetime, tau)
         tautime = dosetime + tau
         s     = 1
-        e     = length(data.time)
-        for i = 1:length(data) - 1
-            if dosetime > data.time[i] && dosetime <= data.time[i+1] s = i+1;
+        e     = length(time)
+        for i = 1:length(time) - 1
+            if dosetime > time[i] && dosetime <= time[i+1] s = i+1;
                 break
             end
         end
-        if tautime >= data.time[end]
-            e = length(data.time)
+        if tautime >= time[end]
+            e = length(time)
         else
-            for i = s:length(data) - 1
-                if tautime >= data.time[i] && tautime < data.time[i+1] e = i; break end
+            for i = s:length(time) - 1
+                if tautime >= time[i] && tautime < time[i+1] e = i; break end
             end
         end
         return s, e
@@ -536,9 +544,19 @@ function nca!(data::PKSubject; calcm = :lint, intp = :lint, verbose = false, io:
         :Rsq     => NaN, :ARsq     => NaN, :Rsqn   => NaN,
         :AUCinf  => NaN, :AUCpct   => NaN)
         =#
+        time             = data.time
+        obs              = data.obs
 
-        result[:Obsnum]  = length(data)
-        result[:Cmax]    = maximum(data.obs)
+        time, obs        = dropbeforecmax(time, obs, data.dosetime)
+
+
+        result[:Obsnum]  = length(obs)
+
+        if result[:Obsnum] < 2
+            return PKPDProfile(data, result; method = calcm)
+        end
+
+        result[:Cmax]    = maximum(obs)
 
         doseaucpart  = 0.0
         doseaumcpart = 0.0
@@ -546,13 +564,13 @@ function nca!(data::PKSubject; calcm = :lint, intp = :lint, verbose = false, io:
         daumcpartl   = 0.0
 
         for i = result[:Obsnum]:-1:1
-            if data.obs[i] > 0
-                result[:Tlast]   = data.time[i]
-                result[:Clast]   = data.obs[i]
+            if obs[i] > 0
+                result[:Tlast]   = time[i]
+                result[:Clast]   = obs[i]
                 break
             end
         end
-        result[:Cmax], result[:Tmax], result[:Tmaxn] = ctmax(data) #????!!!!
+        result[:Cmax], result[:Tmax], result[:Tmaxn] = ctmax(time, obs) #????!!!!
         #-----------------------------------------------------------------------
         if verbose
             println(io, "Non-compartmental Pharmacokinetic Analysis")
@@ -566,7 +584,7 @@ function nca!(data::PKSubject; calcm = :lint, intp = :lint, verbose = false, io:
         aumcpartl = Array{Number, 1}(undef, result[:Obsnum] - 1)
         #Calculate all UAC part based on data
         for i = 1:(result[:Obsnum] - 1)
-            aucpartl[i], aumcpartl[i] = aucpart(data.time[i], data.time[i + 1], data.obs[i], data.obs[i + 1], calcm, i + 1 > result[:Tmaxn])
+            aucpartl[i], aumcpartl[i] = aucpart(time[i], time[i + 1], obs[i], obs[i + 1], calcm, i + 1 > result[:Tmaxn])
         end
         pmask   = Array{Bool, 1}(undef, result[:Obsnum] - 1)
         pmask  .= true
@@ -575,42 +593,48 @@ function nca!(data::PKSubject; calcm = :lint, intp = :lint, verbose = false, io:
         ncae    = nothing
 
         if  data.dosetime.time !== NaN && data.dosetime.tau > 0
-            ncas, ncae       = ncarange(data, data.dosetime.time, data.dosetime.tau)
-            result[:Ctaumin] = minimum(data.obs[ncas:ncae])
-            #if data.time[ncas] != data.dosetime.time
-            #    daucpartl, daumcpartl = aucpart(data.dosetime.time, data.time[ncas], result[:Ctaumin], data.obs[ncas], calcm, false)
+            ncas, ncae       = ncarange(time, data.dosetime.time, data.dosetime.tau)
+            result[:Ctaumin] = minimum(obs[ncas:ncae])
+            #if time[ncas] != data.dosetime.time
+            #    daucpartl, daumcpartl = aucpart(data.dosetime.time, time[ncas], result[:Ctaumin], obs[ncas], calcm, false)
             #end
         end
 
         #sum all AUC parts
-        if data.dosetime.time < data.time[1]
-            #Dosetime < first time
-        end
-        #Find AUC part from dose time; exclude all before dosetime
-        for i = 1:result[:Obsnum] - 1
-            if  data.time[i] <= data.dosetime.time <= data.time[i+1]
-                if data.time[i] == data.dosetime.time
-                    result[:Cdose] = data.obs[i]
-                    break
+        if data.dosetime.time < time[1]
+            #Dosetime < first tim
+            # IV not included!!!
+                if  data.dosetime.tau > 0
+                    result[:Cdose] = result[:Ctaumin]
                 else
-                #Cdose calculation
-
-
-                    #if data.obs[i] > 0
-                        #result[:Cdose] = linpredict(data.time[i] , data.time[i + 1], data.dosetime.time, data.obs[i], data.obs[i + 1])
-                        #esult[:Cdose] = data.obs[i]
-                    if  data.dosetime.time !== NaN && data.dosetime.tau > 0
-                        result[:Cdose] = result[:Ctaumin]
-                    else
-                        result[:Cdose] = 0
-                    end
-                #aucpartl[i], aumcpartl[i] = aucpart(data.dosetime.time, data.time[i+1], result[:Cdose], data.obs[i+1], :lint, false) #? only :lint? always aftertmax = false?
-                    doseaucpart, doseaumcpart  = aucpart(data.dosetime.time, data.time[i + 1], result[:Cdose], data.obs[i + 1], :lint, false)
-                    pmask[i]     = false
-                    break
+                    result[:Cdose] = 0
                 end
-            else
-                pmask[i]     = false
+                doseaucpart, doseaumcpart  = aucpart(data.dosetime.time, time[1], result[:Cdose], obs[1], :lint, false)
+        else
+        #Find AUC part from dose time; exclude all before dosetime
+            for i = 1:result[:Obsnum] - 1
+                if  time[i] <= data.dosetime.time <= time[i+1]
+                    if time[i] == data.dosetime.time
+                        result[:Cdose] = obs[i]
+                        break
+                    else
+                #Cdose calculation
+                    #if obs[i] > 0
+                        #result[:Cdose] = linpredict(time[i] , time[i + 1], data.dosetime.time, obs[i], obs[i + 1])
+                        #esult[:Cdose] = obs[i]
+                        if  data.dosetime.tau > 0
+                            result[:Cdose] = result[:Ctaumin]
+                        else
+                            result[:Cdose] = 0
+                        end
+                #aucpartl[i], aumcpartl[i] = aucpart(data.dosetime.time, time[i+1], result[:Cdose], obs[i+1], :lint, false) #? only :lint? always aftertmax = false?
+                        doseaucpart, doseaumcpart  = aucpart(data.dosetime.time, time[i + 1], result[:Cdose], obs[i + 1], :lint, false)
+                        pmask[i]     = false
+                        break
+                    end
+                else
+                    pmask[i]     = false
+                end
             end
         end
 
@@ -621,7 +645,7 @@ function nca!(data::PKSubject; calcm = :lint, intp = :lint, verbose = false, io:
         #Exclude all AUC parts from observed concentation before 0 or less
         #Need elaborate!!!!
         for i = result[:Tmaxn]:result[:Obsnum] - 1
-            if data.obs[i+1] <= 0 * data.obs[i+1] pmask[i:end] .= false; break end
+            if obs[i+1] <= 0 * obs[i+1] pmask[i:end] .= false; break end
         end
         result[:AUClast]  = sum(aucpartl[pmask])
         result[:AUMClast] = sum(aumcpartl[pmask])
@@ -635,24 +659,26 @@ function nca!(data::PKSubject; calcm = :lint, intp = :lint, verbose = false, io:
         keldata                = KelData()
         if data.kelauto
             if result[:Obsnum] - result[:Tmaxn] >= 3
-                logconc = log.(data.obs)
-                cmask   = Array{Bool, 1}(undef, result[:Obsnum])
+                logconc = log.(obs)
+                cmask   = Vector{Bool}(undef, result[:Obsnum])
                 for i  = result[:Tmaxn] + 1:result[:Obsnum] - 2
                     cmask                    .= false
                     cmask[i:result[:Obsnum]] .= true
-                    sl = slope(data.time[cmask], logconc[cmask])
+
+                    sl = slope(time[cmask], logconc[cmask])
+
                     if sl[1] < 0 * sl[1]
                         push!(keldata, i, result[:Obsnum], sl[1], sl[2], sl[3], sl[4])
                     end
                 end
             end
         else
-            logconc = log.(data.obs)
+            logconc = log.(obs)
             cmask   = Array{Bool, 1}(undef, result[:Obsnum])
             cmask  .= false
             cmask[data.kelrange.kelstart:data.kelrange.kelend] .= true
             cmask[data.kelrange.kelexcl] .= false
-            sl = slope(data.time[cmask], logconc[cmask])
+            sl = slope(time[cmask], logconc[cmask])
             push!(keldata, data.kelrange.kelstart, data.kelrange.kelend, sl[1], sl[2], sl[3], sl[4])
         end
         if  length(keldata) > 0
@@ -671,6 +697,10 @@ function nca!(data::PKSubject; calcm = :lint, intp = :lint, verbose = false, io:
             result[:AUCinf]          = result[:AUClast] + result[:Clast] / result[:Kel]
             result[:AUCinf_pred]     = result[:AUClast] + result[:Clast_pred] / result[:Kel]
             result[:AUCpct]          = (result[:AUCinf] - result[:AUClast]) / result[:AUCinf] * 100.0
+            result[:AUMCinf]         = result[:AUMClast] + result[:Tlast] * result[:Clast] / result[:Kel] + result[:Clast] / result[:Kel] ^ 2
+            result[:MRTinf]          = result[:AUMCinf] / result[:AUCinf]
+            result[:Vzf]             = data.dosetime.dose / result[:AUCinf] / result[:Kel]
+            result[:Clf]             = data.dosetime.dose / result[:AUCinf]
         end
         #-----------------------------------------------------------------------
         #Steady-state
@@ -678,31 +708,26 @@ function nca!(data::PKSubject; calcm = :lint, intp = :lint, verbose = false, io:
         if data.dosetime.tau > 0
             #tautime    = data.dosetime.time + data.dosetime.tau
             eaucpartl  = eaumcpartl = 0.0
-            if tautime < data.time[end]
-                #result[:Ctau] = linpredict(data.time[ncae] , data.time[ncae+1], tautime, data.obs[ncae], data.obs[ncae+1])
+            if tautime < time[end]
+                #result[:Ctau] = linpredict(time[ncae] , time[ncae+1], tautime, obs[ncae], obs[ncae+1])
                 if tautime > result[:Tmax] aftertmax = true else aftertmax = false end
-                result[:Ctau] = cpredict(data.time[ncae], data.time[ncae + 1], tautime, data.obs[ncae], data.obs[ncae + 1], intp)
-                eaucpartl, eaumcpartl = aucpart(data.time[ncae], tautime, data.obs[ncae], result[:Ctau], calcm, aftertmax)
+                result[:Ctau] = cpredict(time[ncae], time[ncae + 1], tautime, obs[ncae], obs[ncae + 1], intp)
+                eaucpartl, eaumcpartl = aucpart(time[ncae], tautime, obs[ncae], result[:Ctau], calcm, aftertmax)
 
                 #remoove part after tau
                 if ncae < result[:Obsnum] - 1 pmask[ncae:end] .= false end
-            elseif tautime > data.time[end]
+            elseif tautime > time[end] && :LZint in keys(result)
                 #extrapolation
                 result[:Ctau] = exp(result[:LZint] + result[:LZ] * tautime)
-                eaucpartl, eaumcpartl = aucpart(data.time[ncae], tautime, data.obs[ncae], result[:Ctau], calcm, true)
-
-                #!!!
+                eaucpartl, eaumcpartl = aucpart(time[ncae], tautime, obs[ncae], result[:Ctau], calcm, true)
             else
-                result[:Ctau] = data.obs[end]
+                result[:Ctau] = obs[end]
             end
             #daucpartl  = 0.0
             #daumcpartl = 0.0
-
-
-            #result[:Ctaudose] = minimum(data.obs[ncas+1:ncae])
-            #daucpartl, daumcpartl = aucpart(data.dosetime.time, data.time[ncas+1], result[:Ctaudose], data.obs[ncas+1], calcm, false)
-
-            #esult[:Ctaumin]  = min(result[:Ctau], result[:Cdose], minimum(data.obs[ncas+1:ncae]))
+            #result[:Ctaudose] = minimum(obs[ncas+1:ncae])
+            #daucpartl, daumcpartl = aucpart(data.dosetime.time, time[ncas+1], result[:Ctaudose], obs[ncas+1], calcm, false)
+            #esult[:Ctaumin]  = min(result[:Ctau], result[:Cdose], minimum(obs[ncas+1:ncae]))
             result[:AUCtau]   = sum(aucpartl[pmask])  + eaucpartl  + doseaucpart
             result[:AUMCtau]  = sum(aumcpartl[pmask]) + eaumcpartl + doseaumcpart
             result[:Cavg]     = result[:AUCtau]/data.dosetime.tau
@@ -718,7 +743,12 @@ function nca!(data::PKSubject; calcm = :lint, intp = :lint, verbose = false, io:
             end
             result[:Fluc]     = (result[:Cmax] - result[:Ctaumin])/result[:Cavg]
             result[:Fluctau]  = (result[:Cmax] - result[:Ctau])/result[:Cavg]
-            result[:Accind]   = 1 / (1 - (exp(-result[:Kel] * data.dosetime.tau)))
+            #If Kel calculated
+            if :Kel in keys(result)
+                result[:Accind]   = 1 / (1 - (exp(-result[:Kel] * data.dosetime.tau)))
+            else
+                result[:Accind]   = NaN
+            end
         end
         if verbose
             aucpartlsum  = similar(aucpartl)
@@ -737,14 +767,14 @@ function nca!(data::PKSubject; calcm = :lint, intp = :lint, verbose = false, io:
             printmatrix(io, mx)
             println(io, "")
             println(io, "Cdose: $(result[:Cdose]), Dose time: $(data.dosetime.time)")
-            if data.dosetime.time > data.time[1]
+            if data.dosetime.time > time[1]
                 println("Dose AUC  part: $(doseaucpart)")
                 println("Dose AUMC part: $(doseaumcpart)")
             end
             println(io, "")
-            if tautime < data.time[end]
+            if tautime < time[end]
                 println(io, "Tau + dosetime is less then end time. Interpolation used.")
-                println(io, "Interpolation between: $(data.time[ncae]) - $( data.time[ncae+1]), method: $(intp)")
+                println(io, "Interpolation between: $(time[ncae]) - $( time[ncae+1]), method: $(intp)")
                 println(io, "Ctau: $(result[:Ctau])")
                 println(io, "AUC  final part: $(eaucpartl)")
                 println(io, "AUMC final part: $(eaumcpartl)")
@@ -1253,6 +1283,18 @@ function setdosetime!(data::DataSet{PKSubject}, dosetime::DoseTime, sort::Dict)
     end
     data
 end
+
+"""
+    dosetime(data::PKSubject)
+
+Return dosing time and tau for subject.
+
+data - PK subject.
+"""
+function dosetime(data::PKSubject)
+    data.dosetime
+end
+
 """
     setth!(data::PDSubject, th::Real)
 
