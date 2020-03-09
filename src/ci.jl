@@ -862,7 +862,7 @@ Cochran–Mantel–Haenszel confidence intervals for proportion difference.
         n1 = a + b
         n2 = c + d
         N  = a + b + c + d
-        z = quantile(ZDIST, 1 - alpha/2)
+        z = quantile(ZDIST, 1 - alpha / 2)
             #...
         R = sum(a .* (n2 ./ N))
         S = sum(c .* (n1 ./ N))
@@ -873,3 +873,24 @@ Cochran–Mantel–Haenszel confidence intervals for proportion difference.
         #pval= 2*(1-cdf(Normal(), abs(zval)))
         if logscale return ConfInt(estimate  - z*se, estimate  + z*se, estimate , alpha) else return ConfInt(exp(estimate  - z*se), exp(estimate  + z*se), exp(estimate ), alpha) end
     end
+
+
+function diffmcnmwaldci(a::Int, b::Int, c::Int, d::Int; alpha = 0.05)
+    n        = a + b + c + d
+    p1       = (a + b)/n
+    p2       = (a + c)/n
+    estimate = p1 - p2
+    se       = ((a+d)*(b+c)+4*b*c)/n^3
+    z        = quantile(ZDIST, 1 - alpha / 2)
+    ConfInt(estimate  - z * se, estimate  + z * se, estimate , alpha)
+end
+function diffmcnmwaldccci(a::Int, b::Int, c::Int, d::Int; alpha = 0.05)
+    n        = a + b + c + d
+    p1       = (a + b)/n
+    p2       = (a + c)/n
+    estimate = p1 - p2
+    se       = ((a+d)*(b+c)+4*b*c)/n^3
+    z        = quantile(ZDIST, 1 - alpha / 2)
+    ConfInt(estimate  - z * se - 1 / n, estimate  + z * se + 1 / n, estimate , alpha)
+
+end
