@@ -701,6 +701,11 @@ function nca!(data::PKSubject; calcm = :lint, intp = :lint, verbose = false, io:
             result[:MRTinf]          = result[:AUMCinf] / result[:AUCinf]
             result[:Vzf]             = data.dosetime.dose / result[:AUCinf] / result[:Kel]
             result[:Clf]             = data.dosetime.dose / result[:AUCinf]
+        else
+            result[:Kel]             = NaN
+            result[:HL]              = NaN
+            result[:AUCinf]          = NaN
+            result[:LZint]           = NaN
         end
         #-----------------------------------------------------------------------
         #Steady-state
@@ -716,7 +721,7 @@ function nca!(data::PKSubject; calcm = :lint, intp = :lint, verbose = false, io:
 
                 #remoove part after tau
                 if ncae < result[:Obsnum] - 1 pmask[ncae:end] .= false end
-            elseif tautime > time[end] && :LZint in keys(result)
+            elseif tautime > time[end] && result[:LZint] !== NaN
                 #extrapolation
                 result[:Ctau] = exp(result[:LZint] + result[:LZ] * tautime)
                 eaucpartl, eaumcpartl = aucpart(time[ncae], tautime, obs[ncae], result[:Ctau], calcm, true)
@@ -744,7 +749,7 @@ function nca!(data::PKSubject; calcm = :lint, intp = :lint, verbose = false, io:
             result[:Fluc]     = (result[:Cmax] - result[:Ctaumin])/result[:Cavg]
             result[:Fluctau]  = (result[:Cmax] - result[:Ctau])/result[:Cavg]
             #If Kel calculated
-            if :Kel in keys(result)
+            if result[:Kel] !== NaN
                 result[:Accind]   = 1 / (1 - (exp(-result[:Kel] * data.dosetime.tau)))
             else
                 result[:Accind]   = NaN
@@ -757,12 +762,12 @@ function nca!(data::PKSubject; calcm = :lint, intp = :lint, verbose = false, io:
                 aucpartlsum[i]  = sum(aucpartl[1:i])
                 aumcpartlsum[i] = sum(aumcpartl[1:i])
             end
-            astx    = Vector{String}(undef, length(data.time))
+            astx    = Vector{String}(undef, length(time))
             astx[1] = ""
             for i = 1:length(pmask)
                 if pmask[i] astx[i+1] = "Yes" else astx[i+1] = "No" end
             end
-            mx = hcat(data.time, data.obs, round.(vcat([0], aucpartl), digits = 3),  round.(vcat([0], aucpartlsum), digits = 3), round.(vcat([0], aumcpartl), digits = 3),  round.(vcat([0], aumcpartlsum), digits = 3), astx)
+            mx = hcat(time, obs, round.(vcat([0], aucpartl), digits = 3),  round.(vcat([0], aucpartlsum), digits = 3), round.(vcat([0], aumcpartl), digits = 3),  round.(vcat([0], aumcpartlsum), digits = 3), astx)
             mx = vcat(permutedims(["Time", "Concentrtion", "AUC", "AUC (cumulate)", "AUMC", "AUMC (cumulate)", "Include"]), mx)
             printmatrix(io, mx)
             println(io, "")
@@ -772,9 +777,9 @@ function nca!(data::PKSubject; calcm = :lint, intp = :lint, verbose = false, io:
                 println("Dose AUMC part: $(doseaumcpart)")
             end
             println(io, "")
-            if tautime < time[end]
+            if tautime < time[end] && tautime > 0
                 println(io, "Tau + dosetime is less then end time. Interpolation used.")
-                println(io, "Interpolation between: $(time[ncae]) - $( time[ncae+1]), method: $(intp)")
+                println(io, "Interpolation between: $(time[ncae]) - $( time[ncae + 1]), method: $(intp)")
                 println(io, "Ctau: $(result[:Ctau])")
                 println(io, "AUC  final part: $(eaucpartl)")
                 println(io, "AUMC final part: $(eaumcpartl)")
@@ -812,7 +817,6 @@ function nca!(data::DataSet{PKSubject}; calcm = :lint, intp = :lint, verbose = f
         results = Array{PKPDProfile, 1}(undef, 0)
         for i = 1:length(data.data)
             push!(results, nca!(data.data[i]; calcm = calcm, intp = intp, verbose = verbose, io = io))
-
         end
         return DataSet(results)
 end

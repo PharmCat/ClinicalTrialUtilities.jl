@@ -259,7 +259,7 @@ println(" ---------------------------------- ")
 
     # TAU 0.25 - 9
     ClinicalTrialUtilities.setdosetime!(pkds, ClinicalTrialUtilities.DoseTime(dose = 100, time = 0.25, tau = 9))
-    pk   = ClinicalTrialUtilities.nca!(pkds, calcm = :luld, intp = :logt)
+    pk   = ClinicalTrialUtilities.nca!(pkds, calcm = :luld, intp = :logt, io = io, verbose = true)
     df   = DataFrame(pk; unst = true)
     sort!(df, :Subject)
 
@@ -390,9 +390,18 @@ println(" ---------------------------------- ")
     6389.420453], sigdigits = 6)
 
 
+    #TAU = Tlast
+    ClinicalTrialUtilities.setdosetime!(pkds, ClinicalTrialUtilities.DoseTime(dose = 100, time = 0, tau = 72))
+    pk   = ClinicalTrialUtilities.nca!(pkds, calcm = :luld, intp = :logt)
+    df   = DataFrame(pk; unst = true)
+    sort!(df, :Subject)
+    @test df[!, :AUCtau] == df[!, :AUClast]
+
+
     # Log-trapezoidal Linear Interpolation
 
-    pkds = ClinicalTrialUtilities.pkimport(pkdata2, [:Subject, :Formulation]; conc = :Concentration, time = :Time)
+    #pkds = ClinicalTrialUtilities.pkimport(pkdata2, [:Subject, :Formulation]; conc = :Concentration, time = :Time)
+    ClinicalTrialUtilities.setdosetime!(pkds, ClinicalTrialUtilities.DoseTime(dose = 100, time = 0, tau = 0))
     pk   = ClinicalTrialUtilities.nca!(pkds, calcm = :logt, intp = :lint)
     df   = DataFrame(pk; unst = true)
     sort!(df, :Subject)
@@ -434,6 +443,8 @@ println(" ---------------------------------- ")
     7073.306755718137
     8303.373085532965
     5486.838889441992], sigdigits = 6)
+
+    # Utilities 
     #---------------------------------------------------------------------------
     # Elimination range check
     ClinicalTrialUtilities.setkelauto!(pkds, false)
