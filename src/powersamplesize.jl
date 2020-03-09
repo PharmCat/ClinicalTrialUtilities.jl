@@ -90,7 +90,7 @@ end
 function mcnm(p10::Float64, p01::Float64, α::Real, β::Real)::Float64
     pdisc = p10 + p01
     pdiff = p10 - p01
-    return ((quantile(ZDIST, 1-α/2)*sqrt(pdisc)+quantile(ZDIST, 1 - β)*sqrt(pdisc-pdiff^2))/pdiff)^2
+    return ((quantile(ZDIST, 1 - α / 2) * sqrt(pdisc) + quantile(ZDIST, 1 - β) * sqrt(pdisc - pdiff^2)) / pdiff)^2
 end
 
 function mcnm_pow(p10::Float64, p01::Float64, α::Float64, n::Int)::Float64
