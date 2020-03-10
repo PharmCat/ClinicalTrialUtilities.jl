@@ -31,6 +31,10 @@ struct Crossover{Symbol} <: AbstractDesign
     end
 end
 
+struct CoxPHM <: AbstractDesign
+end
+
+
 function Design(type::Symbol)::AbstractDesign
     if type == :parallel
         return Parallel()

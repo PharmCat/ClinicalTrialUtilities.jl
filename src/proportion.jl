@@ -87,6 +87,10 @@ end
 
 struct CoxHazardRatio <: AbstractParameter
     a::Real
-    b::Real
     p::Real
+end
+
+struct DiffCoxHazardRatio <: AbstractCompositeProportion
+    a::CoxHazardRatio
+    b::CoxHazardRatio
 end

@@ -82,29 +82,47 @@ end
 """
     ctask(;param::Symbol, hyp::Symbol, group::Symbol = :notdef, alpha::Real = 0.05, beta::Real = 0.2, k::Real = 1, kw...)::CTask
 """
-function ctask(;param::Symbol, hyp::Symbol, group::Symbol = :notdef, alpha::Real = 0.05, beta::Real = 0.2, k::Real = 1, kw...)::CTask
+function ctask(;param::Symbol, hyp::Symbol, group::Symbol = :notdef, alpha::Real = 0.05, k::Real = 1, kw...)::CTask
+    kwk      = keys(kw)
     a        = kw[:a]
     b        = kw[:b]
-    diff     = kw[:diff]
+
+    if :power in kwk && :n in kwk
+         throw(ArgumentError("only power or only n keyword should be used!"))
+    elseif :power in kwk
+        objf = SampleSize
+        objv = kw[:power]
+    elseif :n in kwk
+        objf = Power
+        objv = kw[:n]
+    else
+        throw(ArgumentError("power or n keyword should be used!"))
+    end
+
+    if (hyp == :ei || hyp == :ns) && :diff ∉ kwk
+        throw(ArgumentError("diff keyword should be specified when ei or ns hypothesis used!"))
+    else
+        diff     = kw[:diff]
+    end
 
     if param == :mean
 
         sd = kw[:sd]
         if group == :one
             if hyp == :ea
-                task = CTask(DiffMean(Mean(a, sd), b), OneGroup(), Equality(), SampleSize(beta), alpha)
+                task = CTask(DiffMean(Mean(kw[:a], sd), kw[:b]), OneGroup(), Equality(), objf(objv), alpha)
             elseif hyp == :ei
-                task = CTask(DiffMean(Mean(a, sd), b),  OneGroup(), Equivalence(b-diff, b+diff), SampleSize(beta), alpha)
+                task = CTask(DiffMean(Mean(kw[:a], sd), kw[:b]),  OneGroup(), Equivalence(b-diff, b+diff), objf(objv), alpha)
             elseif hyp == :ns
-                task = CTask(DiffMean(Mean(a, sd), b), OneGroup(), Superiority(b + diff, diff), SampleSize(beta), alpha)
+                task = CTask(DiffMean(Mean(kw[:a], sd), kw[:b]), OneGroup(), Superiority(b + diff, diff), objf(objv), alpha)
             else throw(ArgumentError("Keyword hyp unknown!")) end
         elseif group == :two
             if hyp == :ea
-                task = CTask(DiffMean(Mean(a, sd), Mean(b, sd)), Parallel(), Equality(), SampleSize(beta), alpha, k)
+                task = CTask(DiffMean(Mean(kw[:a], sd), Mean(kw[:b], sd)), Parallel(), Equality(), objf(objv), alpha, k)
             elseif hyp == :ei
-                task = CTask(DiffMean(Mean(a, sd), Mean(b, sd)), Parallel(), Equivalence(-diff, diff), SampleSize(beta), alpha, k)
+                task = CTask(DiffMean(Mean(kw[:a], sd), Mean(kw[:b], sd)), Parallel(), Equivalence(-diff, diff), objf(objv), alpha, k)
             elseif hyp == :ns
-                task = CTask(DiffMean(Mean(a, sd), Mean(b, sd)),  Parallel(), Superiority(diff, diff), SampleSize(beta), alpha, k)
+                task = CTask(DiffMean(Mean(kw[:a], sd), Mean(kw[:b], sd)),  Parallel(), Superiority(diff, diff), objf(objv), alpha, k)
             else throw(ArgumentError("Keyword hyp unknown!")) end
         elseif group == :co
 
@@ -112,39 +130,49 @@ function ctask(;param::Symbol, hyp::Symbol, group::Symbol = :notdef, alpha::Real
     elseif param == :prop
         if group == :one
             if hyp == :ea
-                task = CTask(DiffProportion(Proportion(a), b), OneGroup(), Equality(), SampleSize(beta), alpha)
+                task = CTask(DiffProportion(Proportion(kw[:a]), kw[:b]), OneGroup(), Equality(), objf(objv), alpha)
             elseif hyp == :ei
-                task = CTask(DiffProportion(Proportion(a), b), OneGroup(), Equivalence(b-diff, b+diff), SampleSize(beta), alpha)
+                task = CTask(DiffProportion(Proportion(kw[:a]), kw[:b]), OneGroup(), Equivalence(b-diff, b+diff), objf(objv), alpha)
             elseif hyp == :ns
-                task = CTask(DiffProportion(Proportion(a), b), OneGroup(), Superiority(b+diff, diff), SampleSize(beta), alpha)
+                task = CTask(DiffProportion(Proportion(kw[:a]), kw[:b]), OneGroup(), Superiority(b+diff, diff), objf(objv), alpha)
             else throw(ArgumentError("Keyword hyp unknown!")) end
         elseif group == :two
             if hyp == :ea
-                task = CTask(DiffProportion(Proportion(a), Proportion(b)), Parallel(), Equality(), SampleSize(beta), alpha, k)
+                task = CTask(DiffProportion(Proportion(kw[:a]), Proportion(kw[:b])), Parallel(), Equality(), objf(objv), alpha, k)
             elseif hyp == :ei
-                task = CTask(DiffProportion(Proportion(a), Proportion(b)), Parallel(), Equivalence(-diff, diff), SampleSize(beta), alpha, k)
+                task = CTask(DiffProportion(Proportion(kw[:a]), Proportion(kw[:b])), Parallel(), Equivalence(-diff, diff), objf(objv), alpha, k)
             elseif hyp == :ns
-                task = CTask(DiffProportion(Proportion(a), Proportion(b)), Parallel(), Superiority(diff, diff), SampleSize(beta), alpha, k)
+                task = CTask(DiffProportion(Proportion(kw[:a]), Proportion(kw[:b])), Parallel(), Superiority(diff, diff), objf(objv), alpha, k)
             else throw(ArgumentError("Keyword hyp unknown!")) end
         elseif group == :co
+            if hyp == :mcnm
 
+            else throw(ArgumentError("Keyword hyp unknown!")) end
         else throw(ArgumentError("Keyword group unknown!")) end
     elseif param == :or
 
         logscale = kw[:logscale]
         if group == :two || group == :notdef
             if hyp == :ea
-                task = CTask(OddRatio(Proportion(a), Proportion(b)), Parallel(),  Equality(), SampleSize(beta), alpha, k)
+                task = CTask(OddRatio(Proportion(kw[:a]), Proportion(kw[:b])), Parallel(),  Equality(), objf(objv), alpha, k)
             elseif hyp == :ei
                 if !logscale diff = log(diff) end
-                task = CTask(OddRatio(Proportion(a), Proportion(b)), Parallel(), Equivalence(-diff, diff), SampleSize(beta), alpha, k)
+                task = CTask(OddRatio(Proportion(kw[:a]), Proportion(kw[:b])), Parallel(), Equivalence(-diff, diff), objf(objv), alpha, k)
             elseif hyp == :ns
                 if !logscale diff = log(diff) end
-                task = CTask(OddRatio(Proportion(a), Proportion(b)), Parallel(), Superiority(diff,  diff), SampleSize(beta), alpha, k)
+                task = CTask(OddRatio(Proportion(kw[:a]), Proportion(kw[:b])), Parallel(), Superiority(diff,  diff), objf(objv), alpha, k)
             else throw(ArgumentError("Keyword hyp unknown!")) end
         elseif group == :co
 
         else throw(ArgumentError("Keyword group unknown!")) end
+    elseif param == :cox
+        if hyp == :ea
+            task = CTask(CoxHazardRatio(kw[:a], kw[:p]), Parallel(),  Equality(), objf(objv), alpha, k)
+        elseif hyp == :ei
+            task = CTask(CoxHazardRatio(kw[:a], kw[:p]), Parallel(),  Equivalence(-diff, diff), objf(objv), alpha, k)
+        elseif hyp == :ns
+            task = CTask(CoxHazardRatio(kw[:a], kw[:p]), Parallel(),  Superiority(diff,  diff), objf(objv), alpha, k)
+        else throw(ArgumentError("Keyword hyp unknown!")) end
     else throw(ArgumentError("Keyword param unknown!")) end
     return task
 end
