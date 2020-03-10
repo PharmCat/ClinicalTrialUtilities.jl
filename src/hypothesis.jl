@@ -22,6 +22,10 @@ struct Bioequivalence <: AbstractEquivalenceHypothesis
 end
 
 struct Equality <: AbstractHypothesis
+    val::Real
+    function Equality()
+        new(0)::Equality
+    end
 end
 struct Superiority <: AbstractHypothesis
     llim::Real          #Lower lmit for Test group
