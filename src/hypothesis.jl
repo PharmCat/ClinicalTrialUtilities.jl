@@ -12,8 +12,11 @@ struct Equivalence <:AbstractEquivalenceHypothesis
         new(llim, ulim)::Equivalence
     end
 end
-function mdiff(h::Equivalence)::AbstractFloat
+function mdiff(h::Equivalence)
     (h.ulim - h.llim)/2
+end
+function refval(h::Equivalence)
+    (h.ulim + h.llim)/2
 end
 
 struct Bioequivalence <: AbstractEquivalenceHypothesis
@@ -26,9 +29,20 @@ struct Equality <: AbstractHypothesis
     function Equality()
         new(0)::Equality
     end
+    function Equality(val)
+        new(val)::Equality
+    end
 end
+function refval(h::Equality)
+    h.val
+end
+
 struct Superiority <: AbstractHypothesis
     llim::Real          #Lower lmit for Test group
     diff::Real          #Margin difference
 end
+function refval(h::Superiority)
+    h.llim - h.diff
+end
+
 struct McNemars <: AbstractHypothesis end

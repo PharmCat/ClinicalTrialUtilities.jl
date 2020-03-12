@@ -63,7 +63,7 @@ end
 function StatsBase.confint(param::Mean; level = 0.95, method = :default)::ConfInt
     meanci(param.m, param.s, param.n; alpha = 1 - level, method = method)
 end
-function StatsBase.confint(param::DiffMean{T}; level = 0.95, method = :default)::ConfInt where T <: Mean
+function StatsBase.confint(param::DiffMean{true}; level = 0.95, method = :default)::ConfInt where T <: Mean
     diffmeanci(param.a.m, param.a.s, param.a.n, param.b.m, param.b.s, param.b.n; alpha = 1 - level, method = method)
 end
 """
