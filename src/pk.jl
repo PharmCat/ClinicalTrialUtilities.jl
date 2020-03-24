@@ -159,8 +159,8 @@ struct LimitRule
     function LimitRule(lloq, btmax, atmax)
         new(lloq, btmax, atmax, NaN, true)::LimitRule
     end
-    function LimitRule()
-        new(NaN, NaN, NaN, NaN, false)::LimitRule
+    function LimitRule(;lloq = NaN, btmax = NaN, atmax = NaN, nan = NaN, rm = false)
+        new(lloq, btmax, atmax, nan, rm)::LimitRule
     end
 end
 
