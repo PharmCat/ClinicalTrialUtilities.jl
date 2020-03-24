@@ -51,19 +51,19 @@ end
 function StatsBase.confint(param::Proportion; level = 0.95, method = :default)::ConfInt
     propci(param.x, param.n; alpha = 1 - level, method = method)
 end
-function StatsBase.confint(param::DiffProportion{P, P}; level = 0.95, method = :default)::ConfInt  where P <: Proportion
+function StatsBase.confint(param::DiffProportion{P, P}; level = 0.95, method = :default)::ConfInt  where P <: Proportion{true}
     diffpropci(param.a.x, param.a.n, param.b.x, param.b.n; alpha = 1 - level, method = method)
 end
-function StatsBase.confint(param::OddRatio{P}; level = 0.95, method = :default)::ConfInt where P <: Proportion
+function StatsBase.confint(param::OddRatio{P, P}; level = 0.95, method = :default)::ConfInt where P <: Proportion{true}
     orpropci(param.a.x, param.a.n, param.b.x, param.b.n; alpha = 1 - level, method = method)
 end
-function StatsBase.confint(param::RiskRatio{P}; level = 0.95, method = :default)::ConfInt where P <: Proportion
+function StatsBase.confint(param::RiskRatio{P}; level = 0.95, method = :default)::ConfInt where P <: Proportion{true}
     rrpropci(param.a.x, param.a.n, param.b.x, param.b.n; alpha = 1 - level, method = method)
 end
 function StatsBase.confint(param::Mean; level = 0.95, method = :default)::ConfInt
     meanci(param.m, param.s, param.n; alpha = 1 - level, method = method)
 end
-function StatsBase.confint(param::DiffMean{T}; level = 0.95, method = :default)::ConfInt where T <: Mean
+function StatsBase.confint(param::DiffMean{true}; level = 0.95, method = :default)::ConfInt where T <: Mean
     diffmeanci(param.a.m, param.a.s, param.a.n, param.b.m, param.b.s, param.b.n; alpha = 1 - level, method = method)
 end
 """
@@ -862,7 +862,7 @@ Cochran–Mantel–Haenszel confidence intervals for proportion difference.
         n1 = a + b
         n2 = c + d
         N  = a + b + c + d
-        z = quantile(ZDIST, 1 - alpha/2)
+        z = quantile(ZDIST, 1 - alpha / 2)
             #...
         R = sum(a .* (n2 ./ N))
         S = sum(c .* (n1 ./ N))
@@ -873,3 +873,24 @@ Cochran–Mantel–Haenszel confidence intervals for proportion difference.
         #pval= 2*(1-cdf(Normal(), abs(zval)))
         if logscale return ConfInt(estimate  - z*se, estimate  + z*se, estimate , alpha) else return ConfInt(exp(estimate  - z*se), exp(estimate  + z*se), exp(estimate ), alpha) end
     end
+
+
+function diffmcnmwaldci(a::Int, b::Int, c::Int, d::Int; alpha = 0.05)
+    n        = a + b + c + d
+    p1       = (a + b)/n
+    p2       = (a + c)/n
+    estimate = p1 - p2
+    se       = ((a+d)*(b+c)+4*b*c)/n^3
+    z        = quantile(ZDIST, 1 - alpha / 2)
+    ConfInt(estimate  - z * se, estimate  + z * se, estimate , alpha)
+end
+function diffmcnmwaldccci(a::Int, b::Int, c::Int, d::Int; alpha = 0.05)
+    n        = a + b + c + d
+    p1       = (a + b)/n
+    p2       = (a + c)/n
+    estimate = p1 - p2
+    se       = ((a+d)*(b+c)+4*b*c)/n^3
+    z        = quantile(ZDIST, 1 - alpha / 2)
+    ConfInt(estimate  - z * se - 1 / n, estimate  + z * se + 1 / n, estimate , alpha)
+
+end

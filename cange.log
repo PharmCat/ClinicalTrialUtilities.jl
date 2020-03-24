@@ -1,3 +1,19 @@
+v0.2.4
+
+  - PK: drop observation before dosetime
+  - Roots Version 1.0
+  - Distributions 23.0
+  - Remove Probability struct
+  - Update Proportion struct
+  - Type simplification for composite means/proportions for CTask
+  - PK Validation: basic tests completed
+  - LimitRule keywords
+  - Output changes
+  - Fix
+  - Cox sample size: initial
+  - McNemar CI: initial
+  - Cosmetics
+
 v0.2.3
 
   - ConTab struct

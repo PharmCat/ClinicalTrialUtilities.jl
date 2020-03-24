@@ -16,16 +16,20 @@ struct SampleSize{T} <: AbstractSampleSize where T <: AbstractFloat
     end
 end
 
-struct Mean{T <: Union{Int, Nothing}} <: AbstractMean
+struct Mean{Bool} <: AbstractMean
     m::Real
     sd::Real
-    n::T
-    function Mean(m::Real, sd::Real, n::T) where T <: Union{Int, Nothing}
+    n::Int
+    function Mean(m::Real, sd::Real, n::Int)
         if sd ≤ 0.0 throw(ArgumentError("SD can't be ≤ 0.0!")) end
-        new{T}(m, sd, n)::Mean
+        new{true}(m, sd, n)::Mean
     end
     function Mean(m::Real, sd::Real)
-        Mean(m, sd, nothing)
+        if sd ≤ 0.0 throw(ArgumentError("SD can't be ≤ 0.0!")) end
+        new{false}(m, sd, 0)
+    end
+    function Mean(m::Real)
+        new{false}(m, NaN, 0)
     end
 end
 """
@@ -33,9 +37,13 @@ end
     a - Test group value
     b - Reference group value {Mean} type, or reference value for one group test {Real}
 """
-struct DiffMean{T <: Union{Mean, Real}} <: AbstractCompositeMean{T}
+struct DiffMean{Bool} <: AbstractCompositeMean
     a::Mean
-    b::T
+    b::Mean
+    function DiffMean(a::Mean, b::Mean)
+        if typeof(a) <: Mean{false} || typeof(b) <: Mean{false}  t = false else t = true end
+        new{t}(a, b)
+    end
 end
 struct TaskResult{T <: AbstractTask}
     task::T
@@ -71,6 +79,112 @@ mutable struct CTask{T <: AbstractParameter, D <: AbstractDesign, H <: AbstractH
         return CTask(param, design, hyp, objective, alpha, 1)
     end
 end
+
+function setobjval!(task::CTask{T,D,H,O}, val) where T where D where H where O <: AbstractPower
+    task.objective = Power(val)
+end
+function setobjval!(task::CTask{T,D,H,O}, val) where T where D where H where O <: AbstractSampleSize
+    task.objective = SampleSize(val)
+end
+
+"""
+    ctask(;param::Symbol, hyp::Symbol, group::Symbol = :notdef, alpha::Real = 0.05, beta::Real = 0.2, k::Real = 1, kw...)::CTask
+"""
+function ctask(;param::Symbol, hyp::Symbol, group::Symbol = :notdef, alpha::Real = 0.05, k::Real = 1, kw...)::CTask
+    kwk      = keys(kw)
+    a        = kw[:a]
+    b        = kw[:b]
+
+    if :power in kwk && :n in kwk
+         throw(ArgumentError("only beta or only n keyword should be used!"))
+    elseif :beta in kwk
+        objf = SampleSize
+        objv = kw[:beta]
+    elseif :n in kwk
+        objf = Power
+        objv = kw[:n]
+    else
+        throw(ArgumentError("beta or n keyword should be used!"))
+    end
+
+    if (hyp == :ei || hyp == :ns) && :diff ∉ kwk
+        throw(ArgumentError("diff keyword should be specified when ei or ns hypothesis used!"))
+    else
+        diff     = kw[:diff]
+    end
+
+    if param == :mean
+
+        sd = kw[:sd]
+        if group == :one
+            if hyp == :ea
+                task = CTask(Mean(kw[:a], sd), OneGroup(), Equality(kw[:b]), objf(objv), alpha)
+            elseif hyp == :ei
+                task = CTask(Mean(kw[:a], sd), OneGroup(), Equivalence(kw[:b] - diff, kw[:b] + diff), objf(objv), alpha)
+            elseif hyp == :ns
+                task = CTask(Mean(kw[:a], sd), OneGroup(), Superiority(kw[:b] + diff, diff), objf(objv), alpha)
+            else throw(ArgumentError("Keyword hyp unknown!")) end
+        elseif group == :two
+            if hyp == :ea
+                task = CTask(DiffMean(Mean(kw[:a], sd), Mean(kw[:b], sd)), Parallel(), Equality(), objf(objv), alpha, k)
+            elseif hyp == :ei
+                task = CTask(DiffMean(Mean(kw[:a], sd), Mean(kw[:b], sd)), Parallel(), Equivalence(-diff, diff), objf(objv), alpha, k)
+            elseif hyp == :ns
+                task = CTask(DiffMean(Mean(kw[:a], sd), Mean(kw[:b], sd)),  Parallel(), Superiority(diff, diff), objf(objv), alpha, k)
+            else throw(ArgumentError("Keyword hyp unknown!")) end
+        elseif group == :co
+
+        else throw(ArgumentError("Keyword group unknown!")) end
+    elseif param == :prop
+        if group == :one
+            if hyp == :ea
+                task = CTask(Proportion(kw[:a]), OneGroup(), Equality(kw[:b]), objf(objv), alpha)
+            elseif hyp == :ei
+                task = CTask(Proportion(kw[:a]), OneGroup(), Equivalence(kw[:b] - diff,  kw[:b] + diff), objf(objv), alpha)
+            elseif hyp == :ns
+                task = CTask(Proportion(kw[:a]), OneGroup(), Superiority(kw[:b] + diff, diff), objf(objv), alpha)
+            else throw(ArgumentError("Keyword hyp unknown!")) end
+        elseif group == :two
+            if hyp == :ea
+                task = CTask(DiffProportion(Proportion(kw[:a]), Proportion(kw[:b])), Parallel(), Equality(), objf(objv), alpha, k)
+            elseif hyp == :ei
+                task = CTask(DiffProportion(Proportion(kw[:a]), Proportion(kw[:b])), Parallel(), Equivalence(-diff, diff), objf(objv), alpha, k)
+            elseif hyp == :ns
+                task = CTask(DiffProportion(Proportion(kw[:a]), Proportion(kw[:b])), Parallel(), Superiority(diff, diff), objf(objv), alpha, k)
+            else throw(ArgumentError("Keyword hyp unknown!")) end
+        elseif group == :co
+            if hyp == :mcnm
+                task = CTask(DiffProportion(Proportion(kw[:a]), Proportion(kw[:b])), Parallel(),  McNemars(), objf(objv), alpha, k)
+            else throw(ArgumentError("Keyword hyp unknown!")) end
+        else throw(ArgumentError("Keyword group unknown!")) end
+    elseif param == :or
+
+        logscale = kw[:logscale]
+        if group == :two || group == :notdef
+            if hyp == :ea
+                task = CTask(OddRatio(Proportion(kw[:a]), Proportion(kw[:b])), Parallel(),  Equality(), objf(objv), alpha, k)
+            elseif hyp == :ei
+                if !logscale diff = log(diff) end
+                task = CTask(OddRatio(Proportion(kw[:a]), Proportion(kw[:b])), Parallel(), Equivalence(-diff, diff), objf(objv), alpha, k)
+            elseif hyp == :ns
+                if !logscale diff = log(diff) end
+                task = CTask(OddRatio(Proportion(kw[:a]), Proportion(kw[:b])), Parallel(), Superiority(diff,  diff), objf(objv), alpha, k)
+            else throw(ArgumentError("Keyword hyp unknown!")) end
+        elseif group == :co
+
+        else throw(ArgumentError("Keyword group unknown!")) end
+    elseif param == :cox
+        if hyp == :ea
+            task = CTask(CoxHazardRatio(kw[:a], kw[:p]), Parallel(),  Equality(), objf(objv), alpha, k)
+        elseif hyp == :ei
+            task = CTask(CoxHazardRatio(kw[:a], kw[:p]), Parallel(),  Equivalence(-diff, diff), objf(objv), alpha, k)
+        elseif hyp == :ns
+            task = CTask(CoxHazardRatio(kw[:a], kw[:p]), Parallel(),  Superiority(diff,  diff), objf(objv), alpha, k)
+        else throw(ArgumentError("Keyword hyp unknown!")) end
+    else throw(ArgumentError("Keyword param unknown!")) end
+    return task
+end
+
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
 #main sample size function
@@ -116,10 +230,20 @@ Clinical trial sample size estimation.
 - false - diff is not in log-scale, will be transformed;
 """
 function ctsamplen(;param::Symbol, type::Symbol, group::Symbol = :notdef, alpha::Real = 0.05, beta::Real = 0.2, diff::Real = 0, sd::Real = 0, a::Real = 0, b::Real = 0, k::Real = 1, logscale::Bool = true)::TaskResult
-    if alpha >= 1 || alpha <= 0 || beta >= 1 || beta <= 0  throw(ArgumentError("sampleSize: alpha and beta sould be > 0 and < 1.")) end
-    if param == :prop && !(group == :one || group == :two || type == :mcnm)  throw(ArgumentError("sampleSize: group should be defined or mcnm type.")) end
+    if alpha >= 1 || alpha <= 0 || beta >= 1 || beta <= 0  throw(ArgumentError("ctsamplen: alpha and beta sould be > 0 and < 1.")) end
+    if param == :prop && !(group == :one || group == :two || type == :mcnm)  throw(ArgumentError("ctsamplen: group should be defined or mcnm type.")) end
     if sd ≤ 0 && param == :mean throw(ArgumentError("SD can't be ≤ 0.0!")) end
     if k <= 0 throw(ArgumentError("Constant k can't be ≤ 0.0!")) end
+
+    if type == :mcnm
+        group = :co
+    end
+
+    kwd  = Dict(:beta => beta, :diff => diff, :sd => sd, :a => a, :b => b, :logscale => logscale)
+
+    task = ctask(;param = param, hyp = type, group = group, alpha = alpha, k = k, kwd...)
+
+    #=
     if param == :mean
         if group == :one
             if type == :ea
@@ -148,78 +272,79 @@ function ctsamplen(;param::Symbol, type::Symbol, group::Symbol = :notdef, alpha:
         if 1 < a || a < 0 || 1 < b || b < 0 throw(ArgumentError("Keyword a or b out of the range!")) end
         if type == :mcnm
             n = mcnm(a, b, alpha, beta)
-            task = CTask(DiffProportion(Probability(a), Probability(b)), Parallel(),  McNemars(), SampleSize(beta), alpha, k)
+            task = CTask(DiffProportion(Proportion(a), Proportion(b)), Parallel(),  McNemars(), SampleSize(beta), alpha, k)
         else
             if group == :one
                 if type == :ea
                     n = one_proportion_equality(a, b, alpha, beta)
-                    task = CTask(DiffProportion(Probability(a), b), OneGroup(), Equality(), SampleSize(beta), alpha)
+                    task = CTask(DiffProportion(Proportion(a), b), OneGroup(), Equality(), SampleSize(beta), alpha)
                 elseif type == :ei
                     n = one_proportion_equivalence(a, b, diff, alpha, beta)
-                    task = CTask(DiffProportion(Probability(a), b), OneGroup(), Equivalence(b-diff, b+diff), SampleSize(beta), alpha)
+                    task = CTask(DiffProportion(Proportion(a), b), OneGroup(), Equivalence(b-diff, b+diff), SampleSize(beta), alpha)
                 elseif type == :ns
                     n = one_proportion_superiority(a, b, diff, alpha, beta)
-                    task = CTask(DiffProportion(Probability(a), b), OneGroup(), Superiority(b+diff, diff), SampleSize(beta), alpha)
+                    task = CTask(DiffProportion(Proportion(a), b), OneGroup(), Superiority(b+diff, diff), SampleSize(beta), alpha)
                 else throw(ArgumentError("Keyword type unknown!")) end
             elseif group == :two
                 if type == :ea
                     n = two_proportion_equality(a, b, alpha, beta, k)
-                    task = CTask(DiffProportion(Probability(a), Probability(b)), Parallel(), Equality(), SampleSize(beta), alpha, k)
+                    task = CTask(DiffProportion(Proportion(a), Proportion(b)), Parallel(), Equality(), SampleSize(beta), alpha, k)
                 elseif type == :ei
                     n = two_proportion_equivalence(a, b, diff, alpha, beta, k)
-                    task = CTask(DiffProportion(Probability(a), Probability(b)), Parallel(), Equivalence(-diff, diff), SampleSize(beta), alpha, k)
+                    task = CTask(DiffProportion(Proportion(a), Proportion(b)), Parallel(), Equivalence(-diff, diff), SampleSize(beta), alpha, k)
                 elseif type == :ns
                     n = two_proportion_superiority(a, b, diff, alpha, beta, k)
-                    task = CTask(DiffProportion(Probability(a), Probability(b)), Parallel(), Superiority(diff, diff), SampleSize(beta), alpha, k)
+                    task = CTask(DiffProportion(Proportion(a), Proportion(b)), Parallel(), Superiority(diff, diff), SampleSize(beta), alpha, k)
                 else throw(ArgumentError("Keyword type unknown!")) end
             else throw(ArgumentError("Keyword group unknown!")) end
         end
     elseif param == :or
         if type == :ea
             n = or_equality(a, b, alpha, beta, k)
-            task = CTask(OddRatio(Probability(a), Probability(b)), Parallel(),  Equality(), SampleSize(beta), alpha, k)
+            task = CTask(OddRatio(Proportion(a), Proportion(b)), Parallel(),  Equality(), SampleSize(beta), alpha, k)
         elseif type == :ei
             if !logscale diff = log(diff) end
             n = or_equivalence(a, b, diff, alpha, beta, k)
-            task = CTask(OddRatio(Probability(a), Probability(b)), Parallel(), Equivalence(-diff, diff), SampleSize(beta), alpha, k)
+            task = CTask(OddRatio(Proportion(a), Proportion(b)), Parallel(), Equivalence(-diff, diff), SampleSize(beta), alpha, k)
         elseif type == :ns
             if !logscale diff = log(diff) end
             n = or_superiority(a, b, diff, alpha, beta, k)
-            task = CTask(OddRatio(Probability(a), Probability(b)), Parallel(), Superiority(diff,  diff), SampleSize(beta), alpha, k)
+            task = CTask(OddRatio(Proportion(a), Proportion(b)), Parallel(), Superiority(diff,  diff), SampleSize(beta), alpha, k)
         else throw(ArgumentError("Keyword type unknown!")) end
     else throw(ArgumentError("Keyword param unknown!")) end
     #TaskEstimate(task.design, n, k)
-    return TaskResult(task, :chow, n)
+    =#
+    return ctsamplen(task)
 end #sampleSize
 
-function ctsamplen(t::CTask{T, D, H, O}) where T <: DiffMean{R} where R <: Real where D <: AbstractDesign where H <: Equality where O <: AbstractSampleSize
-    return TaskResult(t, :chow, one_mean_equality(t.param.a.m, t.param.b, t.param.a.sd, t.alpha, t.objective.val))
+function ctsamplen(t::CTask{T, D, H, O}) where T <: Mean where D <: AbstractDesign where H <: Equality where O <: AbstractSampleSize
+    return TaskResult(t, :chow, one_mean_equality(t.param.m, refval(t.hyp), t.param.sd, t.alpha, t.objective.val))
 end
-function ctsamplen(t::CTask{T, D, H, O}) where T <: DiffMean{R} where R <: Real where D <: AbstractDesign where H <: Equivalence where O <: AbstractSampleSize
-    return TaskResult(t, :chow, one_mean_equivalence(t.param.a.m, t.param.b, t.param.a.sd, mdiff(t.hyp), t.alpha, t.objective.val))
+function ctsamplen(t::CTask{T, D, H, O}) where T <: Mean where D <: AbstractDesign where H <: Equivalence where O <: AbstractSampleSize
+    return TaskResult(t, :chow, one_mean_equivalence(t.param.m, refval(t.hyp), t.param.sd, mdiff(t.hyp), t.alpha, t.objective.val))
 end
-function ctsamplen(t::CTask{T, D, H, O}) where T <: DiffMean{R} where R <: Real where D <: AbstractDesign where H <: Superiority where O <: AbstractSampleSize
-    return TaskResult(t, :chow, one_mean_superiority(t.param.a.m, t.param.b, t.param.a.sd, t.hyp.diff, t.alpha, t.objective.val))
+function ctsamplen(t::CTask{T, D, H, O}) where T <: Mean where D <: AbstractDesign where H <: Superiority where O <: AbstractSampleSize
+    return TaskResult(t, :chow, one_mean_superiority(t.param.m, refval(t.hyp), t.param.sd, t.hyp.diff, t.alpha, t.objective.val))
 end
 #---
-function ctsamplen(t::CTask{T, D, H, O}) where T <: DiffMean{M} where M <: AbstractMean where D <: AbstractDesign where H <: Equality where O <: AbstractSampleSize
+function ctsamplen(t::CTask{T, D, H, O}) where T <: DiffMean where D <: AbstractDesign where H <: Equality where O <: AbstractSampleSize
     return TaskResult(t, :chow, two_mean_equality(t.param.a.m, t.param.b.m, t.param.a.sd, t.alpha, t.objective.val, t.k))
 end
-function ctsamplen(t::CTask{T, D, H, O}) where T <: DiffMean{M} where M <: AbstractMean  where D <: AbstractDesign where H <: Equivalence where O <: AbstractSampleSize
+function ctsamplen(t::CTask{T, D, H, O}) where T <: DiffMean  where D <: AbstractDesign where H <: Equivalence where O <: AbstractSampleSize
     return TaskResult(t, :chow, two_mean_equivalence(t.param.a.m, t.param.b.m, t.param.a.sd,  mdiff(t.hyp), t.alpha, t.objective.val, t.k))
 end
-function ctsamplen(t::CTask{T, D, H, O}) where T <: DiffMean{M} where M <: AbstractMean  where D <: AbstractDesign where H <: Superiority where O <: AbstractSampleSize
+function ctsamplen(t::CTask{T, D, H, O}) where T <: DiffMean  where D <: AbstractDesign where H <: Superiority where O <: AbstractSampleSize
     return TaskResult(t, :chow, two_mean_superiority(t.param.a.m, t.param.b.m, t.param.a.sd, t.hyp.diff, t.alpha, t.objective.val, t.k))
 end
 #------
-function ctsamplen(t::CTask{T, D, H, O}) where T <: DiffProportion{P, R} where P <: AbstractSimpleProportion where R <: Real  where D  <: AbstractDesign where H <: Equality where O <: AbstractSampleSize
-    return TaskResult(t, :chow, one_proportion_equality(getval(t.param.a), t.param.b, t.alpha, t.objective.val))
+function ctsamplen(t::CTask{T, D, H, O}) where T <: Proportion where D  <: OneGroup where H <: Equality where O <: AbstractSampleSize
+    return TaskResult(t, :chow, one_proportion_equality(getval(t.param), refval(t.hyp), t.alpha, t.objective.val))
 end
-function ctsamplen(t::CTask{T, D, H, O}) where T <: DiffProportion{P, R} where P <: AbstractSimpleProportion where R <: Real  where D <: AbstractDesign where H <: Equivalence where O <: AbstractSampleSize
-    return TaskResult(t, :chow, one_proportion_equivalence(getval(t.param.a), t.param.b,  mdiff(t.hyp), t.alpha, t.objective.val))
+function ctsamplen(t::CTask{T, D, H, O}) where T <: Proportion   where D <: OneGroup where H <: Equivalence where O <: AbstractSampleSize
+    return TaskResult(t, :chow, one_proportion_equivalence(getval(t.param), refval(t.hyp),  mdiff(t.hyp), t.alpha, t.objective.val))
 end
-function ctsamplen(t::CTask{T, D, H, O}) where T <: DiffProportion{P, R} where P <: AbstractSimpleProportion where R <: Real  where D <: AbstractDesign where H <: Superiority where O <: AbstractSampleSize
-    return TaskResult(t, :chow, one_proportion_superiority(getval(t.param.a), t.param.b, t.hyp.diff, t.alpha, t.objective.val))
+function ctsamplen(t::CTask{T, D, H, O}) where T <: Proportion  where D <: OneGroup where H <: Superiority where O <: AbstractSampleSize
+    return TaskResult(t, :chow, one_proportion_superiority(getval(t.param), refval(t.hyp), t.hyp.diff, t.alpha, t.objective.val))
 end
 #---
 function ctsamplen(t::CTask{T, D, H, O}) where T <: DiffProportion{P, P} where P <: AbstractSimpleProportion  where D <: AbstractDesign where H <: Equality where O <: AbstractSampleSize
@@ -229,20 +354,20 @@ function ctsamplen(t::CTask{T, D, H, O}) where T <: DiffProportion{P, P} where P
     return TaskResult(t, :chow, two_proportion_equivalence(getval(t.param.a), getval(t.param.b),  mdiff(t.hyp), t.alpha, t.objective.val, t.k))
 end
 function pdiffnsn(a, b, diff; alpha = 0.05, beta = 0.2, k = 1.0)
-    t = CTask(DiffProportion(Probability(a), Probability(b)), Parallel(), Superiority(diff, diff), SampleSize(beta), alpha, k)
+    t = CTask(DiffProportion(Proportion(a), Proportion(b)), Parallel(), Superiority(diff, diff), SampleSize(beta), alpha, k)
     ctsamplen(t)
 end
 function ctsamplen(t::CTask{T, D, H, O}) where T <: DiffProportion{P, P} where P <: AbstractSimpleProportion  where D <: AbstractDesign where H <: Superiority where O <: AbstractSampleSize
     return TaskResult(t, :chow, two_proportion_superiority(getval(t.param.a), getval(t.param.b), t.hyp.diff, t.alpha, t.objective.val, t.k))
 end
 #------
-function ctsamplen(t::CTask{T, D, H, O}) where T <: OddRatio{P} where P <:  AbstractSimpleProportion  where D <: AbstractDesign where H <: Equality where O <: AbstractSampleSize
+function ctsamplen(t::CTask{T, D, H, O}) where T <: OddRatio  where D <: AbstractDesign where H <: Equality where O <: AbstractSampleSize
     return TaskResult(t, :chow, or_equality(getval(t.param.a), getval(t.param.b), t.alpha, t.objective.val, t.k))
 end
-function ctsamplen(t::CTask{T, D, H, O}) where T <: OddRatio{P} where P <:  AbstractSimpleProportion  where D <: AbstractDesign where H <: Equivalence where O <: AbstractSampleSize
+function ctsamplen(t::CTask{T, D, H, O}) where T <: OddRatio  where D <: AbstractDesign where H <: Equivalence where O <: AbstractSampleSize
     return TaskResult(t, :chow, or_equivalence(getval(t.param.a), getval(t.param.b),  mdiff(t.hyp), t.alpha, t.objective.val, t.k))
 end
-function ctsamplen(t::CTask{T, D, H, O}) where T <: OddRatio{P} where P <:  AbstractSimpleProportion  where D <: AbstractDesign where H <: Superiority where O <: AbstractSampleSize
+function ctsamplen(t::CTask{T, D, H, O}) where T <: OddRatio  where D <: AbstractDesign where H <: Superiority where O <: AbstractSampleSize
     return TaskResult(t, :chow, or_superiority(getval(t.param.a), getval(t.param.b), t.hyp.diff, t.alpha, t.objective.val, t.k))
 end
 #------------
@@ -253,7 +378,9 @@ end
 function ctsamplen(t::CTask{T, D, Bioequivalence, O}; method::Symbol = :owenq)  where T where D where O <: AbstractSampleSize
     return besamplen(t; method = method)
 end
+#------------
 
+#------------
 #-------------------------------------------------------------------------------
 #-------------------------------------------------------------------------------
 #clinical trial power main function
@@ -304,6 +431,16 @@ function ctpower(;param::Symbol, type::Symbol, group::Symbol = :notdef, alpha::R
     if sd == 0 && param == :mean throw(ArgumentError("Keyword sd = 0!")) end
     if k == 0 throw(ArgumentError("Keyword k = 0!")) end
     if n == 0 throw(ArgumentError("Keyword n = 0!")) end
+
+    if type == :mcnm
+        group = :co
+    end
+
+    kwd  = Dict(:n => n, :diff => diff, :sd => sd, :a => a, :b => b, :logscale => logscale)
+
+    task = ctask(;param = param, hyp = type, group = group, alpha = alpha, k = k, kwd...)
+
+    #=
     if param == :mean
         if group == :one
             if type == :ea
@@ -332,86 +469,87 @@ function ctpower(;param::Symbol, type::Symbol, group::Symbol = :notdef, alpha::R
         if 1 < a || a < 0 || 1 < b || b < 0 throw(ArgumentError("Keyword a or b out of the range!")) end
         if type == :mcnm
             pow =  mcnm_pow(a, b, alpha, n)
-            task = CTask(DiffProportion(Probability(a), Probability(b)), Parallel(), McNemars(), Power(n), alpha, k)
+            task = CTask(DiffProportion(Proportion(a), Proportion(b)), Parallel(), McNemars(), Power(n), alpha, k)
         else
             if group == :one
                 if type == :ea
                     pow =  one_proportion_equality_pow(a, b, alpha, n)
-                    task = CTask(DiffProportion(Probability(a), b), Parallel(), Equality(), Power(n), alpha)
+                    task = CTask(DiffProportion(Proportion(a), Proportion(b)), OneGroup(), Equality(), Power(n), alpha)
                 elseif type == :ei
                     pow =  one_proportion_equivalence_pow(a, b, diff, alpha, n)
-                    task = CTask(DiffProportion(Probability(a), b), Parallel(), Equivalence(b-diff, b+diff), Power(n), alpha)
+                    task = CTask(DiffProportion(Proportion(a), Proportion(b)), OneGroup(), Equivalence(b-diff, b+diff), Power(n), alpha)
                 elseif type == :ns
                     pow =  one_proportion_superiority_pow(a, b, diff, alpha, n)
-                    task = CTask(DiffProportion(Probability(a), b), Parallel(), Superiority(b-diff, diff), Power(n), alpha)
+                    task = CTask(DiffProportion(Proportion(a), Proportion(b)), OneGroup(), Superiority(b-diff, diff), Power(n), alpha)
                 else throw(ArgumentError("Keyword type unknown!")) end
             elseif group == :two
                 if type == :ea
                     pow =  two_proportion_equality_pow(a, b, alpha, n, k)
-                    task = CTask(DiffProportion(Probability(a), Probability(b)), Parallel(), Equality(), Power(n), alpha, k)
+                    task = CTask(DiffProportion(Proportion(a), Proportion(b)), Parallel(), Equality(), Power(n), alpha, k)
                 elseif type == :ei
                     pow =  two_proportion_equivalence_pow(a, b, diff, alpha, n, k)
-                    task = CTask(DiffProportion(Probability(a), Probability(b)), Parallel(), Equivalence(-diff, +diff), Power(n), alpha, k)
+                    task = CTask(DiffProportion(Proportion(a), Proportion(b)), Parallel(), Equivalence(-diff, +diff), Power(n), alpha, k)
                 elseif type == :ns
                     pow =  two_proportion_superiority_pow(a, b, diff, alpha, n, k)
-                    task = CTask(DiffProportion(Probability(a), Probability(b)), Parallel(), Superiority(diff, diff), Power(n), alpha, k)
+                    task = CTask(DiffProportion(Proportion(a), Proportion(b)), Parallel(), Superiority(diff, diff), Power(n), alpha, k)
                 else throw(ArgumentError("Keyword type unknown!")) end
             else throw(ArgumentError("Keyword group unknown!")) end
         end
     elseif param == :or
         if type == :ea
             pow =  or_equality_pow(a, b, alpha, n, k)
-            task = CTask(OddRatio(Probability(a), Probability(b)), Parallel(), Equality(), Power(n), alpha, k)
+            task = CTask(OddRatio(Proportion(a), Proportion(b)), Parallel(), Equality(), Power(n), alpha, k)
         elseif type == :ei
             if !logscale diff = log(diff) end
             pow =  or_equivalence_pow(a, b, diff, alpha, n, k)
-            task = CTask(OddRatio(Probability(a), Probability(b)), Parallel(), Equivalence(-diff, +diff), Power(n), alpha, k)
+            task = CTask(OddRatio(Proportion(a), Proportion(b)), Parallel(), Equivalence(-diff, +diff), Power(n), alpha, k)
         elseif type == :ns
             if !logscale diff = log(diff) end
             pow = or_superiority_pow(a, b, diff, alpha, n, k)
-            task = CTask(OddRatio(Probability(a), Probability(b)), Parallel(), Superiority(diff, diff), Power(n), alpha, k)
+            task = CTask(OddRatio(Proportion(a), Proportion(b)), Parallel(), Superiority(diff, diff), Power(n), alpha, k)
         else throw(ArgumentError("Keyword type unknown!")) end
     else throw(ArgumentError("Keyword param unknown!")) end
-    return TaskResult(task, :chow, pow)
+    =#
+    return ctpower(task)
 end #ctpower
 #---
-function ctpower(t::CTask{T, D, H, O}) where T <: DiffMean{R} where R <: Real where D <: AbstractDesign where H <: Equality where O <: Power
-    return TaskResult(t, :chow,  one_mean_equality_pow(t.param.a.m, t.param.b, t.param.a.sd, t.alpha, t.objective.val))
+function ctpower(t::CTask{T, D, H, O}) where T <: Mean where D <: AbstractDesign where H <: Equality where O <: Power
+    return TaskResult(t, :chow,  one_mean_equality_pow(t.param.m, refval(t.hyp), t.param.sd, t.alpha, t.objective.val))
 end
-function ctpower(t::CTask{T, D, H, O}) where T <: DiffMean{R} where R <: Real where D <: AbstractDesign where H <: Equivalence where O <: Power
-    return TaskResult(t, :chow,  one_mean_equivalence_pow(t.param.a.m, t.param.b, t.param.a.sd, mdiff(t.hyp), t.alpha, t.objective.val))
+function ctpower(t::CTask{T, D, H, O}) where T <: Mean where D <: AbstractDesign where H <: Equivalence where O <: Power
+    return TaskResult(t, :chow,  one_mean_equivalence_pow(t.param.m, refval(t.hyp), t.param.sd, mdiff(t.hyp), t.alpha, t.objective.val))
 end
-function ctpower(t::CTask{T, D, H, O}) where T <: DiffMean{R} where R <: Real where D <: AbstractDesign where H <: Superiority where O <: Power
-    return TaskResult(t, :chow,  one_mean_superiority_pow(t.param.a.m, t.param.b, t.param.a.sd, t.hyp.diff, t.alpha, t.objective.val))
+function ctpower(t::CTask{T, D, H, O}) where T <: Mean where D <: AbstractDesign where H <: Superiority where O <: Power
+    return TaskResult(t, :chow,  one_mean_superiority_pow(t.param.m, refval(t.hyp), t.param.sd, t.hyp.diff, t.alpha, t.objective.val))
 end
 #------
-function ctpower(t::CTask{T, D, H, O}) where T <: DiffMean{M} where M <: AbstractMean where D <: AbstractDesign where H <: Equality where O <: Power
+function ctpower(t::CTask{T, D, H, O}) where T <: DiffMean  where D <: AbstractDesign where H <: Equality where O <: Power
     return TaskResult(t, :chow, two_mean_equality_pow(t.param.a.m, t.param.b.m, t.param.a.sd, t.alpha, t.objective.val, t.k))
 end
-function ctpower(t::CTask{T, D, H, O}) where T <: DiffMean{M} where M <: AbstractMean where D <: AbstractDesign where H <: Equivalence where O <: Power
+function ctpower(t::CTask{T, D, H, O}) where T <: DiffMean where D <: AbstractDesign where H <: Equivalence where O <: Power
     return TaskResult(t, :chow, two_mean_equivalence_pow(t.param.a.m, t.param.b.m, t.param.a.sd, mdiff(t.hyp), t.alpha, t.objective.val, t.k))
 end
-function ctpower(t::CTask{T, D, H, O}) where T <: DiffMean{M} where M <: AbstractMean where D <: AbstractDesign where H <: Superiority where O <: Power
+function ctpower(t::CTask{T, D, H, O}) where T <: DiffMean where D <: AbstractDesign where H <: Superiority where O <: Power
     return TaskResult(t, :chow, two_mean_superiority_pow(t.param.a.m, t.param.b.m, t.param.a.sd, t.hyp.diff, t.alpha, t.objective.val, t.k))
 end
 #---
-function ctpower(t::CTask{T, D, H, O}) where T <: DiffProportion{P, R} where P <: AbstractSimpleProportion where R <: Real where D <: AbstractDesign where H <: Equality where O <: Power
-    return TaskResult(t, :chow, one_proportion_equality_pow(getval(t.param.a), t.param.b, t.alpha, t.objective.val))
+function ctpower(t::CTask{T, D, H, O})  where T <: Proportion where D <: OneGroup where H <: Equality where O <: Power
+    return TaskResult(t, :chow, one_proportion_equality_pow(getval(t.param), refval(t.hyp), t.alpha, t.objective.val))
 end
-function ctpower(t::CTask{T, D, H, O}) where T <: DiffProportion{P, R} where P <: AbstractSimpleProportion where R <: Real where D <: AbstractDesign where H <: Equivalence where O <: Power
-    return TaskResult(t, :chow, one_proportion_equivalence_pow(getval(t.param.a), t.param.b, mdiff(t.hyp), t.alpha, t.objective.val))
+function ctpower(t::CTask{T, D, H, O})  where T <: Proportion where D <: OneGroup where H <: Equivalence where O <: Power
+    return TaskResult(t, :chow, one_proportion_equivalence_pow(getval(t.param), refval(t.hyp), mdiff(t.hyp), t.alpha, t.objective.val))
 end
-function ctpower(t::CTask{T, D, H, O}) where T <: DiffProportion{P, R} where P <: AbstractSimpleProportion where R <: Real where D <: AbstractDesign where H <: Superiority where O <: Power
-    return TaskResult(t, :chow, one_proportion_superiority_pow(getval(t.param.a), t.param.b, t.hyp.diff, t.alpha, t.objective.val))
+function ctpower(t::CTask{T, D, H, O})  where T <: Proportion where D <: OneGroup where H <: Superiority where O <: Power
+    return TaskResult(t, :chow, one_proportion_superiority_pow(getval(t.param), refval(t.hyp), t.hyp.diff, t.alpha, t.objective.val))
 end
 #---
-function ctpower(t::CTask{T, D, H, O}) where T <: DiffProportion{P, P} where P <: AbstractSimpleProportion where D <: AbstractDesign where H <: Equality where O <: Power
+function ctpower(t::CTask{T, D, H, O}) where T <: DiffProportion{P, P} where P <: AbstractSimpleProportion where D <: Parallel where H <: Equality where O <: Power
     return TaskResult(t, :chow, two_proportion_equality_pow(getval(t.param.a), getval(t.param.b), t.alpha, t.objective.val, t.k))
 end
-function ctpower(t::CTask{T, D, H, O}) where T <: DiffProportion{P, P} where P <: AbstractSimpleProportion where D <: AbstractDesign where H <: Equivalence where O <: Power
+function ctpower(t::CTask{T, D, H, O}) where T <: DiffProportion{P, P} where P <: AbstractSimpleProportion where D <: Parallel where H <: Equivalence where O <: Power
     return TaskResult(t, :chow, two_proportion_equivalence_pow(getval(t.param.a), getval(t.param.b), mdiff(t.hyp), t.alpha, t.objective.val, t.k))
 end
-function ctpower(t::CTask{T, D, H, O}) where T <: DiffProportion{P, P} where P <: AbstractSimpleProportion where D <: AbstractDesign where H <: Superiority where O <: Power
+function ctpower(t::CTask{T, D, H, O}) where T <: DiffProportion{P, P} where P <: AbstractSimpleProportion where D <: Parallel where H <: Superiority where O <: Power
     return TaskResult(t, :chow, two_proportion_superiority_pow(getval(t.param.a), getval(t.param.b), t.hyp.diff, t.alpha, t.objective.val, t.k))
 end
 #------

@@ -75,6 +75,11 @@
     @test ceil(t.result) == ceil(ClinicalTrialUtilities.ctsamplen(t.task).result) == 23
     Base.show(io, t)
 
+    #COX
+    #ClinicalTrialUtilities.cox_superiority(2, 1, 0.8, 0.05/2, 0.2, 1) ≈  81.68207407358884
+    #ClinicalTrialUtilities.cox_equivalence(1, exp(0.5), 0.8, 0.05, 0.2, 1) ≈ 171.27694701335946
+    #ClinicalTrialUtilities.cox_equality(2, 1, 0.8, 0.05, 0.2, 1) ≈ 81.68207407358884
+
     #Additional
     #Different type input
     @test ClinicalTrialUtilities.ctsamplen(param=:mean, type=:ns, group=:two, alpha=0.05, beta=0.2, diff=1, sd=20.0, a=1, b=2).result ≈ 1236.511446403953 atol=1E-12
@@ -148,6 +153,10 @@ println(" ---------------------------------- ")
     Base.show(io, t)
     #16
     t = ClinicalTrialUtilities.ctpower(param=:prop, type=:mcnm, a=0.45, b=0.05, n=23, alpha=0.1)
-    @test ClinicalTrialUtilities.ctpower(t.task).result ≈ 0.9023805           atol=1E-7
+    @test ClinicalTrialUtilities.ctpower(t.task).result ≈ 0.9023805225074147  atol=1E-7
+    Base.show(io, t)
+
+    t = ClinicalTrialUtilities.ctpower(param=:or, type=:ns, a=0.4, b=0.25, diff=exp(0.2), n=242, alpha=0.05, logscale = false)
+    @test ClinicalTrialUtilities.ctpower(t.task).result ≈ 0.8007200876001626  atol=1E-7
     Base.show(io, t)
 end

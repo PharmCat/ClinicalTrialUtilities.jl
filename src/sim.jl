@@ -5,7 +5,7 @@
 Bioequivalence power simulation.
 
 """
-function ctsim(t::CTask{T, D, Bioequivalence, Power}; nsim = 100, seed=0)  where T where D
+function ctsim(t::CTask{T, D, Bioequivalence, Power}; nsim = 100, rsabe = false, rsabeconst = 0.760, seed = 0)  where T where D
     if seed != 0  Random.seed!(seed) end
     df      = t.design.df(t.objective.val)
     sef     = sediv(t.design, t.objective.val)
@@ -16,10 +16,20 @@ function ctsim(t::CTask{T, D, Bioequivalence, Power}; nsim = 100, seed=0)  where
     for i = 1:nsim
         smean   = rand(ZDIST) * σ̵ₓ + (t.param.a.m - t.param.b.m)
         σ²      = rand(CHSQ)  * t.param.a.sd  ^ 2 / df
-        hw      = tval * sqrt(σ²) * sef
+        σ       = sqrt(σ²)
+        hw      = tval * σ * sef
         θ₁      = smean - hw
         θ₂      = smean + hw
-        if θ₁ > t.hyp.llim && θ₂ < t.hyp.ulim pow += 1 end
+        if rsabe
+            cv = cvfromsd(σ)
+            if cv > 0.30
+                if θ₁ > (- rsabeconst * σ) && θ₂ < (rsabeconst * σ) pow += 1 end
+            else
+                if θ₁ > t.hyp.llim && θ₂ < t.hyp.ulim pow += 1 end
+            end
+        else
+            if θ₁ > t.hyp.llim && θ₂ < t.hyp.ulim pow += 1 end
+        end
     end
     return pow/nsim
 end

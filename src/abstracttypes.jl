@@ -12,8 +12,8 @@ abstract type AbstractMean  <:  AbstractParameter end
 
 abstract type AbstractSimpleProportion <:  AbstractProportion end
 
-abstract type AbstractCompositeProportion{T}  <:  AbstractProportion end
-abstract type AbstractCompositeMean{T}  <:  AbstractMean end
+abstract type AbstractCompositeProportion  <:  AbstractProportion end
+abstract type AbstractCompositeMean  <:  AbstractMean end
 
 abstract type AbstractObjective end
 abstract type AbstractSampleSize <: AbstractObjective end

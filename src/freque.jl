@@ -83,6 +83,12 @@ function fisher(t::ConTab{2, 2})
     fisher(t.tab)
 end
 
+
+function mcnmtest(a::Matrix{Int}; cc = false)
+    if cc cc = 1 else cc = 0 end
+    (abs(a[1,2] - a[2,1]) - cc) ^ 2 / (a[1,2] + a[2,1])
+
+end
 #=
 function StatsBase.confint(t::ConTab{2, 2})
 end

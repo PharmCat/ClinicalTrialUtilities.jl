@@ -1,5 +1,73 @@
 #deprecated
 
+
+#=
+function ncarule!(data::DataFrame, conc::Symbol, time::Symbol, rule::LimitRule)
+        sort!(data, [time])
+
+        cmax, tmax, tmaxn = ctmax(data, conc, time)
+        #NaN Rule
+        if rule.nan !== NaN
+            for i = 1:nrow(data)
+                if data[i, conc] === NaN data[i, conc] = rule.nan end
+            end
+        end
+
+        #LLOQ rule
+        for i = 1:nrow(data)
+            if data[i, conc] < rule.lloq
+                if i <= tmaxn
+                    data[i, conc] = rule.btmax
+                else
+                    data[i, conc] = rule.atmax
+                end
+            end
+        end
+
+        #NaN Remove rule
+        if rule.rm
+            filterv = Array{Int, 1}(undef, 0)
+            for i = 1:nrow(data)
+                if data[i, conc] === NaN push!(filterv, i) end
+            end
+            if length(filterv) > 0
+                deleterows!(data, filterv)
+            end
+        end
+end
+function ncarule!(data::PKSubject, rule::LimitRule)
+    #!!!!
+end
+=#
+
+#=
+function ctmax(data::PKSubject, dosetime, tau)
+    if tau === NaN || tau <= 0 return ctmax(data, dosetime) end
+    tautime = dosetime + tau
+    s, e = ncarange(data, dosetime, tau)
+    if dosetime == data.time[1] && tautime == data.time[end] return ctmax(data.time, data.obs) end
+    mask           = trues(length(data))
+    scpredict      = linpredict(data.time[s], data.time[s+1], data.dosetime.time, data.obs[s], data.obs[s+1])
+    mask[1:s]     .= false
+
+    if e < length(data)
+        ecpredict      = linpredict(data.time[e], data.time[e+1], tautime, data.obs[e], data.obs[e+1])
+        mask[e+1:end] .= false
+    end
+    cmax, tmax, tmaxn = ctmax(data.time[mask], data.obs[mask])
+    if e < length(data)
+        if cmax > max(scpredict, ecpredict)
+            return cmax, tmax, tmaxn + s
+        elseif scpredict >= max(cmax, ecpredict)
+            return scpredict, data.dosetime.time, s
+        else
+            return ecpredict, tautime, e
+        end
+    elseif cmax > scpredict return max, tmax, tmaxn + s else return scpredict, data.dosetime.time, s end
+end
+=#
+
+#=
 function designinfo(d::OneGroup)::String
         return "One group design"
 end
@@ -9,8 +77,9 @@ end
 function designinfo(d::Crossover)::String
         return "Crossover design"
 end
+=#
 
-
+#=
 function cmh(data::DataFrame; a = :a, b = :b, c = :c, d = :d, alpha = 0.05, type = :diff, method = :default, logscale = false)::ConfInt
     n1 = data[:, a] + data[:, b]
     n2 = data[:, c] + data[:, d]
@@ -273,7 +342,7 @@ function descriptive_deprecated(data::DataFrame;
     end
     return dfs
 end
-
+=#
 #=
 struct Probability{T<: Float64, N <: Union{Int, Nothing}} <: AbstractParameter
     p::T

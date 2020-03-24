@@ -65,7 +65,8 @@ function Base.show(io::IO, obj::TaskResult{CT}) where CT <:  CTask{T, D, H, O} w
         #println(io,"  Upper limit: ", round(obj.task.ulim, sigdigits = 4))
         println(io,"  Alpha: ", obj.task.alpha)
         showobjective(io, obj.task.objective)
-        println(io, obj.task.param)
+        showparams(io, obj.task)
+        #println(io, obj.task.param)
         println(io,"-----------------------------------------")
         showresult(io, obj)
 end
@@ -111,7 +112,7 @@ function paramname(p::T)::String where T <: AbstractParameter
         elseif isa(p, RiskRatio) return "Risk Ratio"
         elseif isa(p, DiffMean) return "Mean Difference"
         elseif isa(p, Mean) return "One Mean"
-        elseif isa(p, Probability) return "One Proportion"
+        elseif isa(p, Proportion) return "One Proportion"
         else return "NA" end
 end
 function groupnum(p::T)::String where T <: AbstractParameter
@@ -137,15 +138,27 @@ function showresult(io, obj::TaskResult{CT}) where CT <:  CTask{T, D, H, O} wher
         println(io, "Power: ", round(obj.result, sigdigits = 6))
 end
 
+function showparams(io, task::T) where T <: CTask{P, D, H, O} where P where D <: OneGroup where H where O
+        println(io,"  A: ", task.param)
+        println(io,"  B: ", refval(task.hyp))
+end
+function showparams(io, task::T) where T <: CTask{P, D, H, O} where P  where D where H where O
+        println(io, task.param)
+end
 #-------------------------------------------------------------------------------
 #Parameters
-function Base.show(io::IO, p::Proportion)
-        print(io,"  Proportion: ", p.x, "/", p.n)
+function Base.show(io::IO, p::Proportion{true})
+        print(io, p.x, "/", p.n)
 end
+function Base.show(io::IO, p::Proportion{false})
+        print(io, p.val)
+end
+#=
 function Base.show(io::IO, p::Probability)
-        print(io,"  Probability: ", p.p)
+        print(io, p.p)
 end
-
+=#
+#=
 function Base.show(io::IO, dp::DiffProportion{Probability, R}) where R <: Real
         println(io, "  A   = ", dp.a.p)
         print(io,   "  Ref = ", dp.b)
@@ -155,38 +168,48 @@ function Base.show(io::IO, dp::DiffProportion{Probability, Probability})
         println(io, "  A = ", dp.a.p)
         print(io,   "  B = ", dp.b.p)
 end
-#=
 function Base.show(io, dp::DiffProportion{Proportion})::String
         println(io,"  A: ", dp.a.x,"/",dp.a.n)
         println(io,"  B: ", dp.b.x,"/",dp.b.n)
 end
 =#
-function Base.show(io::IO, dp::T) where T <: Union{DiffProportion{P, P}, OddRatio{P}, RiskRatio{P}} where P <: Proportion
-        println(io,"  A: ", dp.a.x,"/",dp.a.n)
-        print(io,"  B: ", dp.b.x,"/",dp.b.n)
+function Base.show(io::IO, dp::T) where T <: AbstractCompositeProportion
+        println(io,"  A: ", dp.a)
+        print(io,"  B: ", dp.b)
 end
+#=
 function Base.show(io::IO, dp::T) where T <: Union{DiffProportion{P, P}, OddRatio{P}, RiskRatio{P}} where P <: Probability
         println(io,"  A: ", dp.a.p)
         print(io,"  B: ", dp.b.p)
 end
-function Base.show(io::IO, dm::DiffMean{T}) where T <: AbstractMean
-        println(io,"  A: ", dm.a.m, " ± ", round(dm.a.sd, sigdigits = 4))
-        print(io,"  B: ", dm.b.m, " ± ", round(dm.b.sd, sigdigits = 4))
+=#
+function Base.show(io::IO, dm::DiffMean)
+        println(io,"  A ", dm.a)
+        print(io,"  B ", dm.b)
 end
-function Base.show(io::IO, dm::DiffMean{T}) where T <: Real
+#=
+function Base.show(io::IO, dm::DiffMean{false})
         println(io,"  A: ", dm.a.m, " ± ", round(dm.a.sd, sigdigits = 4))
-        print(io,"  Ref: ", dm.b)
+        print(io,"  B: ", dm.b)
 end
-function Base.show(io::IO, m::Mean{Nothing})
-        print(io,"  Mean(SD): ", m.m, " ± ", m.sd)
+=#
+function Base.show(io::IO, m::Mean{true})
+        print(io,"Mean ± SD (N): $(m.m) ± $(m.sd) ($(m.n))")
+end
+function Base.show(io::IO, m::Mean{false})
+        if m.sd === NaN
+                print(io,"Mean: ", m.m)
+        else
+                print(io,"Mean(SD): ", m.m, " ± ", m.sd)
+        end
 end
 
 #-------------------------------------------------------------------------------
 # Hypothesis
 function Base.show(io::IO, h::Equality)
         println(io,"Equality")
-        println(io,"  H₀: A = B")
-        print(io,  "  Hₐ: A ≠ B")
+        println(io,"  H₀: A - B = 0")
+        print(io,  "  Hₐ: A - B ≠ 0")
 end
 function Base.show(io::IO, h::Equivalence)
         println(io,"Equivalence")
@@ -204,7 +227,7 @@ function Base.show(io::IO, h::Superiority)
         print(io,  "  Hₐ: A − B > $(round(h.diff, sigdigits = 4))")
 end
 function Base.show(io::IO, h::McNemars)
-        println(io,"McNemar's Equality test")
+        print(io,"McNemar's Equality test")
 end
 function Base.show(io::IO, e::TaskEstimate)
         for i = 1:length(e)

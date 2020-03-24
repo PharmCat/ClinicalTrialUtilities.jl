@@ -53,14 +53,25 @@ function one_proportion_superiority(p₀::Real, p₁::Real, δ::Real, α::Real, 
 end
 #Two Sample
 function two_proportion_equality(p₀::Real, p₁::Real, α::Real, β::Real, k::Real)::Float64
-    return (p₀*(1-p₀)/k+p₁*(1-p₁))*((quantile(ZDIST, 1-α/2)+quantile(ZDIST, 1 - β))/(p₀-p₁))^2
+    return (p₀*(1-p₀)/k+p₁*(1-p₁))*((quantile(ZDIST, 1 - α / 2) + quantile(ZDIST, 1 - β))/(p₀-p₁))^2
 end
 function two_proportion_equivalence(p₀::Real, p₁::Real, δ::Real, α::Real, β::Real, k::Real)::Float64
-    return (p₀*(1-p₀)/k+p₁*(1-p₁))*((quantile(ZDIST, 1-α)+quantile(ZDIST, 1 - β/2))/(δ - abs(p₀-p₁)))^2
+    return (p₀*(1-p₀)/k+p₁*(1-p₁))*((quantile(ZDIST, 1 - α)+quantile(ZDIST, 1 - β / 2))/(δ - abs(p₀-p₁)))^2
 end
 function two_proportion_superiority(p₀::Real, p₁::Real, δ::Real, α::Real, β::Real, k::Real)::Float64
-    return (p₀*(1-p₀)/k+p₁*(1-p₁))*((quantile(ZDIST, 1-α)+quantile(ZDIST, 1 - β))/(p₀-p₁-δ))^2
+    return (p₀*(1-p₀)/k+p₁*(1-p₁))*((quantile(ZDIST, 1 - α)+quantile(ZDIST, 1 - β))/(p₀-p₁-δ))^2
 end
+#Crossover
+function co_proportion_equality(seq, σ::Real, ϵ::Real, α::Real, β::Real)
+    (quantile(ZDIST, 1 - α / 2) + quantile(ZDIST, 1 - β) * σ) ^ 2 / (seq * ϵ ^ 2)
+end
+function co_proportion_equivalence(seq, σ::Real, ϵ::Real, δ::Real, α::Real, β::Real)
+    (quantile(ZDIST, 1 - α) + quantile(ZDIST, 1 - β / 2) * σ) ^ 2 / (seq * (δ - abs(ϵ)) ^ 2)
+end
+function co_proportion_superiority(seq, σ::Real,  ϵ::Real, δ::Real, α::Real, β::Real)
+    (quantile(ZDIST, 1 - α) + quantile(ZDIST, 1 - β) * σ) ^ 2 / (seq * (ϵ - δ) ^ 2)
+end
+
 #Odd ratio Chow S, Shao J, Wang H. 2008. Sample Size Calculations in Clinical Research. 2nd Ed. Chapman & Hall/CRC Biostatistics Series.
 function or_equality(p₀::Real, p₁::Real, α::Real, β::Real, k::Real)::Float64
     OR=p₀*(1-p₁)/p₁/(1-p₀)
@@ -79,7 +90,7 @@ end
 function mcnm(p10::Float64, p01::Float64, α::Real, β::Real)::Float64
     pdisc = p10 + p01
     pdiff = p10 - p01
-    return ((quantile(ZDIST, 1-α/2)*sqrt(pdisc)+quantile(ZDIST, 1 - β)*sqrt(pdisc-pdiff^2))/pdiff)^2
+    return ((quantile(ZDIST, 1 - α / 2) * sqrt(pdisc) + quantile(ZDIST, 1 - β) * sqrt(pdisc - pdiff^2)) / pdiff)^2
 end
 
 function mcnm_pow(p10::Float64, p01::Float64, α::Float64, n::Int)::Float64
@@ -88,6 +99,17 @@ function mcnm_pow(p10::Float64, p01::Float64, α::Float64, n::Int)::Float64
     x1 = ( pdiff * sqrt(n) - quantile(ZDIST, 1 - α / 2) * sqrt(pdisc))/sqrt(pdisc - pdiff^2);
     x2 = (-pdiff * sqrt(n) - quantile(ZDIST, 1 - α / 2) * sqrt(pdisc))/sqrt(pdisc - pdiff^2);
     return cdf(ZDIST, x1)+cdf(ZDIST, x2)
+end
+
+#COX
+function cox_equality(θ, θ₀, p, α::Float64, β::Real, k::Real)
+    1.0/p/(1.0/(1+k)*(1.0-1.0/(1+k)))*((quantile(ZDIST, 1 - α / 2) + quantile(ZDIST, 1 - β))/(log(θ)-log(θ₀)))^2
+end
+function cox_equivalence(θ, θ₀, p, α::Float64, β::Real, k::Real)
+    1.0/p/(1.0/(1+k)*(1.0-1.0/(1+k)))*((quantile(ZDIST, 1 - α) + quantile(ZDIST, 1 - β / 2))/(log(θ₀) - abs(log(θ))))^2
+end
+function cox_superiority(θ, θ₀, p, α::Float64, β::Real, k::Real)
+    1.0/p/(1.0/(1+k)*(1.0-1.0/(1+k)))*((quantile(ZDIST, 1 - α) + quantile(ZDIST, 1 - β))/(log(θ)-log(θ₀)))^2
 end
 #-------------------------------------------------------------------------------
 # Power Section
