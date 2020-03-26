@@ -15,6 +15,9 @@ branches:
   - master
   - dev
 
+matrix:
+  allow_failures:
+  - os: windows
 
 notifications:
   email: false
