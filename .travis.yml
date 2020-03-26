@@ -2,6 +2,7 @@ language: julia
 os:
   - linux
   - osx
+  - windows
 
 julia:
   - 1.0
@@ -14,6 +15,9 @@ branches:
   - master
   - dev
 
+matrix:
+  allow_failures:
+  - os: windows
 
 notifications:
   email: false
