@@ -19,7 +19,7 @@ using Distributions, Random, Roots, QuadGK, RecipesBase, Reexport
 @reexport using StatsBase
 
 import SpecialFunctions
-import Base.show
+import Base: show, findfirst
 import Base.showerror
 import Base.getindex
 import Base.length
@@ -124,6 +124,7 @@ DataFrame,
 ElimRange,
 DoseTime,
 LimitRule,
+applyncarule!,
 keldata,
 # Simulation
 ctsim,

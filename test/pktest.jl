@@ -930,6 +930,7 @@ println(" ---------------------------------- ")
 
 
     # NaN PK LimitRule test
+    nanpkdata.Concentration = ClinicalTrialUtilities.tryfloatparse!(nanpkdata.Concentration)
     pkds = ClinicalTrialUtilities.pkimport(nanpkdata, [:Subject, :Formulation]; conc = :Concentration, time = :Time)
     rule = ClinicalTrialUtilities.LimitRule(0, 0, NaN, 0, true)
     ClinicalTrialUtilities.applyncarule!(pkds, rule)
@@ -940,6 +941,11 @@ println(" ---------------------------------- ")
     rule = ClinicalTrialUtilities.LimitRule(0, 0, NaN, -1, false)
     ClinicalTrialUtilities.applyncarule!(pkds, rule)
     @test pkds[3].obs[6]  === NaN
+
+    ClinicalTrialUtilities.setdosetime!(pkds, ClinicalTrialUtilities.DoseTime(100,0), Dict(:Subject => 1, :Formulation => "R"))
+    @test pkds[3].dosetime.dose == 100
+
+    pks = ClinicalTrialUtilities.findfirst(Dict(:Subject => 1, :Formulation => "R"), pkds)
 end
 
 println(" ---------------------------------- ")

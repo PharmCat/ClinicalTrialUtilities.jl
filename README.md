@@ -17,7 +17,18 @@ The package is designed to perform calculations related to the planning and anal
 using Pkg; Pkg.add("ClinicalTrialUtilities");
 ```
 
-### <a name="Usage">Usage</a>
+### <a name="Features">Main features</a>
+
+- SampleSize calculation
+- Power calculation
+- Confidence Interval calculation
+- NCA Pharmacokinetics parameters calculation
+- Randomization
+
+
+### <a name="Examples">Examples</a>
+
+#### SampleSize
 
 **NB! Hypothesis types:**
 
@@ -25,9 +36,6 @@ using Pkg; Pkg.add("ClinicalTrialUtilities");
 - :ei - Equivalencens: two one-sided hypothesis;
 - :ns - Non-Inferiority / Superiority: one-sided hypothesis, for some cases you should use two-sided hypothesis for  Non-Inferiority/Superiority, you can use alpha/2 for this;
 
-### <a name="Examples">Examples</a>
-
-#### SampleSize
 ```
 #Sample size for one proportion equality
 ctsamplen(param=:prop, type=:ea, group=:one, a=0.3, b=0.5)
@@ -92,6 +100,19 @@ pooledcv(data; cv=:cv, df=:df, alpha=0.05, returncv=true)
 pooledcv([0.12, 0.2, 0.25], [14, 22, 32], [:d2x2, :d2x2, :d2x2])
 
 ```
+
+#### NCA
+```
+using CSV, DataFrames, ClinicalTrialUtilities
+pkdata2 = CSV.File("pkdata.csv") |> DataFrame
+pkds    = pkimport(pkdata2, [:Subject, :Formulation]; time = :Time, conc = :Concentration)
+pk      = nca!(pkds)
+ncadf   = DataFrame(pk; unst = true)
+ds      = ClinicalTrialUtilities.descriptive(ncadf, stats = [:n, :mean, :sd], sort = [:Formulation])
+dsdf    = ClinicalTrialUtilities.DataFrame(ds; unst = true)
+
+```
+
 
 ### <a name="Copyrights">Copyrights</a>
 

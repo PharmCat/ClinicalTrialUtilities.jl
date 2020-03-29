@@ -16,7 +16,7 @@ function in(a::Pair, b::Dict)
     return true
 end
 #!!!
-struct KelData <: AbstractData
+struct KelData 
     s::Array{Int, 1}
     e::Array{Int, 1}
     a::Array{Number, 1}
@@ -143,14 +143,25 @@ mutable struct PKPDProfile{T <: AbstractSubject} <: AbstractData
         new{T}(subject, method, result, subject.sort)
     end
 end
+"""
+    LimitRule(;lloq::Real = NaN, btmax::Real = NaN, atmax::Real = NaN, nan::Real = NaN, rm::Bool = false)
 
+
+    LimitRule(lloq::Real, btmax::Real, atmax::Real, nan::Real, rm::Bool)
+
+Rule for PK subject.
+
+STEP 1 (NaN step): replace all NaN values with nan reyword value (if nan !== NaN);
+STEP 2 (LLOQ step): replace values below lloq with btmax value if this value befor Tmax or with atmax if this value after Tmax (if lloq !== NaN);
+STEP 3 (remove NaN): rm == true, then remove all NaN values;
+"""
 struct LimitRule
     lloq::Real
     btmax::Real
     atmax::Real
     nan::Real
     rm::Bool
-    function LimitRule(lloq, btmax, atmax, nan, rm)
+    function LimitRule(lloq::Real, btmax::Real, atmax::Real, nan::Real, rm::Bool)
         new(lloq, btmax, atmax, nan, rm)::LimitRule
     end
     function LimitRule(lloq, btmax, atmax, nan)
@@ -159,7 +170,7 @@ struct LimitRule
     function LimitRule(lloq, btmax, atmax)
         new(lloq, btmax, atmax, NaN, true)::LimitRule
     end
-    function LimitRule(;lloq = NaN, btmax = NaN, atmax = NaN, nan = NaN, rm = false)
+    function LimitRule(;lloq::Real = NaN, btmax::Real = NaN, atmax::Real = NaN, nan::Real = NaN, rm::Bool = false)
         new(lloq, btmax, atmax, nan, rm)::LimitRule
     end
 end
@@ -187,12 +198,14 @@ end
 =#
 
 #-------------------------------------------------------------------------------
+#=
 function obsnum(data::T) where T <:  AbstractSubject
     return length(data.time)
 end
 function obsnum(keldata::KelData)
     return length(keldata.a)
 end
+=#
 function length(data::T) where T <:  AbstractSubject
     return length(data.time)
 end
@@ -301,7 +314,7 @@ end
     function ctmax(data::PKSubject)
         return ctmax(data.time, data.obs)
     end
-
+#=
     function ctmax(data::PKSubject, dosetime)
         s     = 0
         for i = 1:length(data) - 1
@@ -314,7 +327,7 @@ end
         cmax, tmax, tmaxn = ctmax(data.time[mask], data.obs[mask])
         if cmax > cpredict return cmax, tmax, tmaxn + s else return cpredict, data.dosetime.time, s end
     end
-
+=#
 function dropbeforedosetime(time::Vector, obs::Vector, dosetime::DoseTime)
     s = 0
     for i = 1:length(time)
@@ -545,7 +558,11 @@ function nca!(data::PKSubject; calcm = :lint, intp = :lint, verbose = false, io:
                 result[:Cdose] = 0
             end
             doseaucpart, doseaumcpart  = aucpart(data.dosetime.time, time[1], result[:Cdose], obs[1], :lint, false)
-        else #Dosetime >= first time
+        elseif  data.dosetime.time == time[1]
+            result[:Cdose] = obs[1]
+        else
+            error("Some concentration before dose time after filtering!!!")
+            #=
             for i = 1:result[:Obsnum] - 1
                 if  time[i] <= data.dosetime.time < time[i+1]
                     if time[i] == data.dosetime.time
@@ -554,8 +571,10 @@ function nca!(data::PKSubject; calcm = :lint, intp = :lint, verbose = false, io:
                     else
                         if  data.dosetime.tau > 0
                             result[:Cdose] = result[:Ctaumin]
+
                         else
                             result[:Cdose] = 0
+
                         end
                         doseaucpart, doseaumcpart  = aucpart(data.dosetime.time, time[i + 1], result[:Cdose], obs[i + 1], :lint, false)
                         pmask[i]     = false
@@ -565,6 +584,7 @@ function nca!(data::PKSubject; calcm = :lint, intp = :lint, verbose = false, io:
                     pmask[i]     = false
                 end
             end
+            =#
         end
 
         #sum all full AUC parts and part before dose
@@ -756,7 +776,7 @@ function nca!(data::PDSubject; verbose = false, io::IO = stdout)::PKPDProfile{PD
         result[:BL] = data.bl
         result[:RMAX] = maximum(data.obs)
         result[:RMIN] = maximum(data.obs)
-        for i = 2:obsnum(data) #BASELINE
+        for i = 2:length(data) #BASELINE
             if data.obs[i - 1] <= result[:BL] && data.obs[i] <= result[:BL]
                 result[:TBBL]   += data.time[i,] - data.time[i - 1]
                 result[:AUCBBL] += linauc(data.time[i - 1], data.time[i], result[:BL] - data.obs[i - 1], result[:BL] - data.obs[i])
@@ -895,6 +915,29 @@ end
 
 #-------------------------------------------------------------------------------
 
+function tryfloatparse!(x)
+    for i = 1:length(x)
+        if typeof(x[i]) <: AbstractString
+            try
+                x[i] = parse(Float64, x[i])
+            catch
+                x[i] = NaN
+            end
+        else
+            try
+                if x[i] === missing
+                    x[i] = NaN
+                else
+                    x[i] = float(x[i])
+                end
+            catch
+                x[i] = NaN
+            end
+        end
+    end
+    return convert(Vector{Float64}, x)
+end
+
 """
     pkimport(data::DataFrame, sort::Array, rule::LimitRule; conc::Symbol, time::Symbol)
 
@@ -909,6 +952,7 @@ Pharmacokinetics data import from DataFrame.
 """
 function pkimport(data::DataFrame, sort::Array, rule::LimitRule; conc::Symbol, time::Symbol)::DataSet
     results  = Array{PKSubject, 1}(undef, 0)
+    if !(eltype(data[!, conc]) <: Real) throw(ArgumentError("Type of concentration data not <: Real!"))end
     getdatai(data, sort, [conc, time], (x, y) -> push!(results, PKSubject(copy(x[!, time]), copy(x[!, conc]), sort = Dict(sort .=> collect(y)))); sortby = time)
     results = DataSet(results)
     applyncarule!(results, rule)
@@ -998,6 +1042,15 @@ function upkimport(data::DataFrame, sort::Array; stime::Symbol, etime::Symbol, c
 end
 
 #-------------------------------------------------------------------------------
+"""
+    applyncarule!(data::PKSubject, rule::LimitRule)
+
+Apply rule to PK subject .
+
+STEP 1 (NaN step): replace all NaN values with nan reyword value (if nan !== NaN);
+STEP 2 (LLOQ step): replace values below lloq with btmax value if this value befor Tmax or with atmax if this value after Tmax (if lloq !== NaN);
+STEP 3 (remove NaN): rm == true, then remove all NaN values;
+"""
 function applyncarule!(data::PKSubject, rule::LimitRule)
     cmax, tmax, tmaxn = ctmax(data)
     #NaN Rule
@@ -1028,31 +1081,14 @@ function applyncarule!(data::PKSubject, rule::LimitRule)
         data.obs  = data.obs[filterv]
     end
 end
-    #=
-    function applyncarule(data::DataSet{PKSubject}, rule::LimitRule)
-    end
 
-    function applyncarule(data::PKPDProfile{PKSubject}, rule::LimitRule)
-    end
-    function applyncarule(data::DataSet{PKPDProfile{PKSubject}}, rule::LimitRule)
-    end
-
-    function applyncarule(data::PKSubject, rule::LimitRule)
-
-    end
-    =#
 function applyncarule!(data::DataSet{PKSubject}, rule::LimitRule)
     for i in data
         applyncarule!(i, rule)
     end
     data
 end
-    #=
-    function applyncarule!(data::PKPDProfile{PKSubject}, rule::LimitRule)
-    end
-    function applyncarule!(data::DataSet{PKPDProfile{PKSubject}}, rule::LimitRule)
-    end
-    =#
+
 #---------------------------------------------------------------------------
 """
     setelimrange!(data::PKSubject, range::ElimRange)
@@ -1174,6 +1210,18 @@ function setdosetime!(data::DataSet{PKSubject}, dosetime::DoseTime, sort::Dict)
         if sort ∈ data[i].sort setdosetime!(data[i], dosetime) end
     end
     data
+end
+"""
+    findfirst(sort::Dict, data::DataSet{PKSubject})
+
+The first item in the dataset that satisfies the condition - sort dictionary.
+"""
+function findfirst(sort::Dict, data::DataSet{PKSubject})
+    for i = 1:length(data)
+        if sort ∈ data[i].sort
+            return data[i]
+        end
+    end
 end
 
 """
