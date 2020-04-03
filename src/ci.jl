@@ -880,7 +880,7 @@ function diffmcnmwaldci(a::Int, b::Int, c::Int, d::Int; alpha = 0.05)
     p1       = (a + b)/n
     p2       = (a + c)/n
     estimate = p1 - p2
-    se       = ((a+d)*(b+c)+4*b*c)/n^3
+    se       = sqrt(((a+d)*(b+c)+4*b*c)/n^3)
     z        = quantile(ZDIST, 1 - alpha / 2)
     ConfInt(estimate  - z * se, estimate  + z * se, estimate , alpha)
 end
@@ -889,8 +889,19 @@ function diffmcnmwaldccci(a::Int, b::Int, c::Int, d::Int; alpha = 0.05)
     p1       = (a + b)/n
     p2       = (a + c)/n
     estimate = p1 - p2
-    se       = ((a+d)*(b+c)+4*b*c)/n^3
+    se       = sqrt(((a+d)*(b+c)+4*b*c)/n^3)
     z        = quantile(ZDIST, 1 - alpha / 2)
     ConfInt(estimate  - z * se - 1 / n, estimate  + z * se + 1 / n, estimate , alpha)
-
 end
+
+#=
+function diffmcnmci(a::Int, b::Int, c::Int, d::Int; alpha = 0.05)
+    n        = a + b + c + d
+    p1       = (a + b)/n
+    p2       = (a + c)/n
+    estimate = p1 - p2
+    se       = sqrt((p1 * (1 - p1)  + p2 * (1 - p2)  - 2 * (a * d - b * c) / n^2) / n)
+    z        = quantile(ZDIST, 1 - alpha / 2)
+    ConfInt(estimate  - z * se, estimate  + z * se, estimate , alpha)
+end
+=#

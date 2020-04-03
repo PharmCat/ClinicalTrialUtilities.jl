@@ -19,13 +19,7 @@ using Distributions, Random, Roots, QuadGK, RecipesBase, Reexport
 @reexport using StatsBase
 
 import SpecialFunctions
-import Base: show, findfirst
-import Base.showerror
-import Base.getindex
-import Base.length
-import Base.in
-import Base.iterate
-import Base.eltype
+import Base: show, findfirst, getproperty, showerror, getindex, length, in, iterate, eltype
 import StatsBase.confint
 import DataFrames: DataFrame, DataFrames, names!, unstack, deleterows!
 
@@ -101,6 +95,7 @@ pooledcv,
 descriptive,
 freque,
 contab,
+cmh,
 htmlexport,
 #CI
 confint,
@@ -129,7 +124,8 @@ keldata,
 # Simulation
 ctsim,
 #Plots
-plot
+plot,
+plot!
 
 
 
