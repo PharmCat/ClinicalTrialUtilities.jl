@@ -1,10 +1,7 @@
 println(" ---------------------------------- ")
-@testset "  PK                    " begin
-
+@testset "#10  Pharmacokinetics   " begin
 
     # Basic tests
-
-
     pkds = ClinicalTrialUtilities.pkimport(pkdata, [:Subject, :Formulation]; conc = :Concentration, time = :Time)
     pk   = ClinicalTrialUtilities.nca!(pkds)
     @test pk[1, :AUCinf]  ≈ 1.63205 atol=1E-5
@@ -949,7 +946,7 @@ println(" ---------------------------------- ")
 end
 
 println(" ---------------------------------- ")
-@testset " UPK                    " begin
+@testset "#11 Urine PK            " begin
     upk = ClinicalTrialUtilities.upkimport(upkdata, [:subj]; stime = :st, etime = :et, conc = :conc, vol = :vol)
     unca = ClinicalTrialUtilities.nca!(upk[1])
     unca = ClinicalTrialUtilities.nca!(upk)
@@ -961,7 +958,8 @@ println(" ---------------------------------- ")
 end
 
 println(" ---------------------------------- ")
-@testset "  PD                    " begin
+@testset "#12  Pharmacodynamics   " begin
+
 
     #PD
     pdds = ClinicalTrialUtilities.pdimport(pddata; time=:time, resp=:effect, bl = 3.0)

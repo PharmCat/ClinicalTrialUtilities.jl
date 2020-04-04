@@ -6,3 +6,18 @@ Calculation descriptive statistics by groups.
 ```@docs
 ClinicalTrialUtilities.descriptive
 ```
+
+### freque
+```@docs
+ClinicalTrialUtilities.freque
+```
+
+### contab
+```@docs
+ClinicalTrialUtilities.contab
+```
+
+### metaprop
+```@docs
+ClinicalTrialUtilities.metaprop
+```

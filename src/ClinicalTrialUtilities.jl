@@ -21,7 +21,7 @@ using Distributions, Random, Roots, QuadGK, RecipesBase, Reexport
 import SpecialFunctions
 import Base: show, findfirst, getproperty, showerror, getindex, length, in, iterate, eltype
 import StatsBase.confint
-import DataFrames: DataFrame, DataFrames, names!, unstack, deleterows!
+import DataFrames: DataFrame, DataFrames, names!, unstack, deleterows!, rename!
 
 function lgamma(x)
     return SpecialFunctions.logabsgamma(x)[1]
@@ -95,7 +95,7 @@ pooledcv,
 descriptive,
 freque,
 contab,
-cmh,
+metaprop,
 htmlexport,
 #CI
 confint,
