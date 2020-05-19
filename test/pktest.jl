@@ -921,10 +921,16 @@ println(" ---------------------------------- ")
     pkds = ClinicalTrialUtilities.pkimport(glucose2, [:Subject, :Date]; conc = :glucose, time = :Time)
     pk   = ClinicalTrialUtilities.nca!(pkds)
     df   = DataFrame(pk; unst = true)
-    p    = ClinicalTrialUtilities.plot(pkds; pagesort = [:Date], typesort = [:Subject])
+    p    = ClinicalTrialUtilities.pkplot(pkds; pagesort = [:Date], typesort = [:Subject])
     @test length(p) == 2
     print(io, pk[1].subject.keldata)
-
+    p    = ClinicalTrialUtilities.pkplot(pkds; pagesort = nothing, typesort = [:Subject])
+    @test length(p) == 1
+    p    = ClinicalTrialUtilities.pkplot(pkds; pagesort = nothing, typesort = nothing, legend = false, xlabel = "L1", ylabel = "L2", xlims = (0,12))
+    @test length(p) == 1
+    p    = ClinicalTrialUtilities.pkplot(pkds; pagesort = [:Date], typesort = nothing)
+    @test length(p) == 2
+    p    = ClinicalTrialUtilities.pkplot(pkds[1])
 
     # NaN PK LimitRule test
     nanpkdata.Concentration = ClinicalTrialUtilities.tryfloatparse!(nanpkdata.Concentration)
@@ -954,7 +960,7 @@ println(" ---------------------------------- ")
     @test unca[1][:mTmax]   ≈ 1.5
     @test unca[1][:ar]      ≈ 16.0
     @test unca[1][:volume]  ≈ 11.0
-     p    = ClinicalTrialUtilities.plot(upk, ylabel = "Excretion")
+     p    = ClinicalTrialUtilities.pkplot(upk, ylabel = "Excretion")
 end
 
 println(" ---------------------------------- ")

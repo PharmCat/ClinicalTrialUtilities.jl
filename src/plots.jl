@@ -72,7 +72,16 @@ function plotlabel(d)
     return title
 end
 
-function plot(subj::T; plotstyle::PKPlotStyle = PKPLOTSTYLE[1], kwargs...) where T <: AbstractSubject
+"""
+    pkplot(subj::T; plotstyle::PKPlotStyle = PKPLOTSTYLE[1], kwargs...) where T <: AbstractSubject
+
+Plot for subject
+
+subj - subject;
+plotstyle - styles for plots.
+
+"""
+function pkplot(subj::T; plotstyle::PKPlotStyle = PKPLOTSTYLE[1], kwargs...) where T <: AbstractSubject
     kwargs = Dict{Symbol, Any}(kwargs)
     k = keys(kwargs)
 
@@ -99,7 +108,8 @@ function plot(subj::T; plotstyle::PKPlotStyle = PKPLOTSTYLE[1], kwargs...) where
     return p
 
 end
-function plot!(subj::T; plotstyle::PKPlotStyle = PKPLOTSTYLE[1], kwargs...) where T <: AbstractSubject
+
+function pkplot!(subj::T; plotstyle::PKPlotStyle = PKPLOTSTYLE[1], kwargs...) where T <: AbstractSubject
     kwargs = Dict{Symbol, Any}(kwargs)
     k = keys(kwargs)
 
@@ -167,10 +177,10 @@ function pageplot(pagedatatmp, styledict, typesort; kwargs...)
 
                 kwargs[:label] = label
                 if fst
-                    p = plot(d; plotstyle = style, kwargs...)
+                    p = pkplot(d; plotstyle = style, kwargs...)
                     fst = false
                 else
-                    plot!(   d; plotstyle = style, kwargs...)
+                    pkplot!(   d; plotstyle = style, kwargs...)
                 end
             end
         end
@@ -200,16 +210,25 @@ function pageplot(pagedatatmp; kwargs...)
 
         kwargs[:label] = "AUTO"
         if fst
-            p = plot(d; plotstyle = PKPLOTSTYLE[1], kwargs...)
+            p = pkplot(d; plotstyle = PKPLOTSTYLE[1], kwargs...)
             fst = false
         else
-            plot!(   d; plotstyle = PKPLOTSTYLE[1], kwargs...)
+            pkplot!(   d; plotstyle = PKPLOTSTYLE[1], kwargs...)
         end
     end
     p
 end
 
-function plot(data::DataSet{T};  pagesort = nothing, typesort = nothing, kwargs...) where T <: AbstractSubject
+"""
+    pkplot(data::DataSet{T};  pagesort::Union{Nothing, Vector{Symbol}} = nothing, typesort::Union{Nothing, Vector{Symbol}} = nothing, kwargs...) where T <: AbstractSubject
+
+Plot for subjects in dataset.
+
+data - subjects dataset;
+pagesort - subject page groupping;
+typesort - subject sorting within page;
+"""
+function pkplot(data::DataSet{T};  pagesort::Union{Nothing, Vector{Symbol}} = nothing, typesort::Union{Nothing, Vector{Symbol}} = nothing, kwargs...) where T <: AbstractSubject
     # Style types
     kwargs = Dict{Symbol, Any}(kwargs)
     k = keys(kwargs)

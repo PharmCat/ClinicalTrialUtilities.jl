@@ -19,10 +19,11 @@ using Pkg; Pkg.add("ClinicalTrialUtilities");
 
 ### <a name="Features">Main features</a>
 
-- SampleSize calculation
+- Clinical trial sample size calculation
 - Power calculation
 - Confidence Interval calculation
 - NCA Pharmacokinetics parameters calculation
+- Descriptive statistics and frequencies
 - Randomization
 
 

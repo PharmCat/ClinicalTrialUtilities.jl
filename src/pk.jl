@@ -1,22 +1,7 @@
 #Pharmacokinetics
 #Makoid C, Vuchetich J, Banakar V. 1996-1999. Basic Pharmacokinetics.
-
 #!!!
-function in(a::Dict, b::Dict)
-    k = collect(keys(a))
-    if any(x -> x  ∉  collect(keys(b)), k) return false end
-    for i = 1:length(a)
-        if a[k[i]] != b[k[i]] return false end
-    end
-    return true
-end
-function in(a::Pair, b::Dict)
-    if a[1]  ∉  collect(keys(b)) return false end
-    if a[2] != b[a[1]] return false end
-    return true
-end
-#!!!
-struct KelData 
+struct KelData
     s::Array{Int, 1}
     e::Array{Int, 1}
     a::Array{Number, 1}

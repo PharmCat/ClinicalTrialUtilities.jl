@@ -74,7 +74,7 @@ function randomtable(;blocksize::Int = 4, subject::Int = 10, group::Int = 2, rat
     seqrand  = permutedims(hcat(grseq[r]...))
     seqrand  = hcat(collect(1:length(r)), hcat(r,  seqrand))
     df       = DataFrame(seqrand)
-    names!(df, [:Subject, :Group, :Sequence])
+    rename!(df, [:Subject, :Group, :Sequence])
     for i=1:length(grseq[1])
         df[!, Symbol("Period_"*string(i))] = getindex.(df[!, :Sequence], i)
     end
