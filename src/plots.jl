@@ -45,19 +45,19 @@ end
 @recipe function f(subj::PKPlot)
     x, y = subj.args
 
-    seriestype  --> :line
-    xlabel      --> "Time"
-    link        --> :both
-    legend      --> true
-    grid        --> false
+    seriestype        --> :line
+    xguide            --> "Time"
+    link              --> :both
+    legend            --> true
+    grid              --> false
     #ticks       := [nothing :auto nothing]
-    xlims       --> (minimum(x), maximum(x)),
-    ylims       --> (0, maximum(y)*1.1)
-    seriescolor --> :blue
-    markershape --> :circle
-    markersize  --> 3
-    markercolor --> :match
-    msalpha     --> 0
+    xlims             --> (minimum(x), maximum(x)),
+    ylims             --> (0, maximum(y)*1.1)
+    seriescolor       --> :blue
+    markershape       --> :circle
+    markersize        --> 3
+    markercolor       --> :match
+    markerstrokealpha --> 0
     (x, y)
 end
 
