@@ -102,6 +102,18 @@ pooledcv([0.12, 0.2, 0.25], [14, 22, 32], [:d2x2, :d2x2, :d2x2])
 
 ```
 
+#### Confidence Intervals
+```
+using  ClinicalTrialUtilities
+ci = propci(38, 100, alpha=0.05, method=:cp)
+
+ci = orpropci(30, 100, 40, 90; alpha=0.05, method=:mn)
+
+ci = diffpropci(30, 100, 40, 90; alpha=0.05, method=:wald)
+
+ci = meanci(30, 10, 30, alpha = 0.05, method=:norm)
+```
+
 #### NCA
 ```
 using CSV, DataFrames, ClinicalTrialUtilities
@@ -112,6 +124,12 @@ ncadf   = DataFrame(pk; unst = true)
 ds      = ClinicalTrialUtilities.descriptive(ncadf, stats = [:n, :mean, :sd], sort = [:Formulation])
 dsdf    = ClinicalTrialUtilities.DataFrame(ds; unst = true)
 
+```
+
+#### Randomization
+```
+using DataFrames, ClinicalTrialUtilities
+rt = ClinicalTrialUtilities.randomtable(;blocksize = 4, subject = 32, group = 2, ratio = [1,1], grseq = ["TR", "RT"], seed = 36434654652452)
 ```
 
 
