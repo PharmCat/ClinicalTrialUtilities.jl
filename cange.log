@@ -1,3 +1,17 @@
+v0.2.6
+
+  - findfirst
+  - Documents update
+  - export applyncarule!
+  - code cleaning
+  - improve coverage
+  - plots kwargs
+  - Proportion meta-analysis
+  - Tests restruct
+  - Hypothesis test for simulation
+  - Deps update
+  - Docs
+
 v0.2.5
 
   - SpecialFunctions 0.10

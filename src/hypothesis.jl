@@ -45,4 +45,16 @@ function refval(h::Superiority)
     h.llim - h.diff
 end
 
+
+function checkhyp(h::Superiority, ci::ConfInt)
+    ci.lower > h.diff
+end
+function checkhyp(h::Equivalence, ci::ConfInt)
+    ci.lower > h.llim && ci.upper < h.ulim
+end
+function checkhyp(h::Equality, ci::ConfInt)
+    ci.lower > h.val || ci.upper < h.val
+end
+
+
 struct McNemars <: AbstractHypothesis end

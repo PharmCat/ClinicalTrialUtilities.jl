@@ -39,30 +39,6 @@ function Base.show(io::IO, obj::DataSet{Descriptive})
         println(io, "____________________")
     end
 end
-function Base.getindex(a::DataSet{T}, i::Int)::T where T
-    return a.data[i]
-end
-function Base.getindex(a::DataSet{T}, i::Int, s::Symbol)::Real where T
-    return a.data[i].result[s]
-end
-function Base.getindex(a::DataSet{T}, d::Pair)::T where T
-    for i = 1:length(a)
-        if d ∈ a[i].sort return a[i] end
-    end
-    throw(ArgumentError("Element not found!"))
-end
-function Base.getindex(a::DataSet{T}, d::Dict)::T where T
-    for i = 1:length(a)
-        if d ∈ a[i].sort return a[i] end
-    end
-    throw(ArgumentError("Element not found!"))
-end
-function Base.getindex(a::DataSet{T}, d::Tuple{Vararg{Pair}})::T where T
-    return a[Dict(d)]
-end
-function Base.length(a::DataSet{T})::Int where T <: AbstractData
-    return length(a.data)
-end
 """
     descriptive(data::DataFrame;
         sort::Union{Symbol, Array{T,1}} = Array{Symbol,1}(undef,0),

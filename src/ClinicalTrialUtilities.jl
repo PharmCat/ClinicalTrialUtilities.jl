@@ -19,15 +19,9 @@ using Distributions, Random, Roots, QuadGK, RecipesBase, Reexport
 @reexport using StatsBase
 
 import SpecialFunctions
-import Base.show
-import Base.showerror
-import Base.getindex
-import Base.length
-import Base.in
-import Base.iterate
-import Base.eltype
+import Base: show, findfirst, getproperty, showerror, getindex, length, in, iterate, eltype, deleteat!, findall
 import StatsBase.confint
-import DataFrames: DataFrame, DataFrames, names!, unstack, deleterows!
+import DataFrames: DataFrame, DataFrames, names!, unstack, deleterows!, rename!
 
 function lgamma(x)
     return SpecialFunctions.logabsgamma(x)[1]
@@ -42,10 +36,15 @@ const PI2INV = 0.5 / π
 include("abstracttypes.jl")
 
 include("design.jl")
-include("hypothesis.jl")
 
 include("proportion.jl")
 
+include("means.jl")
+
+#Confidence interval calculation
+include("ci.jl")
+
+include("hypothesis.jl")
 
 #Owen function calc: owensQ, owensQo, ifun1, owensTint2, owensT, tfn
 include("owensq.jl")
@@ -55,8 +54,6 @@ include("powertost.jl")
 include("powersamplesize.jl")
 #Main sample size and power functions: sampleSize, ctpower, besamplen
 include("samplesize.jl")
-#Confidence interval calculation
-include("ci.jl")
 #Simulations
 include("sim.jl")
 #info function
@@ -101,6 +98,7 @@ pooledcv,
 descriptive,
 freque,
 contab,
+metaprop,
 htmlexport,
 #CI
 confint,
@@ -124,11 +122,13 @@ DataFrame,
 ElimRange,
 DoseTime,
 LimitRule,
+applyncarule!,
 keldata,
 # Simulation
 ctsim,
 #Plots
-plot
+pkplot,
+pkplot!
 
 
 

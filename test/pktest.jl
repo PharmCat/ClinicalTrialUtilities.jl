@@ -1,10 +1,7 @@
 println(" ---------------------------------- ")
-@testset "  PK                    " begin
-
+@testset "#10  Pharmacokinetics   " begin
 
     # Basic tests
-
-
     pkds = ClinicalTrialUtilities.pkimport(pkdata, [:Subject, :Formulation]; conc = :Concentration, time = :Time)
     pk   = ClinicalTrialUtilities.nca!(pkds)
     @test pk[1, :AUCinf]  ≈ 1.63205 atol=1E-5
@@ -924,12 +921,19 @@ println(" ---------------------------------- ")
     pkds = ClinicalTrialUtilities.pkimport(glucose2, [:Subject, :Date]; conc = :glucose, time = :Time)
     pk   = ClinicalTrialUtilities.nca!(pkds)
     df   = DataFrame(pk; unst = true)
-    p    = ClinicalTrialUtilities.plot(pkds; pagesort = [:Date], typesort = [:Subject])
+    p    = ClinicalTrialUtilities.pkplot(pkds; pagesort = [:Date], typesort = [:Subject])
     @test length(p) == 2
     print(io, pk[1].subject.keldata)
-
+    p    = ClinicalTrialUtilities.pkplot(pkds; pagesort = nothing, typesort = [:Subject])
+    @test length(p) == 1
+    p    = ClinicalTrialUtilities.pkplot(pkds; pagesort = nothing, typesort = nothing, legend = false, xlabel = "L1", ylabel = "L2", xlims = (0,12))
+    @test length(p) == 1
+    p    = ClinicalTrialUtilities.pkplot(pkds; pagesort = [:Date], typesort = nothing)
+    @test length(p) == 2
+    p    = ClinicalTrialUtilities.pkplot(pkds[1])
 
     # NaN PK LimitRule test
+    nanpkdata.Concentration = ClinicalTrialUtilities.tryfloatparse!(nanpkdata.Concentration)
     pkds = ClinicalTrialUtilities.pkimport(nanpkdata, [:Subject, :Formulation]; conc = :Concentration, time = :Time)
     rule = ClinicalTrialUtilities.LimitRule(0, 0, NaN, 0, true)
     ClinicalTrialUtilities.applyncarule!(pkds, rule)
@@ -940,10 +944,15 @@ println(" ---------------------------------- ")
     rule = ClinicalTrialUtilities.LimitRule(0, 0, NaN, -1, false)
     ClinicalTrialUtilities.applyncarule!(pkds, rule)
     @test pkds[3].obs[6]  === NaN
+
+    ClinicalTrialUtilities.setdosetime!(pkds, ClinicalTrialUtilities.DoseTime(100,0), Dict(:Subject => 1, :Formulation => "R"))
+    @test pkds[3].dosetime.dose == 100
+
+    pks = ClinicalTrialUtilities.findfirst(Dict(:Subject => 1, :Formulation => "R"), pkds)
 end
 
 println(" ---------------------------------- ")
-@testset " UPK                    " begin
+@testset "#11 Urine PK            " begin
     upk = ClinicalTrialUtilities.upkimport(upkdata, [:subj]; stime = :st, etime = :et, conc = :conc, vol = :vol)
     unca = ClinicalTrialUtilities.nca!(upk[1])
     unca = ClinicalTrialUtilities.nca!(upk)
@@ -951,11 +960,12 @@ println(" ---------------------------------- ")
     @test unca[1][:mTmax]   ≈ 1.5
     @test unca[1][:ar]      ≈ 16.0
     @test unca[1][:volume]  ≈ 11.0
-     p    = ClinicalTrialUtilities.plot(upk, ylabel = "Excretion")
+     p    = ClinicalTrialUtilities.pkplot(upk, ylabel = "Excretion")
 end
 
 println(" ---------------------------------- ")
-@testset "  PD                    " begin
+@testset "#12  Pharmacodynamics   " begin
+
 
     #PD
     pdds = ClinicalTrialUtilities.pdimport(pddata; time=:time, resp=:effect, bl = 3.0)

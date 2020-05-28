@@ -18,3 +18,5 @@ freqdat        = CSV.File(path*"/csv/freqdat.csv") |> DataFrame
 negdat         = CSV.File(path*"/csv/negdat.csv") |> DataFrame
 #Dataset foe descriptive statistics check
 descriptivedat = CSV.File(path*"/csv/descriptivedat.csv") |> DataFrame
+#Meta-analysis
+metadf = CSV.File(path*"/csv/meta.csv") |> DataFrame

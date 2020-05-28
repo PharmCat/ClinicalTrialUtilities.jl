@@ -1,5 +1,5 @@
 println(" ---------------------------------- ")
-@testset "#5  utils Test          " begin
+@testset "#5  Utilities           " begin
 
 @testset "  ci2cv Test            " begin
     #cvms = ClinicalTrialUtilities.cvfromci(;alpha = 0.05, theta1 = 0.9, theta2 = 1.25, n=30, design=:d2x2x4, cvms=true)

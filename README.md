@@ -1,6 +1,6 @@
 # ClinicalTrialUtilities
 
- Clinical trial related calculation: descriptive statistics, power and sample size calculation, power simulations, confidence interval, pharmacokinetics/pharmacodynamics parameters calculation.
+ Clinical trial related calculation: descriptive statistics, power and sample size calculation, power simulations, confidence interval, pharmacokinetics/pharmacodynamics parameters calculation. This program comes with absolutely no warranty. No liability is accepted for any loss and risk to public health resulting from use of this software.
 
 [![Build Status](https://travis-ci.com/PharmCat/ClinicalTrialUtilities.jl.svg?branch=master)](https://travis-ci.com/PharmCat/ClinicalTrialUtilities.jl)
 [![Build status](https://ci.appveyor.com/api/projects/status/35f8b5vq259sbssg?svg=true)](https://ci.appveyor.com/project/PharmCat/clinicaltrialutilities-jl)
@@ -17,7 +17,19 @@ The package is designed to perform calculations related to the planning and anal
 using Pkg; Pkg.add("ClinicalTrialUtilities");
 ```
 
-### <a name="Usage">Usage</a>
+### <a name="Features">Main features</a>
+
+- Clinical trial sample size calculation
+- Power calculation
+- Confidence Interval calculation
+- NCA Pharmacokinetics parameters calculation
+- Descriptive statistics and frequencies
+- Randomization
+
+
+### <a name="Examples">Examples</a>
+
+#### SampleSize
 
 **NB! Hypothesis types:**
 
@@ -25,9 +37,6 @@ using Pkg; Pkg.add("ClinicalTrialUtilities");
 - :ei - Equivalencens: two one-sided hypothesis;
 - :ns - Non-Inferiority / Superiority: one-sided hypothesis, for some cases you should use two-sided hypothesis for  Non-Inferiority/Superiority, you can use alpha/2 for this;
 
-### <a name="Examples">Examples</a>
-
-#### SampleSize
 ```
 #Sample size for one proportion equality
 ctsamplen(param=:prop, type=:ea, group=:one, a=0.3, b=0.5)
@@ -92,6 +101,37 @@ pooledcv(data; cv=:cv, df=:df, alpha=0.05, returncv=true)
 pooledcv([0.12, 0.2, 0.25], [14, 22, 32], [:d2x2, :d2x2, :d2x2])
 
 ```
+
+#### Confidence Intervals
+```
+using  ClinicalTrialUtilities
+ci = propci(38, 100, alpha=0.05, method=:cp)
+
+ci = orpropci(30, 100, 40, 90; alpha=0.05, method=:mn)
+
+ci = diffpropci(30, 100, 40, 90; alpha=0.05, method=:wald)
+
+ci = meanci(30, 10, 30, alpha = 0.05, method=:norm)
+```
+
+#### NCA
+```
+using CSV, DataFrames, ClinicalTrialUtilities
+pkdata2 = CSV.File("pkdata.csv") |> DataFrame
+pkds    = pkimport(pkdata2, [:Subject, :Formulation]; time = :Time, conc = :Concentration)
+pk      = nca!(pkds)
+ncadf   = DataFrame(pk; unst = true)
+ds      = ClinicalTrialUtilities.descriptive(ncadf, stats = [:n, :mean, :sd], sort = [:Formulation])
+dsdf    = ClinicalTrialUtilities.DataFrame(ds; unst = true)
+
+```
+
+#### Randomization
+```
+using DataFrames, ClinicalTrialUtilities
+rt = ClinicalTrialUtilities.randomtable(;blocksize = 4, subject = 32, group = 2, ratio = [1,1], grseq = ["TR", "RT"], seed = 36434654652452)
+```
+
 
 ### <a name="Copyrights">Copyrights</a>
 

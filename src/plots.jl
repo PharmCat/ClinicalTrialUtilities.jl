@@ -45,19 +45,19 @@ end
 @recipe function f(subj::PKPlot)
     x, y = subj.args
 
-    seriestype  --> :line
-    xlabel      --> "Time"
-    link        --> :both
-    legend      --> true
-    grid        --> false
+    seriestype        --> :line
+    xguide            --> "Time"
+    link              --> :both
+    legend            --> true
+    grid              --> false
     #ticks       := [nothing :auto nothing]
-    xlims       --> (minimum(x), maximum(x)),
-    ylims       --> (0, maximum(y)*1.1)
-    seriescolor --> :blue
-    markershape --> :circle
-    markersize  --> 3
-    markercolor --> :match
-    msalpha     --> 0
+    xlims             --> (minimum(x), maximum(x)),
+    ylims             --> (0, maximum(y)*1.1)
+    seriescolor       --> :blue
+    markershape       --> :circle
+    markersize        --> 3
+    markercolor       --> :match
+    markerstrokealpha --> 0
     (x, y)
 end
 
@@ -72,36 +72,60 @@ function plotlabel(d)
     return title
 end
 
-function plot(subj::T; title = nothing, legend = true, label = "AUTO", ylabel = "Concentration", xlims = nothing, plotstyle::PKPlotStyle = PKPLOTSTYLE[1]) where T <: AbstractSubject
+"""
+    pkplot(subj::T; plotstyle::PKPlotStyle = PKPLOTSTYLE[1], kwargs...) where T <: AbstractSubject
 
-    if title === nothing
-        title = plotlabel(subj.sort)
+Plot for subject
+
+subj - subject;
+plotstyle - styles for plots.
+
+"""
+function pkplot(subj::T; plotstyle::PKPlotStyle = PKPLOTSTYLE[1], kwargs...) where T <: AbstractSubject
+    kwargs = Dict{Symbol, Any}(kwargs)
+    k = keys(kwargs)
+
+    if !(:title in k)
+        kwargs[:title] = plotlabel(subj.sort)
     end
-    if xlims === nothing xlims = (minimum(subj.time), maximum(subj.time)) end
+    if !(:xlims in k)
+        kwargs[:xlims] = (minimum(subj.time), maximum(subj.time))
+    end
+    if !(:legend in k)
+        kwargs[:legend] = true
+    end
+    if !(:ylabel in k)
+        kwargs[:ylabel] = "Concentration"
+    end
+
     p = pkplot(subj.time, subj.obs;
-        title       = title,
         linestyle   = plotstyle.linestyle,
         linecolor   = plotstyle.linecolor,
         markershape = plotstyle.markershape,
         markercolor = plotstyle.markercolor,
-        legend      = legend,
-        label       = label,
-        ylabel      = ylabel,
-        xlims       = xlims,
+        kwargs...
         )
     return p
 
 end
-function plot!(subj::T; legend = true, label = "AUTO", xlims = nothing,  plotstyle::PKPlotStyle = PKPLOTSTYLE[1]) where T <: AbstractSubject
-    if xlims === nothing xlims = (minimum(subj.time), maximum(subj.time)) end
+
+function pkplot!(subj::T; plotstyle::PKPlotStyle = PKPLOTSTYLE[1], kwargs...) where T <: AbstractSubject
+    kwargs = Dict{Symbol, Any}(kwargs)
+    k = keys(kwargs)
+
+    if !(:xlims in k)
+        kwargs[:xlims] = (minimum(subj.time), maximum(subj.time))
+    end
+    if !(:legend in k)
+        kwargs[:legend] = true
+    end
+
     p = pkplot!(subj.time, subj.obs;
         linestyle   = plotstyle.linestyle,
         linecolor   = plotstyle.linecolor,
         markershape = plotstyle.markershape,
         markercolor = plotstyle.markercolor,
-        legend      = legend,
-        label       = label,
-        xlims       = xlims,
+        kwargs...
         )
     return p
 end
@@ -115,7 +139,23 @@ function usort(data::DataSet{T}, list) where T <: AbstractData
     dl
 end
 
-function pageplot(pagedatatmp, styledict, typesort; title = "", ylabel = "Concentration", legend = true, xlims = nothing)
+function pageplot(pagedatatmp, styledict, typesort; kwargs...)
+    kwargs = Dict{Symbol, Any}(kwargs)
+    k = keys(kwargs)
+
+    if !(:title in k)
+        kwargs[:title] = ""
+    end
+    if !(:xlims in k)
+        kwargs[:xlims] = (minimum(subj.time), maximum(subj.time))
+    end
+    if !(:legend in k)
+        kwargs[:legend] = true
+    end
+    if !(:ylabel in k)
+        kwargs[:ylabel] = "Concentration"
+    end
+
     utypes    = keys(styledict)
     labels    = Vector{String}(undef, 0)
     fst       = true
@@ -134,34 +174,77 @@ function pageplot(pagedatatmp, styledict, typesort; title = "", ylabel = "Concen
                         label = ""
                     end
                 end
+
+                kwargs[:label] = label
                 if fst
-                    p = plot(d; title = title, legend = legend, xlims = xlims, plotstyle = style, label = label, ylabel = ylabel)
+                    p = pkplot(d; plotstyle = style, kwargs...)
                     fst = false
                 else
-                    plot!(                  d; legend = legend, xlims = xlims, plotstyle = style, label = label)
+                    pkplot!(   d; plotstyle = style, kwargs...)
                 end
             end
         end
     end
     p
 end
-function pageplot(pagedatatmp; title = "", ylabel = "Concentration", legend = true, xlims = nothing)
+function pageplot(pagedatatmp; kwargs...)
+    kwargs = Dict{Symbol, Any}(kwargs)
+    k = keys(kwargs)
+
+    if !(:title in k)
+        kwargs[:title] = ""
+    end
+    if !(:xlims in k)
+        kwargs[:xlims] = (minimum(subj.time), maximum(subj.time))
+    end
+    if !(:legend in k)
+        kwargs[:legend] = true
+    end
+    if !(:ylabel in k)
+        kwargs[:ylabel] = "Concentration"
+    end
+
     fst       = true
     p         = nothing
     for d in pagedatatmp
-        label = "AUTO"
+
+        kwargs[:label] = "AUTO"
         if fst
-            p = plot(d; title = title, legend = legend, xlims = xlims, plotstyle = PKPLOTSTYLE[1], label = label, ylabel = ylabel)
+            p = pkplot(d; plotstyle = PKPLOTSTYLE[1], kwargs...)
             fst = false
         else
-            plot!(                  d; legend = legend, xlims = xlims, plotstyle = PKPLOTSTYLE[1], label = label)
+            pkplot!(   d; plotstyle = PKPLOTSTYLE[1], kwargs...)
         end
     end
     p
 end
 
-function plot(data::DataSet{T}; title = nothing, ylabel = "Concentration", legend = true, xlims = nothing, pagesort = nothing, typesort = nothing) where T <: AbstractSubject
+"""
+    pkplot(data::DataSet{T};  pagesort::Union{Nothing, Vector{Symbol}} = nothing, typesort::Union{Nothing, Vector{Symbol}} = nothing, kwargs...) where T <: AbstractSubject
+
+Plot for subjects in dataset.
+
+data - subjects dataset;
+pagesort - subject page groupping;
+typesort - subject sorting within page;
+"""
+function pkplot(data::DataSet{T};  pagesort::Union{Nothing, Vector{Symbol}} = nothing, typesort::Union{Nothing, Vector{Symbol}} = nothing, kwargs...) where T <: AbstractSubject
     # Style types
+    kwargs = Dict{Symbol, Any}(kwargs)
+    k = keys(kwargs)
+
+    if !(:title in k)
+        kwargs[:title] = :AUTO
+    end
+    if !(:xlims in k)
+        kwargs[:xlims] = nothing
+    end
+    if !(:legend in k)
+        kwargs[:legend] = true
+    end
+    if !(:ylabel in k)
+        kwargs[:ylabel] = "Concentration"
+    end
 
     styledict  = nothing
     #style      = PKPLOTSTYLE[1]
@@ -181,7 +264,7 @@ function plot(data::DataSet{T}; title = nothing, ylabel = "Concentration", legen
         end
     end
     autotitle = false
-    if title === nothing autotitle = true end
+    if kwargs[:title] == :AUTO autotitle = true end
     #---------------------------------------------------------------------------
     # PAGES
     plots    = Vector{Any}(undef, 0)
@@ -190,7 +273,7 @@ function plot(data::DataSet{T}; title = nothing, ylabel = "Concentration", legen
         pagedict   = usort(data, pagesort)
         for i in pagedict
             if autotitle
-                title  = plotlabel(i)
+                kwargs[:title]  = plotlabel(i)
             end
             pagedatatmp = Vector{eltype(data)}(undef, 0)
             for d in data
@@ -199,17 +282,18 @@ function plot(data::DataSet{T}; title = nothing, ylabel = "Concentration", legen
                 end
             end
             if typesort !== nothing
-                p = pageplot(pagedatatmp, styledict, typesort; title = title, legend = legend, xlims = xlims, ylabel = ylabel)
+                p = pageplot(pagedatatmp, styledict, typesort; kwargs...)
             else
-                p = pageplot(pagedatatmp; title = title, legend = legend, xlims = xlims, ylabel = ylabel)
+                p = pageplot(pagedatatmp; kwargs...)
             end
             push!(plots, p)
         end
     else
+        if kwargs[:title] == :AUTO kwargs[:title] = "" end
         if typesort !== nothing
-            p = pageplot(data, styledict, typesort; title = title, legend = legend, xlims = xlims, ylabel = ylabel)
+            p = pageplot(data, styledict, typesort; kwargs...)
         else
-            p = pageplot(data; title = title, legend = legend, xlims = xlims, ylabel = ylabel)
+            p = pageplot(data; kwargs...)
         end
         push!(plots, p)
     end

@@ -1,5 +1,5 @@
 println(" ---------------------------------- ")
-@testset "  CI Test               " begin
+@testset "#6  CI Test             " begin
     # ONE PROPORTION
     ci = ClinicalTrialUtilities.propci(38, 100, alpha=0.05, method=:wald)
     @test ci.lower    ≈ 0.284866005121432 atol=1E-6
