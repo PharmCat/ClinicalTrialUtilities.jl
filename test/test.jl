@@ -33,68 +33,84 @@ println(" ---------------------------------- ")
     t = ClinicalTrialUtilities.besamplen(;theta0=0.95, theta1=0.8, theta2=1.25, cv=0.3, alpha=0.05, beta=0.2, logscale=true, method=:owenq)
     @test ClinicalTrialUtilities.besamplen(t.task).result == 40
     Base.show(io, t)
+    Base.show(io, t.task)
     #@test n == 40 && round(p, digits=7) == 0.8158453
     t = ClinicalTrialUtilities.besamplen(;theta0=1.0, theta1=0.8, theta2=1.25, cv=0.3, alpha=0.05, beta=0.1, logscale=true, method=:owenq)
     @test ClinicalTrialUtilities.besamplen(t.task).result  == 40
     Base.show(io, t)
+    Base.show(io, t.task)
     #@test n == 40 && round(p, digits=7) == 0.9095603
     t = ClinicalTrialUtilities.besamplen(;theta0=1.05, theta1=0.8, theta2=1.25, cv=0.4, alpha=0.05, beta=0.15, logscale=true, method=:nct)
     @test ClinicalTrialUtilities.besamplen(t.task).result == 74
     Base.show(io, t)
+    Base.show(io, t.task)
     #@test n == 74 && round(p, digits=7) == 0.8558178
     t = ClinicalTrialUtilities.besamplen(;theta0=1.05, theta1=0.9, theta2=1.25, cv=0.4, alpha=0.05, beta=0.15, logscale=true, method=:nct)
     @test ClinicalTrialUtilities.besamplen(t.task).result == 108
     Base.show(io, t)
+    Base.show(io, t.task)
     #@test n == 108 && round(p, digits=7) == 0.8506248
     t = ClinicalTrialUtilities.besamplen(;theta0=1.05, theta1=0.8, theta2=1.2, cv=0.5, alpha=0.05, beta=0.2, logscale=true, method=:nct)
     @test ClinicalTrialUtilities.besamplen(t.task).result == 158
     Base.show(io, t)
+    Base.show(io, t.task)
     #@test n == 158 && round(p, digits=7) == 0.8039191
     t = ClinicalTrialUtilities.besamplen(;theta0=1.05, theta1=0.8, theta2=1.25, cv=0.8, alpha=0.05, beta=0.2, logscale=true, method=:shifted)
     @test ClinicalTrialUtilities.besamplen(t.task).result == 210
     Base.show(io, t)
+    Base.show(io, t.task)
     #@test n == 210 && round(p, digits=7) == 0.8012471
     t = ClinicalTrialUtilities.besamplen(;theta0=0.0, theta1=-0.2, theta2=0.2, sd=0.5, alpha=0.05, beta=0.2, logscale=false, method=:owenq)
     @test ClinicalTrialUtilities.besamplen(t.task).result == 110
     Base.show(io, t)
+    Base.show(io, t.task)
     #@test n == 110 && round(p, digits=7) == 0.8074124
     t = ClinicalTrialUtilities.besamplen(;theta0=0.0, theta1=-0.2, theta2=0.2, sd=2.0, alpha=0.05, beta=0.2, logscale=false, method=:owenq)
     @test ClinicalTrialUtilities.besamplen(t.task).result == 1716
     Base.show(io, t)
+    Base.show(io, t.task)
     #@test n == 1716 && round(p, digits=7) == 0.8005618
     t = ClinicalTrialUtilities.besamplen(;theta0=0.0, theta1=-0.2, theta2=0.2, sd=2.0, alpha=0.001, beta=0.2, logscale=false, method=:owenq)
     @test ClinicalTrialUtilities.besamplen(t.task).result == 3828
     Base.show(io, t)
+    Base.show(io, t.task)
     #@test n == 3828 && round(p, digits=7) == 0.8001454
     t = ClinicalTrialUtilities.besamplen(;theta0=0, theta1=-0.2, theta2=0.2, sd=2, alpha=0.01, beta=0.01, logscale=false, method=:owenq)
     @test ClinicalTrialUtilities.besamplen(t.task).result == 4810
     Base.show(io, t)
+    Base.show(io, t.task)
     #@test n == 4810 && round(p, digits=7) == 0.9900151
     t = ClinicalTrialUtilities.besamplen(cv=0.347)
     @test ClinicalTrialUtilities.besamplen(t.task).result == 52
     Base.show(io, t)
+    Base.show(io, t.task)
     #@test n == 52 && round(p, digits=7) == 0.8136415
     t = ClinicalTrialUtilities.besamplen(;theta0=1.05, theta1=0.9, theta2=1.25, cv=0.0001, alpha=0.05, beta=0.15, logscale=true, method=:nct, design=:parallel)
     @test ClinicalTrialUtilities.besamplen(t.task).result == 4
     Base.show(io, t)
+    Base.show(io, t.task)
     #@test n == 4 && p ≈ 1.0
     t = ClinicalTrialUtilities.besamplen(;theta0=1.0, theta1=0.95, theta2=1.5, cv=0.8, alpha=0.0000001, beta=0.0001, logscale=true, method=:shifted, design=:d2x2x4)
     @test ClinicalTrialUtilities.besamplen(t.task).result == 10002
     Base.show(io, t)
+    Base.show(io, t.task)
     #@test n == 10002 && p ≈ 0.9818179411719451
     t = ClinicalTrialUtilities.besamplen(;theta0=1.05, theta1=0.8, theta2=1.25, cv=0.8, alpha=0.05, beta=0.2, logscale=true, method=:shifted, design=:d2x2x4)
     @test ClinicalTrialUtilities.besamplen(t.task).result == 106
     Base.show(io, t)
+    Base.show(io, t.task)
     #@test n == 106 && p ≈ 0.8060551186037984
     t = ClinicalTrialUtilities.besamplen(;theta0=0.95, theta1=0.8, theta2=1.25, cv=0.35, alpha=0.1, beta=0.1, logscale=true, method=:shifted, design=:parallel)
     @test ClinicalTrialUtilities.besamplen(t.task).result == 106
     Base.show(io, t)
+    Base.show(io, t.task)
     #@test n == 106 && p ≈ 0.9013894463164578
 
     #CHECK with R
     t = ClinicalTrialUtilities.besamplen(;cv=0.35, design=:d4x4)
     @test ClinicalTrialUtilities.besamplen(t.task).result == 52
     Base.show(io, t)
+    Base.show(io, t.task)
 end
 
 println(" ---------------------------------- ")
@@ -110,43 +126,53 @@ println(" ---------------------------------- ")
     t = ClinicalTrialUtilities.bepower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.3, n=32, design=:parallel, method=:owenq)
     @test ClinicalTrialUtilities.bepower(t.task).result ≈ 0.3166927 atol=1E-7
     Base.show(io, t)
+    Base.show(io, t.task)
     #2x2
     #3
     t = ClinicalTrialUtilities.bepower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=20, design=:d2x2, method=:owenq)
     @test ClinicalTrialUtilities.bepower(t.task).result         ≈ 0.8346802 atol=1E-7
     Base.show(io, t)
+    Base.show(io, t.task)
     #4
     t = ClinicalTrialUtilities.bepower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=10, design=:d2x2, method=:nct)
     @test ClinicalTrialUtilities.bepower(t.task, method=:nct).result        ≈ 0.4316618 atol=1E-7
     Base.show(io, t)
+    Base.show(io, t.task)
     #5
     t = ClinicalTrialUtilities.bepower(alpha=0.1, logscale=false, theta1=-0.1, theta2=0.1, theta0=0.0, sd=0.14, n=21, design=:d2x2, method=:shifted)
     @test ClinicalTrialUtilities.bepower(t.task, method=:shifted).result       ≈ 0.6626132 atol=1E-7
     Base.show(io, t)
+    Base.show(io, t.task)
     #6
     t = ClinicalTrialUtilities.bepower(alpha=0.05, logscale=false, theta1=-0.1, theta2=0.1, theta0=0.0, sd=0.14, n=30, design=:d2x2, method=:nct)
     @test ClinicalTrialUtilities.bepower(t.task, method=:nct).result          ≈ 0.7079951 atol=1E-7
     Base.show(io, t)
+    Base.show(io, t.task)
     #7
     t = ClinicalTrialUtilities.bepower(alpha=0.0000001, logscale=false, theta1=-0.1, theta2=0.1, theta0=0.0, sd=1.0, n=10000, design=:d2x2, method=:owenq)
     @test ClinicalTrialUtilities.bepower(t.task).result ≈ 0.9380914 atol=1E-7
     Base.show(io, t)
+    Base.show(io, t.task)
     #8
     t = ClinicalTrialUtilities.bepower(alpha=0.0001, logscale=false, theta1=-0.1, theta2=0.1, theta0=0.0, sd=1.0, n=3500, design=:d2x2, method=:owenq)
     @test ClinicalTrialUtilities.bepower(t.task).result     ≈ 0.3545904 atol=1E-7
     Base.show(io, t)
+    Base.show(io, t.task)
     #9
     t = ClinicalTrialUtilities.bepower(alpha=0.00000005, logscale=false, theta1=-0.1, theta2=0.1, theta0=0.0, sd=1.5, n=20000, design=:d2x2, method=:owenq)
     @test ClinicalTrialUtilities.bepower(t.task).result ≈ 0.8197361 atol=1E-7
     Base.show(io, t)
+    Base.show(io, t.task)
     #10
     t = ClinicalTrialUtilities.bepower(alpha=0.1, logscale=false, theta1=-0.1, theta2=0.1, theta0=0.0, sd=0.14, n=4, design=:d2x2, method=:shifted)
     @test ClinicalTrialUtilities.bepower(t.task, method=:shifted).result ≈ 0.0
     Base.show(io, t)
+    Base.show(io, t.task)
     #11
     t = ClinicalTrialUtilities.bepower(alpha=0.1, logscale=false, theta1=-0.1, theta2=0.1, theta0=0.0, sd=0.02, n=3, design=:d2x2, method=:shifted)
     @test ClinicalTrialUtilities.bepower(t.task, method=:shifted).result ≈ 0.7738659 atol=1E-7
     Base.show(io, t)
+    Base.show(io, t.task)
     #
     t = ClinicalTrialUtilities.bepower(alpha=0.05, logscale=true, theta1=0.8, theta2=1.25, theta0=0.95, cv=0.2, n=27, design=:d2x2, method=:owenq)
     @test ClinicalTrialUtilities.bepower(t.task).result ≈ 0.9264365737448076
