@@ -60,4 +60,11 @@ end
     @test d.df(31) ≈ 59 && d.bkni ≈ 1/6 && d.sq ≈ 3
 
 end
+
+@testset "  Proportion         " begin
+    p1 = ClinicalTrialUtilities.DiffProportion(ClinicalTrialUtilities.Proportion(0.2), 0.1)
+    p2 = ClinicalTrialUtilities.DiffProportion(0.2, ClinicalTrialUtilities.Proportion(0.1))
+    p3 = ClinicalTrialUtilities.DiffProportion(0.2, 0.1)
+    @test ClinicalTrialUtilities.getval(p1) == ClinicalTrialUtilities.getval(p2) == ClinicalTrialUtilities.getval(p3)
+end
 end
