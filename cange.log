@@ -1,3 +1,107 @@
+v0.2.6
+
+  - findfirst
+  - Documents update
+  - export applyncarule!
+  - code cleaning
+  - improve coverage
+  - plots kwargs
+  - Proportion meta-analysis
+  - Tests restruct
+  - Hypothesis test for simulation
+  - Deps update
+  - Docs
+
+v0.2.5
+
+  - SpecialFunctions 0.10
+  - RecipesBase 0.8
+
+v0.2.4
+
+  - PK: drop observation before dosetime
+  - Roots Version 1.0
+  - Distributions 23.0
+  - Remove Probability struct
+  - Update Proportion struct
+  - Type simplification for composite means/proportions for CTask
+  - PK Validation: basic tests completed
+  - LimitRule keywords
+  - Output changes
+  - Fix
+  - Cox sample size: initial
+  - McNemar CI: initial
+  - Cosmetics
+
+v0.2.3
+
+  - ConTab struct
+  - Urine PK
+  - NCA Tau PK partial areas fix
+  - NCA test update
+  - Plotting improve
+  - minor fix
+
+
+v0.2.2
+  - Distributions bump
+  - cvfromci cvms deprecated
+  - cmh methods
+  - Plots for PK with RecipesBase
+  - NCA Ctau intrapolation/extrapolation fix and validate
+  - fisher & pirson non-public methods for frequencies
+  - add Show methods
+  - minor fix
+  - add sim
+  - cosmetics
+
+v0.2.1
+  - error message for besamplen
+  - cvfromci new method
+  - pooledcv new method
+  - minor fix
+  - cosmetics
+
+v0.2.0
+
+  Breaking changes(!):
+
+  - Renamed exported functions: ctsamplen, ctpower, besamplen, bepower, ets (now in lower case).
+  - nca() -> nca!() - renamed;
+  - Changes in ctsamplen() in one group estimation. In version 0.1.x test mean/proportion denoted as parameter/keyword  "a" was a "Reference".
+  This situation was inconsistent with two group analysis where "a" - T, "b" - R. Now everywhere "a" means "Test group", "b" means "Reference group".
+  Hypothesis testing for difference is A-B everywhere.
+  - Keyword "logdiff" removed in ctsamplen(), because this was inconsistent with bepower/besamplen, new parameter logscale using instead.
+  - Keyword "out" removed everywhere. Output via Base.show(io::IO, obj::TaskResult);
+  - twoProp(), oneProp(), oneMean. twoMeans() removed;
+  - No submodule politics.
+
+  Major changes:
+
+  - using DataFrames 19.0+
+  - Task types for many functions (sample size, power functions, random ets.);
+  - Sample size and power functions now return TaskResult{T <: CTask};
+  - descriptive() rewrited;
+  - DataSet type;
+  - make DataFrame from DataSet;
+  - Descriptive type;
+  - CMH CI split;
+  - randomtable() return DF
+  - Include CI in ClinicalTrialUtilities & StatsBase methods for AbstractParameter types.
+
+  Other changes:
+
+  - Changes in error messages. Now throw(ArgumentError(msg));
+  - LimitRule for PK;
+  - RMIN/RMAX/TH/BL for PD;
+  - Steady-state PK and other PK parameters;
+  - Descriptive stats add SES and SEK;
+  - Descriptive performance;
+  - Test procedures restructured;
+  - 4x4 design;
+  - Documentation;
+  - Minor changes, bugfix, code cleaning, cosmetics.
+
 v0.1.16
 
   - Split PK/PD

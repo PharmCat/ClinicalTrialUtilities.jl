@@ -1,9 +1,23 @@
+struct RandomTable
+    seq
+    table
+    t
+end
+"""
+    randomseq(;blocksize = 4, subject = 10, group = 2, ratio = [1,1],  seed = 0)
 
+Randomization list generaton.
 
-function randomtable(;blocksize = 4, subject = 10, group = 2, ratio = [1,1], grseq = [["A", "B"], ["B", "A"]], seed = 1234)
+- ``blocksize`` - size of block;
+- ``subject`` - subject number;
+- ``group`` - number of groups;
+- ``ratio`` - group ration, [1,1] means 1:1, [1,2] means 1:2, ets. ``length(ratio)`` should be equal ``group``;
+- ``seed`` - RNG seed.
+"""
+function randomseq(;blocksize::Int = 4, subject = 10, group = 2, ratio = [1,1], grseq = [["A", "B"], ["B", "A"]], seed = 0)
 
-    rng = MersenneTwister()
-    if seed == 0  Random.seed!(rng) else Random.seed!(seed) end
+    #rng = MersenneTwister()
+    if seed != 0 Random.seed!(seed) end
 
     r = sum(ratio)
 
@@ -11,7 +25,7 @@ function randomtable(;blocksize = 4, subject = 10, group = 2, ratio = [1,1], grs
     if blocksize%r != 0 throw(ArgumentError("Sum of ratio should be in blocksize")) end
     if subject%r != 0 throw(ArgumentError("Sum of ratio should be in subject")) end
 
-    if length(unique(length.(grseq))) != 1 throw(ArgumentError("Unequal grseq")) end
+    #if length(unique(length.(grseq))) != 1 throw(ArgumentError("Unequal grseq")) end
 
     rm = blocksize/r                                                            #ratio multiplication
     block = []                                                                  #block dummy
@@ -33,9 +47,36 @@ function randomtable(;blocksize = 4, subject = 10, group = 2, ratio = [1,1], grs
         end
         append!(rand, block[sample(1:last, last, replace=false)])
     end
-
     #seqrand = hcat(grseq[rand]...)
-
     return rand
 
+end
+
+"""
+    randomtable(;blocksize = 4, subject = 10, group = 2,
+        ratio = [1,1], grseq = ["AB", "BA"], seed = 0)
+
+
+Randomization table generaton.
+
+- ``blocksize`` - size of block;
+- ``subject`` - subject number;
+- ``group`` - number of groups;
+- ``ratio`` - group ration, [1,1] means 1:1, [1,2] means 1:2, ets. ``length(ratio)`` should be equal ``group``;
+- ``grseq`` - treatment sequence in each group;
+- ``seed`` - RNG seed.
+"""
+function randomtable(;blocksize::Int = 4, subject::Int = 10, group::Int = 2, ratio::Vector = [1,1], grseq::Vector{String} = ["AB", "BA"], seed = 0)
+
+    if length(unique(length.(grseq))) != 1 throw(ArgumentError("Unequal grseq")) end
+
+    r = randomseq(;blocksize = blocksize, subject = subject, group = group, ratio = ratio,  seed = seed)
+    seqrand  = permutedims(hcat(grseq[r]...))
+    seqrand  = hcat(collect(1:length(r)), hcat(r,  seqrand))
+    df       = DataFrame(seqrand)
+    rename!(df, [:Subject, :Group, :Sequence])
+    for i=1:length(grseq[1])
+        df[!, Symbol("Period_"*string(i))] = getindex.(df[!, :Sequence], i)
+    end
+    return df
 end

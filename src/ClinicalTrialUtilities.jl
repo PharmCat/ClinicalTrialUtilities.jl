@@ -13,53 +13,38 @@
 # If you want to check and get R code you can find some here: http://powerandsamplesize.com/Calculators/
 __precompile__(true)
 module ClinicalTrialUtilities
-using Distributions, StatsBase, Statistics, Random
-using QuadGK
-using DataFrames
-import SpecialFunctions.lgamma
 
-#Exceptions
-struct CTUException <: Exception
-    n::Int
-    var::String
+using Distributions, Random, Roots, QuadGK, RecipesBase, Reexport
+
+@reexport using StatsBase
+
+import SpecialFunctions
+import Base: show, findfirst, getproperty, showerror, getindex, length, in, iterate, eltype, deleteat!, findall
+import StatsBase.confint
+import DataFrames: DataFrame, DataFrames, names!, unstack, deleterows!, rename!
+
+function lgamma(x)
+    return SpecialFunctions.logabsgamma(x)[1]
 end
 
-Base.showerror(io::IO, e::CTUException) = print("CTU Exception code: ", e.n, " Message: ", e.var);
 const ZDIST  = Normal()
 const LOG2   = log(2)
 const PI2    = π * 2.0
 const PI2INV = 0.5 / π
-const VERSION = "0.1.16"
 #Exceptions
 
-struct ConfInt
-    lower::Float64
-    upper::Float64
-    estimate::Float64
-end
+include("abstracttypes.jl")
 
-function getindex(a::ConfInt, b::Int64)
-    if b == 1
-        return a.lower
-    elseif b == 2
-        return a.upper
-    elseif b == 3
-        return a.estimate
-    else
-        throw(ArgumentError("Index should be in 1:3"))
-    end
-end
+include("design.jl")
 
-struct NCA
-    result::DataFrame
-    elimination::DataFrame
-    settings::DataFrame
-    textout::String
-    errorlog::String
-    errors::Array
-end
+include("proportion.jl")
 
-export CTUException, ConfInt, NCA
+include("means.jl")
+
+#Confidence interval calculation
+include("ci.jl")
+
+include("hypothesis.jl")
 
 #Owen function calc: owensQ, owensQo, ifun1, owensTint2, owensT, tfn
 include("owensq.jl")
@@ -67,35 +52,83 @@ include("owensq.jl")
 include("powertost.jl")
 #Sample sise and Power atomic functions
 include("powersamplesize.jl")
-#Main sample size and power functions: sampleSize, ctPower, beSampleN
+#Main sample size and power functions: sampleSize, ctpower, besamplen
 include("samplesize.jl")
-#Confidence interval calculation
-include("CI.jl")
 #Simulations
-include("SIM.jl")
-#PK
-include("PK.jl")
+include("sim.jl")
 #info function
 include("info.jl")
+#DataSET
+include("dataset.jl")
 #Descriptive statistics
 include("descriptives.jl")
+#PK
+include("pk.jl")
 #Frequency
 include("freque.jl")
 #Export
-include("Export.jl")
+include("export.jl")
 #Randomization
 include("randomization.jl")
+#Utilities
+include("utilities.jl")
+#Show
+include("show.jl")
+#Plots
+include("plots.jl")
+#Deprecated
+include("deprecated.jl")
 
+const CTU = ClinicalTrialUtilities
+#Types
+export CTU, ConfInt,
+#Task
+CTask,
 #Sample size
-export ctSampleN, beSampleN
+ctsamplen,
+besamplen,
 #Power
-export ctPower, bePower
+ctpower,
+bepower,
 #Utils
-export ci2cv, pooledCV
+cvfromci,
+cvfromvar,
+pooledcv,
 #Other
-export descriptive, freque, contab, owensQ, owensT
-#Mudules
-export SIM, CI, PK
+descriptive,
+freque,
+contab,
+metaprop,
+htmlexport,
+#CI
+confint,
+propci,
+diffpropci,
+rrpropci,
+orpropci,
+meanci,
+diffmeanci,
+diffcmhci,
+orcmhci,
+rrcmhci,
+#Randomization
+randomtable,
+randomseq,
+#Pharmacokinetics
+nca!,
+pkimport,
+pdimport,
+DataFrame,
+ElimRange,
+DoseTime,
+LimitRule,
+applyncarule!,
+keldata,
+# Simulation
+ctsim,
+#Plots
+pkplot,
+pkplot!
 
 
 
