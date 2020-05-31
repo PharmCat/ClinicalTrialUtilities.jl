@@ -38,10 +38,12 @@ ClinicalTrialUtilities.diffmeanci
 
 Table cell map:
 
-|         | outcome 1 | outcome 2 |
+
+| group   | outcome 1 | outcome 2 |
 |---------|-----------|-----------|
 | group 1 |     a     |     b     |
 | group 2 |     c     |     d     |
+
 
 ### diffcmhci
 ```@docs
