@@ -5,6 +5,7 @@ println(" ---------------------------------- ")
     @test ci.lower    ≈ 0.284866005121432 atol=1E-6
     @test ci.upper    ≈ 0.47513399487856794 atol=1E-6
     @test ci.estimate ≈ 0.38 atol=1E-6
+    @test ci.estimate ≈ StatsBase.confint(ClinicalTrialUtilities.Proportion(38, 100); level = 0.95, method = :wald).estimate
 
     ci = ClinicalTrialUtilities.propci(38, 100, alpha=0.05, method=:waldcc)
     @test ci.lower    ≈ 0.27986600512143206 atol=1E-6
@@ -48,6 +49,8 @@ println(" ---------------------------------- ")
     @test ci.lower    ≈ 0.29537414 atol=1E-6
     @test ci.upper    ≈ 0.97166697 atol=1E-6
     @test ci.estimate ≈ 0.53571428 atol=1E-6
+    @test ci.estimate ≈ StatsBase.confint(ClinicalTrialUtilities.OddRatio(ClinicalTrialUtilities.Proportion(30,100),
+    ClinicalTrialUtilities.Proportion(40,90)); level = 0.95, method = :mn).estimate
 
     ci = ClinicalTrialUtilities.orpropci(100, 100, 90, 90; alpha=0.05, method=:mn)
     @test ci.lower    ≈ 0.0
@@ -107,6 +110,8 @@ println(" ---------------------------------- ")
     @test ci.lower    ≈ -0.275381800 atol=1E-6
     @test ci.upper    ≈ -0.007158419 atol=1E-6
     @test ci.estimate ≈ -0.1444444   atol=1E-6
+    @test ci.estimate ≈ StatsBase.confint(ClinicalTrialUtilities.DiffProportion(ClinicalTrialUtilities.Proportion(30, 100),
+    ClinicalTrialUtilities.Proportion(40, 90)); level = 0.95, method = :nhs).estimate
 
     ci = ClinicalTrialUtilities.diffpropci(30, 100, 40, 90; alpha=0.05, method=:ac)
     @test ci.lower    ≈ -0.276944506 atol=1E-6
@@ -146,6 +151,8 @@ println(" ---------------------------------- ")
     @test ci.lower    ≈ 0.46636099123297575 atol=1E-6
     @test ci.upper    ≈ 0.9799258384796817 atol=1E-6
     @test ci.estimate ≈ 0.675 atol=1E-6
+    @test ci.estimate ≈ StatsBase.confint(ClinicalTrialUtilities.RiskRatio(ClinicalTrialUtilities.Proportion(30, 100),
+    ClinicalTrialUtilities.Proportion(40, 90)); level = 0.95, method = :mn).estimate
 
     ci = ClinicalTrialUtilities.rrpropci(100, 100, 90, 90; alpha=0.05, method=:mn)
     @test ci.lower    ≈ 0.0
@@ -190,19 +197,25 @@ println(" ---------------------------------- ")
     @test ci.lower    ≈ -11.6549655 atol=1E-6
     @test ci.upper    ≈ -8.3450344 atol=1E-6
     @test ci.estimate ≈ -10.0     atol=1E-4
+    @test ci.lower    ≈ StatsBase.confint(ClinicalTrialUtilities.DiffMean(ClinicalTrialUtilities.Mean(30, sqrt(10), 30), 
+    ClinicalTrialUtilities.Mean(40, sqrt(12), 35)); level = 0.95, method = :default).lower
+
 
     ci = ClinicalTrialUtilities.diffmeanci(30, 10, 30, 40, 12, 35, alpha=0.05, method=:uv)
     @test ci.lower    ≈ -11.6433893 atol=1E-6
     @test ci.upper    ≈ -8.3566106 atol=1E-6
     @test ci.estimate ≈ -10.0     atol=1E-4
+
     ci = ClinicalTrialUtilities.diffmeanci(30.5, 12.6, 23, 34, 21.7, 39, alpha=0.05, method=:uv)
     @test ci.lower    ≈ -5.6050900 atol=1E-6
     @test ci.upper    ≈ -1.3949099 atol=1E-6
     @test ci.estimate ≈ -3.5     atol=1E-4
 
-    ci = ClinicalTrialUtilities.meanci(30,10,30, alpha = 0.05, method=:norm)
+    ci = ClinicalTrialUtilities.meanci(30, 10, 30, alpha = 0.05, method=:norm)
     @test ci.lower    ≈ 28.86841 atol=1E-5
     @test ci.upper    ≈ 31.13159 atol=1E-5
+    @test ci.lower ≈ StatsBase.confint(ClinicalTrialUtilities.Mean(30, sqrt(10), 30); level = 0.95, method = :norm).lower
+
     ci = ClinicalTrialUtilities.meanci(30,10,30, alpha = 0.05, method=:tdist)
     @test ci.lower    ≈ 28.81919 atol=1E-5
     @test ci.upper    ≈ 31.18081 atol=1E-5

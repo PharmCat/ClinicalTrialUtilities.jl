@@ -9,16 +9,16 @@
 # DescTools https://CRAN.R-project.org/package=DescTools
 # metafor by Wolfgang Viechtbauer https://cran.r-project.org/package=metafor
 
-struct ConfInt{T <: Real}
-    lower::T
-    upper::T
-    estimate::T
-    alpha::T
-    function ConfInt(lower::T, upper::T, estimate::T) where T <: Real
-        new{T}(lower, upper, estimate, NaN)::ConfInt
+struct ConfInt
+    lower::Real
+    upper::Real
+    estimate::Real
+    alpha::Real
+    function ConfInt(lower, upper, estimate)
+        new(lower, upper, estimate, NaN)::ConfInt
     end
-    function ConfInt(lower::T, upper::T, estimate::T, alpha::T) where T <: Real
-        new{T}(lower, upper, estimate, alpha)::ConfInt
+    function ConfInt(lower, upper, estimate, alpha)
+        new(lower, upper, estimate, alpha)::ConfInt
     end
 end
 
@@ -29,8 +29,10 @@ function getindex(a::ConfInt, b::Int)
         return a.upper
     elseif b == 3
         return a.estimate
+    elseif b == 4
+        return a.alpha
     else
-        throw(ArgumentError("Index should be in 1:3"))
+        throw(ArgumentError("Index should be in 1:4"))
     end
 end
 
@@ -61,10 +63,10 @@ function StatsBase.confint(param::RiskRatio{P}; level = 0.95, method = :default)
     rrpropci(param.a.x, param.a.n, param.b.x, param.b.n; alpha = 1 - level, method = method)
 end
 function StatsBase.confint(param::Mean; level = 0.95, method = :default)::ConfInt
-    meanci(param.m, param.s, param.n; alpha = 1 - level, method = method)
+    meanci(param.m, param.sd^2, param.n; alpha = 1 - level, method = method)
 end
 function StatsBase.confint(param::DiffMean{true}; level = 0.95, method = :default)::ConfInt where T <: Mean
-    diffmeanci(param.a.m, param.a.s, param.a.n, param.b.m, param.b.s, param.b.n; alpha = 1 - level, method = method)
+    diffmeanci(param.a.m, param.a.sd^2, param.a.n, param.b.m, param.b.sd^2, param.b.n; alpha = 1 - level, method = method)
 end
 """
     propci(x::Int, n::Int; alpha=0.05, method = :default)::ConfInt
@@ -205,10 +207,14 @@ function orpropci(x1::Int, n1::Int, x2::Int, n2::Int; alpha::Real = 0.05, method
     end
 end
 """
-    meanci(m::Real, s::Real, n::Int; alpha::Real = 0.05,
+    meanci(m::Real, σ²::Real, n::Int; alpha::Real = 0.05,
         method=:default)::ConfInt
 
-Confidence interval for mean.
+Confidence interval for mean, where:
+
+m  - mean;
+σ² - variance;
+n  - observation number.
 
 # Computation methods:
 
@@ -216,18 +222,24 @@ Confidence interval for mean.
 - :tdist - T Distribution.
 
 """
-function meanci(m::Real, s::Real, n::Int; alpha::Real = 0.05, method=:default)::ConfInt
+function meanci(m::Real, σ²::Real, n::Int; alpha::Real = 0.05, method=:default)::ConfInt
         if method==:norm || method == :default
-            return meannormci(m, s, n, alpha)
+            return meannormci(m, σ², n, alpha)
         elseif method == :tdist
-            return meantdistci(m, s, n, alpha)
+            return meantdistci(m, σ², n, alpha)
         end
 end
 """
-    diffmeanci(m1::Real, s1::Real, n1::Real, m2::Real, s2::Real, n2::Real;
+    diffmeanci(m1::Real, σ²1::Real, n1::Real, m2::Real, σ²2::Real, n2::Real;
         alpha::Real = 0.05, method::Symbol = :default)::ConfInt
 
 Confidence interval for mead difference.
+
+m1, m2  - mean;
+σ²1, σ²2 - variance;
+n1, n2  - observation number.
+
+# Computation methods:
 
 - :ev - equal variance (default);
 - :uv - unequal variance with Welch-Satterthwaite df correction.
@@ -675,19 +687,19 @@ end
     #-------------------------------MEANS---------------------------------------
 
     #Normal
-    function meannormci(m::Real, s::Real, n::Real, alpha::Real)::ConfInt
-        e = quantile(ZDIST, 1-alpha/2)*sqrt(s/n)
+    function meannormci(m::Real, σ²::Real, n::Real, alpha::Real)::ConfInt
+        e = quantile(ZDIST, 1-alpha/2)*sqrt(σ²/n)
         return ConfInt(m-e, m+e, float(m), alpha)
     end
     #T Distribution
-    function meantdistci(m::Real, s::Real, n::Real, alpha::Real)::ConfInt
-        e = quantile(TDist(n-1), 1-alpha/2)*sqrt(s/n)
+    function meantdistci(m::Real, σ²::Real, n::Real, alpha::Real)::ConfInt
+        e = quantile(TDist(n-1), 1-alpha/2)*sqrt(σ²/n)
         return ConfInt(m-e, m+e, float(m), alpha)
     end
     #mean diff equal var
-    function meandiffev(m1::Real, s1::Real, n1::Real, m2::Real, s2::Real, n2::Real, alpha::Real)::ConfInt
+    function meandiffev(m1::Real, σ²1::Real, n1::Real, m2::Real, σ²2::Real, n2::Real, alpha::Real)::ConfInt
         diff   = float(m1 - m2)
-        stddev = sqrt(((n1 - 1) * s1 + (n2 - 1) * s2) / (n1 + n2 - 2))
+        stddev = sqrt(((n1 - 1) * σ²1 + (n2 - 1) * σ²2) / (n1 + n2 - 2))
         stderr = stddev * sqrt(1/n1 + 1/n2)
         d      = stderr*quantile(TDist(n1+n2-2), 1-alpha/2)
         return ConfInt(diff-d, diff+d, diff, alpha)
@@ -698,10 +710,10 @@ end
     #mean diff unequal var
     #Two sample t-test (unequal variance)
     #Welch-Satterthwaite df
-    function meandiffuv(m1::Real, s1::Real, n1::Real, m2::Real, s2::Real, n2::Real, alpha::Real)::ConfInt
+    function meandiffuv(m1::Real, σ²1::Real, n1::Real, m2::Real, σ²2::Real, n2::Real, alpha::Real)::ConfInt
         diff   = float(m1 - m2)
-        v      = (s1/n1+s2/n2)^2/(s1^2/n1^2/(n1-1)+s2^2/n2^2/(n2-1))
-        stderr = sqrt(s1/n1 + s2/n2)
+        v      = (σ²1 / n1 + σ²2 / n2)^2 /( σ²1^2 / n1^2 / (n1 - 1) + σ²2^2 / n2^2 / (n2 - 1))
+        stderr = sqrt(σ²1 / n1 + σ²2 / n2)
         d      = stderr*quantile(TDist(v), 1-alpha/2)
         return ConfInt(diff-d, diff+d, diff, alpha)
     end
@@ -725,8 +737,10 @@ function meanratiot(m1::Real, s1::Real, n1::Real, m2::Real, s2::Real, n2::Real, 
     d = sqrt((cov^2 - s1 * s2) * t0^4 + (m1^2 * s2 - 2 * m1 * m2 * cov + m2^2 * s1) * t0^2)
     return ((a - d)/b, (a + d)/b, m2/m1, alpha)
 end
+#=
 function meanratiof(m1::Real, s1::Real, n1::Real, m2::Real, s2::Real, n2::Real, cov::Real, alpha::Real)
 end
+=#
 
     #Cochran–Mantel–Haenszel confidence intervals
     #p275, Rothman, K. J., Greenland, S., & Lash, T. L. (2008). Modern epidemiology (3rd ed.). Philadelphia: Lippincott Williams & Wilkins.

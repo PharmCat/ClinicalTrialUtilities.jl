@@ -18,4 +18,16 @@ println(" ---------------------------------- ")
     @test cmht.est   ≈ 0.46774668790076773 atol=1E-5
     @test cmht.var   ≈ 0.2500964678287197 atol=1E-5
     @test cmht.tausq ≈ 0.3284301973957149 atol=1E-5
+
+    #Not validated
+    cmht = ClinicalTrialUtilities.metaprop(ctds, type = :diff, model = :random, zeroadj = 0.0, tau = :ho)
+    cmht = ClinicalTrialUtilities.metaprop(ctds, type = :diff, model = :random, zeroadj = 0.0, tau = :dl)
+    cmht = ClinicalTrialUtilities.metaprop(ctds, type = :diff, model = :random, zeroadj = 0.0, tau = :hm)
+
+    cmht = ClinicalTrialUtilities.metaprop(ctds, type = :rr, model = :random, zeroadj = 0.0, tau = :ho)
+    cmht = ClinicalTrialUtilities.metaprop(ctds, type = :rr, model = :random, zeroadj = 0.0, tau = :dl)
+    cmht = ClinicalTrialUtilities.metaprop(ctds, type = :rr, model = :random, zeroadj = 0.0, tau = :hm)
+
+    println(io, cmht)
+
 end

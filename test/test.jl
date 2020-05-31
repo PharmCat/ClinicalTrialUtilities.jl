@@ -296,11 +296,38 @@ println(" ---------------------------------- ")
     @test_throws ArgumentError ClinicalTrialUtilities.besamplen(;cv=0.35, alpha = 1.0)
 
     @test_throws ArgumentError ClinicalTrialUtilities.besamplen(;cv=-0.35)
+    #CI
+    ci = ClinicalTrialUtilities.ConfInt(1, 3, 2, 0.05)
+    @test_throws ArgumentError ci[5]
+    @test_throws ArgumentError ci = ClinicalTrialUtilities.propci(38, 100, alpha=0.05, method=:waldd)
+    @test_throws ArgumentError ci = ClinicalTrialUtilities.diffpropci(30, 100, 40, 90; alpha=-0.05, method=:mee)
+    @test_throws ArgumentError ci = ClinicalTrialUtilities.diffpropci(30, 100, 40, 90; alpha=0.05, method=:meee)
+    @test_throws ArgumentError ci = ClinicalTrialUtilities.rrpropci(30, 100, 40, 90; alpha=0.05, method=:mnnn)
+    @test_throws ArgumentError ci = ClinicalTrialUtilities.orpropci(30, 100, 40, 90; alpha=0.05,  method=:awoolfff)
 
-
-
+    #DS
+    pkds = ClinicalTrialUtilities.pkimport(pkdata, [:Subject, :Formulation]; conc = :Concentration, time = :Time)
+    @test_throws BoundsError pkds[20]
+    @test_throws ArgumentError pkds[:Subject => 20]
+    @test_throws ArgumentError pkds[Dict(:Subject => 20)]
 end
 
+println(" ---------------------------------- ")
+@testset "  Experimental          " begin
+    @test ClinicalTrialUtilities.bartlettstest(10, 100, 12, 50)[1] ≈ 0.4578814034969132
+
+    @test  ClinicalTrialUtilities.meanratiot(10, 2, 100, 12, 3, 120, 0.2, 0.05)[1] ≈ 0.7623819718221434
+
+    @test  ClinicalTrialUtilities.diffmcnmwaldci(10, 20, 11, 15; alpha = 0.05).lower ≈ -0.029553406052837572
+
+    @test  ClinicalTrialUtilities.diffmcnmwaldccci(10, 20, 11, 15; alpha = 0.05).lower ≈ -0.04741054890998043
+
+    @test ClinicalTrialUtilities.fisher(ClinicalTrialUtilities.ConTab([12 23; 22 33])) ≈ 0.7505159712638552
+
+    @test ClinicalTrialUtilities.pirson(ClinicalTrialUtilities.ConTab([12 23; 22 33]))[4] ≈ 0.5856943077831229
+
+    @test  ClinicalTrialUtilities.mcnmtest(ClinicalTrialUtilities.McnmConTab([12 23; 22 33]); cc = false) ≈ 0.022222222222222223
+end
 #println(" ---------------------------------- ")
 #@testset "  Tpl                 " begin
 #end

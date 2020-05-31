@@ -14,6 +14,10 @@ struct Mean{Bool} <: AbstractMean
         new{false}(m, NaN, 0)
     end
 end
+
+function getval(m::Mean)
+    return m.m
+end
 """
     Mean comparison hypothesis testing
     a - Test group value

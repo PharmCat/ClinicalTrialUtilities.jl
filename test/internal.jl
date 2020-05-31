@@ -67,4 +67,41 @@ end
     p3 = ClinicalTrialUtilities.DiffProportion(0.2, 0.1)
     @test ClinicalTrialUtilities.getval(p1) == ClinicalTrialUtilities.getval(p2) == ClinicalTrialUtilities.getval(p3)
 end
+
+@testset "  Means        " begin
+    m1 = ClinicalTrialUtilities.Mean(10, 2, 100)
+    m2 = ClinicalTrialUtilities.Mean(10, 2)
+    m3 = ClinicalTrialUtilities.Mean(10)
+    @test ClinicalTrialUtilities.getval(m1) == ClinicalTrialUtilities.getval(m2) == ClinicalTrialUtilities.getval(m3)
+end
+
+@testset "  ConfInt         " begin
+    ci = ClinicalTrialUtilities.ConfInt(1, 3, 2, 0.05)
+    @test ci[1] == 1
+    @test ci[2] == 3
+    @test ci[3] == 2
+    @test ci[4] == 0.05
+end
+
+@testset "  DataSet         " begin
+    pkds = ClinicalTrialUtilities.pkimport(pkdata, [:Subject, :Formulation]; conc = :Concentration, time = :Time)
+    @test eltype(pkds) == eltype(pkds.data)
+    a = pkds[:Subject => 1]
+    b = pkds[Dict(:Subject => 1)]
+    @test a === b
+
+    b = findall(pkds, Dict(:Formulation => "T"))
+    @test length(b) == 2
+
+    deleteat!(pkds, Dict(:Formulation => "T"))
+    @test length(pkds) == 1
+
+    pkds = ClinicalTrialUtilities.pkimport(pkdata, [:Subject, :Formulation]; conc = :Concentration, time = :Time)
+    deleteat!(pkds, 1)
+    @test length(pkds) == 2
+
+    pkds = ClinicalTrialUtilities.pkimport(pkdata, [:Subject, :Formulation]; conc = :Concentration, time = :Time)
+    deleteat!(pkds, [1,2])
+    @test length(pkds) == 1
+end
 end
