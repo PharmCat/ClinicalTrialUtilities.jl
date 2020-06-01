@@ -42,7 +42,7 @@ include("proportion.jl")
 include("means.jl")
 
 #Confidence interval calculation
-include("ci.jl")
+include("CI.jl")
 
 include("hypothesis.jl")
 
@@ -55,7 +55,7 @@ include("powersamplesize.jl")
 #Main sample size and power functions: sampleSize, ctpower, besamplen
 include("samplesize.jl")
 #Simulations
-include("sim.jl")
+include("SIM.jl")
 #info function
 include("info.jl")
 #DataSET
@@ -63,11 +63,11 @@ include("dataset.jl")
 #Descriptive statistics
 include("descriptives.jl")
 #PK
-include("pk.jl")
+include("PK.jl")
 #Frequency
 include("freque.jl")
 #Export
-include("export.jl")
+include("Export.jl")
 #Randomization
 include("randomization.jl")
 #Utilities
