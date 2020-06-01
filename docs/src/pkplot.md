@@ -14,15 +14,19 @@ pkdatapath = joinpath(dirname(pathof(ClinicalTrialUtilities)))*"\\..\\test\\csv\
 pkdata     = CSV.File(pkdatapath) |> DataFrame
 pkds       = ClinicalTrialUtilities.pkimport(pkdata, [:Subject, :Formulation]; conc = :Concentration, time = :Time)
 plot1      = pkplot(pkds[1], legend = false);
-savefig("pkplot1.svg"); # hide
+#savefig("pkplot1.svg"); # hide
 plot2      = pkplot(pkds;  pagesort = [:Formulation], typesort = [:Subject])[1];
-savefig("pkplot2.svg"); nothing # hide
+#savefig("pkplot2.svg"); nothing # hide
 ```
 
 Plot for subject:
 
-![](pkplot1.svg)
+```@example 1
+plot1
+```
 
 First plot for DataSet:
 
-![](pkplot2.svg)
+```@example 1
+plot2
+```
