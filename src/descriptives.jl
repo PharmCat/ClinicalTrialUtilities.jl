@@ -28,15 +28,89 @@ function Base.show(io::IO, obj::Descriptive)
         println(io, String(spv), "___", "____________")
     end
 end
+
+
 function Base.getindex(a::Descriptive, s::Symbol)::Real
     return a.result[s]
 end
+
+function getkeylist(obj::DataSet)
+    keylist = Vector{Any}(undef, 0)
+    for i = 1:length(obj)
+        if length(obj[i].sort) > 0
+            for k in keys(obj[i].sort)
+                if k ∉ keylist push!(keylist, k) end
+            end
+        end
+    end
+    keylist
+end
+
 function Base.show(io::IO, obj::DataSet{Descriptive})
     println(io, "Descriptive statistics set")
+    if length(obj) == 0
+        println(io, "Empty")
+        return
+    end
+    keylist     = getkeylist(obj)
+    strkeylist  = string.(keylist)
+    maxkeyvars  = Vector{Int}(undef, length(keylist))
+
+    strvars     = Vector{String}(undef, length(obj))
+    keyvalmx    = Matrix{String}(undef, length(obj), length(keylist))
+
+    for i = 1:length(obj)
+        strvars[i] = string(obj[i].var)
+        for kl = 1:length(keylist)
+            if keylist[kl] in keys(obj[i].sort)
+                keyvalmx[i, kl] = string(obj[i].sort[keylist[kl]])*" "
+            else
+                keyvalmx[i, kl] = "."
+            end
+        end
+    end
+
+    maxstrvars  = max(10, maximum(length.(strvars)))
+
+    for i = 1:length(keylist)
+        maxkeyvars[i] = max(length(strkeylist[i]), maximum(length.(keyvalmx[:, i]))) + 2
+        if length(strkeylist[i]) < maxkeyvars[i]
+            for ps = 1: length(strkeylist[i]) - maxkeyvars[i]
+                strkeylist[i] = strkeylist[i]*" "
+            end
+        end
+    end
+
+    print(io, "N ")
+    #=
+    print(io, "Variabels ")
+    =#
+    for i = 1:length(strkeylist)
+        print(io, strkeylist[i])
+        if length(strkeylist[i]) < maxkeyvars[i]
+            for s = 1:(maxkeyvars[i] - length(strkeylist[i])) print(io, " ") end
+        end
+    end
+
+    println(io, " ")
+
+
     for i = 1:length(obj.data)
-        print(io, i, " | ", string(obj.data[i].var))
-        if obj.data[i].sort !== nothing println(io, " | ", string(obj.data[i].sort)) end
-        println(io, "____________________")
+        print(io, "$i ")
+        #=
+        print(io, strvars[i])
+        if length(strvars[i]) < maxstrvars
+            for s = 1:(maxstrvars - length(strvars[i])) print(io, " ") end
+        end
+        =#
+        for c = 1:length(keylist)
+            print(io, keyvalmx[i, c])
+            if length(keyvalmx[i, c]) < maxkeyvars[c]
+                for s = 1:(maxkeyvars[c] - length(keyvalmx[i, c])) print(io, " ") end
+            end
+        end
+
+        println(io, " ")
     end
 end
 """

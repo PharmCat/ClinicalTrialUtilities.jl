@@ -123,7 +123,10 @@ ElimRange,
 DoseTime,
 LimitRule,
 applyncarule!,
+applyelimrange!,
 keldata,
+setkelauto!,
+getkelauto,
 # Simulation
 ctsim,
 #Plots

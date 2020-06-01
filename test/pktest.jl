@@ -17,6 +17,18 @@ println(" ---------------------------------- ")
     @test pk[1, :AUClast]  ≈ 1.43851 atol=1E-5
     @test pk[1, :AUMClast] ≈ 4.49504 atol=1E-5
 
+    #setkelauto! getkelauto
+    ClinicalTrialUtilities.setkelauto!(pkds, false, [1,2])
+    ClinicalTrialUtilities.setkelauto!(pkds, true, 1)
+    @test ClinicalTrialUtilities.getkelauto(pkds[1]) == true
+
+    ClinicalTrialUtilities.applyelimrange!(pk, ClinicalTrialUtilities.ElimRange(4,7))
+    ClinicalTrialUtilities.applyelimrange!(pk, ClinicalTrialUtilities.ElimRange(5,7), [1,2,3])
+    ClinicalTrialUtilities.applyelimrange!(pk, ClinicalTrialUtilities.ElimRange(4,7), 1)
+    ClinicalTrialUtilities.applyelimrange!(pk, ClinicalTrialUtilities.ElimRange(5,7), Dict(:Subject => 2))
+    @test pk[1].subject.kelrange.kelstart == 4
+    @test pk[2].subject.kelrange.kelstart == 5
+
     pkds = ClinicalTrialUtilities.pkimport(pkdata[1:7,:], [:Subject, :Formulation]; conc = :Concentration, time = :Time)
     pk   = ClinicalTrialUtilities.nca!(pkds)
     @test pk[1, :AUCinf]  ≈ 1.63205 atol=1E-5
@@ -995,5 +1007,7 @@ println(" ---------------------------------- ")
     print(io, pdds[1])
     print(io, pd)
     print(io, pd[1])
+
+
 
 end

@@ -1,3 +1,15 @@
+v0.2.7
+  - setkelauto!
+  - getkelauto
+  - applyelimrange!
+  - getval improove
+  - Mean CI fix
+  - code fix
+  - experimental tests
+  - DataSet{Descriptive} show changes
+  - improove coverage
+  - test update
+
 v0.2.6
 
   - findfirst

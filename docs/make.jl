@@ -1,4 +1,4 @@
-using Documenter, ClinicalTrialUtilities
+using Documenter, ClinicalTrialUtilities, DataFrames, CSV, Plots
 
 makedocs(
     modules = [ClinicalTrialUtilities],

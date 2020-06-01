@@ -2,20 +2,20 @@ abstract type AbstractTest end
 abstract type AbstractConTab <: AbstractData end
 
 struct ConTab{Int32, Int32} <: AbstractConTab
-    tab::Matrix{Real}
+    tab::Matrix{Int}
     row::Vector
     col::Vector
     sort::Dict
 
-    function ConTab(m::Matrix{T}) where T <: Real
+    function ConTab(m::Matrix{T}) where T <: Int
         row = Vector{Symbol}(undef, size(m, 1)) .= Symbol("")
         col = Vector{Symbol}(undef, size(m, 2)) .= Symbol("")
         new{size(m, 1), size(m, 2)}(m, row, col, Dict())
     end
-    function ConTab(m::Matrix{T}, row, col) where T <: Real
+    function ConTab(m::Matrix{T}, row, col) where T <: Int
         new{size(m, 1), size(m, 2)}(m, row, col, Dict())
     end
-    function ConTab(m::Matrix{T}, row, col, sort) where T <: Real
+    function ConTab(m::Matrix{T}, row, col, sort) where T <: Int
         new{size(m, 1), size(m, 2)}(m, row, col, sort)
     end
 end
@@ -152,13 +152,14 @@ function pirson(a::Matrix{Int})
     K     = sqrt(chsq/num/sqrt((n - 1)*(m - 1)))
     return chsq, chsqy, ml, 1-cdf(Chisq(df), chsq)
 end
+function pirson(a::ConTab)
+    return (pirson(a.tab))
+end
 
 function fisher(a::Matrix{Int})
     dist  = Hypergeometric(sum(a[1, :]), sum(a[2, :]), sum(a[:, 1]))
     value = min(2 * min(cdf(dist, a[1, 1]), ccdf(dist, a[1, 1])), 1.0)
 end
-
-
 function fisher(t::ConTab{2, 2})
     fisher(t.tab)
 end
@@ -169,6 +170,10 @@ function mcnmtest(a::Matrix{Int}; cc = false)
     (abs(a[1,2] - a[2,1]) - cc) ^ 2 / (a[1,2] + a[2,1])
 end
 
+
+function mcnmtest(a::McnmConTab; cc = false)
+    return mcnmtest(a.tab; cc = cc)
+end
 #=
 function StatsBase.confint(t::ConTab{2, 2})
 end

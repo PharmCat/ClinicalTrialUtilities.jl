@@ -51,6 +51,11 @@ struct DiffProportion{T1 <: AbstractSimpleProportion, T2 <: AbstractSimplePropor
         new{typeof(a), typeof(b)}(a, b)::DiffProportion
     end
 end
+
+function getval(p::DiffProportion)
+    return getval(p.a) - getval(p.b)
+end
+
 struct OddRatio{T1 <: AbstractSimpleProportion, T2 <: AbstractSimpleProportion} <: AbstractCompositeProportion
     a::T1
     b::T2

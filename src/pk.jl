@@ -1085,6 +1085,7 @@ range - ElimRange object.
 """
 function setelimrange!(data::PKSubject, range::ElimRange)
     if range.kelend > length(data) throw(ArgumentError("Kel endpoint out of range")) end
+    setkelauto!(data, false)
     data.kelrange = range
 end
 
@@ -1133,6 +1134,12 @@ function setkelauto!(data::DataSet{PKSubject}, kelauto::Bool, subj::Int)
     setkelauto!(data[subj], kelauto)
     data
 end
+
+#-------------------------------------------------------------------------------
+function getkelauto(data::PKSubject)
+    return data.kelauto
+end
+
 #-------------------------------------------------------------------------------
 """
     applyelimrange!(data::PKPDProfile{PKSubject}, range::ElimRange)
@@ -1147,23 +1154,23 @@ function applyelimrange!(data::PKPDProfile{PKSubject}, range::ElimRange)
     data.result = nca!(data.subject, calcm = data.method).result
     data
 end
-function applyelimrange!(data::DataSet{PKPDProfile{PKSubject}}, range::ElimRange)
+function applyelimrange!(data::DataSet{PKPDProfile}, range::ElimRange)
     for i = 1:length(data)
         applyelimrange!(data[i], range)
     end
     data
 end
-function applyelimrange!(data::DataSet{PKPDProfile{PKSubject}}, range::ElimRange, subj::Array{Int,1})
+function applyelimrange!(data::DataSet{PKPDProfile}, range::ElimRange, subj::Array{Int,1})
     for i = 1:length(data)
         if i ∈ subj applyelimrange!(data[i], range) end
     end
     data
 end
-function applyelimrange!(data::DataSet{PKPDProfile{PKSubject}}, range::ElimRange, subj::Int)
+function applyelimrange!(data::DataSet{PKPDProfile}, range::ElimRange, subj::Int)
     applyelimrange!(data[subj], range)
     data
 end
-function applyelimrange!(data::DataSet{PKPDProfile{PKSubject}}, range::ElimRange, sort::Dict)
+function applyelimrange!(data::DataSet{PKPDProfile}, range::ElimRange, sort::Dict)
     for i = 1:length(data)
         if sort ∈ data[i].subject.sort
             applyelimrange!(data[i], range)

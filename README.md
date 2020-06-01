@@ -117,15 +117,15 @@ ci = meanci(30, 10, 30, alpha = 0.05, method=:norm)
 #### NCA
 ```
 using CSV, DataFrames, ClinicalTrialUtilities
-pkdata2 = CSV.File("pkdata.csv") |> DataFrame
-pkds    = pkimport(pkdata2, [:Subject, :Formulation]; time = :Time, conc = :Concentration)
+pkdatapath = joinpath(dirname(pathof(ClinicalTrialUtilities)))*"\\..\\test\\csv\\pkdata2.csv"
+pkdata  = CSV.File(pkdatapath) |> DataFrame
+pkds    = pkimport(pkdata, [:Subject, :Formulation]; time = :Time, conc = :Concentration)
 pk      = nca!(pkds)
 ncadf   = DataFrame(pk; unst = true)
 ds      = ClinicalTrialUtilities.descriptive(ncadf, stats = [:n, :mean, :sd], sort = [:Formulation])
 dsdf    = ClinicalTrialUtilities.DataFrame(ds; unst = true)
 
 ```
-
 #### Randomization
 ```
 using DataFrames, ClinicalTrialUtilities
