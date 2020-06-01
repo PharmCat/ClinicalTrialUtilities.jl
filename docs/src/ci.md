@@ -29,7 +29,7 @@ ClinicalTrialUtilities.orpropci
 ClinicalTrialUtilities.meanci
 ```
 
-### .diffmeanci
+### diffmeanci
 ```@docs
 ClinicalTrialUtilities.diffmeanci
 ```
