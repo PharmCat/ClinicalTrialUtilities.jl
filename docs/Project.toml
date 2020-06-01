@@ -1,7 +1,12 @@
 [deps]
 Documenter = "e30172f5-a6a5-5a46-863b-614d45cd2de4"
+DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
+CSV = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
+Plots = "91a5bcdd-55d7-5caf-9e0b-520d859cae80"
 
 [compat]
 
-Documenter = "0.23"
-
+Documenter = "0.23, 0.24"
+DataFrames = "0.19, 0.20"
+CSV = "0.5, 0.6"
+Plots = "1.2, 1.3"
