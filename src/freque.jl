@@ -130,6 +130,47 @@ function contab(data::DataFrame, sort; row::Symbol, col::Symbol)
     return DataSet(result)
 end
 
+"""
+    mcnmcontab
+"""
+function mcnmcontab(data::DataFrame; row::Symbol, col::Symbol, sort = Dict())::McnmConTab
+    clist = unique(data[:, col])
+    rlist = unique(data[:, row])
+    cn    = length(clist)
+    rn    = length(rlist)
+    dfs   = Matrix{Int}(undef, rn, cn)
+    for ri = 1:rn
+        rowl  = data[data[:, row] .== rlist[ri], col]
+        for ci = 1:cn
+            cnt = count(x -> x == clist[ci], rowl)
+            dfs[ri, ci] = cnt
+        end
+    end
+    return McnmConTab(dfs, sort)
+end
+"""
+    mcnmcontab
+"""
+function mcnmcontab(data::DataFrame, sort; row::Symbol, col::Symbol)
+    slist  = unique(data[:, sort])
+    clist  = unique(data[:, col])
+    rlist  = unique(data[:, row])
+    rcv    = [row, col]
+    result = Vector{McnmConTab}(undef, size(slist, 1))
+    tempdf = DataFrame(row = Vector{eltype(data[!, row])}(undef, 0), col = Vector{eltype(data[!, col])}(undef, 0))
+    rename!(tempdf, rcv)
+    for si = 1:size(slist, 1)
+        if size(tempdf, 1) > 0 deleterows!(tempdf, 1:size(tempdf, 1)) end
+        for i = 1:size(data, 1)
+            if data[i, sort] == slist[si, :]
+                push!(tempdf, data[i, rcv])
+            end
+        end
+        result[si] = mcnmcontab(tempdf, row = row, col = col, sort = Dict(sort .=> collect(slist[si, :])))
+    end
+    return DataSet(result)
+end
+
 
 function pirson(a::Matrix{Int})
     n   = length(a[:,1])
