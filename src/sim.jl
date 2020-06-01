@@ -56,3 +56,25 @@ function ctsim(t::CTask{DiffProportion{P, P}, D, H, Power}; nsim = 100, seed=0, 
     end
     return pow/nsim
 end
+
+#Means
+"""
+    ctsim(t::CTask{DiffMean{M, M}, D, H, Power}; nsim = 100, seed=0, method = :default, dropout = 0.0)  where M <: Mean where D where H
+
+Means power simulation.
+
+"""
+function ctsim(t::CTask{P, D, H, Power}; nsim = 100, seed=0, method = :default, dropout = 0.0)  where P <: DiffMean where D where H
+    if seed != 0  Random.seed!(seed) end
+    n₁      = getval(t.objective)
+    n₂      = Int(ceil(getval(t.objective) / t.k))
+    pow     = 0
+
+    for i = 1:nsim
+        n1      = rand(ZDIST, n₁) .* t.param.a.sd .+ getval(t.param.a)
+        n2      = rand(ZDIST, n₂) .* t.param.b.sd .+ getval(t.param.b)
+        ci      = confint(DiffMean(Mean(n1), Mean(n2)); level = 1.0 - t.alpha * 2, method = method)
+        if  checkhyp(t.hyp, ci) pow += 1 end
+    end
+    return pow/nsim
+end
