@@ -46,7 +46,7 @@ function one_proportion_equality(p₀::Real, p₁::Real, α::Real, β::Real)::Fl
     return p₀*(1 - p₀)*((quantile(ZDIST, 1 - α / 2)+quantile(ZDIST, 1 - β))/(p₀ - p₁))^2
 end
 function one_proportion_equivalence(p₀::Real, p₁::Real, δ::Real, α::Real, β::Real)::Float64
-    return p₀*(1 - p₀)*((quantile(ZDIST, 1 - α)+quantile(ZDIST, 1 - β / 2))/(abs(p₀ - p₁) - δ))^2
+    return p₀*(1 - p₀)*((quantile(ZDIST, 1 - α) + quantile(ZDIST, 1 - β / 2))/(abs(p₀ - p₁) - δ))^2
 end
 function one_proportion_superiority(p₀::Real, p₁::Real, δ::Real, α::Real, β::Real)::Float64
     return p₀*(1 - p₀)*((quantile(ZDIST, 1 - α)+quantile(ZDIST, 1 - β))/(p₀ - p₁ - δ))^2

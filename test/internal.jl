@@ -66,6 +66,7 @@ end
     p2 = ClinicalTrialUtilities.DiffProportion(0.2, ClinicalTrialUtilities.Proportion(0.1))
     p3 = ClinicalTrialUtilities.DiffProportion(0.2, 0.1)
     @test ClinicalTrialUtilities.getval(p1) == ClinicalTrialUtilities.getval(p2) == ClinicalTrialUtilities.getval(p3)
+    #@test ClinicalTrialUtilities.getval(p1 + p2) == (p1.x + p2.x)/(p1.n + p2.n)
 end
 
 @testset "  Means        " begin

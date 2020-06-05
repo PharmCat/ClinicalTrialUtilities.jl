@@ -26,7 +26,9 @@ end
 function getval(p::Proportion)
     return p.val
 end
-
+function Base.:+(a::Proportion{true}, b::Proportion{true})
+    return Proportion(a.x + b.x, a.n + b.n)
+end
 #function getval(p::Probability)
 #    return p.p
 #end

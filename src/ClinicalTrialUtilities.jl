@@ -129,6 +129,7 @@ setkelauto!,
 getkelauto,
 # Simulation
 ctsim,
+besim,
 #Plots
 pkplot,
 pkplot!
