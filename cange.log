@@ -1,5 +1,14 @@
 v0.2.8
   - update test
+  - Move alpha from CTask to Hypothesis
+  - besim method for bioequivalence simulation
+  - checkhyp changed for simulations methods
+  - minor changes in text output
+  - theo test dataset; theo :luld AUClast test
+  - TaskResult changes: field result -> res, t.result returns t.res[:result]
+  - simulation hypothesis generalization
+  - minor changes in power formulas: predict negative power
+  - code cosmetics
 
 v0.2.7
   - setkelauto!

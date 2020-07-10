@@ -946,6 +946,7 @@ println(" ---------------------------------- ")
 
     # The Theoph dataset: 132 observations from 12 subjects
     # see also  https://github.com/asancpt/NonCompart-tests/blob/master/docs/validation_0.4.4.pdf
+    # https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6989226/
 
     pkds = ClinicalTrialUtilities.pkimport(theodata, [:Subject]; conc = :conc, time = :Time)
     pk   = ClinicalTrialUtilities.nca!(pkds; calcm = :luld)
@@ -1039,7 +1040,4 @@ println(" ---------------------------------- ")
     print(io, pdds[1])
     print(io, pd)
     print(io, pd[1])
-
-
-
 end
