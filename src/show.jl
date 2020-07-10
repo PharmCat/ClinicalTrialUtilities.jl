@@ -129,6 +129,9 @@ end
 function showresult(io, obj::TaskResult{CT}) where CT <:  CTask{T, D, H, O} where T where D <: Crossover where H where O <: SampleSize
         println(io, "Sample size: $(ceil(obj.result))")
 end
+function showresult(io, obj::TaskResult{CT}) where CT <:  CTask{T, D, H, O} where T where D <: Crossover where H <: Bioequivalence where O <: SampleSize
+        println(io, "Sample size: $(ceil(obj.result)) (Power: $(round(obj.res[:pow], sigdigits = 4)))")
+end
 function showresult(io, obj::TaskResult{CT})  where CT <:  CTask{T, D, H, O} where T where D <: Parallel where H where O <: SampleSize
         println(io, "Sample size (k=$(obj.task.k)):")
         println(io, "  Group A: ", ceil(obj.result * obj.task.k), "  Group B: ", ceil(obj.result))

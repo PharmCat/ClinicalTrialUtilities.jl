@@ -478,7 +478,7 @@ function besamplen(;alpha::Real=0.05, beta::Real=0.2, theta0::Real=0.95, theta1:
     task = CTask(DiffMean(Mean(theta0, sd), Mean(0, sd)), Crossover(design), Bioequivalence(theta1, theta2, alpha), SampleSize(beta))
 
     estn, estpow = samplentostint(alpha, theta1, theta2, theta0, sd, beta, design, method)
-    return TaskResult(task, method, estn)
+    return TaskResult(task, method, Dict(:result => estn, :pow => estpow))
 end
 
 function besamplen(t::CTask; method::Symbol = :owenq)
@@ -490,7 +490,7 @@ function besamplen(t::CTask; method::Symbol = :owenq)
     θ₂     = t.hyp.ulim
     δ      = t.param.a.m - t.param.b.m
     estn, estpow = samplentostint(α, θ₁, θ₂, δ, σ, β, design, method)
-    return TaskResult(t, method, estn)
+    return TaskResult(t, method, Dict(:result => estn, :pow => estpow))
 end
 
 #-------------------------------------------------------------------------------
