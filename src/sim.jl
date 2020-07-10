@@ -41,7 +41,7 @@ end
 Proportion difference power simulation.
 
 """
-function ctsim(t::CTask{DiffProportion{P, P}, D, H, Power}; nsim = 100, seed=0, method = :default, dropout = 0.0)  where P <: Proportion where D where H <: Superiority
+function ctsim(t::CTask{DiffProportion{P, P}, D, H, Power}; nsim = 100, seed=0, method = :default, dropout = 0.0)  where P <: Proportion where D where H <: AbstractHypothesis
     if seed != 0  Random.seed!(seed) end
     n₁      = getval(t.objective)
     n₂      = Int(ceil(getval(t.objective) / t.k))
@@ -49,9 +49,9 @@ function ctsim(t::CTask{DiffProportion{P, P}, D, H, Power}; nsim = 100, seed=0, 
     D₁      = Binomial(n₁, getval(t.param.a))
     D₂      = Binomial(n₂, getval(t.param.b))
     for i = 1:nsim
-        n1      = rand(D₁)
-        n2      = rand(D₂)
-        if  checkhyp(t.hyp, DiffProportion(Proportion(n1, getval(t.objective)), Proportion(n2, getval(t.objective))); method = method) pow += 1 end
+        xn₁      = rand(D₁)
+        xn₂      = rand(D₂)
+        if  checkhyp(t.hyp, DiffProportion(Proportion(xn₁, n₁), Proportion(xn₂, n₂)); method = method) pow += 1 end
     end
     return pow/nsim
 end

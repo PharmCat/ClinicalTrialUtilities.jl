@@ -700,9 +700,9 @@ end
     function meandiffev(m1::Real, σ²1::Real, n1::Real, m2::Real, σ²2::Real, n2::Real, alpha::Real)::ConfInt
         diff   = float(m1 - m2)
         stddev = sqrt(((n1 - 1) * σ²1 + (n2 - 1) * σ²2) / (n1 + n2 - 2))
-        stderr = stddev * sqrt(1/n1 + 1/n2)
-        d      = stderr*quantile(TDist(n1+n2-2), 1-alpha/2)
-        return ConfInt(diff-d, diff+d, diff, alpha)
+        stderr = stddev * sqrt(1 / n1 + 1 / n2)
+        d      = stderr * quantile(TDist(n1 + n2 - 2), 1 - alpha / 2)
+        return ConfInt(diff - d, diff + d, diff , alpha)
     end
     function meandiffev(a1::AbstractVector{T}, a2::AbstractVector{S}, alpha::Real)::ConfInt where {T<:Real,S<:Real}
         return meandiffev(mean(a1), var(a1), length(a1), mean(a2), var(a2), length(a2), alpha)
@@ -714,8 +714,8 @@ end
         diff   = float(m1 - m2)
         v      = (σ²1 / n1 + σ²2 / n2)^2 /( σ²1^2 / n1^2 / (n1 - 1) + σ²2^2 / n2^2 / (n2 - 1))
         stderr = sqrt(σ²1 / n1 + σ²2 / n2)
-        d      = stderr*quantile(TDist(v), 1-alpha/2)
-        return ConfInt(diff-d, diff+d, diff, alpha)
+        d      = stderr * quantile(TDist(v), 1 - alpha / 2)
+        return ConfInt(diff - d, diff + d, diff, alpha)
     end
     function meandiffuv(a1::AbstractVector{T}, a2::AbstractVector{S}, alpha::Real)::ConfInt where {T<:Real,S<:Real}
         return meandiffuv(mean(a1), var(a1), length(a1), mean(a2), var(a2), length(a2), alpha)

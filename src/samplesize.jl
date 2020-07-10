@@ -24,8 +24,19 @@ end
 struct TaskResult{T <: AbstractTask}
     task::T
     method::Symbol
-    result
+    res::Dict
+    function TaskResult(t::T, method::Symbol, result::Dict) where T <: AbstractTask
+        new{typeof(t)}(t, method, result)
+    end
+    function TaskResult(t::T, method::Symbol, result::R) where T <: AbstractTask where R <: Real
+        new{typeof(t)}(t, method, Dict(:result => result))
+    end
 end
+
+@inline function Base.getproperty(t::TaskResult, f::Symbol)
+    if f == :result return t.res[:result] else return getfield(t, f) end
+end
+
 
 struct TaskEstimate
     est

@@ -55,7 +55,7 @@ function checkhyp(h::Superiority, param; method::Symbol = :default)
     ci.lower > h.diff
 end
 function checkhyp(h::Equivalence, param; method::Symbol = :default)
-    ci = confint(param; level = 1.0 - h.alpha, method = method)
+    ci = confint(param; level = 1.0 - h.alpha * 2, method = method)
     ci.lower > h.llim && ci.upper < h.ulim
 end
 function checkhyp(h::Equality, param; method::Symbol = :default)
