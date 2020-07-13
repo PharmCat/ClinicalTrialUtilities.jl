@@ -8,6 +8,9 @@ v0.2.8
   - TaskResult changes: field result -> res, t.result returns t.res[:result]
   - simulation hypothesis generalization
   - minor changes in power formulas: predict negative power
+  - simulation bug: fix Equivalence checkhyp
+  - changes in Show
+  - documenting
   - code cosmetics
 
 v0.2.7
