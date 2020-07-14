@@ -2,6 +2,24 @@
 
 ## Proportions
 
+### One proportion
+
+P = n / x
+
+where n - number of outcomes; x - number of observations.
+
+### Absolute risk difference
+
+Diff(𝛿) = P₁ - P₂ = n₁ / x₁ - n₂ / x₂
+
+### Risk Ratio
+
+RR = P₁ / P₂ = (n₁ / x₁) - (n₂ / x₂)
+
+### Odd Ratio
+
+OR = (n₁ / (x₁ - n₁)) - (n₂ / (x₂ - n₂))
+
 ### propci
 ```@docs
 ClinicalTrialUtilities.propci

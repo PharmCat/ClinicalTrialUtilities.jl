@@ -14,12 +14,16 @@ struct ConfInt
     upper::Real
     estimate::Real
     alpha::Real
+    #method::Symbol
     function ConfInt(lower, upper, estimate)
         new(lower, upper, estimate, NaN)::ConfInt
     end
     function ConfInt(lower, upper, estimate, alpha)
         new(lower, upper, estimate, alpha)::ConfInt
     end
+    #function ConfInt(lower, upper, estimate, alpha, method)
+    #    new(lower, upper, estimate, alpha, method)::ConfInt
+    #end
 end
 
 function getindex(a::ConfInt, b::Int)
@@ -67,6 +71,43 @@ function StatsBase.confint(param::Mean; level = 0.95, method = :default)::ConfIn
 end
 function StatsBase.confint(param::DiffMean{true}; level = 0.95, method = :default)::ConfInt where T <: Mean
     diffmeanci(param.a.m, param.a.sd^2, param.a.n, param.b.m, param.b.sd^2, param.b.n; alpha = 1 - level, method = method)
+end
+
+"""
+
+P value.
+"""
+function pval(param::DiffProportion{Proportion{true}, Proportion{true}}, hyp::Equivalence; method = :default, atol = 1E-6)
+    basepval(param, hyp; method = method, atol = atol)
+end
+function pval(param::DiffProportion{Proportion{true}, Proportion{true}}, hyp::Superiority; method = :default, atol = 1E-6)
+    basepval(param, hyp; method = method, atol = atol)
+end
+function pval(param::DiffProportion{Proportion{true}, Proportion{true}}, hyp::Equality; method = :default, atol = 1E-6)
+    basepval(param, hyp; method = method, atol = atol)
+end
+function basepval(param::T, hyp::Equivalence; method = :default, atol = 1E-6) where T <: AbstractParameter
+    fx = x -> hyp.llim - confint(param; level = 1 - x, method = method).lower
+    p1 = find_zero(fx, (1-eps(), eps()), atol = atol)/2
+    fx = x -> hyp.ulim - confint(param; level = 1 - x, method = method).upper
+    p2 = find_zero(fx, (1-eps(), eps()), atol = atol)/2
+    max(p1, p2)
+end
+function basepval(param::T, hyp::Superiority; method = :default, atol = 1E-6) where T <: AbstractParameter
+    if confint(param; method = method).estimate > hyp.diff
+        fx = x -> hyp.diff - confint(param; level = 1 - x, method = method).lower
+        return find_zero(fx, (1-eps(), eps()), atol = atol)/2
+    else return 1.0 end
+end
+function basepval(param::T, hyp::Equality; method = :default, atol = 1E-6) where T <: AbstractParameter
+    if confint(param; method = method).estimate > hyp.val
+        fx = x -> hyp.val - confint(param; level = 1 - x, method = method).lower
+        p = find_zero(fx, (1-eps(), eps()), atol = atol)
+    else
+        fx = x -> hyp.val - confint(param; level = 1 - x, method = method).upper
+        p = find_zero(fx, (1-eps(), eps()), atol = atol)
+    end
+    p
 end
 """
     propci(x::Int, n::Int; alpha=0.05, method = :default)::ConfInt
@@ -534,28 +575,28 @@ end
     #Method of Mee 1984 with Miettinen and Nurminen modification n / (n - 1) Newcombe 1998
     #Score intervals for the difference of two binomial proportions
     #6
-    function propdiffmnci(x1::Int, n1::Int, x2::Int, n2::Int, alpha::Real)::ConfInt
+    function propdiffmnci(x1::Int, n1::Int, x2::Int, n2::Int, alpha::Real; atol::Float64 = 1E-6)::ConfInt
         ci       = propdiffnhsccci(x1, n1, x2, n2, alpha) #approx zero bounds
         p1       = x1/n1
         p2       = x2/n2
         estimate = p1 - p2
         z        = quantile(Chisq(1), 1-alpha)
         fmnd(x)  = mndiffval(p1, n1, p2, n2, estimate, x) - z
-        if fmnd(ci.lower)*fmnd(estimate-1e-8) < 0.0
+        if fmnd(ci.lower)*fmnd(estimate-eps()) < 0.0
             ll = ci.lower
-            lu = estimate-1e-8
+            lu = estimate-eps()
         else
-            ll = -1.0+1e-8
+            ll = -1.0+eps()
             lu = ci.lower
         end
-        if fmnd(ci.upper)*fmnd(estimate+1e-8) < 0.0
-            ul = estimate+1e-8
+        if fmnd(ci.upper)*fmnd(estimate+eps()) < 0.0
+            ul = estimate+eps()
             uu = ci.upper
         else
             ul = ci.upper
-            uu = 1.0-1e-8
+            uu = 1.0-eps()
         end
-        return ConfInt(find_zero(fmnd, (ll, lu), atol=1E-6), find_zero(fmnd, (ul, uu), atol=1E-6), estimate, alpha)
+        return ConfInt(find_zero(fmnd, (ll, lu), atol = atol), find_zero(fmnd, (ul, uu), atol = atol), estimate, alpha)
     end
     @inline function mndiffval(p1::Real, n1::Int, p2::Real, n2::Int, estimate::Real, Δ::Real)::AbstractFloat
         return (estimate-Δ)^2/((n1+n2)/(n1+n2-1)*mlemndiff(p1, n1, p2, n2, Δ))

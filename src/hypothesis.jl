@@ -44,6 +44,12 @@ struct Superiority <: AbstractHypothesis
     llim::Real          #Lower lmit for Test group
     diff::Real          #Margin difference
     alpha::Real
+    function Superiority(llim, diff, alpha)
+        new(llim, diff, alpha)::Superiority
+    end
+    function Superiority(diff, alpha)
+        new(diff, diff, alpha)::Superiority
+    end
 end
 function refval(h::Superiority)
     h.llim - h.diff

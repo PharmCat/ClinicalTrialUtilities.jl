@@ -188,18 +188,18 @@ Clinical trial sample size estimation.
 - :or - Odd Ratio;
 
 **type (Hypothesis type):**
-- :ea - Equality;
-- :ei - Equivalencens;
-- :ns - Non-Inferiority / Superiority (!one-sided hypothesis!);
+- :ea - Equality (two-sided hypothesis, 100\\*(1 - α)% CI);
+- :ei - Equivalence (two-sided hypothesis, 100\\*(1 - **2\\*α**)% CI);
+- :ns - Non-Inferiority / Superiority (one-sided hypothesis, 100\\*(1 - α)% CI);
 - :mcnm - McNemar's Equality test;
 
 **group (group num):**
 - :one - One sample;
 - :two - Two sample, result is for one group, second group size = n * k;
 
-**alpha** - Alpha (o < α < 1)  (default=0.05);
+**alpha** - Alpha (o < α < 1)  (default = 0.05);
 
-**beta** - Beta (o < β < 1) (default=0.2); power = 1 - β;
+**beta** - Beta (o < β < 1) (default = 0.2); power = 1 - β;
 
 **diff** - difference/equivalence margin/non-inferiority/superiority margin;
 
@@ -313,16 +313,16 @@ Clinical trial power estimation.
 - :or   - Odd Ratio;
 
 **type (Hypothesis type):**
-- :ea   - Equality;
-- :ei   - Equivalence;
-- :ns   - Non-Inferiority / Superiority;
+- :ea - Equality (two-sided hypothesis, 100\\*(1 - α)% CI);
+- :ei - Equivalence (two-sided hypothesis, 100\\*(1 - **2\\*α**)% CI);
+- :ns - Non-Inferiority / Superiority (one-sided hypothesis, 100\\*(1 - α)% CI);
 - :mcnm - McNemar's Equality test;
 
 **group (group num):**
 - :one - one sample;
 - :two - Two sample;
 
-**alpha** - Alpha (0 < α < 1)  (default=0.05);
+**alpha** - Alpha (0 < α < 1)  (default = 0.05);
 
 **n** - Subjects number;
 
@@ -426,7 +426,7 @@ end
 
 Bioequivalence sample size estimation.
 
-**alpha** - Alpha (o < α < 1)  (default=0.05);
+**alpha** - Alpha (o < α < 1)  (default = 0.05);
 
 **beta** - Beta (o < β < 1) (default=0.2); power = 1 - β;
 
@@ -502,13 +502,13 @@ end
 
 Bioequivalence power estimation.
 
-**alpha** - Alpha (0 < α < 1)  (default=0.05);
+**alpha** - Alpha (0 < α < 1)  (default = 0.05);
 
-**theta1** - Lower Level (default=0.8);
+**theta1** - Lower Level (default = 0.8);
 
-**theta2** - Upper level (default=1.25);
+**theta2** - Upper level (default = 1.25);
 
-**theta0** - T/R Ratio (default=0.95);
+**theta0** - T/R Ratio (default = 0.95);
 
 **cv** - coefficient of variation;
 

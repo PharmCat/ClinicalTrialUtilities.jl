@@ -41,10 +41,10 @@ include("proportion.jl")
 
 include("means.jl")
 
+include("hypothesis.jl")
+
 #Confidence interval calculation
 include("ci.jl")
-
-include("hypothesis.jl")
 
 #Owen function calc: owensQ, owensQo, ifun1, owensTint2, owensT, tfn
 include("owensq.jl")

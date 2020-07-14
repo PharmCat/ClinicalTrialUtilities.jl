@@ -34,7 +34,7 @@ function samplentostint(α::Real, θ₁::Real, θ₂::Real, δ::Real, σ::Real, 
 
     d     = Design(design) #dffunc if generic funtion with 1 arg return df
     df    = d.df(n₀)
-    σ̵ₓ    = σ*sediv(d, n₀)
+    σ̵ₓ    = σ * sediv(d, n₀)
     if df < 1 throw(ArgumentError("powertostint: df < 1")) end
 
     powertostf = powertostintf(method) #PowerTOST function
