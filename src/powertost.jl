@@ -24,10 +24,9 @@ function samplentostint(α::Real, θ₁::Real, θ₂::Real, δ::Real, σ::Real, 
     td = (θ₁ + θ₂)/2
     rd = abs(θ₁ - θ₂)/2
 
-    #if rd <= 0 return false end
     d0 = δ - td
     #approximate n
-    n₀::Int = convert(Int, ceil(two_mean_equivalence(0, d0, σ, rd, α, β, 1) / 2) * 2)
+    n₀::Int = convert(Int, ceil(two_mean_equivalence(0, d0, sqrt(σ^2*2), rd, α, β, 1)) * 2)
     tp = 1 - β  #target power
     if n₀ < 4 n₀ = 4 end
     if n₀ > 5000 n₀ = 5000 end
@@ -47,7 +46,6 @@ function samplentostint(α::Real, θ₁::Real, θ₂::Real, δ::Real, σ::Real, 
             np   = n₀
             powp = pow
             n₀   = n₀ - 2
-            #pow = powerTOST(;alpha=alpha, logscale=false, theta1=ltheta1, theta2=ltheta2, theta0=diffm, cv=se, n=n0, design=design, method=method)
             if n₀ < 4 break end #n0, pow end
             df    = d.df(n₀)
             σ̵ₓ    = σ*sediv(d, n₀)
@@ -60,7 +58,6 @@ function samplentostint(α::Real, θ₁::Real, θ₂::Real, δ::Real, σ::Real, 
             np   = n₀
             powp = pow
             n₀   = n₀ + 2
-            #pow = powerTOST(;alpha=alpha, logscale=false, theta1=ltheta1, theta2=ltheta2, theta0=diffm, cv=se, n=n0, design=design, method=method)
             df    = d.df(n₀)
             σ̵ₓ    = σ*sediv(d, n₀)
             pow = powertostf(α, θ₁, θ₂, δ, σ̵ₓ, df)
@@ -110,21 +107,12 @@ function powertost_owenq(α::Real, θ₁::Real, θ₂::Real, δ::Real, σ̵ₓ::
     if df > 10000
         #tval = qnorm(1-alpha)
         tval  = quantile(ZDIST, 1 - α)
-        #p1   = pnorm(tval-delta1)
-        #p1    = cdf(ZDIST,  tval - delta1)
-        #p2   = pnorm(-tval-delta2)
-        #p2    = cdf(ZDIST, -tval - delta2)
-        #pwr   = p2 - p1
         return max(0, (cdf(ZDIST, -tval - delta2) - cdf(ZDIST,  tval - delta1)))
         #if pwr > 0 return pwr else return 0 end
     elseif df >= 5000
         # approximation via non-central t-distribution
         return powertost_nct(α, θ₁, θ₂, δ, σ̵ₓ, df)
     else
-    #p1  = owensq(df, tval, delta1, 0.0, R)
-    #p2  = owensq(df,-tval, delta2, 0.0, R)
-    #pwr = p2 - p1
-    #if pwr > 0 return pwr else return 0 end
         return max(0, (owensq(df, -tval, delta2, 0.0, R) - owensq(df, tval, delta1, 0.0, R)))
     end
 end #powerTOSTOwenQ

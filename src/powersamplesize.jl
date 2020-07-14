@@ -53,13 +53,13 @@ function one_proportion_superiority(p₀::Real, p₁::Real, δ::Real, α::Real, 
 end
 #Two Sample
 function two_proportion_equality(p₀::Real, p₁::Real, α::Real, β::Real, k::Real)::Float64
-    return (p₀*(1-p₀)/k+p₁*(1-p₁))*((quantile(ZDIST, 1 - α / 2) + quantile(ZDIST, 1 - β))/(p₀-p₁))^2
+    return (p₀ * (1 - p₀) / k + p₁ * (1 - p₁)) * ((quantile(ZDIST, 1 - α / 2) + quantile(ZDIST, 1 - β))/(p₀-p₁))^2
 end
 function two_proportion_equivalence(p₀::Real, p₁::Real, δ::Real, α::Real, β::Real, k::Real)::Float64
-    return (p₀*(1-p₀)/k+p₁*(1-p₁))*((quantile(ZDIST, 1 - 2 * α)+quantile(ZDIST, 1 - β / 2))/(δ - abs(p₀-p₁)))^2
+    return (p₀ * (1 - p₀)/k + p₁ * (1 - p₁)) * ((quantile(ZDIST, 1 - 2 * α)+quantile(ZDIST, 1 - β / 2))/(δ - abs(p₀-p₁)))^2
 end
 function two_proportion_superiority(p₀::Real, p₁::Real, δ::Real, α::Real, β::Real, k::Real)::Float64
-    return (p₀*(1-p₀)/k+p₁*(1-p₁))*((quantile(ZDIST, 1 - α)+quantile(ZDIST, 1 - β))/(p₀-p₁-δ))^2
+    return (p₀ *(1 - p₀) / k + p₁ *(1 - p₁)) * ((quantile(ZDIST, 1 - α)+quantile(ZDIST, 1 - β))/(p₀-p₁-δ))^2
 end
 #Crossover
 function co_proportion_equality(seq, σ::Real, ϵ::Real, α::Real, β::Real)
@@ -74,16 +74,16 @@ end
 
 #Odd ratio Chow S, Shao J, Wang H. 2008. Sample Size Calculations in Clinical Research. 2nd Ed. Chapman & Hall/CRC Biostatistics Series.
 function or_equality(p₀::Real, p₁::Real, α::Real, β::Real, k::Real)::Float64
-    OR=p₀*(1-p₁)/p₁/(1-p₀)
-    return (1/k/p₀/(1-p₀)+1/p₁/(1-p₁))*((quantile(ZDIST, 1-α/2)+quantile(ZDIST, 1 - β))/log(OR))^2
+    OR = p₀ * (1 - p₁) / p₁ /(1 - p₀)
+    return (1 / k / p₀ / (1 - p₀) + 1 / p₁ / (1 - p₁)) * ((quantile(ZDIST, 1-α/2)+quantile(ZDIST, 1 - β))/log(OR))^2
 end
 function or_equivalence(p₀::Real, p₁::Real, δ::Real, α::Real, β::Real, k::Real)::Float64
     OR = p₀ * (1 - p₁) / p₁ / (1 - p₀)
-    return (1/k/p₀/(1-p₀)+1/p₁/(1-p₁))*((quantile(ZDIST, 1 - 2 * α)+quantile(ZDIST, 1 - β / 2))/(log(OR) - δ))^2
+    return (1 / k / p₀ / (1 - p₀) + 1 / p₁ / (1 - p₁)) * ((quantile(ZDIST, 1 - 2 * α)+quantile(ZDIST, 1 - β / 2))/(log(OR) - δ))^2
 end
 function or_superiority(p₀::Real, p₁::Real, δ::Real, α::Real, β::Real, k::Real)::Float64
-    OR=p₀*(1-p₁)/p₁/(1-p₀)
-    return (1/k/p₀/(1-p₀)+1/p₁/(1-p₁))*((quantile(ZDIST, 1 - α)+quantile(ZDIST, 1 - β))/(log(OR)-δ))^2
+    OR = p₀ *(1 - p₁) / p₁ / (1 - p₀)
+    return (1 / k / p₀ / (1 - p₀) + 1 / p₁ / (1 - p₁)) * ((quantile(ZDIST, 1 - α)+quantile(ZDIST, 1 - β))/(log(OR)-δ))^2
 end
 
 #Connor R. J. 1987. Sample size for testing differences in proportions for the paired-sample design. Biometrics 43(1):207-211. page 209.
