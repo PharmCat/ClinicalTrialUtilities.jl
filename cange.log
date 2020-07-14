@@ -1,4 +1,4 @@
-v0.2.8
+v0.3.0
   - update test
   - Move alpha from CTask to Hypothesis
   - besim method for bioequivalence simulation
@@ -9,6 +9,7 @@ v0.2.8
   - simulation hypothesis generalization
   - minor changes in power formulas: predict negative power
   - simulation bug: fix Equivalence checkhyp
+  - pval: experimental function
   - changes in Show
   - documenting
   - code cosmetics
