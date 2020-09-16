@@ -51,23 +51,23 @@ Power: 0.312274
 
 t      = ClinicalTrialUtilities.ctask(param=:mean, hyp=:ei, group=:two, alpha=0.05, n = 108, sd=10, diff=5, a=5, b=4, k=1)
 result = ClinicalTrialUtilities.ctsim(t; nsim = 1000, seed = 1234)
-@test result == 0.885 # sulution 0.809
+@test result == 0.885
 Base.show(io, t)
 #=
-    julia> ClinicalTrialUtilities.ctpower(t)
-                Power Estimation
-    -----------------------------------------
-      Parameter type: Mean Difference
-      Design: Parallel
-      Hypothesis: Equivalence
-      H₀: |A − B| ≥ 5.0
-      Hₐ: |A − B| < 5.0
-      Alpha: 0.05
-      N: 108
-      A Mean(SD): 5 ± 10
-      B Mean(SD): 4 ± 10
-    -----------------------------------------
-    Power: 0.804524
+julia> ClinicalTrialUtilities.ctpower(t)
+            Power Estimation
+-----------------------------------------
+  Parameter type: Mean Difference
+  Design: Parallel
+  Hypothesis: Equivalence
+  H₀: |A − B| ≥ 5.0
+  Hₐ: |A − B| < 5.0
+  Alpha: 0.05
+  N: 108
+  A Mean(SD): 5 ± 10
+  B Mean(SD): 4 ± 10
+-----------------------------------------
+Power: 0.902674
 =#
 
 #---
@@ -104,7 +104,7 @@ ClinicalTrialUtilities.Parallel(),
 ClinicalTrialUtilities.Equivalence(-0.2, 0.2, 0.05),
 ClinicalTrialUtilities.Power(132), 1.0)
 result = ClinicalTrialUtilities.ctsim(t; nsim = 1000, seed = 1234)
-@test result == 0.894 # solution is 0.832
+@test result == 0.894
 Base.show(io, t)
 
 #=
@@ -121,7 +121,7 @@ julia> ClinicalTrialUtilities.ctpower(t)
   A: 75/100
   B: 80/100
 -----------------------------------------
-Power: 0.798978
+Power: 0.899422
 =#
 
 t      = ClinicalTrialUtilities.CTask(
@@ -151,7 +151,6 @@ Power: 0.319724
 =#
 
 #---
-
 
 t      = ClinicalTrialUtilities.ctask(param=:prop, hyp=:ei, group=:two, alpha=0.05, n = 135, diff = 0.15,  a=0.45, b=0.4, k=1)
 end
