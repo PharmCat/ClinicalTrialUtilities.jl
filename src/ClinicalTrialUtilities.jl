@@ -21,11 +21,23 @@ using Distributions, Random, Roots, QuadGK, RecipesBase, Reexport
 import SpecialFunctions
 import Base: show, findfirst, getproperty, showerror, getindex, length, in, iterate, eltype, deleteat!, findall
 import StatsBase.confint
-import DataFrames: DataFrame, DataFrames, names!, unstack, deleterows!, rename!
+import DataFrames: DataFrame, DataFrames, names!, unstack, deleterows!, rename!, AbstractDataFrame
 
-function lgamma(x)
-    return SpecialFunctions.logabsgamma(x)[1]
+try
+    methods(SpecialFunctions.logabsgamma)
+    global lgamma(x) = SpecialFunctions.logabsgamma(x)[1]
+catch
+    global lgamma(x) = SpecialFunctions.lgamma(x)
 end
+
+try
+    if collect(methods(DataFrames.delete!, (AbstractDataFrame, Any)))[1].file == Symbol("deprecated.jl")
+        DataFrames.delete!(df::AbstractDataFrame, inds) = deleterows!(df, inds)
+        println("!")
+    end
+catch
+end
+
 
 const ZDIST  = Normal()
 const LOG2   = log(2)

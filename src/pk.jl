@@ -885,7 +885,7 @@ function getdatai(data, sort, cols, func; sortby = nothing)
         datai[!, i] = Vector{eltype(data[!, i])}(undef, 0)
     end
     for i = 1:size(sortlist, 1)
-        if size(datai, 1) > 0 deleterows!(datai, 1:size(datai, 1)) end
+        if size(datai, 1) > 0 delete!(datai, 1:size(datai, 1)) end
         for c = 1:size(data, 1) #For each line in data
             if data[c, sort] == sortlist[i,:]
                 push!(datai, data[c, cols])
@@ -989,6 +989,15 @@ function pkimport(data::DataFrame; time::Symbol, conc::Symbol)::DataSet
     return DataSet([PKSubject(datai[!, time], datai[!, conc])])
 end
 
+"""
+    pkimport(time::Vector, conc::Vector; sort = Dict())::PKSubject
+
+Pharmacokinetics data import.
+
+- time - time vector;
+- conc - concentration vector.
+
+"""
 function pkimport(time::Vector, conc::Vector; sort = Dict())::PKSubject
      PKSubject(time, conc; sort = sort)
 end
