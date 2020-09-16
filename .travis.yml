@@ -31,7 +31,7 @@ after_success:
 jobs:
   allow_failures:
     - os:
-        - linux
+        - windows
     - julia:
         - 1.4
         - 1.5
