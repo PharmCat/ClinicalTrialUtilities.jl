@@ -310,6 +310,10 @@ println(" ---------------------------------- ")
     @test_throws BoundsError pkds[20]
     @test_throws ArgumentError pkds[:Subject => 20]
     @test_throws ArgumentError pkds[Dict(:Subject => 20)]
+
+
+    #Type check
+    ClinicalTrialUtilities.besamplen(;theta0=0, theta1=-1, theta2=1, sd=2, logscale = false)
 end
 
 println(" ---------------------------------- ")
