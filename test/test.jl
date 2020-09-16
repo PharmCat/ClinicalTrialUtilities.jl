@@ -75,7 +75,7 @@ println(" ---------------------------------- ")
     Base.show(io, t)
     Base.show(io, t.task)
     #@test n == 3828 && round(p, digits=7) == 0.8001454
-    t = ClinicalTrialUtilities.besamplen(;theta0=0, theta1=-0.2, theta2=0.2, sd=2, alpha=0.01, beta=0.01, logscale=false, method=:owenq)
+    t = ClinicalTrialUtilities.besamplen(;theta0=0.0, theta1=-0.2, theta2=0.2, sd=2.0, alpha=0.01, beta=0.01, logscale=false, method=:owenq)
     @test ClinicalTrialUtilities.besamplen(t.task).result == 4810
     Base.show(io, t)
     Base.show(io, t.task)
