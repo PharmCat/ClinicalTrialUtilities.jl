@@ -1,4 +1,5 @@
 v0.3.0
+  - #44 , #45 , #46
   - update test
   - Move alpha from CTask to Hypothesis
   - besim method for bioequivalence simulation
