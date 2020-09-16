@@ -33,7 +33,6 @@ end
 try
     if collect(methods(DataFrames.delete!, (AbstractDataFrame, Any)))[1].file == Symbol("deprecated.jl")
         DataFrames.delete!(df::AbstractDataFrame, inds) = deleterows!(df, inds)
-        println("!")
     end
 catch
 end
