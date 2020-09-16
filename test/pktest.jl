@@ -944,6 +944,39 @@ println(" ---------------------------------- ")
     @test length(p) == 2
     p    = ClinicalTrialUtilities.pkplot(pkds[1])
 
+    # The Theoph dataset: 132 observations from 12 subjects
+    # see also  https://github.com/asancpt/NonCompart-tests/blob/master/docs/validation_0.4.4.pdf
+    # https://www.ncbi.nlm.nih.gov/pmc/articles/PMC6989226/
+
+    pkds = ClinicalTrialUtilities.pkimport(theodata, [:Subject]; conc = :conc, time = :Time)
+    pk   = ClinicalTrialUtilities.nca!(pkds; calcm = :luld)
+    df   = DataFrame(pk; unst = true)
+    @test round.(df[!, :AUClast], sigdigits = 6) == round.([ 147.2347485
+  88.7312755
+  95.8781978
+ 102.6336232
+ 118.1793538
+  71.6970150
+  87.9692274
+  86.8065635
+  83.9374360
+ 135.5760701
+  77.8934723
+ 115.2202082], sigdigits = 6)
+    #=
+    @test round.(df[!, :AUCinf], sigdigits = 6) == round.([214.9236316
+  97.3779346
+ 106.1276685
+ 114.2162046
+ 136.3047316
+  81.74333453119011 #82.1758833 #6 Rsq&
+ 100.9876292
+ 102.1533003
+  97.52000174742838 #97.5200039
+ 167.8600307
+  86.9026173
+ 125.8315397], sigdigits = 6)
+ =#
     # NaN PK LimitRule test
     nanpkdata.Concentration = ClinicalTrialUtilities.tryfloatparse!(nanpkdata.Concentration)
     pkds = ClinicalTrialUtilities.pkimport(nanpkdata, [:Subject, :Formulation]; conc = :Concentration, time = :Time)
@@ -1007,7 +1040,4 @@ println(" ---------------------------------- ")
     print(io, pdds[1])
     print(io, pd)
     print(io, pd[1])
-
-
-
 end

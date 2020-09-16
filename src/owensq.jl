@@ -8,13 +8,16 @@
 # general OwensQ function
 # https://github.com/Detlew/PowerTOST/blob/master/R/OwensQ.R#L52
 
-#pnorm = cdf(ZDIST,  )
-#dnorm = pdf(ZDIST, )
+
+#function owensqf(nu::Float64, t::Float64, delta::Float64, a::Float64, b::Float64)::Float64
+#    sqrt(2pi)/gamma(nu/2.0)/2.0^((nu-2.0)/2.0)*quadgk(x -> cdf(Normal(), t * x / sqrt(nu) - delta) * x ^ (nu - 1.0) * pdf(Normal(), x), a, b, rtol=1.0E-8)[1]
+#end
+
 function owensq(nu::Real, t::Real, delta::Real, a::Real, b::Real)::AbstractFloat
     if a < 0 return  throw(CTUException(1011,"owensQ: a can not be < 0")) end
     if a==b return(0) end
     if a > b return throw(CTUException(1012,"owensQ: a can not be > b")) end
-    if a > 0 return owensq(nu, t, delta, 0, b) - owensQ(nu, t, delta, 0, a)  end #not effective - double integration
+    if a > 0 return owensq(nu, t, delta, 0, b) - owensq(nu, t, delta, 0, a)  end #not effective - double integration
     if nu < 29 && abs(delta) > 37.62
         if isinf(b)
             return quadgk(x -> ifun1(x, nu, t, delta), 0, 1, rtol=1.0E-8)[1]
@@ -111,8 +114,6 @@ end
 #.Q.integrand
 @inline function owenstint2(x::Real, nu::Real, t::Real, delta::Real)::AbstractFloat
     if x == 0 return 0 end
-    #Qconst::Float64 = -((nu/2.0)-1.0)*log(2.0)-lgamma(nu/2.0)
-    #return sign(x)^(nu-1)*cdf(ZDIST,t*x/sqrt(nu)-delta)*exp((nu-1)*log(abs(x))-0.5*x^2+Qconst)
     return sign(x) ^ (nu - 1.0) * cdf(ZDIST, t * x / sqrt(nu) - delta) *
     exp((nu - 1.0) * log(abs(x)) - 0.5 * x ^ 2 -
     ((nu / 2.0) - 1.0) * LOG2 - lgamma(nu / 2.0))
@@ -144,8 +145,6 @@ function owenst(h::Real, a::Real)::AbstractFloat
     end
     aa = abs(a)
     if aa <= 1.0
-        #tha::Float64 = tfn(h, a)
-        #return tha
         return tfn(h, a)
     else
         ah   = aa * h
@@ -187,21 +186,6 @@ end #OwensT(h,a)
             x1 = x2
         end
     end
-        # 10 point Gaussian quadrature.
-        # original via loop
-
-        #rt::Float64 = r1::Float64 = r2::Float64 = 0
-
-        #r1::Float64 = 0
-        #r2::Float64 = 0
-        #=
-        for i in 1:ng
-            r1 = 1.0 + fxs * (0.5 + u[i]) ^ 2
-            r2 = 1.0 + fxs * (0.5 - u[i]) ^ 2
-            rt = rt + r[i] * (exp(xs * r1) / r1 + exp(xs * r2) / r2)
-        end
-        =#
-
         #Vectorized:
     r1 = 1.0 .+ fxs .* (0.5 .+ u) .^ 2
     r2 = 1.0 .+ fxs .* (0.5 .- u) .^ 2

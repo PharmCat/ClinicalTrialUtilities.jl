@@ -13,6 +13,9 @@ struct Mean{Bool} <: AbstractMean
     function Mean(m::Real)
         new{false}(m, NaN, 0)
     end
+    function Mean(v::Vector{T}) where T <: Real
+        new{true}(mean(v), sqrt(var(v)), length(v))
+    end
 end
 
 function getval(m::Mean)

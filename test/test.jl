@@ -75,7 +75,7 @@ println(" ---------------------------------- ")
     Base.show(io, t)
     Base.show(io, t.task)
     #@test n == 3828 && round(p, digits=7) == 0.8001454
-    t = ClinicalTrialUtilities.besamplen(;theta0=0, theta1=-0.2, theta2=0.2, sd=2, alpha=0.01, beta=0.01, logscale=false, method=:owenq)
+    t = ClinicalTrialUtilities.besamplen(;theta0=0.0, theta1=-0.2, theta2=0.2, sd=2.0, alpha=0.01, beta=0.01, logscale=false, method=:owenq)
     @test ClinicalTrialUtilities.besamplen(t.task).result == 4810
     Base.show(io, t)
     Base.show(io, t.task)
@@ -310,6 +310,10 @@ println(" ---------------------------------- ")
     @test_throws BoundsError pkds[20]
     @test_throws ArgumentError pkds[:Subject => 20]
     @test_throws ArgumentError pkds[Dict(:Subject => 20)]
+
+
+    #Type check
+    ClinicalTrialUtilities.besamplen(;theta0=0, theta1=-1, theta2=1, sd=2, logscale = false)
 end
 
 println(" ---------------------------------- ")
@@ -327,6 +331,42 @@ println(" ---------------------------------- ")
     @test ClinicalTrialUtilities.pirson(ClinicalTrialUtilities.ConTab([12 23; 22 33]))[4] ≈ 0.5856943077831229
 
     @test  ClinicalTrialUtilities.mcnmtest(ClinicalTrialUtilities.McnmConTab([12 23; 22 33]); cc = false) ≈ 0.022222222222222223
+
+    #= /*SAS Tesing code*/
+data effect;
+length Group $12 Response $3;
+input Group Response N;
+datalines;
+T          Yes  75
+T          No   25
+R         Yes  80
+R         No   20
+;
+
+proc freq data=effect order=data;
+   weight N;
+   tables Group*Response / riskdiff (EQUIV MARGIN=0.08) alpha=0.05;
+run;
+
+proc freq data=effect order=data;
+   weight N;
+   tables Group*Response / riskdiff (EQUAL(NULL=0)) alpha=0.05;
+run;
+
+proc freq data=effect order=data;
+   weight N;
+   tables Group*Response / riskdiff (NONINF MARGIN=0.15) alpha=0.05;
+run;
+=#
+    param = ClinicalTrialUtilities.DiffProportion(ClinicalTrialUtilities.Proportion(75, 100), ClinicalTrialUtilities.Proportion(80, 100))
+    hyp   = ClinicalTrialUtilities.Equivalence(-0.08, 0.08, 0.05)
+    hyp2 = ClinicalTrialUtilities.Equality(0.0, 0.05)
+    hyp3 = ClinicalTrialUtilities.Superiority(-0.15, 0.05)
+    @test  ClinicalTrialUtilities.pval(param, hyp; method = :wald, atol = 1E-6) ≈ 0.3054046630859374
+    @test  ClinicalTrialUtilities.pval(param, hyp2; method = :wald, atol = 1E-6) ≈ 0.39634132385253895
+    @test  ClinicalTrialUtilities.pval(param, hyp3; method = :wald, atol = 1E-6) ≈ 0.04490566253662108
+
+
 end
 #println(" ---------------------------------- ")
 #@testset "  Tpl                 " begin

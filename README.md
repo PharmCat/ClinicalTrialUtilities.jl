@@ -8,6 +8,10 @@
 [![Coverage Status](https://coveralls.io/repos/github/PharmCat/ClinicalTrialUtilities.jl/badge.svg?branch=master)](https://coveralls.io/github/PharmCat/ClinicalTrialUtilities.jl?branch=master)
 [![Latest docs](https://img.shields.io/badge/docs-latest-blue.svg)](https://pharmcat.github.io/ClinicalTrialUtilities.jl/dev/)
 
+## Difference since v0.2.7
+
+  Changes in Equivalence Hypothesis alpha level! See [here](https://github.com/PharmCat/ClinicalTrialUtilities.jl/issues/46)!
+
 ## Description
 
 The package is designed to perform calculations related to the planning and analysis of the results of clinical trials. The package includes the basic functions described below, as well as a few modules to perform specific calculations.

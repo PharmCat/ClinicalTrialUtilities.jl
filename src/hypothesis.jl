@@ -5,11 +5,12 @@
 struct Equivalence <:AbstractEquivalenceHypothesis
     llim::Real          #Lower lmit for Test group
     ulim::Real          #Upper lmit for Test group
+    alpha::Real
     #diff::Real          #Margin difference
-    function Equivalence(llim, ulim; bio::Bool = false)
+    function Equivalence(llim, ulim, alpha; bio::Bool = false)
         if llim == ulim throw(ArgumentError("llim == ulim!")) end
-        if bio return Bioequivalence(llim, ulim) end
-        new(llim, ulim)::Equivalence
+        if bio return Bioequivalence(llim, ulim, alpha) end
+        new(llim, ulim, alpha)::Equivalence
     end
 end
 function mdiff(h::Equivalence)
@@ -22,15 +23,17 @@ end
 struct Bioequivalence <: AbstractEquivalenceHypothesis
     llim::Real          #Lower lmit for Test group
     ulim::Real          #Upper lmit for Test group
+    alpha::Real
 end
 
 struct Equality <: AbstractHypothesis
     val::Real
-    function Equality()
-        new(0)::Equality
+    alpha::Real
+    function Equality(alpha)
+        new(0, alpha)::Equality
     end
-    function Equality(val)
-        new(val)::Equality
+    function Equality(val, alpha)
+        new(val, alpha)::Equality
     end
 end
 function refval(h::Equality)
@@ -40,21 +43,33 @@ end
 struct Superiority <: AbstractHypothesis
     llim::Real          #Lower lmit for Test group
     diff::Real          #Margin difference
+    alpha::Real
+    function Superiority(llim, diff, alpha)
+        new(llim, diff, alpha)::Superiority
+    end
+    function Superiority(diff, alpha)
+        new(diff, diff, alpha)::Superiority
+    end
 end
 function refval(h::Superiority)
     h.llim - h.diff
 end
 
 
-function checkhyp(h::Superiority, ci::ConfInt)
+function checkhyp(h::Superiority, param; method::Symbol = :default)
+    ci = confint(param; level = 1.0 - h.alpha * 2, method = method)
     ci.lower > h.diff
 end
-function checkhyp(h::Equivalence, ci::ConfInt)
+function checkhyp(h::Equivalence, param; method::Symbol = :default)
+    ci = confint(param; level = 1.0 - h.alpha * 2, method = method)
     ci.lower > h.llim && ci.upper < h.ulim
 end
-function checkhyp(h::Equality, ci::ConfInt)
+function checkhyp(h::Equality, param; method::Symbol = :default)
+    ci = confint(param; level = 1.0 - h.alpha, method = method)
     ci.lower > h.val || ci.upper < h.val
 end
 
 
-struct McNemars <: AbstractHypothesis end
+struct McNemars <: AbstractHypothesis
+    alpha::Real
+end

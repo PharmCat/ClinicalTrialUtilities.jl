@@ -4,7 +4,7 @@ function Base.show(io::IO, obj::CTask)
         println(io, obj.param)
         println(io, "  Design: $(obj.design)")
 
-        println(io, "  Alpha: $(obj.alpha)")
+        #println(io, "  Alpha: $(obj.hyp.alpha)")
         println(io, "  Hypothesis: $(obj.hyp)")
         println(io, "  K: $(obj.k)")
         print(io,   "  Objective: $(obj.objective)")
@@ -63,7 +63,7 @@ function Base.show(io::IO, obj::TaskResult{CT}) where CT <:  CTask{T, D, H, O} w
         println(io,"  Hypothesis: ", obj.task.hyp)
         #println(io,"  Lower limit: ", round(obj.task.llim, sigdigits = 4))
         #println(io,"  Upper limit: ", round(obj.task.ulim, sigdigits = 4))
-        println(io,"  Alpha: ", obj.task.alpha)
+        #println(io,"  Alpha: ", obj.task.alpha)
         showobjective(io, obj.task.objective)
         showparams(io, obj.task)
         #println(io, obj.task.param)
@@ -78,7 +78,7 @@ function Base.show(io::IO, obj::TaskResult{CT}) where CT <:  CTask{T, D, Bioequi
         println(io,"  Hypothesis: ", obj.task.hyp)
         #println(io,"  Lower limit: ", round(obj.task.llim, sigdigits = 4))
         #println(io,"  Upper limit: ", round(obj.task.ulim, sigdigits = 4))
-        println(io,"  Alpha: ", obj.task.alpha)
+        #println(io,"  Alpha: ", obj.task.alpha)
         showobjective(io, obj.task.objective)
         println(io, "  A/B = $(round(exp(obj.task.param.a.m - obj.task.param.b.m), sigdigits = 4))")
         println(io, "  σ  = $(round(obj.task.param.a.sd, sigdigits = 4))")
@@ -128,6 +128,9 @@ function showresult(io, obj::TaskResult{CT}) where CT <:  CTask{T, D, H, O} wher
 end
 function showresult(io, obj::TaskResult{CT}) where CT <:  CTask{T, D, H, O} where T where D <: Crossover where H where O <: SampleSize
         println(io, "Sample size: $(ceil(obj.result))")
+end
+function showresult(io, obj::TaskResult{CT}) where CT <:  CTask{T, D, H, O} where T where D <: Crossover where H <: Bioequivalence where O <: SampleSize
+        println(io, "Sample size: $(ceil(obj.result)) (Power: $(round(obj.res[:pow], sigdigits = 4)))")
 end
 function showresult(io, obj::TaskResult{CT})  where CT <:  CTask{T, D, H, O} where T where D <: Parallel where H where O <: SampleSize
         println(io, "Sample size (k=$(obj.task.k)):")
@@ -209,25 +212,30 @@ end
 function Base.show(io::IO, h::Equality)
         println(io,"Equality")
         println(io,"  H₀: A - B = 0")
-        print(io,  "  Hₐ: A - B ≠ 0")
+        println(io,"  Hₐ: A - B ≠ 0")
+        print(io,  "  Alpha: $(h.alpha)")
 end
 function Base.show(io::IO, h::Equivalence)
         println(io,"Equivalence")
         println(io,"  H₀: |A − B| ≥ $(round(mdiff(h), sigdigits = 4))")
-        print(io,  "  Hₐ: |A − B| < $(round(mdiff(h), sigdigits = 4))")
+        println(io,"  Hₐ: |A − B| < $(round(mdiff(h), sigdigits = 4))")
+        print(io,  "  Alpha: $(h.alpha)")
 end
 function Base.show(io::IO, h::Bioequivalence)
         println(io,"BioEquivalence")
         println(io,"  H₀: A/B ≤ $(round(exp(h.llim), sigdigits = 4)) || A/B ≥ $(round(exp(h.ulim), sigdigits = 4))")
-        print(io,  "  Hₐ: $(round(exp(h.llim), sigdigits = 4)) < A/B < $(round(exp(h.ulim), sigdigits = 4))")
+        println(io,"  Hₐ: $(round(exp(h.llim), sigdigits = 4)) < A/B < $(round(exp(h.ulim), sigdigits = 4))")
+        print(io,  "  Alpha: $(h.alpha)")
 end
 function Base.show(io::IO, h::Superiority)
         println(io,"Superiority/Non-Inferiority")
         println(io,"  H₀: A − B ≤ $(round(h.diff, sigdigits = 4))")
-        print(io,  "  Hₐ: A − B > $(round(h.diff, sigdigits = 4))")
+        println(io,"  Hₐ: A − B > $(round(h.diff, sigdigits = 4))")
+        print(io,  "  Alpha: $(h.alpha)")
 end
 function Base.show(io::IO, h::McNemars)
-        print(io,"McNemar's Equality test")
+        println(io,"McNemar's Equality test")
+        print(io,  "  Alpha: $(h.alpha)")
 end
 function Base.show(io::IO, e::TaskEstimate)
         for i = 1:length(e)

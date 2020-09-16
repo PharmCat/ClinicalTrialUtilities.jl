@@ -19,22 +19,21 @@
 #designProp
 #ci2cv
 
-function samplentostint(α::Real, θ₁::Real, θ₂::Real, δ::Real, σ::Real, β::Real, design::Symbol, method::Symbol)::Tuple{Float64, Float64}
+function samplentostint(α::T, θ₁::T, θ₂::T, δ::T, σ::T, β::T, design::Symbol, method::Symbol)::Tuple{Float64, Float64} where T <: AbstractFloat
     #values for approximate n
-    td = (θ₁ + θ₂)/2
-    rd = abs(θ₁ - θ₂)/2
+    td = (θ₁ + θ₂)/2.0
+    rd = abs(θ₁ - θ₂)/2.0
 
-    #if rd <= 0 return false end
     d0 = δ - td
     #approximate n
-    n₀::Int = convert(Int, ceil(two_mean_equivalence(0, d0, σ, rd, α, β, 1) / 2) * 2)
-    tp = 1 - β  #target power
+    n₀::Int = convert(Int, ceil(two_mean_equivalence(zero(T), d0, sqrt(σ^2 * 2.0), rd, α, β, one(T))) * 2.0)
+    tp = one(typeof(β)) - β   #target power
     if n₀ < 4 n₀ = 4 end
     if n₀ > 5000 n₀ = 5000 end
 
     d     = Design(design) #dffunc if generic funtion with 1 arg return df
     df    = d.df(n₀)
-    σ̵ₓ    = σ*sediv(d, n₀)
+    σ̵ₓ    = σ * sediv(d, n₀)
     if df < 1 throw(ArgumentError("powertostint: df < 1")) end
 
     powertostf = powertostintf(method) #PowerTOST function
@@ -47,7 +46,6 @@ function samplentostint(α::Real, θ₁::Real, θ₂::Real, δ::Real, σ::Real, 
             np   = n₀
             powp = pow
             n₀   = n₀ - 2
-            #pow = powerTOST(;alpha=alpha, logscale=false, theta1=ltheta1, theta2=ltheta2, theta0=diffm, cv=se, n=n0, design=design, method=method)
             if n₀ < 4 break end #n0, pow end
             df    = d.df(n₀)
             σ̵ₓ    = σ*sediv(d, n₀)
@@ -60,7 +58,6 @@ function samplentostint(α::Real, θ₁::Real, θ₂::Real, δ::Real, σ::Real, 
             np   = n₀
             powp = pow
             n₀   = n₀ + 2
-            #pow = powerTOST(;alpha=alpha, logscale=false, theta1=ltheta1, theta2=ltheta2, theta0=diffm, cv=se, n=n0, design=design, method=method)
             df    = d.df(n₀)
             σ̵ₓ    = σ*sediv(d, n₀)
             pow = powertostf(α, θ₁, θ₂, δ, σ̵ₓ, df)
@@ -97,48 +94,39 @@ function powertostintf(method::Symbol)::Function
 end #powerTOST
 
 #.power.TOST
-function powertost_owenq(α::Real, θ₁::Real, θ₂::Real, δ::Real, σ̵ₓ::Real, df::Real)::Float64
-    tval::Float64   = quantile(TDist(df), 1 - α)
-    delta1::Float64 = (δ - θ₁)/σ̵ₓ
-    delta2::Float64 = (δ - θ₂)/σ̵ₓ
-    R::Float64      = (delta1 - delta2) * sqrt(df) / (tval + tval)
-    if isnan(R) R   = 0 end
-    if R <= 0 R     = Inf end
+function powertost_owenq(α::T, θ₁::T, θ₂::T, δ::T, σ̵ₓ::T, df::Real)::T where T <: AbstractFloat
+    tval            = quantile(TDist(df), one(T) - α)
+    delta1          = (δ - θ₁)/σ̵ₓ
+    delta2          = (δ - θ₂)/σ̵ₓ
+    R               = (delta1 - delta2) * sqrt(df) / (tval + tval)
+    if isnan(R) R   = zero(eltype(R)) end
+    if R <= zero(T) R   = Inf end
     # to avoid numerical errors in OwensQ implementation
     # 'shifted' normal approximation Jan 2015
     # former Julious formula (57)/(58) doesn't work
     if df > 10000
         #tval = qnorm(1-alpha)
-        tval  = quantile(ZDIST, 1 - α)
-        #p1   = pnorm(tval-delta1)
-        #p1    = cdf(ZDIST,  tval - delta1)
-        #p2   = pnorm(-tval-delta2)
-        #p2    = cdf(ZDIST, -tval - delta2)
-        #pwr   = p2 - p1
-        return max(0, (cdf(ZDIST, -tval - delta2) - cdf(ZDIST,  tval - delta1)))
+        tval  = quantile(ZDIST, one(T) - α)
+        return max(zero(T), (cdf(ZDIST, -tval - delta2) - cdf(ZDIST,  tval - delta1)))
         #if pwr > 0 return pwr else return 0 end
     elseif df >= 5000
         # approximation via non-central t-distribution
         return powertost_nct(α, θ₁, θ₂, δ, σ̵ₓ, df)
     else
-    #p1  = owensq(df, tval, delta1, 0.0, R)
-    #p2  = owensq(df,-tval, delta2, 0.0, R)
-    #pwr = p2 - p1
-    #if pwr > 0 return pwr else return 0 end
-        return max(0, (owensq(df, -tval, delta2, 0.0, R) - owensq(df, tval, delta1, 0.0, R)))
+        return max(zero(T), (owensq(df, -tval, delta2, zero(T), R) - owensq(df, tval, delta1, zero(T), R)))
     end
 end #powerTOSTOwenQ
 
 #------------------------------------------------------------------------------
 # approximation based on non-central t
 # .approx.power.TOST - PowerTOST
-function powertost_nct(α::Real, θ₁::Real, θ₂::Real, δ::Real, σ̵ₓ::Real, df::Real)::Float64
+function powertost_nct(α::T, θ₁::T, θ₂::T, δ::T, σ̵ₓ::T, df::Real)::T where T <: AbstractFloat
     tdist           = TDist(df)
-    tval::Float64   = quantile(tdist, 1 - α)
-    delta1::Float64 = (δ - θ₁)/σ̵ₓ
-    delta2::Float64 = (δ - θ₂)/σ̵ₓ
+    tval            = quantile(tdist, one(T) - α)
+    delta1          = (δ - θ₁)/σ̵ₓ
+    delta2          = (δ - θ₂)/σ̵ₓ
     pow             = cdf(NoncentralT(df, delta2), -tval) - cdf(NoncentralT(df, delta1), tval)
-    return max(0, pow)
+    return max(zero(T), pow)
 end #approxPowerTOST
 
 #.power.1TOST
@@ -153,14 +141,14 @@ function powertost_mvt(alpha::Real, ltheta1::Real, ltheta2::Real, diffm::Real, s
 end
 
 #.approx2.power.TOST
-function powertost_shifted(α::Real, θ₁::Real, θ₂::Real, δ::Real, σ̵ₓ::Real, df::Real)::Float64
+function powertost_shifted(α::T, θ₁::T, θ₂::T, δ::T, σ̵ₓ::T, df::Real)::T where T <: AbstractFloat
     tdist           = TDist(df)
-    tval::Float64   = quantile(tdist, 1 - α)
-    delta1::Float64 = (δ - θ₁)/σ̵ₓ
-    delta2::Float64 = (δ - θ₂)/σ̵ₓ
-    if isnan(delta1) delta1 = 0 end
-    if isnan(delta2) delta2 = 0 end
+    tval            = quantile(tdist, one(T) - α)
+    delta1          = (δ - θ₁)/σ̵ₓ
+    delta2          = (δ - θ₂)/σ̵ₓ
+    if isnan(delta1) delta1 = zero(T) end
+    if isnan(delta2) delta2 = zero(T) end
     pow = cdf(tdist,-tval-delta2) - cdf(tdist, tval-delta1)
-    return max(0, pow)
+    return max(zero(T), pow)
     #if pow > 0 return pow else return 0 end
 end #approx2PowerTOST
