@@ -8,9 +8,9 @@
 [![Coverage Status](https://coveralls.io/repos/github/PharmCat/ClinicalTrialUtilities.jl/badge.svg?branch=master)](https://coveralls.io/github/PharmCat/ClinicalTrialUtilities.jl?branch=master)
 [![Latest docs](https://img.shields.io/badge/docs-latest-blue.svg)](https://pharmcat.github.io/ClinicalTrialUtilities.jl/dev/)
 
-## Difference since v0.2.7
+## Difference since v0.3.0
 
-  Changes in Equivalence Hypothesis alpha level! See [here](https://github.com/PharmCat/ClinicalTrialUtilities.jl/issues/46)!
+  Wrong Equivalence Hypothesis alpha level! Use 0.2.7 or 0.3.1 version.
 
 ## Description
 
@@ -38,7 +38,7 @@ using Pkg; Pkg.add("ClinicalTrialUtilities");
 **NB! Hypothesis types:**
 
 - :ea - Equality: two-sided;
-- :ei - Equivalencens: two one-sided hypothesis;
+- :ei - Equivalencens: two one-sided hypothesis (TOST);
 - :ns - Non-Inferiority / Superiority: one-sided hypothesis, for some cases you should use two-sided hypothesis for  Non-Inferiority/Superiority, you can use alpha/2 for this;
 
 ```

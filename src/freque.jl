@@ -119,7 +119,7 @@ function contab(data::DataFrame, sort; row::Symbol, col::Symbol)
     tempdf = DataFrame(row = Vector{eltype(data[!, row])}(undef, 0), col = Vector{eltype(data[!, col])}(undef, 0))
     rename!(tempdf, rcv)
     for si = 1:size(slist, 1)
-        if size(tempdf, 1) > 0 delete!(tempdf, 1:size(tempdf, 1)) end
+        if size(tempdf, 1) > 0 deleterows!(tempdf, 1:size(tempdf, 1)) end
         for i = 1:size(data, 1)
             if data[i, sort] == slist[si, :]
                 push!(tempdf, data[i, rcv])
@@ -160,7 +160,7 @@ function mcnmcontab(data::DataFrame, sort; row::Symbol, col::Symbol)
     tempdf = DataFrame(row = Vector{eltype(data[!, row])}(undef, 0), col = Vector{eltype(data[!, col])}(undef, 0))
     rename!(tempdf, rcv)
     for si = 1:size(slist, 1)
-        if size(tempdf, 1) > 0 delete!(tempdf, 1:size(tempdf, 1)) end
+        if size(tempdf, 1) > 0 deleterows!(tempdf, 1:size(tempdf, 1)) end
         for i = 1:size(data, 1)
             if data[i, sort] == slist[si, :]
                 push!(tempdf, data[i, rcv])
@@ -351,6 +351,8 @@ Meta-analysis for 2x2 tables.
 
 tab: vectro of ConTab{2,2} or McnmConTab;
 
+Inverce Variance method used to get variance estimate for fixed effect.
+
 type - type of measure:
 - :rr
 - :or/
@@ -438,7 +440,7 @@ function Base.show(io::IO, obj::MetaProp)
     println(io, "  Trial number (k): $(obj.k)")
     println(io, "  Model: $(obj.model)")
     println(io, "  Type: $(obj.type)")
-    if obj.type == :fixed
+    if obj.type == :diff
         println(io, "  Estimate: $(obj.est)")
         println(io, "  Variance: $(obj.var)")
     else

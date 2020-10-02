@@ -30,13 +30,14 @@ catch
     global lgamma(x) = SpecialFunctions.lgamma(x)
 end
 
+#=
 try
     if collect(methods(DataFrames.delete!, (AbstractDataFrame, Any)))[1].file == Symbol("deprecated.jl")
         DataFrames.delete!(df::AbstractDataFrame, inds) = deleterows!(df, inds)
     end
 catch
 end
-
+=#
 
 const ZDIST  = Normal()
 const LOG2   = log(2)
@@ -53,7 +54,10 @@ include("proportion.jl")
 include("means.jl")
 
 include("hypothesis.jl")
-
+#DataSET
+include("dataset.jl")
+#Frequency
+include("freque.jl")
 #Confidence interval calculation
 include("ci.jl")
 
@@ -69,14 +73,11 @@ include("samplesize.jl")
 include("sim.jl")
 #info function
 include("info.jl")
-#DataSET
-include("dataset.jl")
+
 #Descriptive statistics
 include("descriptives.jl")
 #PK
 include("pk.jl")
-#Frequency
-include("freque.jl")
 #Export
 include("export.jl")
 #Randomization
