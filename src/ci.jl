@@ -69,8 +69,11 @@ end
 function StatsBase.confint(param::Mean; level = 0.95, method = :default)::ConfInt
     meanci(param.m, param.sd^2, param.n; alpha = 1 - level, method = method)
 end
-function StatsBase.confint(param::DiffMean{true}; level = 0.95, method = :default)::ConfInt where T <: Mean
+function StatsBase.confint(param::DiffMean{true}; level = 0.95, method = :default)::ConfInt
     diffmeanci(param.a.m, param.a.sd^2, param.a.n, param.b.m, param.b.sd^2, param.b.n; alpha = 1 - level, method = method)
+end
+function StatsBase.confint(param::MetaProp; level = 0.95, method = :default)::ConfInt
+    error()
 end
 
 """
@@ -109,6 +112,7 @@ function basepval(param::T, hyp::Equality; method = :default, atol = 1E-6) where
     end
     p
 end
+#-------------------------------------------------------------------------------
 """
     propci(x::Int, n::Int; alpha=0.05, method = :default)::ConfInt
 
@@ -190,6 +194,11 @@ function diffpropci(x1::Int, n1::Int, x2::Int, n2::Int; alpha::Real = 0.05, meth
         throw(ArgumentError("Method unknown!"))
     end
 end
+#TEST
+function diffpropci(tab::ConTab{2,2}; alpha::Real = 0.05, method::Symbol = :default)::ConfInt
+    diffpropci(tab.a, tab.a + tab.b, tab.c, tab.c + tab.d; alpha = alpha, method = method)
+end
+
 """
     rrpropci(x1::Int, n1::Int, x2::Int, n2::Int; alpha::Real = 0.05,
         method::Symbol = :default)::ConfInt
@@ -293,7 +302,11 @@ function diffmeanci(m1::Real, s1::Real, n1::Real, m2::Real, s2::Real, n2::Real; 
         end
 end
 
-    #-----------------------------PROPORTIONS-----------------------------------
+
+################################################################################
+#                           ATOMIC FUNCTIONS
+################################################################################
+#-----------------------------PROPORTIONS---------------------------------------
 
     #Wilson’s confidence interval for a single proportion, wilson score
     #Wilson, E.B. (1927) Probable inference, the law of succession, and statistical inferenceJ. Amer.Stat. Assoc22, 209–212

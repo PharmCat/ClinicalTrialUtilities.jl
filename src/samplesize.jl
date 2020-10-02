@@ -188,9 +188,9 @@ Clinical trial sample size estimation.
 - :or - Odd Ratio;
 
 **type (Hypothesis type):**
-- :ea - Equality (two-sided hypothesis, 100\\*(1 - α)% CI);
-- :ei - Equivalence (two-sided hypothesis, 100\\*(1 - **2\\*α**)% CI);
-- :ns - Non-Inferiority / Superiority (one-sided hypothesis, 100\\*(1 - α)% CI);
+- :ea - Equality (two-sided hypothesis, 100\\*(1 - α)% two-sided CI);
+- :ei - Equivalence (two-sided hypothesis, 100\\*(1 - **2\\*α**)% two-sided CI);
+- :ns - Non-Inferiority / Superiority (one-sided hypothesis, one side of 100\\*(1 -**2\\*α**)% two-sided CI);
 - :mcnm - McNemar's Equality test;
 
 **group (group num):**
@@ -313,9 +313,9 @@ Clinical trial power estimation.
 - :or   - Odd Ratio;
 
 **type (Hypothesis type):**
-- :ea - Equality (two-sided hypothesis, 100\\*(1 - α)% CI);
-- :ei - Equivalence (two-sided hypothesis, 100\\*(1 - **2\\*α**)% CI);
-- :ns - Non-Inferiority / Superiority (one-sided hypothesis, 100\\*(1 - α)% CI);
+- :ea - Equality (two-sided hypothesis, 100\\*(1 - α)% two-sided CI);
+- :ei - Equivalence (two-sided hypothesis, 100\\*(1 - **2\\*α**)% two-sided CI);
+- :ns - Non-Inferiority / Superiority (one-sided hypothesis, one side of 100\\*(1 -**2\\*α**)% two-sided CI);
 - :mcnm - McNemar's Equality test;
 
 **group (group num):**

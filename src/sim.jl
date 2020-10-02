@@ -41,7 +41,7 @@ end
 Proportion difference power simulation.
 
 """
-function ctsim(t::CTask{DiffProportion{P, P}, D, H, Power}; nsim = 100, seed=0, method = :default, dropout = 0.0)  where P <: Proportion where D where H <: AbstractHypothesis
+function ctsim(t::CTask{DiffProportion{P1, P2}, D, H, Power}; nsim = 100, seed=0, method = :default, dropout = 0.0)  where P1 <: Proportion where P2 <: Proportion where D where H <: AbstractHypothesis
     if seed != 0  Random.seed!(seed) end
     n₁      = getval(t.objective)
     n₂      = Int(ceil(getval(t.objective) / t.k))
