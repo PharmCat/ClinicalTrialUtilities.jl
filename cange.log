@@ -1,3 +1,8 @@
+v0.3.2
+  - bugfix fisher test
+  - add show
+  - propci for ConTab 
+
 v0.3.1
 
   - deleteat! fix

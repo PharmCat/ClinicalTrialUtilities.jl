@@ -250,6 +250,24 @@ function Base.show(io::IO, obj::ConfInt)
 end
 
 #-------------------------------------------------------------------------------
+# Frequences
+function Base.show(io::IO, ct::ConTab{2, 2})
+        mx = Matrix{Any}(undef, 3, 3)
+        mx[2:3, 2:3] .= ct.tab
+        mx[2:3, 1] .= ct.row
+        mx[1, 2:3] .= ct.col
+        mx[1,1] = ""
+        println(io, "Contingency table 2X2")
+        println(io, "---------------------")
+        printmatrix(io, mx)
+        println(io, "---------------------")
+        if length(ct.sort) > 0
+                println(io, ct.sort)
+        end
+end
+
+
+#-------------------------------------------------------------------------------
 # OUTPUT
 function addspace(s::String, n::Int; first = false)::String
     if n > 0

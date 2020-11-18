@@ -154,6 +154,12 @@ function propci(x::Int, n::Int; alpha::Real = 0.05, method = :default)::ConfInt
         throw(ArgumentError("unknown method!"))
     end
 end
+function propci(tab::ConTab{2,2}; alpha::Real = 0.05, method::Symbol = :default)
+    d = Dict()
+    d[tab.row[1]] = propci(tab.a, tab.a + tab.b; alpha = alpha, method = method)
+    d[tab.row[2]] = propci(tab.c, tab.c + tab.d; alpha = alpha, method = method)
+    d
+end
 """
     diffpropci(x1::Int, n1::Int, x2::Int, n2::Int;
         alpha::Real = 0.05, method::Symbol = :default)::ConfInt
@@ -238,6 +244,9 @@ function rrpropci(x1::Int, n1::Int, x2::Int, n2::Int; alpha::Real = 0.05, method
         throw(ArgumentError("Method unknown!"))
     end
 end
+function rrpropci(tab::ConTab{2,2}; alpha::Real = 0.05, method::Symbol = :default)::ConfInt
+    rrpropci(tab.a, tab.a + tab.b, tab.c, tab.c + tab.d; alpha = alpha, method = method)
+end
 """
     orpropci(x1::Int, n1::Int, x2::Int, n2::Int; alpha::Real = 0.05,
         method::Symbol = :default)::ConfInt
@@ -267,6 +276,9 @@ function orpropci(x1::Int, n1::Int, x2::Int, n2::Int; alpha::Real = 0.05, method
     else
         throw(ArgumentError("Method unknown!"))
     end
+end
+function orpropci(tab::ConTab{2,2}; alpha::Real = 0.05, method::Symbol = :default)::ConfInt
+    orpropci(tab.a, tab.a + tab.b, tab.c, tab.c + tab.d; alpha = alpha, method = method)
 end
 """
     meanci(m::Real, σ²::Real, n::Int; alpha::Real = 0.05,
