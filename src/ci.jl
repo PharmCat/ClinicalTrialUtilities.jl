@@ -154,6 +154,11 @@ function propci(x::Int, n::Int; alpha::Real = 0.05, method = :default)::ConfInt
         throw(ArgumentError("unknown method!"))
     end
 end
+"""
+    propci(tab::ConTab{2,2}; alpha::Real = 0.05, method::Symbol = :default)
+
+Confidence interval for proportions a / (a + b) and c / (c + d)
+"""
 function propci(tab::ConTab{2,2}; alpha::Real = 0.05, method::Symbol = :default)
     d = Dict()
     d[tab.row[1]] = propci(tab.a, tab.a + tab.b; alpha = alpha, method = method)
@@ -192,6 +197,9 @@ function diffpropci(x1::Int, n1::Int, x2::Int, n2::Int; alpha::Real = 0.05, meth
     if alpha >= 1.0 || alpha <= 0.0
         throw(ArgumentError("Alpha shold be > 0.0 and < 1.0"))
     end
+    if x1 > n1 || x2 > n2
+        throw(ArgumentError("X cann't be more than N"))
+    end
     if method == :nhs
         return propdiffnhsci(x1, n1, x2, n2, alpha)
     elseif method == :nhscc
@@ -212,7 +220,11 @@ function diffpropci(x1::Int, n1::Int, x2::Int, n2::Int; alpha::Real = 0.05, meth
         throw(ArgumentError("Method unknown!"))
     end
 end
-#TEST
+"""
+    diffpropci(tab::ConTab{2,2}; alpha::Real = 0.05, method::Symbol = :default)::ConfInt
+
+Confidence interval for proportion difference: (a / (a + b)) - (c / (c + d))
+"""
 function diffpropci(tab::ConTab{2,2}; alpha::Real = 0.05, method::Symbol = :default)::ConfInt
     diffpropci(tab.a, tab.a + tab.b, tab.c, tab.c + tab.d; alpha = alpha, method = method)
 end
@@ -244,6 +256,11 @@ function rrpropci(x1::Int, n1::Int, x2::Int, n2::Int; alpha::Real = 0.05, method
         throw(ArgumentError("Method unknown!"))
     end
 end
+"""
+    rrpropci(tab::ConTab{2,2}; alpha::Real = 0.05, method::Symbol = :default)::ConfInt
+
+Confidence interval for relative risk.
+"""
 function rrpropci(tab::ConTab{2,2}; alpha::Real = 0.05, method::Symbol = :default)::ConfInt
     rrpropci(tab.a, tab.a + tab.b, tab.c, tab.c + tab.d; alpha = alpha, method = method)
 end
@@ -277,6 +294,11 @@ function orpropci(x1::Int, n1::Int, x2::Int, n2::Int; alpha::Real = 0.05, method
         throw(ArgumentError("Method unknown!"))
     end
 end
+"""
+    orpropci(tab::ConTab{2,2}; alpha::Real = 0.05, method::Symbol = :default)::ConfInt
+
+Confidence interval for odd ratio.
+"""
 function orpropci(tab::ConTab{2,2}; alpha::Real = 0.05, method::Symbol = :default)::ConfInt
     orpropci(tab.a, tab.a + tab.b, tab.c, tab.c + tab.d; alpha = alpha, method = method)
 end

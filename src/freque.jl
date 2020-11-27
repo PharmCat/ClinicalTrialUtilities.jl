@@ -129,7 +129,16 @@ function contab(data::DataFrame, sort; row::Symbol, col::Symbol)
     end
     return DataSet(result)
 end
+"""
+    contab(m; row = nothing, col = nothing)
 
+Make contingency table.
+"""
+function contab(m::Matrix; row = nothing, col = nothing)
+    if isa(row, Nothing) row = Vector{Symbol}(undef, size(m, 1)) .= Symbol("") end
+    if isa(col, Nothing) col = Vector{Symbol}(undef, size(m, 2)) .= Symbol("") end
+    ConTab(m, row, col)
+end
 """
     mcnmcontab
 """

@@ -29,6 +29,10 @@ When ctpower/ctsamplen used:
 - :ei - Equivalencens: two one-sided hypothesis;
 - :ns - Non-Inferiority / Superiority: one-sided hypothesis, for some cases you should use two-sided hypothesis for  Non-Inferiority/Superiority, you can use alpha/2 for this;
 
+## Invalidated version v0.3.0 (removed from release page)
+
+  Wrong Equivalence Hypothesis alpha level! Use 0.2.7, 0.3.1 version or higher.
+
 ## Contents
 
 ```@contents
