@@ -7,6 +7,10 @@ println(" ---------------------------------- ")
     frtab =  ClinicalTrialUtilities.freque(df; vars=:row, alpha = 0.05)
     @test frtab[1,2] == 17
 
+    @test ClinicalTrialUtilities.fisher(ClinicalTrialUtilities.ConTab([12 23; 22 33]))[2] ≈ 0.3752579856319276
+
+    @test ClinicalTrialUtilities.pirson(ClinicalTrialUtilities.ConTab([12 23; 22 33]))[4] ≈ 0.5856943077831229
+
 
     ctds = ClinicalTrialUtilities.contab(metadf, [:trial]; row = :group, col = :result)
     cmht = ClinicalTrialUtilities.metaprop(ctds, type = :or, model = :fixed, zeroadj = 0.0, tau = :ho)

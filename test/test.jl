@@ -326,10 +326,6 @@ println(" ---------------------------------- ")
 
     @test  ClinicalTrialUtilities.diffmcnmwaldccci(10, 20, 11, 15; alpha = 0.05).lower ≈ -0.04741054890998043
 
-    @test ClinicalTrialUtilities.fisher(ClinicalTrialUtilities.ConTab([12 23; 22 33])) ≈ 0.7505159712638552
-
-    @test ClinicalTrialUtilities.pirson(ClinicalTrialUtilities.ConTab([12 23; 22 33]))[4] ≈ 0.5856943077831229
-
     @test  ClinicalTrialUtilities.mcnmtest(ClinicalTrialUtilities.McnmConTab([12 23; 22 33]); cc = false) ≈ 0.022222222222222223
 
     #= /*SAS Tesing code*/

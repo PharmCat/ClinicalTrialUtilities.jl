@@ -59,7 +59,7 @@ function Base.getproperty(obj::ConTab{2, 2}, attr::Symbol)
     elseif attr == :d
         return getfield(obj, :tab)[2,2]
     else
-        error("No field!")
+        return getfield(obj, attr)
     end
 end
 
@@ -129,7 +129,16 @@ function contab(data::DataFrame, sort; row::Symbol, col::Symbol)
     end
     return DataSet(result)
 end
+"""
+    contab(m; row = nothing, col = nothing)
 
+Make contingency table.
+"""
+function contab(m::Matrix; row = nothing, col = nothing)
+    if isa(row, Nothing) row = Vector{Symbol}(undef, size(m, 1)) .= Symbol("") end
+    if isa(col, Nothing) col = Vector{Symbol}(undef, size(m, 2)) .= Symbol("") end
+    ConTab(m, row, col)
+end
 """
     mcnmcontab
 """
@@ -178,7 +187,7 @@ function pirson(a::Matrix{Int})
     tm  = sum(a, dims=1)[1,:]
     tn  = sum(a, dims=2)[:,1]
     num = sum(tm)
-    ae  = Array{Real, 2}(undef, n, m)
+    ae  = Array{Float64, 2}(undef, n, m)
     for im = 1:m
         for in = 1:n
             ae[in, im] = tn[in]*tm[im]/num
@@ -199,7 +208,10 @@ end
 
 function fisher(a::Matrix{Int})
     dist  = Hypergeometric(sum(a[1, :]), sum(a[2, :]), sum(a[:, 1]))
-    value = min(2 * min(cdf(dist, a[1, 1]), ccdf(dist, a[1, 1])), 1.0)
+    l = cdf(dist, a[1, 1])
+    r = ccdf(dist, a[1, 1]-1)
+    value = min(2 * min(r, l), 1.0)
+    value, l, r
 end
 function fisher(t::ConTab{2, 2})
     fisher(t.tab)
