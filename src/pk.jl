@@ -79,7 +79,7 @@ mutable struct PKSubject <: AbstractSubject
     function PKSubject(time::Vector, conc::Vector; sort = Dict())
         new(time, conc, true, ElimRange(), DoseTime(NaN, 0 * time[1]), KelData(), sort)::PKSubject
     end
-    function PKSubject(data::DataFrame; time::Symbol, conc::Symbol, timesort::Bool = false, sort = Dict())
+    function PKSubject(data; time::Symbol, conc::Symbol, timesort::Bool = false, sort = Dict())
         if timesort sort!(data, time) end
         #Check double time
         new(copy(data[!,time]), copy(data[!,conc]), true, ElimRange(), DoseTime(), KelData(), sort)::PKSubject
@@ -292,7 +292,7 @@ end
         return cmax, tmax, tmaxn
     end
     #=
-    function ctmax(data::DataFrame, conc::Symbol, time::Symbol)
+    function ctmax(data, conc::Symbol, time::Symbol)
         return ctmax(data[!, time], data[!, conc])
     end
     =#
@@ -879,18 +879,15 @@ vol::Vector
 
 
 function getdatai(data, sort, cols, func; sortby = nothing)
-    sortlist = unique(data[:, sort])
-    datai    = DataFrame()
-    for i in cols
-        datai[!, i] = Vector{eltype(data[!, i])}(undef, 0)
-    end
+    sortlist = unique(data[!, sort])
     for i = 1:size(sortlist, 1)
-        if size(datai, 1) > 0 deleterows!(datai, 1:size(datai, 1)) end
+        inds = Vector{Int}(undef, 0)
         for c = 1:size(data, 1) #For each line in data
             if data[c, sort] == sortlist[i,:]
-                push!(datai, data[c, cols])
+                push!(inds, c)
             end
         end
+        datai = data[inds, cols]
         if sortby !== nothing
             sort!(datai, sortby)
         end
@@ -924,67 +921,67 @@ function tryfloatparse!(x)
 end
 
 """
-    pkimport(data::DataFrame, sort::Array, rule::LimitRule; conc::Symbol, time::Symbol)
+    pkimport(data, sort::Array, rule::LimitRule; conc::Symbol, time::Symbol)
 
-Pharmacokinetics data import from DataFrame.
+Pharmacokinetics data import.
 
-- data - sourece DataFrame;
+- data - sourece data;
 - sort - sorting columns;
 - rule - applied LimitRule.
 
 - conc - concentration column;
 - time - time column.
 """
-function pkimport(data::DataFrame, sort::Array, rule::LimitRule; conc::Symbol, time::Symbol)::DataSet
+function pkimport(data, sort::Array, rule::LimitRule; conc::Symbol, time::Symbol)::DataSet
     results  = Array{PKSubject, 1}(undef, 0)
     if !(eltype(data[!, conc]) <: Real) throw(ArgumentError("Type of concentration data not <: Real!"))end
-    getdatai(data, sort, [conc, time], (x, y) -> push!(results, PKSubject(copy(x[!, time]), copy(x[!, conc]), sort = Dict(sort .=> collect(y)))); sortby = time)
+    getdatai(data, sort, [conc, time], (x, y) -> push!(results, PKSubject(x[!, time], x[!, conc], sort = Dict(sort .=> collect(y)))); sortby = time)
     results = DataSet(results)
     applyncarule!(results, rule)
     return results
 end
 """
-    pkimport(data::DataFrame, sort::Array; time::Symbol, conc::Symbol)
+    pkimport(data, sort::Array; time::Symbol, conc::Symbol)
 
-Pharmacokinetics data import from DataFrame.
+Pharmacokinetics data import.
 
-- data - sourece DataFrame;
+- data - sourece data;
 - sort - sorting columns.
 
 - conc - concentration column;
 - time - time column.
 """
-function pkimport(data::DataFrame, sort::Array; time::Symbol, conc::Symbol)::DataSet
+function pkimport(data, sort::Array; time::Symbol, conc::Symbol)::DataSet
     rule = LimitRule()
     return pkimport(data, sort, rule; conc = conc, time = time)
 end
 """
-    pkimport(data::DataFrame, sort::Array; time::Symbol, conc::Symbol)
+    pkimport(data, sort::Array; time::Symbol, conc::Symbol)
 
-Pharmacokinetics data import from DataFrame for one subject.
+Pharmacokinetics data import  for one subject.
 
-- data - sourece DataFrame;
+- data - sourece data;
 - rule - applied LimitRule.
 
 - conc - concentration column;
 - time - time column.
 """
-function pkimport(data::DataFrame, rule::LimitRule; time::Symbol, conc::Symbol)::DataSet
+function pkimport(data, rule::LimitRule; time::Symbol, conc::Symbol)::DataSet
         #rule = LimitRule()
     datai = ncarule!(copy(data[!,[time, conc]]), conc, time, rule)
     return DataSet([PKSubject(datai[!, time], datai[!, conc])])
 end
 """
-    pkimport(data::DataFrame, sort::Array; time::Symbol, conc::Symbol)
+    pkimport(data, sort::Array; time::Symbol, conc::Symbol)
 
-Pharmacokinetics data import from DataFrame for one subject.
+Pharmacokinetics data import  for one subject.
 
-- data - sourece DataFrame;
+- data - sourece data;
 
 - conc - concentration column;
 - time - time column.
 """
-function pkimport(data::DataFrame; time::Symbol, conc::Symbol)::DataSet
+function pkimport(data; time::Symbol, conc::Symbol)::DataSet
     datai = sort(data[!,[time, conc]], time)
     return DataSet([PKSubject(datai[!, time], datai[!, conc])])
 end
@@ -1003,12 +1000,12 @@ function pkimport(time::Vector, conc::Vector; sort = Dict())::PKSubject
 end
     #---------------------------------------------------------------------------
 """
-    pdimport(data::DataFrame, sort::Array; resp::Symbol, time::Symbol,
+    pdimport(data, sort::Array; resp::Symbol, time::Symbol,
         bl::Real = 0, th::Real = NaN)
 
-Pharmacodynamics data import from DataFrame.
+Pharmacodynamics data import.
 
-- data - sourece DataFrame;
+- data - sourece data;
 - sort - sorting columns;
 
 - resp - responce column;
@@ -1016,21 +1013,21 @@ Pharmacodynamics data import from DataFrame.
 - bl - baseline;
 - th - treashold.
 """
-function pdimport(data::DataFrame, sort::Array; resp::Symbol, time::Symbol, bl::Real = 0, th::Real = NaN)::DataSet
+function pdimport(data, sort::Array; resp::Symbol, time::Symbol, bl::Real = 0, th::Real = NaN)::DataSet
     №sortlist = unique(data[:, sort])
     results  = Array{PDSubject, 1}(undef, 0)
-    getdatai(data, sort, [resp, time], (x, y) -> push!(results, PDSubject(copy(x[!, time]), copy(x[!, resp]), bl, th, sort = Dict(sort .=> collect(y)))); sortby = time)
+    getdatai(data, sort, [resp, time], (x, y) -> push!(results, PDSubject(x[!, time], x[!, resp], bl, th, sort = Dict(sort .=> collect(y)))); sortby = time)
     return DataSet(results)
 end
 
-function pdimport(data::DataFrame; resp::Symbol, time::Symbol, bl = 0, th = NaN)
+function pdimport(data; resp::Symbol, time::Symbol, bl = 0, th = NaN)
     datai = sort(data[!,[time, resp]], time)
     return DataSet([PDSubject(datai[!, time], datai[!, resp], bl, th)])
 end
 #-------------------------------------------------------------------------------
-function upkimport(data::DataFrame, sort::Array; stime::Symbol, etime::Symbol, conc::Symbol, vol::Symbol)::DataSet
+function upkimport(data, sort::Array; stime::Symbol, etime::Symbol, conc::Symbol, vol::Symbol)::DataSet
     results  = Array{UPKSubject, 1}(undef, 0)
-    getdatai(data, sort, [stime, etime, conc, vol], (x, y) -> push!(results, UPKSubject(copy(x[!, stime]), copy(x[!, etime]), copy(x[!, conc]), copy(x[!, vol]); sort =Dict(sort .=> collect(y)))); sortby = stime)
+    getdatai(data, sort, [stime, etime, conc, vol], (x, y) -> push!(results, UPKSubject(x[!, stime], x[!, etime], x[!, conc], x[!, vol]; sort =Dict(sort .=> collect(y)))); sortby = stime)
     results = DataSet(results)
     return results
 end
@@ -1298,6 +1295,8 @@ function keldata(data::DataSet{PKPDProfile{PKSubject}}, i::Int)
     return data[i].subject.keldata
 end
 
+
+#DEPRECATED
 """
     DataFrames.DataFrame(data::DataSet{PKPDProfile}; unst = false, us = false)
 
