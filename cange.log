@@ -1,3 +1,7 @@
+v0.4.0
+
+  - remove DataFrames
+
 v0.3.2
   - bugfix fisher test
   - add show
@@ -10,7 +14,7 @@ v0.3.1
   - simulation crush fix
   - Equivalence Hypothesis alpha level fix!
 
-v0.3.0
+v0.3.0 (removed)
   - #44 , #45 , #46
   - update test
   - Move alpha from CTask to Hypothesis
