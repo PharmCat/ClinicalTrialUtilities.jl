@@ -1,10 +1,10 @@
 """
-    htmlexport(data::DataFrame; io::IO = stdout, sort = NaN,
+    htmlexport(data; io::IO = stdout, sort = NaN,
         rspan=:all, title="Title", dict::Union{Symbol, Dict} = :undef)
 
-HTLM export for DataFrame.
+HTLM export.
 """
-    function htmlexport(data::DataFrame; io::IO = stdout, sort = NaN, rspan=:all, title="Title", dict::Union{Symbol, Dict} = :undef)
+    function htmlexport(data; io::IO = stdout, sort = NaN, rspan=:all, title="Title", dict::Union{Symbol, Dict} = :undef)
         rowlist = Array{String,1}(undef, 0)
         cnames  = names(data)
         if isa(sort, Array)

@@ -92,15 +92,15 @@ function cvfromci(theta1, theta2, n; alpha = 0.05, design=:d2x2, mso=false, cvms
 end
 
 """
-    pooledcv(data::DataFrame; cv=:cv, df=:df, alpha=0.05, returncv=true)::ConfInt
+    pooledcv(data; cv=:cv, df=:df, alpha=0.05, returncv=true)::ConfInt
 
 Pooled CV from multiple sources.
 
-**data**::DataFrame - Dataframe with CV data
+**data** - data with CV data
 
-**cv**::Symbol - CV column in dataframe
+**cv**::Symbol - CV column
 
-**df**::Symbol - DF column in dataframe
+**df**::Symbol - DF column
 
 **alpha** - Alpha for var/cv confidence interval.
 
@@ -110,7 +110,7 @@ Pooled CV from multiple sources.
 - false - return var
 
 """
-function pooledcv(data::DataFrame; cv = :cv, df = :df, alpha::Real = 0.05, returncv::Bool = true)::ConfInt
+function pooledcv(data; cv = :cv, df = :df, alpha::Real = 0.05, returncv::Bool = true)::ConfInt
     if isa(cv, String)  cv = Symbol(cv) end
     if isa(df, String)  df = Symbol(df) end
     return pooledcv(data[!, cv], data[!, df]; alpha = alpha, returncv = returncv)

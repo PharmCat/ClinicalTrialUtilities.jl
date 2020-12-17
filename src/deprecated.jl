@@ -1,5 +1,43 @@
 #deprecated
 
+#DEPRECATED
+"""
+    DataFrames.DataFrame(data::DataSet{PKPDProfile}; unst = false, us = false)
+
+Make datafrafe from PK/PD DataSet.
+
+unst | us - unstack data;
+"""
+function DataFrames.DataFrame(data::DataSet{T}; unst = false, us = false) where T
+        d = DataFrame(id = Int[], sortvar = Symbol[], sortval = Any[])
+        for i = 1:length(data)
+            if length(data[i].sort) > 0
+                for s in data[i].sort
+                    push!(d, [i, s[1], s[2]])
+                end
+            end
+        end
+        d   = unstack(d, :sortvar, :sortval)[!,2:end]
+        df  = DataFrame()
+        dfn = names(d)
+        for i = 1:size(d,2)
+            df[!,dfn[i]] = Array{eltype(d[!, dfn[i]]), 1}(undef, 0)
+        end
+        df = hcat(df, DataFrame(param = Any[], value = Real[]))
+        for i = 1:size(d,1)
+            a = Array{Any,1}(undef, size(d,2))
+            copyto!(a, collect(d[i,:]))
+            for p in data[i].result
+                r = append!(copy(a), collect(p))
+            push!(df, r)
+            end
+        end
+        if unst || us
+            return unstack(df, names(df)[end-1], names(df)[end])
+        else
+            return df
+        end
+end
 
 #=
 function ncarule!(data::DataFrame, conc::Symbol, time::Symbol, rule::LimitRule)

@@ -69,11 +69,11 @@ struct Freque
 end
 
 """
-    freque(data::DataFrame; vars::Symbol, alpha = 0.05)::DataFrame
+    freque(data; vars::Symbol, alpha = 0.05)
 
 Frequencies.
 """
-function freque(data::DataFrame; vars::Symbol, alpha = 0.05)::DataFrame
+function freque(data; vars::Symbol, alpha = 0.05)
     result = DataFrame(value = Any[], n = Int[], p = Float64[], cil = Float64[], ciu = Float64[])
     list   = unique(data[:, vars])
     n      = length(data[:, vars])
@@ -86,11 +86,11 @@ function freque(data::DataFrame; vars::Symbol, alpha = 0.05)::DataFrame
     return result
 end
 """
-    contab(data::DataFrame; row::Symbol, col::Symbol, sort = Dict())::ConTab
+    contab(data; row::Symbol, col::Symbol, sort = Dict())::ConTab
 
 Make contingency table.
 """
-function contab(data::DataFrame; row::Symbol, col::Symbol, sort = Dict())::ConTab
+function contab(data; row::Symbol, col::Symbol, sort = Dict())::ConTab
     clist = unique(data[:, col])
     rlist = unique(data[:, row])
     cn    = length(clist)
@@ -106,11 +106,11 @@ function contab(data::DataFrame; row::Symbol, col::Symbol, sort = Dict())::ConTa
     return ConTab(dfs, rlist, clist, sort)
 end
 """
-    contab(data::DataFrame, sort; row::Symbol, col::Symbol)
+    contab(data, sort; row::Symbol, col::Symbol)
 
 Make contingency tables set.
 """
-function contab(data::DataFrame, sort; row::Symbol, col::Symbol)
+function contab(data, sort; row::Symbol, col::Symbol)
     slist  = unique(data[:, sort])
     clist  = unique(data[:, col])
     rlist  = unique(data[:, row])
@@ -142,7 +142,7 @@ end
 """
     mcnmcontab
 """
-function mcnmcontab(data::DataFrame; row::Symbol, col::Symbol, sort = Dict())::McnmConTab
+function mcnmcontab(data; row::Symbol, col::Symbol, sort = Dict())::McnmConTab
     clist = unique(data[:, col])
     rlist = unique(data[:, row])
     cn    = length(clist)
@@ -160,7 +160,7 @@ end
 """
     mcnmcontab
 """
-function mcnmcontab(data::DataFrame, sort; row::Symbol, col::Symbol)
+function mcnmcontab(data, sort; row::Symbol, col::Symbol)
     slist  = unique(data[:, sort])
     clist  = unique(data[:, col])
     rlist  = unique(data[:, row])
