@@ -40,14 +40,13 @@ function randomseq(;blocksize::Int = 4, subject = 10, group = 2, ratio = [1,1], 
 
     last = subject%blocksize                                                    #not full block
     if last != 0
-        block = []
+        block = Vector{Int}(undef, 0)
         rm = last/r                                                             #ratio multiplication
         for i = 1:group
             append!(block, fill(i, Int(rm*ratio[i])))
         end
         append!(rand, block[sample(1:last, last, replace=false)])
     end
-    #seqrand = hcat(grseq[rand]...)
     return rand
 
 end
@@ -57,7 +56,7 @@ end
         ratio = [1,1], grseq = ["AB", "BA"], seed = 0)
 
 
-Randomization table generaton.
+Randomization table generaton. Return NamedTuple of vectors.
 
 - ``blocksize`` - size of block;
 - ``subject`` - subject number;
@@ -87,13 +86,4 @@ function randomtable(;blocksize::Int = 4, subject::Int = 10, group::Int = 2, rat
         np[i+3] = getindex.(seqrand, i)
     end
     return NamedTuple{Tuple(nm)}(Tuple(np))
-
-    seqrand  = hcat(collect(1:length(r)), hcat(r,  seqrand))
-    return seqrand
-    df       = DataFrame(seqrand)
-    rename!(df, [:Subject, :Group, :Sequence])
-    for i=1:length(grseq[1])
-        df[!, Symbol("Period_"*string(i))] = getindex.(df[!, :Sequence], i)
-    end
-    return df
 end
