@@ -4,7 +4,7 @@ println(" ---------------------------------- ")
     ctab =  ClinicalTrialUtilities.contab(df, row = :row, col = :col)
     @test ctab.tab == [9 8; 5 21]
 
-    frtab =  ClinicalTrialUtilities.freque(df; vars=:row, alpha = 0.05)
+    frtab =  DataFrame(ClinicalTrialUtilities.freque(df; vars=:row, alpha = 0.05))
     @test frtab[1,2] == 17
 
     @test ClinicalTrialUtilities.fisher(ClinicalTrialUtilities.ConTab([12 23; 22 33]))[2] ≈ 0.3752579856319276

@@ -69,28 +69,36 @@ struct Freque
 end
 
 """
-    freque(data::DataFrame; vars::Symbol, alpha = 0.05)::DataFrame
+    freque(data; vars::Symbol, alpha = 0.05)
 
 Frequencies.
 """
-function freque(data::DataFrame; vars::Symbol, alpha = 0.05)::DataFrame
-    result = DataFrame(value = Any[], n = Int[], p = Float64[], cil = Float64[], ciu = Float64[])
+function freque(data; vars::Symbol, alpha = 0.05)
     list   = unique(data[:, vars])
     n      = length(data[:, vars])
-    for i in list
-        ne = count(x -> (x == i), data[:, vars])
+    c1     = Vector{Any}(undef, n)
+    c2     = Vector{Int}(undef, n)
+    c3     = Vector{Float64}(undef, n)
+    c4     = Vector{Float64}(undef, n)
+    c5     = Vector{Float64}(undef, n)
+    for i  = 1:length(list)
+        ne = count(x -> (x == list[i]), data[:, vars])
         pe = ne/n
         ci = ClinicalTrialUtilities.propci(ne, n, alpha=alpha, method=:wald)
-        push!(result, [i, ne, pe, ci.lower, ci.upper])
+        c1[i] = list[i]
+        c2[i] = ne
+        c3[i] = pe
+        c4[i] = ci.lower
+        c5[i] = ci.upper
     end
-    return result
+    return NamedTuple{(:value, :n, :p, :cil, :ciu)}((c1, c2, c3, c4, c5))
 end
 """
-    contab(data::DataFrame; row::Symbol, col::Symbol, sort = Dict())::ConTab
+    contab(data; row::Symbol, col::Symbol, sort = Dict())::ConTab
 
 Make contingency table.
 """
-function contab(data::DataFrame; row::Symbol, col::Symbol, sort = Dict())::ConTab
+function contab(data; row::Symbol, col::Symbol, sort = Dict())::ConTab
     clist = unique(data[:, col])
     rlist = unique(data[:, row])
     cn    = length(clist)
@@ -106,26 +114,24 @@ function contab(data::DataFrame; row::Symbol, col::Symbol, sort = Dict())::ConTa
     return ConTab(dfs, rlist, clist, sort)
 end
 """
-    contab(data::DataFrame, sort; row::Symbol, col::Symbol)
+    contab(data, sort; row::Symbol, col::Symbol)
 
 Make contingency tables set.
 """
-function contab(data::DataFrame, sort; row::Symbol, col::Symbol)
+function contab(data, sort; row::Symbol, col::Symbol)
     slist  = unique(data[:, sort])
-    clist  = unique(data[:, col])
-    rlist  = unique(data[:, row])
+    #clist  = unique(data[:, col])
+    #rlist  = unique(data[:, row])
     rcv    = [row, col]
     result = Vector{ConTab}(undef, size(slist, 1))
-    tempdf = DataFrame(row = Vector{eltype(data[!, row])}(undef, 0), col = Vector{eltype(data[!, col])}(undef, 0))
-    rename!(tempdf, rcv)
     for si = 1:size(slist, 1)
-        if size(tempdf, 1) > 0 deleterows!(tempdf, 1:size(tempdf, 1)) end
+        inds = Vector{Int}(undef, 0)
         for i = 1:size(data, 1)
             if data[i, sort] == slist[si, :]
-                push!(tempdf, data[i, rcv])
+                push!(inds, i)
             end
         end
-        result[si] = contab(tempdf, row = row, col = col, sort = Dict(sort .=> collect(slist[si, :])))
+        result[si] = contab(data[inds, rcv], row = row, col = col, sort = Dict(sort .=> collect(slist[si, :])))
     end
     return DataSet(result)
 end
@@ -142,7 +148,7 @@ end
 """
     mcnmcontab
 """
-function mcnmcontab(data::DataFrame; row::Symbol, col::Symbol, sort = Dict())::McnmConTab
+function mcnmcontab(data; row::Symbol, col::Symbol, sort = Dict())::McnmConTab
     clist = unique(data[:, col])
     rlist = unique(data[:, row])
     cn    = length(clist)
@@ -160,22 +166,18 @@ end
 """
     mcnmcontab
 """
-function mcnmcontab(data::DataFrame, sort; row::Symbol, col::Symbol)
+function mcnmcontab(data, sort; row::Symbol, col::Symbol)
     slist  = unique(data[:, sort])
-    clist  = unique(data[:, col])
-    rlist  = unique(data[:, row])
     rcv    = [row, col]
     result = Vector{McnmConTab}(undef, size(slist, 1))
-    tempdf = DataFrame(row = Vector{eltype(data[!, row])}(undef, 0), col = Vector{eltype(data[!, col])}(undef, 0))
-    rename!(tempdf, rcv)
     for si = 1:size(slist, 1)
-        if size(tempdf, 1) > 0 deleterows!(tempdf, 1:size(tempdf, 1)) end
+        inds = Vector{Int}(undef, 0)
         for i = 1:size(data, 1)
             if data[i, sort] == slist[si, :]
-                push!(tempdf, data[i, rcv])
+                push!(inds, i)
             end
         end
-        result[si] = mcnmcontab(tempdf, row = row, col = col, sort = Dict(sort .=> collect(slist[si, :])))
+        result[si] = mcnmcontab(data[inds, rcv], row = row, col = col, sort = Dict(sort .=> collect(slist[si, :])))
     end
     return DataSet(result)
 end

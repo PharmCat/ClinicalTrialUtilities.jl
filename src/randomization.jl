@@ -14,7 +14,7 @@ Randomization list generaton.
 - ``ratio`` - group ration, [1,1] means 1:1, [1,2] means 1:2, ets. ``length(ratio)`` should be equal ``group``;
 - ``seed`` - RNG seed.
 """
-function randomseq(;blocksize::Int = 4, subject = 10, group = 2, ratio = [1,1], grseq = [["A", "B"], ["B", "A"]], seed = 0)
+function randomseq(;blocksize::Int = 4, subject = 10, group = 2, ratio = [1,1], seed = 0)
 
     #rng = MersenneTwister()
     if seed != 0 Random.seed!(seed) end
@@ -33,21 +33,20 @@ function randomseq(;blocksize::Int = 4, subject = 10, group = 2, ratio = [1,1], 
         append!(block, fill(i, Int(rm*ratio[i])))
     end
     fbn = subject÷blocksize                                                     #block number
-    rand  = []                                                                  #rand list
+    rand  = Vector{Int}(undef, 0)                                                                  #rand list
     for i = 1:fbn
         append!(rand, block[sample(1:blocksize, blocksize, replace=false)])     #generate and append random block
     end
 
     last = subject%blocksize                                                    #not full block
     if last != 0
-        block = []
+        block = Vector{Int}(undef, 0)
         rm = last/r                                                             #ratio multiplication
         for i = 1:group
             append!(block, fill(i, Int(rm*ratio[i])))
         end
         append!(rand, block[sample(1:last, last, replace=false)])
     end
-    #seqrand = hcat(grseq[rand]...)
     return rand
 
 end
@@ -57,7 +56,7 @@ end
         ratio = [1,1], grseq = ["AB", "BA"], seed = 0)
 
 
-Randomization table generaton.
+Randomization table generaton. Return NamedTuple of vectors.
 
 - ``blocksize`` - size of block;
 - ``subject`` - subject number;
@@ -71,12 +70,20 @@ function randomtable(;blocksize::Int = 4, subject::Int = 10, group::Int = 2, rat
     if length(unique(length.(grseq))) != 1 throw(ArgumentError("Unequal grseq")) end
 
     r = randomseq(;blocksize = blocksize, subject = subject, group = group, ratio = ratio,  seed = seed)
-    seqrand  = permutedims(hcat(grseq[r]...))
-    seqrand  = hcat(collect(1:length(r)), hcat(r,  seqrand))
-    df       = DataFrame(seqrand)
-    rename!(df, [:Subject, :Group, :Sequence])
+    subj = collect(1:length(r))
+    seqrand  = vcat(grseq[r]...)
+    nl = length(grseq[1]) + 3
+    nm = Vector{Symbol}(undef, nl)
+    np = Vector{Vector}(undef, nl)
+    nm[1] = :Subject
+    nm[2] = :Group
+    nm[3] = :Sequence
+    np[1] = subj
+    np[2] = r
+    np[3] = seqrand
     for i=1:length(grseq[1])
-        df[!, Symbol("Period_"*string(i))] = getindex.(df[!, :Sequence], i)
+        nm[i+3] = Symbol("Period_"*string(i))
+        np[i+3] = getindex.(seqrand, i)
     end
-    return df
+    return NamedTuple{Tuple(nm)}(Tuple(np))
 end

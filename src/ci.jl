@@ -849,17 +849,17 @@ end
     # metafor: Meta-Analysis Package for R - Wolfgang Viechtbauer
 
 """
-    diffcmhci(data::DataFrame; a = :a, b = :b, c = :c, d = :d,
+    diffcmhci(data; a = :a, b = :b, c = :c, d = :d,
         alpha = 0.05, method = :default)::ConfInt
 
 Cochran–Mantel–Haenszel confidence intervals for proportion difference.
 
-**data**- dataframe with 4 columns, each line represent 2X2 table
+**data**- data with 4 columns, each line represent 2X2 table
 
-**a** **b** **c** **d** - dataframe table names (number of subjects in 2X2 table):
+**a** **b** **c** **d** - data table names (number of subjects in 2X2 table):
 
 """
-    function diffcmhci(data::DataFrame; a = :a, b = :b, c = :c, d = :d, alpha = 0.05, method = :default)::ConfInt
+    function diffcmhci(data; a = :a, b = :b, c = :c, d = :d, alpha = 0.05, method = :default)::ConfInt
         return diffcmhci(data[:, a], data[:, b], data[:, c], data[:, d]; alpha = alpha, method = method)
         #=
         n1 = data[:, a] + data[:, b]
@@ -909,12 +909,12 @@ Cochran–Mantel–Haenszel confidence intervals for proportion difference.
     end
 
     """
-        orcmhci(data::DataFrame; a = :a, b = :b, c = :c, d = :d,
+        orcmhci(data; a = :a, b = :b, c = :c, d = :d,
             alpha = 0.05, logscale = false)::ConfInt
 
     Cochran–Mantel–Haenszel confidence intervals for odd ratio.
     """
-    function orcmhci(data::DataFrame; a = :a, b = :b, c = :c, d = :d, alpha = 0.05, logscale = false)::ConfInt
+    function orcmhci(data; a = :a, b = :b, c = :c, d = :d, alpha = 0.05, logscale = false)::ConfInt
         return orcmhci(data[:, a], data[:, b], data[:, c], data[:, d]; alpha = alpha, logscale = logscale)
         #=
         N  = data[:, a] + data[:, b] + data[:, c] + data[:, d]
@@ -949,12 +949,12 @@ Cochran–Mantel–Haenszel confidence intervals for proportion difference.
         if logscale return ConfInt(estimate - z*se, estimate + z*se, estimate, alpha) else return ConfInt(exp(estimate - z*se), exp(estimate + z*se), exp(estimate), alpha) end
     end
     """
-        rrcmhci(data::DataFrame; a = :a, b = :b, c = :c, d = :d,
+        rrcmhci(data; a = :a, b = :b, c = :c, d = :d,
             alpha = 0.05, logscale = false)::ConfInt
 
     Cochran–Mantel–Haenszel confidence intervals for risk ratio.
     """
-    function rrcmhci(data::DataFrame; a = :a, b = :b, c = :c, d = :d, alpha = 0.05, logscale = false)::ConfInt
+    function rrcmhci(data; a = :a, b = :b, c = :c, d = :d, alpha = 0.05, logscale = false)::ConfInt
         return rrcmhci(data[:, a], data[:, b], data[:, c], data[:, d]; alpha = alpha, logscale = logscale)
         #=
         n1 = data[:, a] + data[:, b]

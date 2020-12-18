@@ -114,7 +114,7 @@ function Base.show(io::IO, obj::DataSet{Descriptive})
     end
 end
 """
-    descriptive(data::DataFrame;
+    descriptive(data;
         sort::Union{Symbol, Array{T,1}} = Array{Symbol,1}(undef,0),
         vars = [],
         stats::Union{Symbol, Array{T,1}, Tuple{Vararg{Symbol}}} = :default)::DataSet{Descriptive} where T <: Union{Symbol, String}
@@ -125,7 +125,7 @@ Descriptive statistics.
 - ``vars`` variabels
 - ``stats`` statistics
 """
-function descriptive(data::DataFrame;
+function descriptive(data;
     sort::Union{Symbol, Array{T,1}} = Array{Symbol,1}(undef,0),
     vars = [],
     stats::Union{Symbol, Array{T,1}, Tuple{Vararg{Symbol}}} = :default)::DataSet{Descriptive} where T <: Union{Symbol, String}
@@ -202,7 +202,7 @@ end
 """
 Push in d Descriptive obj in mx vardata
 """
-@inline function pushvardescriptive!(d::Array{Descriptive, 1}, vars::Array{Symbol, 1}, mx::Union{DataFrame, Matrix{T}}, sortval::Union{Tuple{Vararg{Any}}, Nothing}, stats::Tuple{Vararg{Symbol}}) where T<: Real
+@inline function pushvardescriptive!(d::Array{Descriptive, 1}, vars::Array{Symbol, 1}, mx, sortval::Union{Tuple{Vararg{Any}}, Nothing}, stats::Tuple{Vararg{Symbol}}) where T<: Real
     for v  = 1:length(vars)  #For each variable in list
         push!(d, Descriptive(vars[v], nothing, sortval, descriptive_(mx[:, v], stats)))
     end
@@ -210,7 +210,7 @@ end
 """
 Check if data row sortcol equal sortval
 """
-@inline function checksort(data::DataFrame, row::Int, sortcol::Array{Symbol, 1}, sortval::Tuple{Vararg{Any}})::Bool
+@inline function checksort(data, row::Int, sortcol::Array{Symbol, 1}, sortval::Tuple{Vararg{Any}})::Bool
     for i = 1:length(sortcol)
         if data[row, sortcol[i]] != sortval[i] return false end
     end
@@ -219,7 +219,7 @@ end
 """
 Return matrix of filtered data (datacol) by sortcol with sortval
 """
-@inline function getsortedmatrix(data::DataFrame; datacol::Array{Symbol,1}, sortcol::Array{Symbol,1}, sortval::Tuple{Vararg{Any}})::Matrix{Real}
+@inline function getsortedmatrix(data; datacol::Array{Symbol,1}, sortcol::Array{Symbol,1}, sortval::Tuple{Vararg{Any}})::Matrix{Real}
     result  = Array{Real, 1}(undef, 0)
     for c = 1:size(data, 1) #For each line in data
         if checksort(data, c, sortcol, sortval)

@@ -225,7 +225,7 @@ println(" ---------------------------------- ")
 @testset "#9  Random              " begin
     @test ClinicalTrialUtilities.randomseq(seed = 1234) == [1,2,2,1,2,1,1,2,2,1]
     rdf   = ClinicalTrialUtilities.randomtable(seed = 1234)
-    @test rdf[!, :Group] == [1,2,2,1,2,1,1,2,2,1]
+    @test rdf[:Group] == [1,2,2,1,2,1,1,2,2,1]
 end
 
 
