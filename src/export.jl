@@ -189,7 +189,7 @@ HTLM export.
 
     <TBODY>"""
 
-        sort!(data, tuple(sort))
+        sort!(data, Tuple(sort))
         tablematrix .= 1
         for c = 1:coln
             s = true
