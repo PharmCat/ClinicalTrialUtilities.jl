@@ -14,14 +14,14 @@
 __precompile__(true)
 module ClinicalTrialUtilities
 
-using Distributions, Random, Roots, QuadGK, RecipesBase, Reexport, Tables
+using Distributions, Random, Roots, QuadGK, RecipesBase, Reexport
 
 @reexport using StatsBase
 
 import SpecialFunctions
 import Base: show, findfirst, getproperty, showerror, getindex, length, in, iterate, eltype, deleteat!, findall
 import StatsBase.confint
-import DataFrames: DataFrame, DataFrames, names!, unstack, deleterows!, rename!, AbstractDataFrame
+import DataFrames: DataFrame, DataFrames, unstack
 
 try
     methods(SpecialFunctions.logabsgamma)
@@ -29,15 +29,6 @@ try
 catch
     global lgamma(x) = SpecialFunctions.lgamma(x)
 end
-
-#=
-try
-    if collect(methods(DataFrames.delete!, (AbstractDataFrame, Any)))[1].file == Symbol("deprecated.jl")
-        DataFrames.delete!(df::AbstractDataFrame, inds) = deleterows!(df, inds)
-    end
-catch
-end
-=#
 
 const ZDIST  = Normal()
 const LOG2   = log(2)

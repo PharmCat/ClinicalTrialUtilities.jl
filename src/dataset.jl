@@ -81,7 +81,7 @@ function Base.deleteat!(a::DataSet{T}, inds::Dict) where T
 end
 
 ################################################################################
-
+#=
 function Tables.istable(table::DataSet)
 end
 
@@ -90,3 +90,4 @@ end
 
 function Tables.columns(table::DataSet)
 end
+=#
