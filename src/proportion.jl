@@ -93,10 +93,12 @@ struct RiskRatio{T <: AbstractSimpleProportion} <: AbstractCompositeProportion
 end
 
 struct CoxHazardRatio <: AbstractParameter
-    a::Real
-    p::Real
+    a::Float64
+    p::Float64
 end
-
+function getval(p::CoxHazardRatio)
+    return p.a
+end
 struct DiffCoxHazardRatio <: AbstractCompositeProportion
     a::CoxHazardRatio
     b::CoxHazardRatio
