@@ -1,5 +1,8 @@
-v0.4.0
+v0.4.1
+  - cox samplen
+  - datatable
 
+v0.4.0
   - remove DataFrames interim
   - minor fix
 
@@ -10,7 +13,6 @@ v0.3.2
   - bump dependencies
 
 v0.3.1
-
   - deleteat! fix
   - simulation crush fix
   - Equivalence Hypothesis alpha level fix!
@@ -45,7 +47,6 @@ v0.2.7
   - test update
 
 v0.2.6
-
   - findfirst
   - Documents update
   - export applyncarule!
@@ -59,12 +60,10 @@ v0.2.6
   - Docs
 
 v0.2.5
-
   - SpecialFunctions 0.10
   - RecipesBase 0.8
 
 v0.2.4
-
   - PK: drop observation before dosetime
   - Roots Version 1.0
   - Distributions 23.0
@@ -80,7 +79,6 @@ v0.2.4
   - Cosmetics
 
 v0.2.3
-
   - ConTab struct
   - Urine PK
   - NCA Tau PK partial areas fix
@@ -109,7 +107,6 @@ v0.2.1
   - cosmetics
 
 v0.2.0
-
   Breaking changes(!):
 
   - Renamed exported functions: ctsamplen, ctpower, besamplen, bepower, ets (now in lower case).
@@ -149,19 +146,16 @@ v0.2.0
   - Minor changes, bugfix, code cleaning, cosmetics.
 
 v0.1.16
-
   - Split PK/PD
   - New PD param
   - Column dictionary
 
 v0.1.15
-
   - Add RR CI Katz Test
   - Julian function names (part)
   - Rename descriptives -> descriptive
   - export freque, contab
   - minor changes, bugfix, code cleaning
-
 
 v0.1.14
   - Add compat to Project.toml
@@ -194,10 +188,8 @@ v0.1.12
   - Frequency initial commit - alpha
 
 v0.1.11
-
   - nca hotfix
   - add test
-
   - descriptives()
   - html export - initial, not final
   - StatsBase, Statistics in deps
@@ -207,16 +199,13 @@ v0.1.11
 
 
 v0.1.10
-
 - add Cochran–Mantel–Haenszel confidence intervals
 - add documentation and comments
 - improve coverage
 - add tests
 - code cosmetics
 
-
 v0.1.9
-
 - add PK module
 - pooledCV
 - add DataFrames to dependencies
@@ -226,7 +215,6 @@ v0.1.9
 
 
 v0.1.8
-
   - bugfix (meanNormCI, text output)
   - wald ci include
   - add test
@@ -236,7 +224,6 @@ v0.1.8
 
 
 v1.0.7
-
 Add sub-module CI for confidence interval computation as part of simulation functions SIM.
   - add Roots in dependencies for mee/fm score ci calc
   - add Random in dependencies for simulations

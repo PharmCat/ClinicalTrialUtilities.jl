@@ -158,7 +158,7 @@ function ctask(;param::Symbol, hyp::Symbol, group::Symbol = :notdef, alpha::Real
         else throw(ArgumentError("Keyword group unknown!")) end
     elseif param == :cox
         if hyp == :ea
-            task = CTask(CoxHazardRatio(kw[:a], kw[:p], Parallel(),  Equality(alpha), objf(objv), k)
+            task = CTask(CoxHazardRatio(kw[:a], kw[:p]), Parallel(),  Equality(alpha), objf(objv), k)
         elseif hyp == :ei
             if !logscale diff = log(diff) end
             task = CTask(CoxHazardRatio(kw[:a], kw[:p]), Parallel(),  Equivalence(-diff, diff, alpha), objf(objv), k)

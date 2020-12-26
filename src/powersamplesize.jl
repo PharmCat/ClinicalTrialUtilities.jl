@@ -103,7 +103,7 @@ end
 
 #COX
 function cox_equality(θ, p, α::Float64, β::Float64, k)
-    1.0/p/(1.0/(1+k)*(1.0-1.0/(1.0+k)))*((quantile(ZDIST, 1 - α / 2) + quantile(ZDIST, 1 - β))/(log(θ))^2
+    1.0/p/(1.0/(1+k)*(1.0-1.0/(1.0+k)))*(quantile(ZDIST, 1 - α / 2) + quantile(ZDIST, 1 - β))/(log(θ))^2
 end
 function cox_equivalence(θ, δ, p, α::Float64, β::Float64, k)
     1.0/p/(1.0/(1+k)*(1.0-1.0/(1.0+k)))*((quantile(ZDIST, 1 - α) + quantile(ZDIST, 1 - β / 2))/(log(δ) - abs(log(θ))))^2

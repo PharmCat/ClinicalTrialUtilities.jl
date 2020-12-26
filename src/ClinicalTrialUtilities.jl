@@ -130,6 +130,7 @@ applyelimrange!,
 keldata,
 setkelauto!,
 getkelauto,
+datatable,
 # Simulation
 ctsim,
 besim,
