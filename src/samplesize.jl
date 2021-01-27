@@ -78,9 +78,9 @@ end
 """
 function ctask(;param::Symbol, hyp::Symbol, group::Symbol = :notdef, alpha::Real = 0.05, k::Real = 1, kw...)::CTask
     kwk      = keys(kw)
-    a        = kw[:a]
-    b        = kw[:b]
+    #a        = kw[:a]
 
+    if :logscale ∉ kwk logscale = true else logscale = kw[:logscale] end
     if :power in kwk && :n in kwk
          throw(ArgumentError("only beta or only n keyword should be used!"))
     elseif :beta in kwk
@@ -144,11 +144,9 @@ function ctask(;param::Symbol, hyp::Symbol, group::Symbol = :notdef, alpha::Real
             else throw(ArgumentError("Keyword hyp unknown!")) end
         else throw(ArgumentError("Keyword group unknown!")) end
     elseif param == :or
-
-        logscale = kw[:logscale]
         if group == :two || group == :notdef
             if hyp == :ea
-                task = CTask(OddRatio(Proportion(kw[:a]), Proportion(kw[:b])), Parallel(),  Equality(alpha), objf(objv), k)
+                task = CTask(OddRatio(Proportion(kw[:a]), Proportion(kw[:b])), Parallel(), Equality(alpha), objf(objv), k)
             elseif hyp == :ei
                 if !logscale diff = log(diff) end
                 task = CTask(OddRatio(Proportion(kw[:a]), Proportion(kw[:b])), Parallel(), Equivalence(-diff, diff, alpha), objf(objv), k)
@@ -157,14 +155,15 @@ function ctask(;param::Symbol, hyp::Symbol, group::Symbol = :notdef, alpha::Real
                 task = CTask(OddRatio(Proportion(kw[:a]), Proportion(kw[:b])), Parallel(), Superiority(diff,  diff, alpha), objf(objv), k)
             else throw(ArgumentError("Keyword hyp unknown!")) end
         elseif group == :co
-
         else throw(ArgumentError("Keyword group unknown!")) end
     elseif param == :cox
         if hyp == :ea
             task = CTask(CoxHazardRatio(kw[:a], kw[:p]), Parallel(),  Equality(alpha), objf(objv), k)
         elseif hyp == :ei
+            if !logscale diff = log(diff) end
             task = CTask(CoxHazardRatio(kw[:a], kw[:p]), Parallel(),  Equivalence(-diff, diff, alpha), objf(objv), k)
         elseif hyp == :ns
+            if !logscale diff = log(diff) end
             task = CTask(CoxHazardRatio(kw[:a], kw[:p]), Parallel(),  Superiority(diff,  diff, alpha), objf(objv), k)
         else throw(ArgumentError("Keyword hyp unknown!")) end
     else throw(ArgumentError("Keyword param unknown!")) end
@@ -232,6 +231,7 @@ function ctsamplen(;param::Symbol, type::Symbol, group::Symbol = :notdef, alpha:
     return ctsamplen(task)
 end #sampleSize
 
+
 function ctsamplen(t::CTask{T, D, H, O}) where T <: Mean where D <: AbstractDesign where H <: Equality where O <: AbstractSampleSize
     return TaskResult(t, :chow, one_mean_equality(t.param.m, refval(t.hyp), t.param.sd, t.hyp.alpha, t.objective.val))
 end
@@ -284,6 +284,16 @@ function ctsamplen(t::CTask{T, D, H, O}) where T <: OddRatio  where D <: Abstrac
 end
 function ctsamplen(t::CTask{T, D, H, O}) where T <: OddRatio  where D <: AbstractDesign where H <: Superiority where O <: AbstractSampleSize
     return TaskResult(t, :chow, or_superiority(getval(t.param.a), getval(t.param.b), t.hyp.diff, t.hyp.alpha, t.objective.val, t.k))
+end
+#------
+function ctsamplen(t::CTask{CoxHazardRatio, D, H, O}) where D <: AbstractDesign where H <: Equality where O <: AbstractSampleSize
+    return TaskResult(t, :chow, cox_equality(getval(t.param.a), t.param.b.p, t.hyp.alpha, t.objective.val,t.k))
+end
+function ctsamplen(t::CTask{CoxHazardRatio, D, H, O}) where D <: AbstractDesign where H <: Equivalence where O <: AbstractSampleSize
+    return TaskResult(t, :chow, cox_equivalence(getval(t.param.a), t.hyp.diff, t.param.b.p, t.hyp.alpha, t.objective.val,t.k))
+end
+function ctsamplen(t::CTask{CoxHazardRatio, D, H, O}) where D <: AbstractDesign where H <: Superiority where O <: AbstractSampleSize
+    return TaskResult(t, :chow, cox_superiority(getval(t.param.a), t.hyp.diff, t.param.b.p, t.hyp.alpha, t.objective.val,t.k))
 end
 #------------
 function ctsamplen(t::CTask{T, D, H, O}) where T <: DiffProportion{P, P} where P <: AbstractProportion  where D <: AbstractDesign where H <: McNemars where O <: AbstractSampleSize

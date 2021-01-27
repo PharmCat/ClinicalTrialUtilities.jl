@@ -344,7 +344,7 @@ end
     end
 
     #---------------------------------------------------------------------------
-    function slope(x::Vector, y::Vector)
+    function slope(x, y)
         if length(x) != length(y) throw(ArgumentError("Unequal vector length!")) end
         n   = length(x)
         if n < 2 throw(ArgumentError("n < 2!")) end
@@ -483,9 +483,9 @@ function nca!(data::PKSubject; calcm = :lint, intp = :lint, verbose = false, io:
         #if  calcm == :logt / :luld / :luldt calculation method used - log interpolation using
         if calcm == :logt || calcm == :luld  || calcm == :luldt intp = :logt end
 
-        time             = data.time
-        obs              = data.obs
-        time, obs        = dropbeforedosetime(time, obs, data.dosetime)
+        #time             = data.time
+        #obs              = data.obs
+        time, obs        = dropbeforedosetime(data.time, data.obs, data.dosetime)
         result[:Obsnum]  = length(obs)
 
         if result[:Obsnum] < 2
@@ -521,8 +521,9 @@ function nca!(data::PKSubject; calcm = :lint, intp = :lint, verbose = false, io:
         for i = 1:(result[:Obsnum] - 1)
             aucpartl[i], aumcpartl[i] = aucpart(time[i], time[i + 1], obs[i], obs[i + 1], calcm, i + 1 > result[:Tmaxn])
         end
-        pmask   = Array{Bool, 1}(undef, result[:Obsnum] - 1)
-        pmask  .= true
+        #pmask   = Array{Bool, 1}(undef, result[:Obsnum] - 1)
+        #pmask  .= true
+        pmask   = trues(result[:Obsnum] - 1)
 
         ncas    = nothing
         ncae    = nothing
@@ -530,7 +531,7 @@ function nca!(data::PKSubject; calcm = :lint, intp = :lint, verbose = false, io:
         # If TAU set, calculates start and edt timepoints for AUCtau
         if  data.dosetime.tau > 0
             ncas, ncae       = ncarange(time, data.dosetime.time, data.dosetime.tau)
-            result[:Ctaumin] = minimum(obs[ncas:ncae])
+            result[:Ctaumin] = minimum(view(obs, ncas:ncae))
         end
 
         #Calcalation partial areas (doseaucpart, doseaumcpart)
@@ -547,34 +548,11 @@ function nca!(data::PKSubject; calcm = :lint, intp = :lint, verbose = false, io:
             result[:Cdose] = obs[1]
         else
             error("Some concentration before dose time after filtering!!!")
-            #=
-            for i = 1:result[:Obsnum] - 1
-                if  time[i] <= data.dosetime.time < time[i+1]
-                    if time[i] == data.dosetime.time
-                        result[:Cdose] = obs[i]
-                        break
-                    else
-                        if  data.dosetime.tau > 0
-                            result[:Cdose] = result[:Ctaumin]
-
-                        else
-                            result[:Cdose] = 0
-
-                        end
-                        doseaucpart, doseaumcpart  = aucpart(data.dosetime.time, time[i + 1], result[:Cdose], obs[i + 1], :lint, false)
-                        pmask[i]     = false
-                        break
-                    end
-                else
-                    pmask[i]     = false
-                end
-            end
-            =#
         end
 
         #sum all full AUC parts and part before dose
-        result[:AUCall]  = sum(aucpartl[pmask])  + doseaucpart
-        result[:AUMCall] = sum(aumcpartl[pmask]) + doseaumcpart
+        result[:AUCall]  = sum(view(aucpartl, pmask))  + doseaucpart
+        result[:AUMCall] = sum(view(aumcpartl, pmask)) + doseaumcpart
         #-----------------------------------------------------------------------
         #-----------------------------------------------------------------------
         #Find last mesurable concentration (>0) from start, all after excluded
@@ -587,8 +565,8 @@ function nca!(data::PKSubject; calcm = :lint, intp = :lint, verbose = false, io:
             if obs[i] <= 0  pmask[i] = false else break end
         end
         =#
-        result[:AUClast]       = sum(aucpartl[pmask]) + doseaucpart
-        result[:AUMClast]      = sum(aumcpartl[pmask])+ doseaumcpart
+        result[:AUClast]       = sum(view(aucpartl, pmask)) + doseaucpart
+        result[:AUMClast]      = sum(view(aumcpartl, pmask)) + doseaumcpart
         result[:MRTlast]       = result[:AUMClast] / result[:AUClast]
 
         #-----------------------------------------------------------------------
@@ -610,11 +588,12 @@ function nca!(data::PKSubject; calcm = :lint, intp = :lint, verbose = false, io:
             end
         else
             logconc = log.(obs)
-            cmask   = Array{Bool, 1}(undef, result[:Obsnum])
-            cmask  .= false
+            #cmask   = Array{Bool, 1}(undef, result[:Obsnum])
+            #cmask  .= false
+            cmask   = falses(result[:Obsnum])
             cmask[data.kelrange.kelstart:data.kelrange.kelend] .= true
             cmask[data.kelrange.kelexcl] .= false
-            sl = slope(time[cmask], logconc[cmask])
+            sl = slope(view(time, cmask), view(logconc, cmask))
             push!(keldata, data.kelrange.kelstart, data.kelrange.kelend, sl[1], sl[2], sl[3], sl[4])
         end
         if  length(keldata) > 0
@@ -661,8 +640,8 @@ function nca!(data::PKSubject; calcm = :lint, intp = :lint, verbose = false, io:
             else
                 result[:Ctau] = obs[end]
             end
-            result[:AUCtau]   = sum(aucpartl[pmask])  + eaucpartl  + doseaucpart
-            result[:AUMCtau]  = sum(aumcpartl[pmask]) + eaumcpartl + doseaumcpart
+            result[:AUCtau]   = sum(view(aucpartl, pmask))  + eaucpartl  + doseaucpart
+            result[:AUMCtau]  = sum(view(aumcpartl, pmask)) + eaumcpartl + doseaumcpart
             result[:Cavg]     = result[:AUCtau]/data.dosetime.tau
             if result[:Ctaumin] != 0
                 result[:Swing]    = (result[:Cmax] - result[:Ctaumin])/result[:Ctaumin]
@@ -687,8 +666,8 @@ function nca!(data::PKSubject; calcm = :lint, intp = :lint, verbose = false, io:
             aucpartlsum  = similar(aucpartl)
             aumcpartlsum = similar(aumcpartl)
             for i = 1:length(aucpartl)
-                aucpartlsum[i]  = sum(aucpartl[1:i])
-                aumcpartlsum[i] = sum(aumcpartl[1:i])
+                aucpartlsum[i]  = sum(view(aucpartl, 1:i))
+                aumcpartlsum[i] = sum(view(aumcpartl, 1:i))
             end
             astx    = Vector{String}(undef, length(time))
             astx[1] = ""
@@ -1304,4 +1283,49 @@ function cmax(data::PKSubject)
 end
 
 function auc()
+end
+#----
+function datatable(data; stack = true)
+    if stack return datatable_st(data) else return datatable_unst(data) end
+end
+function datatable_st(data) where T
+
+        sortcols = Vector{Any}(undef, 0)
+        sorttype = Dict()
+        for i = 1:length(data)
+            if length(data[i].sort) > 0
+                for k in keys(data[i].sort)
+                    if k ∉ sortcols push!(sortcols, k) end
+                    if k ∉ keys(sorttype) sorttype[k] = typeof(data[i].sort[k]) else sorttype[k] = promote_type(sorttype[k], typeof(data[i].sort[k])) end
+                end
+            end
+        end
+        pname = :Parameter
+        vname = :Value
+
+        for i = 1:length(sortcols)
+            if sortcols[i] == pname pname = Symbol(string(pname)*"_") end
+            if sortcols[i] == vname pname = Symbol(string(vname)*"_") end
+        end
+        t = Vector{Vector}(undef, length(sortcols))
+        for i = 1:length(t)
+            t[i] = Vector{sorttype[sortcols[i]]}(undef, 0)
+        end
+        nt = NamedTuple{Tuple(append!(copy(sortcols), [pname, vname]))}(Tuple(append!(copy(t), [Vector{Symbol}(undef, 0), Vector{Float64}(undef, 0)])))
+        for i = 1:length(data)
+            sort = Dict()
+            for c = 1:length(sortcols)
+                if sortcols[c] ∈ keys(data[i].sort) sort[sortcols[c]] = data[i].sort[sortcols[c]] else sort[sortcols[c]] = missing end
+            end
+            for k in keys(data[i].result)
+                for s in keys(sort)
+                    push!(nt[s], sort[s])
+                end
+                push!(nt[pname], k)
+                push!(nt[vname], data[i].result[k])
+            end
+        end
+        return nt
+end
+function datatable_unst(data)
 end
