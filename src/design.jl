@@ -74,3 +74,24 @@ end
     end
     return sqrt(sum(1 ./ sqa)*d.bkni)
 end
+
+function printdesigns()
+    v = [:parallel, :d2x2, :d2x2x3, :d2x2x4, :d2x4x4, :d2x3x3, :d2x4x2, :d3x3, :d4x4, :d3x6x3]
+    df = ["n - 1", "n - 2", "2n - 3", "3n - 4", "3n - 4", "2n - 3", "n - 2", "2n - 4", "3n - 6", "2n - 4"]
+    name = ["Parallel",  "Crossover",
+    "Replicate crossover", "Replicate  crossover", "Replicate  crossover",
+    "Partial replicate crossover", "Balaam's", "Crossover", "Crossover", "Crossover"]
+    mx = Matrix{String}(undef, length(v)+1, 5)
+    view(mx, 1, 1:5) .= ["Name", "Symbol", "DF", "bkni", "Sequences"]
+    for i = 1:length(v)
+        d = Design(v[i])
+        r = i + 1
+        mx[r, 2] = string(v[i])
+        mx[r, 4] = string(d.bkni)
+        mx[r, 5] = string(d.sq)
+        view(mx, 2:11, 3) .= df
+        view(mx, 2:11, 1) .= name
+    end
+    mx[2,5] = "-"
+    printmatrix(stdout, mx)
+end
