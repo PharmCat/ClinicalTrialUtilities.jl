@@ -223,9 +223,10 @@ include("freque.jl")
 
 println(" ---------------------------------- ")
 @testset "#9  Random              " begin
-    @test ClinicalTrialUtilities.randomseq(seed = 1234) == [1,2,2,1,2,1,1,2,2,1]
+    rndseq = ClinicalTrialUtilities.randomseq(seed = 1234) 
+    @test length(findall(x->x==1, rndseq)) == length(findall(x->x==2, rndseq))
     rdf   = ClinicalTrialUtilities.randomtable(seed = 1234)
-    @test rdf[:Group] == [1,2,2,1,2,1,1,2,2,1]
+    @test length(findall(x->x==1, rdf[:Group])) == length(findall(x->x==2, rdf[:Group]))
 end
 
 
