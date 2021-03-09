@@ -131,6 +131,7 @@ applyelimrange!,
 keldata,
 setkelauto!,
 getkelauto,
+auc_sparse,
 datatable,
 # Simulation
 ctsim,

@@ -1007,7 +1007,6 @@ println(" ---------------------------------- ")
     @test unca[1][:volume]  ≈ 11.0
      p    = ClinicalTrialUtilities.pkplot(upk, ylabel = "Excretion")
 end
-
 println(" ---------------------------------- ")
 @testset "#12  Pharmacodynamics   " begin
 
@@ -1040,4 +1039,10 @@ println(" ---------------------------------- ")
     print(io, pdds[1])
     print(io, pd)
     print(io, pd[1])
+end
+println(" ---------------------------------- ")
+@testset "#13  Sparse PK          " begin
+    pks = ClinicalTrialUtilities.PKSubject(sparse_pk; conc = :Concentration, time = :Time)
+    auc = ClinicalTrialUtilities.auc_sparse(pks)
+    @test auc ≈ 1.35 atol=1E-5
 end

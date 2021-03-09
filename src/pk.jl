@@ -1329,3 +1329,30 @@ function datatable_st(data) where T
 end
 function datatable_unst(data)
 end
+
+"""
+    auc_sparse(data::PKSubject)
+
+AUC for sparse data.
+
+```math
+w_1 = (t_2 - t_1) / 2
+w_j = (t_{j+1} - t_{j-1}) / 2  (2 \\leq j \\leq J - 1)
+w_J = (t_J - t_{J-1}) / 2
+
+AUC = \\sum_{j=1}^J \\mu_j w_j
+```
+
+where `math \\mu_j` is the mean drug concentration at time t.
+"""
+function auc_sparse(data::PKSubject)
+    wts = Vector{Float64}(undef, length(data))
+    wts[1]   = (data.time[2] - data.time[1])/2.0
+    wts[end] = (data.time[end] - data.time[end-1])/2.0
+    if length(data) > 2
+        for i = 2:length(data)-1
+            wts[i] = (data.time[i+1] - data.time[i-1])/2.0
+        end
+    end
+    return data.obs'*wts
+end

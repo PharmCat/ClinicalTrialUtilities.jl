@@ -1,3 +1,8 @@
+v 0.5.0
+  - StableRNGs test
+  - rng keyword for randomtable, randomseq
+  - auc_sparse for PKSubject
+
 v0.4.1
   - cox samplen
   - datatable
