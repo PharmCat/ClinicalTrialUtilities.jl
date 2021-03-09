@@ -4,7 +4,7 @@ struct RandomTable
     t
 end
 """
-    randomseq(;blocksize = 4, subject = 10, group = 2, ratio = [1,1],  seed = 0)
+    randomseq(;blocksize = 4, subject = 10, group = 2, ratio = [1,1],  seed = 0, rng = Random.GLOBAL_RNG)
 
 Randomization list generaton.
 
@@ -12,12 +12,13 @@ Randomization list generaton.
 - ``subject`` - subject number;
 - ``group`` - number of groups;
 - ``ratio`` - group ration, [1,1] means 1:1, [1,2] means 1:2, ets. ``length(ratio)`` should be equal ``group``;
-- ``seed`` - RNG seed.
+- ``seed`` - RNG seed;
+- ``rng`` - random number generator.
 """
-function randomseq(;blocksize::Int = 4, subject = 10, group = 2, ratio = [1,1], seed = 0)
+function randomseq(;blocksize::Int = 4, subject = 10, group = 2, ratio = [1,1], seed = 0, rng = Random.GLOBAL_RNG)
 
     #rng = MersenneTwister()
-    if seed != 0 Random.seed!(seed) end
+    if seed != 0 Random.seed!(rng, seed) end
 
     r = sum(ratio)
 
@@ -35,7 +36,7 @@ function randomseq(;blocksize::Int = 4, subject = 10, group = 2, ratio = [1,1], 
     fbn = subject÷blocksize                                                     #block number
     rand  = Vector{Int}(undef, 0)                                                                  #rand list
     for i = 1:fbn
-        append!(rand, block[sample(1:blocksize, blocksize, replace=false)])     #generate and append random block
+        append!(rand, block[sample(rng, 1:blocksize, blocksize, replace=false)])     #generate and append random block
     end
 
     last = subject%blocksize                                                    #not full block
@@ -45,7 +46,7 @@ function randomseq(;blocksize::Int = 4, subject = 10, group = 2, ratio = [1,1], 
         for i = 1:group
             append!(block, fill(i, Int(rm*ratio[i])))
         end
-        append!(rand, block[sample(1:last, last, replace=false)])
+        append!(rand, block[sample(rng, 1:last, last, replace=false)])
     end
     return rand
 
@@ -53,7 +54,7 @@ end
 
 """
     randomtable(;blocksize = 4, subject = 10, group = 2,
-        ratio = [1,1], grseq = ["AB", "BA"], seed = 0)
+        ratio = [1,1], grseq = ["AB", "BA"], seed = 0, rng = Random.GLOBAL_RNG)
 
 
 Randomization table generaton. Return NamedTuple of vectors.
@@ -63,13 +64,14 @@ Randomization table generaton. Return NamedTuple of vectors.
 - ``group`` - number of groups;
 - ``ratio`` - group ration, [1,1] means 1:1, [1,2] means 1:2, ets. ``length(ratio)`` should be equal ``group``;
 - ``grseq`` - treatment sequence in each group;
-- ``seed`` - RNG seed.
+- ``seed`` - RNG seed;
+- ``rng`` - random number generator.
 """
-function randomtable(;blocksize::Int = 4, subject::Int = 10, group::Int = 2, ratio::Vector = [1,1], grseq::Vector{String} = ["AB", "BA"], seed = 0)
+function randomtable(;blocksize::Int = 4, subject::Int = 10, group::Int = 2, ratio::Vector = [1,1], grseq::Vector{String} = ["AB", "BA"], seed = 0, rng = Random.GLOBAL_RNG)
 
     if length(unique(length.(grseq))) != 1 throw(ArgumentError("Unequal grseq")) end
 
-    r = randomseq(;blocksize = blocksize, subject = subject, group = group, ratio = ratio,  seed = seed)
+    r = randomseq(;blocksize = blocksize, subject = subject, group = group, ratio = ratio,  seed = seed, rng = rng)
     subj = collect(1:length(r))
     seqrand  = vcat(grseq[r]...)
     nl = length(grseq[1]) + 3
@@ -83,7 +85,7 @@ function randomtable(;blocksize::Int = 4, subject::Int = 10, group::Int = 2, rat
     np[3] = seqrand
     for i=1:length(grseq[1])
         nm[i+3] = Symbol("Period_"*string(i))
-        np[i+3] = getindex.(seqrand, i)
+        np[i+3] = map(x-> x[i:i], seqrand)
     end
     return NamedTuple{Tuple(nm)}(Tuple(np))
 end

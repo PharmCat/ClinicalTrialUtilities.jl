@@ -1,5 +1,6 @@
 #Simple PK DataFrame
 pkdata         = CSV.File(path*"/csv/pkdata.csv") |> DataFrame
+sparse_pk      = pkdata[2:7, :]
 #Simple PK DataFrame
 nanpkdata         = CSV.File(path*"/csv/nanpk.csv") |> DataFrame
 #Simple PD DataFrame

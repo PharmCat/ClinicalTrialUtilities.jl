@@ -1,6 +1,6 @@
 # Clinical Trial Utilities
 # Copyright © 2019 Vladimir Arnautov aka PharmCat (mail@pharmcat.net)
-using Distributions, Random, DataFrames, CSV, Test, Plots, StatsBase
+using Distributions, Random, DataFrames, CSV, Test, Plots, StatsBase, StableRNGs
 
 path    = dirname(@__FILE__)
 io      = IOBuffer();
@@ -223,9 +223,10 @@ include("freque.jl")
 
 println(" ---------------------------------- ")
 @testset "#9  Random              " begin
-    @test ClinicalTrialUtilities.randomseq(seed = 1234) == [1,2,2,1,2,1,1,2,2,1]
-    rdf   = ClinicalTrialUtilities.randomtable(seed = 1234)
-    @test rdf[:Group] == [1,2,2,1,2,1,1,2,2,1]
+    rng = StableRNG(0)
+    @test ClinicalTrialUtilities.randomseq(seed = 1234, rng = rng) == [1, 2, 1, 2, 2, 1, 1, 2, 2, 1]
+    rdf   = ClinicalTrialUtilities.randomtable(seed = 1234, rng = rng)
+    @test rdf[:Group] == [1, 2, 1, 2, 2, 1, 1, 2, 2, 1]
 end
 
 
