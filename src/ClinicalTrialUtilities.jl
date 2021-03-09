@@ -97,6 +97,7 @@ bepower,
 cvfromci,
 cvfromvar,
 pooledcv,
+printdesigns,
 #Other
 descriptive,
 freque,
