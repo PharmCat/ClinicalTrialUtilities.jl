@@ -21,7 +21,7 @@ using Pkg; Pkg.add("ClinicalTrialUtilities");
 
 - Clinical trial sample size calculation
 - Power calculation
-- Confidence Interval calculation
+- Confidence Intervals calculation
 - NCA Pharmacokinetics parameters calculation
 - Descriptive statistics and frequencies
 - Randomization
