@@ -14,9 +14,9 @@
 __precompile__(true)
 module ClinicalTrialUtilities
 
-using Distributions, Random, Roots, QuadGK, RecipesBase, Reexport
+using Distributions, Random, Roots, QuadGK, RecipesBase
 
-@reexport using StatsBase
+using StatsBase
 
 import SpecialFunctions
 import Base: show, findfirst, getproperty, showerror, getindex, length, in, iterate, eltype, deleteat!, findall
