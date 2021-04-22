@@ -14,21 +14,17 @@
 __precompile__(true)
 module ClinicalTrialUtilities
 
-using Distributions, Random, Roots, QuadGK, RecipesBase, Reexport
+using Distributions, Random, Roots, QuadGK, RecipesBase
 
-@reexport using StatsBase
+using StatsBase
 
 import SpecialFunctions
 import Base: show, findfirst, getproperty, showerror, getindex, length, in, iterate, eltype, deleteat!, findall
 import StatsBase.confint
 import DataFrames: DataFrame, DataFrames, unstack
 
-try
-    methods(SpecialFunctions.logabsgamma)
-    global lgamma(x) = SpecialFunctions.logabsgamma(x)[1]
-catch
-    global lgamma(x) = SpecialFunctions.lgamma(x)
-end
+
+lgamma(x) = SpecialFunctions.logabsgamma(x)[1]
 
 const ZDIST  = Normal()
 const LOG2   = log(2)
