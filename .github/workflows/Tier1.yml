@@ -6,12 +6,18 @@ on:
     paths-ignore:
       - 'LICENSE.md'
       - 'README.md'
+      - '.github/**'
+      - 'change.log'
+      - '.gitignore'
   pull_request:
     branches:
       - master
     paths-ignore:
       - 'LICENSE.md'
       - 'README.md'
+      - '.github/**'
+      - 'change.log'
+      - '.gitignore'
 jobs:
   ci:
     runs-on: ${{ matrix.os }}
