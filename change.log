@@ -1,5 +1,6 @@
 v0.5.1
-
+  - DataFrames 1
+  - SpecialFunctions 1v0.5.1
 
 v0.5.0
   - StableRNGs test
