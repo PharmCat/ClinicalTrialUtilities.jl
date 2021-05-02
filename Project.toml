@@ -1,7 +1,7 @@
 name = "ClinicalTrialUtilities"
 uuid = "535c2557-d7d0-564d-8ff9-4ae146c18cfe"
 authors = ["Vladimir Arnautov (mail@pharmcat.net)"]
-version = "0.5.1"
+version = "0.5.2"
 
 [deps]
 DataFrames = "a93c6f00-e57d-5684-b7b6-d8193f3e46c0"
@@ -15,7 +15,7 @@ StatsBase = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
 
 [compat]
 DataFrames = "0.22, 1"
-Distributions = "0.20, 0.21, 0.22, 0.23, 0.24"
+Distributions = "0.20, 0.21, 0.22, 0.23, 0.24, 0.25"
 QuadGK = "2"
 RecipesBase = "1"
 Roots = "1"
