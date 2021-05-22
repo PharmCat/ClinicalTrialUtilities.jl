@@ -128,10 +128,12 @@ Descriptive statistics.
 function descriptive(data;
     sort::Union{Symbol, Array{T,1}} = Array{Symbol,1}(undef,0),
     vars = [],
-    stats::Union{Symbol, Array{T,1}, Tuple{Vararg{Symbol}}} = :default)::DataSet{Descriptive} where T <: Union{Symbol, String}
+    stats::Union{Symbol, Array{T,1}, Tuple{Vararg{Symbol}}} = :default, level = 0.95)::DataSet{Descriptive} where T <: Union{Symbol, String}
 
     stats = checkstats(stats)
-
+    if isa(vars, UnitRange{Int64})
+        vars = names(data)[vars]
+    end
     if isa(vars, Array) && length(vars) == 0
         vars = filter(x -> x ∉ sort, names(data))
         del  = []
@@ -158,7 +160,7 @@ function descriptive(data;
         #pushvardescriptive!(d, vars, Matrix(data[:,vars]), Dict(), stats)
         mx = Matrix(data[:,vars])
         for v  = 1:length(vars)  #For each variable in list
-            push!(d, Descriptive(vars[v], nothing, Dict(:Variable => v), descriptive_(mx[:, v], stats)))
+            push!(d, Descriptive(vars[v], nothing, Dict(:Variable => v), descriptive_(mx[:, v], stats, level)))
         end
         return DataSet(d)
     end
@@ -173,15 +175,15 @@ function descriptive(data;
         for v  = 1:length(vars)  #For each variable in list
             dict = Dict{Symbol, Any}(sort .=> sortval)
             dict[:Variable]   =  vars[v]
-            push!(d, Descriptive(vars[v], nothing, dict, descriptive_(mx[:, v], stats)))
+            push!(d, Descriptive(vars[v], nothing, dict, descriptive_(mx[:, v], stats, level)))
         end
         #pushvardescriptive!(d, vars, mx, sortval, stats)  #push variable descriprives for mx
     end
     return DataSet(d)
 end
-function descriptive(data::Array{T, 1}; stats::Union{Symbol, Vector, Tuple} = :default, var = nothing, varname = nothing, sort = Dict())::Descriptive where T <: Real
+function descriptive(data::Array{T, 1}; stats::Union{Symbol, Vector, Tuple} = :default, var = nothing, varname = nothing, sort = Dict(), level = 0.95)::Descriptive where T <: Real
     stats = checkstats(stats)
-    return Descriptive(var, varname, sort, descriptive_(data, stats))
+    return Descriptive(var, varname, sort, descriptive_(data, stats, level))
 
 end
 
@@ -189,14 +191,16 @@ end
 Check if all statistics in allstat list. return stats tuple
 """
 @inline function checkstats(stats::Union{Symbol, Array{T,1}, Tuple{Vararg{Symbol}}})::Tuple{Vararg{Symbol}} where T <: Union{Symbol, String}
-    allstat = (:n, :min, :max, :range, :mean, :var, :sd, :sem, :cv, :harmmean, :geomean, :geovar, :geosd, :geocv, :skew, :ses, :kurt, :sek, :uq, :median, :lq, :iqr, :mode)
+    allstat = (:n, :min, :max, :range, :mean, :var, :sd, :sem, :cv, :harmmean, :geomean, :geovar, :geosd, :geocv, :skew, :ses, :kurt, :sek, :uq, :median, :lq, :iqr, :mode, :meanci)
     if isa(stats, Symbol)
         if stats == :default stats = (:n, :mean, :sd, :sem, :uq, :median, :lq)
         elseif stats == :all stats = allstat
         else stats = Tuple(stats) end
     end
     stats = Tuple(Symbol.(stats))
-    if any(x -> x  ∉  allstat, stats) throw(ArgumentError("stats element not in allstat list")) end
+    if any(x -> x  ∉  allstat, stats)
+        throw(ArgumentError("stats element ($(findall(x -> x  ∉  allstat, stats))) not in allstat list"))
+    end
     return stats
 end
 """
@@ -237,7 +241,7 @@ function notnan(x)
     return !(x === NaN || x === nothing || x === missing)
 end
 
-@inline function descriptive_(data::Vector{T}, stats::Union{Tuple{Vararg{Symbol}}, Array{Symbol,1}}) where T <: Real
+@inline function descriptive_(data::Vector{T}, stats::Union{Tuple{Vararg{Symbol}}, Array{Symbol,1}}, level) where T <: Real
 
     #=
     dlist = findall(x -> x === NaN || x === nothing || x === missing, data)
@@ -395,6 +399,13 @@ end
             dict[s] = abs(duq-dlq)
         elseif s == :mode
             dict[s] = mode(data)
+        elseif s == :meanci
+            if dmean === nothing dmean = mean(data) end
+            if dvar === nothing dvar = var(data) end
+            if dn === nothing dn = length(data) end
+            e = sqrt(dvar/dn)*quantile(TDist(dn-1), 1-(1-level)/2)
+            dict[Symbol(string(s)*"L"*string(level))] = dmean-e
+            dict[Symbol(string(s)*"U"*string(level))] = dmean+e
         end
     end
     return dict

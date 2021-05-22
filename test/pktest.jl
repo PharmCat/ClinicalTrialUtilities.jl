@@ -53,12 +53,15 @@ println(" ---------------------------------- ")
     #AUMClast
     #MRTlast
     #Clast_pred
+    #Clinf / Cl_F_Obs
+    #Vzinf / Vz_F_Pred
 
     # --------------------------------------------------------------------------
     # Linear Trapezoidal Linear Interpolation
     # calcm = :lint, intp = :lint
 
     pkds = ClinicalTrialUtilities.pkimport(pkdata2, [:Subject, :Formulation]; conc = :Concentration, time = :Time)
+    ClinicalTrialUtilities.setdosetime!(pkds, ClinicalTrialUtilities.DoseTime(dose = 100, time = 0))
     pk   = ClinicalTrialUtilities.nca!(pkds)
     df   = DataFrame(pk; unst = true)
     sort!(df, :Subject)
@@ -195,6 +198,93 @@ println(" ---------------------------------- ")
     75.604277
     93.761762
     38.810857], sigdigits = 6)
+
+    @test round.(df[!, :Clinf], sigdigits = 6) == round.([0.0023296437
+0.0061900608
+0.0038422846
+0.0045446122
+0.0038729255
+0.0062493127
+0.0085550864
+0.0064740799
+0.0040216775
+0.012383404], sigdigits = 6)
+
+    @test round.(df[!, :Vzinf], sigdigits = 6) == round.([0.68827768
+0.43881487
+1.1673601
+0.59056646
+0.56843374
+0.8124135
+0.68666158
+0.72497447
+0.71232266
+0.72039519], sigdigits = 6)
+
+ClinicalTrialUtilities.setdosetime!(pkds, ClinicalTrialUtilities.DoseTime(dose = 120, time = 0, tau = 12))
+pk   = ClinicalTrialUtilities.nca!(pkds; adm = :iv)
+df   = DataFrame(pk; unst = true)
+sort!(df, :Subject)
+
+#Cltau / CLss
+@test round.(df[!, :Cltau], sigdigits = 5) == round.([0.07185191
+0.050414459
+0.12240579
+0.070132959
+0.06902661
+0.085106504
+0.083532913
+0.10859036
+0.073251565
+0.092756742], sigdigits = 5)
+
+#AUMCtau
+@test round.(df[!, :AUMCtau], sigdigits = 6) == round.([9984.8168
+14630.069
+6024.4953
+10299.721
+11466.123
+8467.3568
+9003.0193
+6457.0058
+10095.818
+8367.3005], sigdigits = 6)
+
+#AUCinf
+@test round.(df[!, :AUCinf], sigdigits = 6) == round.([42925.019
+16154.93
+26026.183
+22004.078
+25714.393
+16001.76
+11688.953
+15446.21
+24865.246
+8171.1624], sigdigits = 6)
+
+#MRTtauinf / MRTinf
+@test round.(df[!, :MRTtauinf], sigdigits = 6) == round.([302.40303
+75.590599
+312.72083
+148.34069
+172.0933
+130.19061
+91.908297
+161.57402
+176.30461
+70.260736], sigdigits = 6)
+
+
+@test round.(df[!, :Vsstau], sigdigits = 4) == round.([21.728235
+3.8108592
+38.278842
+10.403572
+11.879017
+11.080068
+7.6773678
+17.545381
+12.914588
+6.517157], sigdigits = 4)
 
 
     # --------------------------------------------------------------------------
@@ -624,6 +714,91 @@ println(" ---------------------------------- ")
     1105.0705
     1638.1903
     1293.7065], sigdigits = 6)
+
+    #Ctau
+    @test round.(df[!, :Ctau], sigdigits = 6) == round.([144.964
+196.035
+76.027
+132.257
+154.066
+113.751
+123.37
+134.133
+135.58
+106.476], sigdigits = 6)
+
+    #Cavg
+    @test round.(df[!, :Cavg], sigdigits = 6) == round.([139.17515
+198.35579
+81.695479
+142.58631
+144.87167
+117.49983
+119.71329
+92.089208
+136.51585
+107.80888], sigdigits = 6)
+
+    #Cavg
+    @test round.(df[!, :Fluctau], sigdigits = 2) .* 100 == round.([32.983619
+32.840987
+35.886931
+53.500928
+10.538983
+34.806007
+24.962976
+4.5542796
+23.269825
+17.629346], sigdigits = 2)
+
+    #Swingtau
+    @test round.(df[!, :Swingtau], sigdigits = 6) == round.([0.31666483
+0.3322978
+0.38562616
+0.57679367
+0.099100386
+0.35953091
+0.24223069
+0.031267473
+0.23430447
+0.17850032
+], sigdigits = 6)
+
+    #Accind
+    @test round.(df[!, :Accind], sigdigits = 6) == round.([25.123662
+6.4216193
+25.821565
+11.336753
+12.737742
+11.341063
+7.2010832
+9.8406852
+15.26571
+5.3650315], sigdigits = 6)
+
+    #Cltau / CLss_F
+    @test round.(df[!, :Cltau], sigdigits = 6) == round.([0.07185191
+0.050414459
+0.12240579
+0.070132959
+0.06902661
+0.085106504
+0.083532913
+0.10859036
+0.073251565
+0.092756742], sigdigits = 6)
+
+#Vztau / Vz_F
+@test round.(df[!, :Vztau], sigdigits = 6) == round.([21.228167
+3.5738929
+37.18924
+9.113687
+10.131115
+11.063884
+6.7046479
+12.160066
+12.974374
+5.3960536], sigdigits = 6)
 
     # --------------------------------------------------------------------------
     # Linear-trapezoidal Linear Interpolation

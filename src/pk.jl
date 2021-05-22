@@ -220,8 +220,8 @@ function Base.show(io::IO, obj::DataSet{PKPDProfile})
     end
 end
 function Base.show(io::IO, obj::PKSubject)
-    println(io, "Pharmacokinetic subject")
-    println(io, "Observations: $(length(obj))")
+    println(io, "  Pharmacokinetic subject")
+    println(io, "Observations: $(length(obj)); ", obj.dosetime)
     println(io,  obj.kelrange)
     println(io, "Time   Concentration")
     for i = 1:length(obj)
@@ -249,8 +249,8 @@ end
 function Base.show(io::IO, obj::ElimRange)
     print(io, "Elimination range: $(obj.kelstart) - $(obj.kelend) ")
     if length(obj.kelexcl) > 0
-        print(io, "Exclusions: $(obj.kelexcl[i])")
-        if length(obj.kelexcl) > 1 for i = 1:length(obj.kelexcl) print(io, ", $(obj.kelexcl[i])") end end
+        print(io, "Exclusions: $(obj.kelexcl[1])")
+        if length(obj.kelexcl) > 1 for i = 2:length(obj.kelexcl) print(io, ", $(obj.kelexcl[i])") end end
         print(io, ".")
     else
         print(io, "No exclusion.")
@@ -316,7 +316,7 @@ end
 function dropbeforedosetime(time::Vector, obs::Vector, dosetime::DoseTime)
     s = 0
     for i = 1:length(time)
-        if time[i] < dosetime.time s = i else break end
+        @inbounds if time[i] < dosetime.time s = i else break end
     end
     return time[s+1:end], obs[s+1:end]
 end
@@ -382,7 +382,7 @@ end
     #Intrapolation
         #linear prediction bx from ax, a1 < ax < a2
     function linpredict(a₁, a₂, ax, b₁, b₂)
-        return abs((ax - a₁) / (a₂ - a₁))*(b₂ - b₁) + b₁
+        return (ax - a₁) / (a₂ - a₁)*(b₂ - b₁) + b₁
     end
 
     function logtpredict(c₁, c₂, cx, t₁, t₂)
@@ -390,7 +390,7 @@ end
     end
 
     function logcpredict(t₁, t₂, tx, c₁, c₂)
-        return exp(log(c₁) + abs((tx-t₁)/(t₂-t₁))*(log(c₂) - log(c₁)))
+        return exp(log(c₁) + (tx-t₁)/(t₂-t₁)*(log(c₂) - log(c₁)))
     end
     function cpredict(t₁, t₂, tx, c₁, c₂, calcm)
         if calcm == :lint || c₂ >= c₁
@@ -445,30 +445,38 @@ end
 
 #-------------------------------------------------------------------------------
 """
-    nca!(data::PKSubject; calcm = :lint, verbose = false, io::IO = stdout)
+    nca!(data::PKSubject; adm = :ev, calcm = :lint, intp = :lint,
+        verbose = false, warn = true, io::IO = stdout)
 
 Pharmacokinetics non-compartment analysis for one PK subject.
 
-calcm - calculation method;
+`adm` - administration:
+
+* `:ev` - extravascular;
+* `:iv` - intra vascular bolus;
+
+`calcm` - calculation method;
 
 - :lint  - Linear trapezoidal everywhere;
 - :logt  - Log-trapezoidat rule after Tmax if c₁ > 0 and c₂ > 0, else Linear trapezoidal used;
 - :luld  - Linear Up - Log Down everywhere if c₁ > c₂ > 0, else Linear trapezoidal used;
 - :luldt - Linear Up - Log Down after Tmax if c₁ > c₂ > 0, else Linear trapezoidal used;
 
-intp - interpolation rule;
+`intp` - interpolation rule;
 - :lint - linear interpolation;
 - :logt - log interpolation;
 
 
-verbose - print to out stream if "true";
+`verbose` - print to out stream if "true";
 
 - true;
 - false.
 
-io - out stream (stdout by default)
+`warn` - warnings enabled;
+
+`io` - out stream (stdout by default).
 """
-function nca!(data::PKSubject; calcm = :lint, intp = :lint, verbose = false, io::IO = stdout)
+function nca!(data::PKSubject; adm = :ev, calcm = :lint, intp = :lint, verbose = false, warn = true, io::IO = stdout)
         result   = Dict()
         #=
         result    = Dict(:Obsnum   => 0,   :Tmax   => 0,   :Tmaxn    => 0,   :Tlast   => 0,
@@ -479,7 +487,11 @@ function nca!(data::PKSubject; calcm = :lint, intp = :lint, verbose = false, io:
         :Rsq     => NaN, :ARsq     => NaN, :Rsqn   => NaN,
         :AUCinf  => NaN, :AUCpct   => NaN)
         =#
-
+        if warn
+            if !allunique(data.time)
+                @warn "Not all time values is unique!"
+            end
+        end
         #if  calcm == :logt / :luld / :luldt calculation method used - log interpolation using
         if calcm == :logt || calcm == :luld  || calcm == :luldt intp = :logt end
 
@@ -487,7 +499,7 @@ function nca!(data::PKSubject; calcm = :lint, intp = :lint, verbose = false, io:
         #obs              = data.obs
         time, obs        = dropbeforedosetime(data.time, data.obs, data.dosetime)
         result[:Obsnum]  = length(obs)
-
+        rmn = length(data.obs) - length(obs)
         if result[:Obsnum] < 2
             return PKPDProfile(data, result; method = calcm)
         end
@@ -534,16 +546,61 @@ function nca!(data::PKSubject; calcm = :lint, intp = :lint, verbose = false, io:
             result[:Ctaumin] = minimum(view(obs, ncas:ncae))
         end
 
+        #Elimination
+        keldata                = KelData()
+        if data.kelauto
+            if result[:Obsnum] - result[:Tmaxn] >= 3
+                logconc    = log.(obs)
+                cmask      = trues(result[:Obsnum])
+                kelexclrmn = data.kelrange.kelexcl .- rmn
+                view(cmask, kelexclrmn) .= false
+                kellast = findlast(x -> x, cmask)
+                if kellast - result[:Tmaxn] >= 3
+                    if adm == :iv tmnc = 0 else tmnc = 1 end
+                    for i  = result[:Tmaxn] + tmnc:kellast - 2
+                        cmask                    .= false
+                        #cmask[i:result[:Obsnum]] .= true
+                        view(cmask, i:kellast) .= true
+                        if length(data.kelrange.kelexcl) > 0
+                            view(cmask, kelexclrmn) .= false
+                        end
+                        if sum(cmask) >= 3
+                            sl = slope(time[cmask], logconc[cmask])
+                            if sl[1] < 0
+                                push!(keldata, i, kellast + rmn, sl[1], sl[2], sl[3], sl[4])
+                            end
+                        end
+                    end
+                end
+            end
+        else
+            logconc = log.(obs)
+            #cmask   = Array{Bool, 1}(undef, result[:Obsnum])
+            #cmask  .= false
+            cmask   = falses(result[:Obsnum])
+            cmask[data.kelrange.kelstart-rmn:data.kelrange.kelend-rmn] .= true
+            cmask[data.kelrange.kelexcl .- rmn] .= false
+            sl = slope(view(time, cmask), view(logconc, cmask))
+            push!(keldata, data.kelrange.kelstart, data.kelrange.kelend, sl[1], sl[2], sl[3], sl[4])
+        end
+
         #Calcalation partial areas (doseaucpart, doseaumcpart)
         #Dosetime < first time
         if data.dosetime.time < time[1]
-        # IV not included!!!
-            if  data.dosetime.tau > 0
-                result[:Cdose] = result[:Ctaumin]
+            if adm == :iv
+                if obs[1] > obs[2] > 0
+                    result[:Cdose] = logcpredict(time[1], time[2], data.dosetime.time, obs[1], obs[2])
+                else
+                    result[:Cdose] = obs[findfirst(x->x>0, obs)]
+                end
             else
-                result[:Cdose] = 0
+                if  data.dosetime.tau > 0
+                    result[:Cdose] = result[:Ctaumin]
+                else
+                    result[:Cdose] = 0
+                end
             end
-            doseaucpart, doseaumcpart  = aucpart(data.dosetime.time, time[1], result[:Cdose], obs[1], :lint, false)
+            doseaucpart, doseaumcpart  = aucpart(data.dosetime.time, time[1], result[:Cdose], obs[1], :lint, false) #always :lint?
         elseif  data.dosetime.time == time[1]
             result[:Cdose] = obs[1]
         else
@@ -569,33 +626,11 @@ function nca!(data::PKSubject; calcm = :lint, intp = :lint, verbose = false, io:
         result[:AUMClast]      = sum(view(aumcpartl, pmask)) + doseaumcpart
         result[:MRTlast]       = result[:AUMClast] / result[:AUClast]
 
+
+        result[:Cllast]           = data.dosetime.dose / result[:AUClast]
         #-----------------------------------------------------------------------
         #-----------------------------------------------------------------------
-        #Elimination
-        keldata                = KelData()
-        if data.kelauto
-            if result[:Obsnum] - result[:Tmaxn] >= 3
-                logconc = log.(obs)
-                cmask   = Vector{Bool}(undef, result[:Obsnum])
-                for i  = result[:Tmaxn] + 1:result[:Obsnum] - 2
-                    cmask                    .= false
-                    cmask[i:result[:Obsnum]] .= true
-                    sl = slope(time[cmask], logconc[cmask])
-                    if sl[1] < 0 * sl[1]
-                        push!(keldata, i, result[:Obsnum], sl[1], sl[2], sl[3], sl[4])
-                    end
-                end
-            end
-        else
-            logconc = log.(obs)
-            #cmask   = Array{Bool, 1}(undef, result[:Obsnum])
-            #cmask  .= false
-            cmask   = falses(result[:Obsnum])
-            cmask[data.kelrange.kelstart:data.kelrange.kelend] .= true
-            cmask[data.kelrange.kelexcl] .= false
-            sl = slope(view(time, cmask), view(logconc, cmask))
-            push!(keldata, data.kelrange.kelstart, data.kelrange.kelend, sl[1], sl[2], sl[3], sl[4])
-        end
+
         if  length(keldata) > 0
             result[:Rsq], result[:Rsqn] = findmax(keldata.ar)
             data.kelrange.kelstart   = keldata.s[result[:Rsqn]]
@@ -614,8 +649,11 @@ function nca!(data::PKSubject; calcm = :lint, intp = :lint, verbose = false, io:
             result[:AUCpct]          = (result[:AUCinf] - result[:AUClast]) / result[:AUCinf] * 100.0
             result[:AUMCinf]         = result[:AUMClast] + result[:Tlast] * result[:Clast] / result[:Kel] + result[:Clast] / result[:Kel] ^ 2
             result[:MRTinf]          = result[:AUMCinf] / result[:AUCinf]
-            result[:Vzf]             = data.dosetime.dose / result[:AUCinf] / result[:Kel]
-            result[:Clf]             = data.dosetime.dose / result[:AUCinf]
+            result[:Vzlast]           = data.dosetime.dose / result[:AUClast] / result[:Kel]
+            result[:Vzinf]           = data.dosetime.dose / result[:AUCinf] / result[:Kel]
+            result[:Clinf]           = data.dosetime.dose / result[:AUCinf]
+            result[:Vssinf]           = result[:Clinf] * result[:MRTinf]
+
         else
             result[:Kel]             = NaN
             result[:HL]              = NaN
@@ -661,6 +699,10 @@ function nca!(data::PKSubject; calcm = :lint, intp = :lint, verbose = false, io:
             else
                 result[:Accind]   = NaN
             end
+            result[:MRTtauinf]       = (result[:AUMCtau] + data.dosetime.tau * (result[:AUCinf] - result[:AUCtau])) / result[:AUCtau]
+            result[:Vztau]           = data.dosetime.dose / result[:AUCtau] / result[:Kel]
+            result[:Cltau]           = data.dosetime.dose / result[:AUCtau]
+            result[:Vsstau]          = result[:Cltau] * result[:MRTtauinf]
         end
         if verbose
             aucpartlsum  = similar(aucpartl)
@@ -696,33 +738,15 @@ function nca!(data::PKSubject; calcm = :lint, intp = :lint, verbose = false, io:
         return PKPDProfile(data, result; method = calcm)
     end
 """
-    nca!(data::DataSet{PKSubject}; calcm = :lint, intp = :lint,
-        verbose = false, io::IO = stdout)
+    nca!(data::DataSet{PKSubject}; adm = :ev, calcm = :lint, intp = :lint,
+        verbose = false, warn = true, io::IO = stdout)
 
-
-Pharmacokinetics non-compartment analysis for PK subjects set.
-
-calcm - calculation method;
-
-- :lint  - Linear trapezoidal everywhere;
-- :logt  - Log-trapezoidat rule after Tmax if c₁ > c₂ > 0, else Linear trapezoidal used  (same as :luldt - will be deprecated);
-- :luld  - Linear Up - Log Down everywhere if c₁ > c₂ > 0, else Linear trapezoidal used;
-
-intp - interpolation rule;
-- :lint - linear interpolation;
-- :logt - log interpolation;
-
-verbose - print to out stream if "true";
-
-- true;
-- false.
-
-io - out stream (stdout by default)
+Pharmacokinetics non-compartment analysis for PK subjects DataSet.
 """
-function nca!(data::DataSet{PKSubject}; calcm = :lint, intp = :lint, verbose = false, io::IO = stdout)
+function nca!(data::DataSet{PKSubject}; adm = :ev, calcm = :lint, intp = :lint, verbose = false, warn = true, io::IO = stdout)
         results = Array{PKPDProfile, 1}(undef, 0)
         for i = 1:length(data.data)
-            push!(results, nca!(data.data[i]; calcm = calcm, intp = intp, verbose = verbose, io = io))
+            push!(results, nca!(data.data[i]; adm = adm, calcm = calcm, intp = intp, verbose = verbose, warn = warn, io = io))
         end
         return DataSet(results)
 end
@@ -993,7 +1017,7 @@ Pharmacodynamics data import.
 - th - treashold.
 """
 function pdimport(data, sort::Array; resp::Symbol, time::Symbol, bl::Real = 0, th::Real = NaN)::DataSet
-    №sortlist = unique(data[:, sort])
+    sortlist = unique(data[:, sort])
     results  = Array{PDSubject, 1}(undef, 0)
     getdatai(data, sort, [resp, time], (x, y) -> push!(results, PDSubject(x[!, time], x[!, resp], bl, th, sort = Dict(sort .=> collect(y)))); sortby = time)
     return DataSet(results)
@@ -1067,27 +1091,69 @@ Set range for elimination parameters calculation for subject.
 
 data - PK subject;
 range - ElimRange object.
+
+Set kelauto `false` if  kelend > kelstart > 0.
 """
 function setelimrange!(data::PKSubject, range::ElimRange)
     if range.kelend > length(data) throw(ArgumentError("Kel endpoint out of range")) end
-    setkelauto!(data, false)
+    if range.kelend > range.kelstart > 0 setkelauto!(data, false) end
     data.kelrange = range
 end
+"""
+    setelimrange!(data::DataSet{PKSubject}, range::ElimRange)
 
+Set range for elimination parameters calculation for DataSet.
+
+data - DataSet of PK subject;
+range - ElimRange object.
+"""
 function setelimrange!(data::DataSet{PKSubject}, range::ElimRange)
     for i = 1:length(data)
         setelimrange!(data[i], range)
     end
     data
 end
+"""
+    setelimrange!(data::DataSet{PKSubject}, range::ElimRange, subj::Array{Int,1})
+
+Set range for elimination parameters calculation for DataSet.
+
+data - DataSet of PK subject;
+range - ElimRange object;
+subj - subjects.
+"""
 function setelimrange!(data::DataSet{PKSubject}, range::ElimRange, subj::Array{Int,1})
     for i in subj
         setelimrange!(data[i], range)
     end
     data
 end
+"""
+    setelimrange!(data::DataSet{PKSubject}, range::ElimRange, subj::Int)
+
+Set range for elimination parameters calculation for DataSet.
+
+data - DataSet of PK subject;
+range - ElimRange object;
+subj - subject.
+"""
 function setelimrange!(data::DataSet{PKSubject}, range::ElimRange, subj::Int)
     setelimrange!(data[subj], range)
+    data
+end
+"""
+    setdosetime!(data::DataSet{PKSubject}, dosetime::DoseTime, sort::Dict)
+
+Set range for elimination parameters calculation for DataSet.
+
+data - DataSet of PK subject;
+range - ElimRange object;
+sort - subject sort.
+"""
+function setelimrange!(data::DataSet{PKSubject}, dosetime::DoseTime, sort::Dict)
+    for i = 1:length(data)
+        if sort ∈ data[i].sort setelimrange!(data[i], dosetime) end
+    end
     data
 end
 #-------------------------------------------------------------------------------
@@ -1176,12 +1242,28 @@ function setdosetime!(data::PKSubject, dosetime::DoseTime)
     data.dosetime = dosetime
     data
 end
+"""
+    setdosetime!(data::DataSet{PKSubject}, dosetime::DoseTime)
+
+Set dosing time and tau for all subjects.
+
+data - dataset of PK subjects;
+dosetime - DoseTime object.
+"""
 function setdosetime!(data::DataSet{PKSubject}, dosetime::DoseTime)
     for i = 1:length(data)
         setdosetime!(data[i], dosetime)
     end
     data
 end
+"""
+    setdosetime!(data::DataSet{PKSubject}, dosetime::DoseTime, sort::Dict)
+
+Set dosing time and tau for  subjects in sort dict.
+
+data - dataset of PK subjects;
+dosetime - DoseTime object.
+"""
 function setdosetime!(data::DataSet{PKSubject}, dosetime::DoseTime, sort::Dict)
     for i = 1:length(data)
         if sort ∈ data[i].sort setdosetime!(data[i], dosetime) end

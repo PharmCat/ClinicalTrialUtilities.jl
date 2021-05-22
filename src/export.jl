@@ -196,7 +196,7 @@ HTLM export.
             while s
                 s = false
                 for r = 2:rown
-                    if tablematrix[r,c] !=0 && data[r,c] === data[r-1,c]
+                    if tablematrix[r,c] !=0 && !ismissing(data[r,c]) && !ismissing(data[r-1,c]) && data[r,c] == data[r-1,c]
                         tablematrix[r,c] -= 1;
                         tablematrix[r-1,c] += 1;
                         s = true;

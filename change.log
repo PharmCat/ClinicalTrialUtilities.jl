@@ -1,9 +1,21 @@
+v0.6.0
+  - changes in PK parameters names
+  - nca! administration settings
+  - adjust kel range for nca! with adm = :iv
+  - MRTtauinf used for Vsstau calculation
+  - changes in plots
+  - descriptive, CI add
+  - export fix
+  - DataSet sort!
+  - documentation
+  - nca tests
+
 v0.5.1
   - DataFrames 1
   - SpecialFunctions 1
 
 v0.5.0
-  - StableRNGs test
+  - StableRNGs test+
   - rng keyword for randomtable, randomseq
   - auc_sparse for PKSubject
 

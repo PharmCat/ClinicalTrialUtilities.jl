@@ -80,6 +80,11 @@ function Base.deleteat!(a::DataSet{T}, inds::Dict) where T
     return a
 end
 
+function Base.sort!(a::DataSet; by)
+    sort!(a.data; by = by)
+    a
+end
+
 ################################################################################
 #=
 function Tables.istable(table::DataSet)

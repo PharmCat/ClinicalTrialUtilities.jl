@@ -8,6 +8,72 @@ NCA analysis based on following steps:
 4. Exporting to DataFrame;
 5. Descriptive statistics / HTML export.
 
+### Description
+
+```julia
+include("ncatable.jl")
+```
+#### AUC
+
+```math
+AUC = \sum_{n=1}^N AUC_{n}
+```
+
+Where AUCn - partial AUC.
+
+Linear trapezoidal rule
+
+```math
+AUC\mid_{t_1}^{t_2} = \delta t \times \frac{C_1 + C_2}{2}
+
+AUMC\mid_{t_1}^{t_2} = \delta t \times \frac{t_1 \times C_1 + t_2 \times C_2}{2}
+```
+
+Logarithmic trapezoidal rule
+
+```math
+AUC\mid_{t_1}^{t_2} =   \delta t \times \frac{ C_2 - C_1}{ln(C_2/C_1)}
+
+AUMC\mid_{t_1}^{t_2} = \delta t \times \frac{t_2 \times C_2 - t_1 \times C_1}{ln(C_2/C_1)} -  \delta t^2 \times \frac{ C_2 - C_1}{ln(C_2/C_1)^2}
+```
+
+Linear interpolation rule
+
+```math
+C_x = C_1 + \frac{(t_x-t_1)\times(C_2 - C_1)}{t_2 - t_1}
+```
+
+Logarithmic interpolation rule
+
+```math
+C_x = exp\left(ln(C_1) + \frac{(t_x-t_1)\times(ln(C_2) - ln(C_1))}{t_2 - t_1}\right)
+```
+
+#### \lambda_z - elimination constant
+
+#### HL
+
+```math
+HL = ln(2) / \lambda_z
+```
+
+#### AUCinf
+
+```math
+AUCinf = AUClast + \frac{Clast}{\lambda_z}
+```
+
+#### AUMCinf
+
+```math
+AUMCinf =  AUMClast + \frac{tlast\times Clast}{\lambda_z} + \frac{Clast}{\lambda_z^2}
+```
+
+#### Accumulation index
+
+```math
+Accind = \frac{1}{1 - exp(-\lambda_z \tau)}
+```
 
 ### nca!
 ```@docs

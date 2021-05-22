@@ -32,15 +32,16 @@ PKPlotStyle(:dot, :purple, :octagon, :purple),
 PKPlotStyle(:dot, :indigo, :heptagon, :indigo),
 ]
 
-function randomstyle()
-    linestyle   = ([:solid, :dash, :dot, :dashdot, :dashdotdot])[sample(1:5)]
-    linecolor   = ([:blue, :red, :green, :yellow, :gray, :cyan, :gold, :magenta, :purple, :indigo])[sample(1:10)]
-    markershape = ([:circle, :rect, :star5, :diamond, :hexagon, :cross, :xcross, :utriangle, :dtriangle, :rtriangle, :ltriangle, :pentagon, :heptagon, :octagon, :star4, :star6, :star7, :star8, :vline, :hline])[sample(1:20)]
-    markercolor = ([:blue, :red, :green, :yellow, :gray, :cyan, :gold, :magenta, :purple, :indigo])[sample(1:10)]
+function randomstyle(rng)
+    linestyle   = ([:solid, :dash, :dot, :dashdot, :dashdotdot])[sample(rng, 1:5)]
+    linecolor   = ([:blue, :red, :green, :yellow, :gray, :cyan, :gold, :magenta, :purple, :indigo])[sample(rng, 1:10)]
+    markershape = ([:circle, :rect, :star5, :diamond, :hexagon, :cross, :xcross, :utriangle, :dtriangle, :rtriangle, :ltriangle, :pentagon, :heptagon, :octagon, :star4, :star6, :star7, :star8, :vline, :hline])[sample(rng, 1:20)]
+    markercolor = ([:blue, :red, :green, :yellow, :gray, :cyan, :gold, :magenta, :purple, :indigo])[sample(rng, 1:10)]
     return PKPlotStyle(linestyle, linecolor, markershape, markercolor)
 end
 
 @userplot PKPlot
+@userplot PKElimpPlot
 
 @recipe function f(subj::PKPlot)
     x, y = subj.args
@@ -61,6 +62,15 @@ end
     (x, y)
 end
 
+@recipe function f(subj::PKElimpPlot)
+    x, y = subj.args
+    seriestype        --> :line
+    legend            --> false
+    markersize        --> 0
+    markerstrokealpha --> 0
+    (x, y)
+end
+
 function plotlabel(d)
     title = ""
     if length(d) > 0
@@ -77,11 +87,13 @@ end
 
 Plot for subject
 
-subj - subject;
-plotstyle - styles for plots.
+* subj - subject;
+* plotstyle - styles for plots.
 
 """
-function pkplot(subj::T; plotstyle::PKPlotStyle = PKPLOTSTYLE[1], kwargs...) where T <: AbstractSubject
+function pkplot(subj::T; plotstyle::PKPlotStyle = PKPLOTSTYLE[1], ls = false, elim = false, kwargs...) where T <: AbstractSubject
+    time = subj.time
+    obs = subj.obs
     kwargs = Dict{Symbol, Any}(kwargs)
     k = keys(kwargs)
 
@@ -97,19 +109,48 @@ function pkplot(subj::T; plotstyle::PKPlotStyle = PKPLOTSTYLE[1], kwargs...) whe
     if !(:ylabel in k)
         kwargs[:ylabel] = "Concentration"
     end
+    if :yscale in k
+        if kwargs[:yscale] in [:ln, :log, :log2, :log10] ls = true end
+    end
+    if ls == true
+        inds = findall(x->x>0, subj.obs)
+        time = subj.time[inds]
+        obs = log.(subj.obs[inds])
+    end
 
-    p = pkplot(subj.time, subj.obs;
+
+    p = pkplot(time, obs;
         linestyle   = plotstyle.linestyle,
         linecolor   = plotstyle.linecolor,
         markershape = plotstyle.markershape,
         markercolor = plotstyle.markercolor,
         kwargs...
         )
+    if elim
+        if length(subj.keldata) > 0
+            rsq, rsqn = findmax(subj.keldata.ar)
+            lz        = subj.keldata.a[rsqn]
+            lzint     = subj.keldata.b[rsqn]
+            ts        = time[subj.kelrange.kelstart]
+            te        = time[subj.kelrange.kelend]
+
+            if ls true
+                x = [ts,te]
+                y = lzint .+ lz .* x
+            else
+                x = collect(ts:(te-ts)/100:te)
+                y = exp.(lzint .+ lz .* x)
+            end
+            pkelimpplot!(p, x, y)
+        end
+    end
     return p
 
 end
 
-function pkplot!(subj::T; plotstyle::PKPlotStyle = PKPLOTSTYLE[1], kwargs...) where T <: AbstractSubject
+function pkplot!(subj::T; plotstyle::PKPlotStyle = PKPLOTSTYLE[1], ls = false, elim = false, kwargs...) where T <: AbstractSubject
+    time = subj.time
+    obs = subj.obs
     kwargs = Dict{Symbol, Any}(kwargs)
     k = keys(kwargs)
 
@@ -119,8 +160,17 @@ function pkplot!(subj::T; plotstyle::PKPlotStyle = PKPLOTSTYLE[1], kwargs...) wh
     if !(:legend in k)
         kwargs[:legend] = true
     end
+    if :yscale in k
+        if kwargs[:yscale] in [:ln, :log, :log2, :log10] ls = true end
+    end
+    if ls == true
+        inds = findall(x->x>0, subj.obs)
+        time = subj.time[inds]
+        obs = log.(subj.obs[inds])
+    end
 
-    p = pkplot!(subj.time, subj.obs;
+
+    p = pkplot!(time, obs;
         linestyle   = plotstyle.linestyle,
         linecolor   = plotstyle.linecolor,
         markershape = plotstyle.markershape,
@@ -139,7 +189,7 @@ function usort(data::DataSet{T}, list) where T <: AbstractData
     dl
 end
 
-function pageplot(pagedatatmp, styledict, typesort; kwargs...)
+function pageplot(pagedatatmp, styledict, typesort, utypes; kwargs...)
     kwargs = Dict{Symbol, Any}(kwargs)
     k = keys(kwargs)
 
@@ -156,7 +206,8 @@ function pageplot(pagedatatmp, styledict, typesort; kwargs...)
         kwargs[:ylabel] = "Concentration"
     end
 
-    utypes    = keys(styledict)
+    #utypes    = keys(styledict)
+
     labels    = Vector{String}(undef, 0)
     fst       = true
     p         = nothing
@@ -187,7 +238,7 @@ function pageplot(pagedatatmp, styledict, typesort; kwargs...)
     end
     p
 end
-function pageplot(pagedatatmp; kwargs...)
+function pageplot(pagedatatmp; elim = false,  kwargs...)
     kwargs = Dict{Symbol, Any}(kwargs)
     k = keys(kwargs)
 
@@ -206,11 +257,12 @@ function pageplot(pagedatatmp; kwargs...)
 
     fst       = true
     p         = nothing
+    if length(pagedatatmp) > 1 elim = false end
     for d in pagedatatmp
 
         kwargs[:label] = "AUTO"
         if fst
-            p = pkplot(d; plotstyle = PKPLOTSTYLE[1], kwargs...)
+            p = pkplot(d; plotstyle = PKPLOTSTYLE[1], elim = elim, kwargs...)
             fst = false
         else
             pkplot!(   d; plotstyle = PKPLOTSTYLE[1], kwargs...)
@@ -224,11 +276,11 @@ end
 
 Plot for subjects in dataset.
 
-data - subjects dataset;
-pagesort - subject page groupping;
-typesort - subject sorting within page;
+* data - subjects dataset;
+* pagesort - subject page groupping;
+* typesort - subject sorting within page;
 """
-function pkplot(data::DataSet{T};  pagesort::Union{Nothing, Vector{Symbol}} = nothing, typesort::Union{Nothing, Vector{Symbol}} = nothing, kwargs...) where T <: AbstractSubject
+function pkplot(data::DataSet{T};  pagesort::Union{Nothing, Vector{Symbol}} = nothing, typesort::Union{Nothing, Vector{Symbol}} = nothing, elim = false, kwargs...) where T <: AbstractSubject
     # Style types
     kwargs = Dict{Symbol, Any}(kwargs)
     k = keys(kwargs)
@@ -247,6 +299,7 @@ function pkplot(data::DataSet{T};  pagesort::Union{Nothing, Vector{Symbol}} = no
     end
 
     styledict  = nothing
+    local utypes
     #style      = PKPLOTSTYLE[1]
     if pagesort !== nothing
         if !isa(pagesort, Array) pagesort = [pagesort] end
@@ -259,7 +312,7 @@ function pkplot(data::DataSet{T};  pagesort::Union{Nothing, Vector{Symbol}} = no
             if i <= 20
                 styledict[utypes[i]] = PKPLOTSTYLE[i]
             else
-                styledict[utypes[i]] = randomstyle()
+                styledict[utypes[i]] = randomstyle(MersenneTwister(34534))
             end
         end
     end
@@ -282,20 +335,20 @@ function pkplot(data::DataSet{T};  pagesort::Union{Nothing, Vector{Symbol}} = no
                 end
             end
             if typesort !== nothing
-                p = pageplot(pagedatatmp, styledict, typesort; kwargs...)
+                p = pageplot(pagedatatmp, styledict, typesort, utypes; kwargs...)
             else
-                p = pageplot(pagedatatmp; kwargs...)
+                p = pageplot(pagedatatmp; elim = elim, kwargs...)
             end
             push!(plots, p)
         end
     else
         if kwargs[:title] == :AUTO kwargs[:title] = "" end
         if typesort !== nothing
-            p = pageplot(data, styledict, typesort; kwargs...)
+            p = pageplot(data, styledict, typesort, utypes; kwargs...)
         else
-            p = pageplot(data; kwargs...)
+            p = pageplot(data; elim = elim, kwargs...)
         end
-        push!(plots, p)
+        return p
     end
     plots
 end
