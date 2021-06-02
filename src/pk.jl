@@ -63,8 +63,8 @@ end
 
 #Plasma PK subject
 mutable struct PKSubject <: AbstractSubject
-    time::Vector
-    obs::Vector
+    time::Vector{Float64}
+    obs::Vector{Float64}
     kelauto::Bool
     kelrange::ElimRange
     dosetime::DoseTime
@@ -74,15 +74,15 @@ mutable struct PKSubject <: AbstractSubject
         new(time, conc, kelauto, kelrange, dosetime, keldata, sort)::PKSubject
     end
     function PKSubject(time::Vector, conc::Vector, kelauto::Bool, kelrange, dosetime; sort = Dict())
-        new(time, conc, kelauto, kelrange, dosetime, KelData(), sort)::PKSubject
+        PKSubject(time, conc, kelauto, kelrange, dosetime, KelData(); sort = sort)
     end
     function PKSubject(time::Vector, conc::Vector; sort = Dict())
-        new(time, conc, true, ElimRange(), DoseTime(NaN, 0 * time[1]), KelData(), sort)::PKSubject
+        PKSubject(time, conc, true, ElimRange(), DoseTime(NaN, 0 * time[1]), KelData(); sort = sort)
     end
     function PKSubject(data; time::Symbol, conc::Symbol, timesort::Bool = false, sort = Dict())
         if timesort sort!(data, time) end
         #Check double time
-        new(copy(data[!,time]), copy(data[!,conc]), true, ElimRange(), DoseTime(), KelData(), sort)::PKSubject
+        PKSubject(copy(data[!,time]), copy(data[!,conc]), true, ElimRange(), DoseTime(), KelData(); sort = sort)
     end
 end
 
@@ -264,7 +264,7 @@ function Base.show(io::IO, obj::KelData)
     m = hcat(m, obj.r)
     m = hcat(m, obj.ar)
     println(io, "Elimination table:")
-    print(io, m)
+    printmatrix(io, m)
 end
 #-------------------------------------------------------------------------------
 function notnanormissing(x)
@@ -316,7 +316,7 @@ end
 function dropbeforedosetime(time::Vector, obs::Vector, dosetime::DoseTime)
     s = 0
     for i = 1:length(time)
-        @inbounds if time[i] < dosetime.time s = i else break end
+        @inbounds if time[i] < dosetime.time || isnan(obs[i]) s = i else break end
     end
     return time[s+1:end], obs[s+1:end]
 end
@@ -518,6 +518,7 @@ function nca!(data::PKSubject; adm = :ev, calcm = :lint, intp = :lint, verbose =
             end
         end
         result[:Cmax], result[:Tmax], result[:Tmaxn] = ctmax(time, obs)
+        #result[:Tmaxn] += rmn
         #-----------------------------------------------------------------------
         if verbose
             println(io, "Non-compartmental Pharmacokinetic Analysis")
@@ -567,7 +568,7 @@ function nca!(data::PKSubject; adm = :ev, calcm = :lint, intp = :lint, verbose =
                         if sum(cmask) >= 3
                             sl = slope(time[cmask], logconc[cmask])
                             if sl[1] < 0
-                                push!(keldata, i, kellast + rmn, sl[1], sl[2], sl[3], sl[4])
+                                push!(keldata, i + rmn, kellast + rmn, sl[1], sl[2], sl[3], sl[4])
                             end
                         end
                     end
@@ -586,7 +587,9 @@ function nca!(data::PKSubject; adm = :ev, calcm = :lint, intp = :lint, verbose =
 
         #Calcalation partial areas (doseaucpart, doseaumcpart)
         #Dosetime < first time
-        if data.dosetime.time < time[1]
+        if  data.dosetime.time == time[1]
+            result[:Cdose] = obs[1]
+        elseif data.dosetime.time < time[1]
             if adm == :iv
                 if obs[1] > obs[2] > 0
                     result[:Cdose] = logcpredict(time[1], time[2], data.dosetime.time, obs[1], obs[2])
@@ -601,8 +604,6 @@ function nca!(data::PKSubject; adm = :ev, calcm = :lint, intp = :lint, verbose =
                 end
             end
             doseaucpart, doseaumcpart  = aucpart(data.dosetime.time, time[1], result[:Cdose], obs[1], :lint, false) #always :lint?
-        elseif  data.dosetime.time == time[1]
-            result[:Cdose] = obs[1]
         else
             error("Some concentration before dose time after filtering!!!")
         end
@@ -734,19 +735,30 @@ function nca!(data::PKSubject; adm = :ev, calcm = :lint, intp = :lint, verbose =
                 println(io, "AUMC final part: $(eaumcpartl)")
             end
         end
+        result[:Tmaxn] += rmn #!
         #-----------------------------------------------------------------------
         return PKPDProfile(data, result; method = calcm)
     end
 """
     nca!(data::DataSet{PKSubject}; adm = :ev, calcm = :lint, intp = :lint,
-        verbose = false, warn = true, io::IO = stdout)
+        verbose = false, warn = true, io::IO = stdout, sort = nothing)
+
+* `sort` - only for this type of subjects.
 
 Pharmacokinetics non-compartment analysis for PK subjects DataSet.
 """
-function nca!(data::DataSet{PKSubject}; adm = :ev, calcm = :lint, intp = :lint, verbose = false, warn = true, io::IO = stdout)
+function nca!(data::DataSet{PKSubject}; adm = :ev, calcm = :lint, intp = :lint, verbose = false, warn = true, io::IO = stdout, sort = nothing)
         results = Array{PKPDProfile, 1}(undef, 0)
-        for i = 1:length(data.data)
-            push!(results, nca!(data.data[i]; adm = adm, calcm = calcm, intp = intp, verbose = verbose, warn = warn, io = io))
+        if isnothing(sort)
+            for i = 1:length(data.data)
+                push!(results, nca!(data.data[i]; adm = adm, calcm = calcm, intp = intp, verbose = verbose, warn = warn, io = io))
+            end
+        else
+            for i = 1:length(data.data)
+                if sort ⊆  data.data[i].sort
+                    push!(results, nca!(data.data[i]; adm = adm, calcm = calcm, intp = intp, verbose = verbose, warn = warn, io = io))
+                end
+            end
         end
         return DataSet(results)
 end
@@ -1076,27 +1088,36 @@ function applyncarule!(data::PKSubject, rule::LimitRule)
     end
 end
 
-function applyncarule!(data::DataSet{PKSubject}, rule::LimitRule)
-    for i in data
-        applyncarule!(i, rule)
+function applyncarule!(data::DataSet{PKSubject}, rule::LimitRule; sort = nothing)
+    if isnothing(sort)
+        for i in data
+            applyncarule!(i, rule)
+        end
+    else
+        for i in data
+            if sort ⊆ i.sort
+                applyncarule!(i, rule)
+            end
+        end
     end
     data
 end
 
 #---------------------------------------------------------------------------
 """
-    setelimrange!(data::PKSubject, range::ElimRange)
+    setelimrange!(data::PKSubject, range::ElimRange; kelauto = false)
 
 Set range for elimination parameters calculation for subject.
 
 data - PK subject;
-range - ElimRange object.
+range - ElimRange object;
+kelauto - set kelauto value.
 
 Set kelauto `false` if  kelend > kelstart > 0.
 """
-function setelimrange!(data::PKSubject, range::ElimRange)
+function setelimrange!(data::PKSubject, range::ElimRange; kelauto = false)
     if range.kelend > length(data) throw(ArgumentError("Kel endpoint out of range")) end
-    if range.kelend > range.kelstart > 0 setkelauto!(data, false) end
+    if range.kelend > range.kelstart > 0 setkelauto!(data, kelauto) end
     data.kelrange = range
 end
 """
@@ -1142,7 +1163,7 @@ function setelimrange!(data::DataSet{PKSubject}, range::ElimRange, subj::Int)
     data
 end
 """
-    setdosetime!(data::DataSet{PKSubject}, dosetime::DoseTime, sort::Dict)
+    setelimrange!(data::DataSet{PKSubject}, range::ElimRange, sort::Dict; kelauto = false)
 
 Set range for elimination parameters calculation for DataSet.
 
@@ -1150,9 +1171,9 @@ data - DataSet of PK subject;
 range - ElimRange object;
 sort - subject sort.
 """
-function setelimrange!(data::DataSet{PKSubject}, dosetime::DoseTime, sort::Dict)
+function setelimrange!(data::DataSet{PKSubject}, range::ElimRange, sort::Dict; kelauto = false)
     for i = 1:length(data)
-        if sort ∈ data[i].sort setelimrange!(data[i], dosetime) end
+        if sort ⊆ data[i].sort setelimrange!(data[i], dosetime; kelauto = kelauto) end
     end
     data
 end
@@ -1223,7 +1244,7 @@ function applyelimrange!(data::DataSet{PKPDProfile}, range::ElimRange, subj::Int
 end
 function applyelimrange!(data::DataSet{PKPDProfile}, range::ElimRange, sort::Dict)
     for i = 1:length(data)
-        if sort ∈ data[i].subject.sort
+        if sort ⊆ data[i].subject.sort
             applyelimrange!(data[i], range)
         end
     end
@@ -1266,7 +1287,7 @@ dosetime - DoseTime object.
 """
 function setdosetime!(data::DataSet{PKSubject}, dosetime::DoseTime, sort::Dict)
     for i = 1:length(data)
-        if sort ∈ data[i].sort setdosetime!(data[i], dosetime) end
+        if sort ⊆ data[i].sort setdosetime!(data[i], dosetime) end
     end
     data
 end
@@ -1277,7 +1298,7 @@ The first item in the dataset that satisfies the condition - sort dictionary.
 """
 function findfirst(sort::Dict, data::DataSet{PKSubject})
     for i = 1:length(data)
-        if sort ∈ data[i].sort
+        if sort ⊆ data[i].sort
             return data[i]
         end
     end
@@ -1314,7 +1335,7 @@ function setth!(data::DataSet{PDSubject}, th::Real)
 end
 function setth!(data::DataSet{PDSubject}, th::Real, sort::Dict)
     for i = 1:length(data)
-        if sort ∈ data[i].sort setth!(data[i], th) end
+        if sort ⊆ data[i].sort setth!(data[i], th) end
     end
     data
 end
@@ -1339,7 +1360,7 @@ function setbl!(data::DataSet{PDSubject}, bl::Real)
 end
 function setbl!(data::DataSet{PDSubject}, bl::Real, sort::Dict)
     for i = 1:length(data)
-        if sort ∈ data[i].sort setbl!(data[i], bl) end
+        if sort ⊆ data[i].sort setbl!(data[i], bl) end
     end
     data
 end

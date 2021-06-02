@@ -39,7 +39,24 @@ function DataFrames.DataFrame(data::DataSet{T}; unst = false, us = false) where 
             return df
         end
 end
-
+#!!!
+#=
+function in(a::Dict, b::Dict)
+    k = collect(keys(a))
+    if any(x -> x  ∉  collect(keys(b)), k) return false end
+    for i = 1:length(a)
+        if a[k[i]] != b[k[i]] return false end
+    end
+    return true
+end
+=#
+#=
+function in(a::Pair, b::Dict)
+    if a[1]  ∉  collect(keys(b)) return false end
+    if a[2] != b[a[1]] return false end
+    return true
+end
+=#
 #=
 function ncarule!(data::DataFrame, conc::Symbol, time::Symbol, rule::LimitRule)
         sort!(data, [time])

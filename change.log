@@ -1,3 +1,11 @@
+v0.6.1
+  - fix ⊆ for Dict
+  - fix setelimrange!(data::DataSet{PKSubject}, range::ElimRange, sort::Dict)
+  - fix start kel value in output
+  - dropbeforedosetime - drop NanN
+  - nca!(data::DataSet{PKSubject}) - sort keyword
+  - other minor fixes
+
 v0.6.0
   - changes in PK parameters names
   - nca! administration settings

@@ -93,7 +93,7 @@ Plot for subject
 """
 function pkplot(subj::T; plotstyle::PKPlotStyle = PKPLOTSTYLE[1], ls = false, elim = false, kwargs...) where T <: AbstractSubject
     time = subj.time
-    obs = subj.obs
+    obs  = subj.obs
     kwargs = Dict{Symbol, Any}(kwargs)
     k = keys(kwargs)
 
@@ -117,7 +117,6 @@ function pkplot(subj::T; plotstyle::PKPlotStyle = PKPLOTSTYLE[1], ls = false, el
         time = subj.time[inds]
         obs = log.(subj.obs[inds])
     end
-
 
     p = pkplot(time, obs;
         linestyle   = plotstyle.linestyle,
