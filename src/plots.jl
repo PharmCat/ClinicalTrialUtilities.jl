@@ -212,7 +212,7 @@ function pageplot(pagedatatmp, styledict, typesort, utypes; kwargs...)
     p         = nothing
     for u in utypes
         for d in pagedatatmp
-            if u ∈ d.sort
+            if u ⊆ d.sort
                 label = "AUTO"
                 if typesort !== nothing
                     tempsd = Dict(k => d.sort[k] for k in typesort)
@@ -329,7 +329,7 @@ function pkplot(data::DataSet{T};  pagesort::Union{Nothing, Vector{Symbol}} = no
             end
             pagedatatmp = Vector{eltype(data)}(undef, 0)
             for d in data
-                if i ∈ d.sort
+                if i ⊆ d.sort
                     push!(pagedatatmp, d)
                 end
             end

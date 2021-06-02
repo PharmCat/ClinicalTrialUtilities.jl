@@ -1173,7 +1173,7 @@ sort - subject sort.
 """
 function setelimrange!(data::DataSet{PKSubject}, range::ElimRange, sort::Dict; kelauto = false)
     for i = 1:length(data)
-        if sort ⊆ data[i].sort setelimrange!(data[i], dosetime; kelauto = kelauto) end
+        if sort ⊆ data[i].sort setelimrange!(data[i], range; kelauto = kelauto) end
     end
     data
 end

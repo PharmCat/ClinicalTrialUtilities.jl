@@ -1111,6 +1111,7 @@ sort!(df, :Subject)
     p    = ClinicalTrialUtilities.pkplot(pkds; pagesort = [:Date], typesort = [:Subject])
     @test length(p) == 2
     print(io, pk[1].subject.keldata)
+    p    = ClinicalTrialUtilities.pkplot(pkds; pagesort = [:Date], typesort = [:Subject], elim = true)
     p    = ClinicalTrialUtilities.pkplot(pkds; pagesort = nothing, typesort = [:Subject])
     @test length(p) == 1
     p    = ClinicalTrialUtilities.pkplot(pkds; pagesort = nothing, typesort = nothing, legend = false, xlabel = "L1", ylabel = "L2", xlims = (0,12))
@@ -1167,8 +1168,13 @@ sort!(df, :Subject)
 
     ClinicalTrialUtilities.setdosetime!(pkds, ClinicalTrialUtilities.DoseTime(100,0), Dict(:Subject => 1, :Formulation => "R"))
     @test pkds[3].dosetime.dose == 100
-
+    ClinicalTrialUtilities.setelimrange!(pkds, ClinicalTrialUtilities.ElimRange(3,7), 1)
+    ClinicalTrialUtilities.setelimrange!(pkds, ClinicalTrialUtilities.ElimRange(3,7), [1,2])
+    ClinicalTrialUtilities.setelimrange!(pkds, ClinicalTrialUtilities.ElimRange(3,7),  Dict(:Subject => 1, :Formulation => "R"))
     pks = ClinicalTrialUtilities.findfirst(Dict(:Subject => 1, :Formulation => "R"), pkds)
+    #experimental
+    pke   = ClinicalTrialUtilities.nca!(pkds; sort =  Dict(:Formulation => "R"), adm = :iv)
+    pkresulttable = ClinicalTrialUtilities.datatable_st(pke)
 end
 
 println(" ---------------------------------- ")
