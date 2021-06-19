@@ -1,7 +1,7 @@
 
 @testset "Internal functions test " begin
 @testset "  tfn function        " begin
-    @test ClinicalTrialUtilities.tfn(1.0,2.0) ≈  0.07846821 atol=1E-8
+    @test ClinicalTrialUtilities.tfn(1.0,2.0) ≈  0.0784681869643072 atol=1E-8
     @test ClinicalTrialUtilities.tfn(0.1,10.0) > 0 #Not validated with PowerTOST
     @test ClinicalTrialUtilities.tfn(0.1,10E20) > 0 #Not validated with PowerTOST
 end
@@ -12,7 +12,7 @@ end
     @test ClinicalTrialUtilities.owensqo(1 ,2.0,1.0,1.0;a=0.0) ≈ 0.321429    atol=1E-6
     @test ClinicalTrialUtilities.owensqo(2 ,1.0,0.5,0.2;a=0.0) ≈ 0.006781741 atol=1E-9
     @test ClinicalTrialUtilities.owensqo(4 ,2.0,1.0,1.0;a=0.0) ≈ 0.03739024  atol=1E-8
-    @test ClinicalTrialUtilities.owensqo(7 ,2.0,1.0,1.0;a=0.0) ≈ 0.001888241 atol=1E-9
+    @test ClinicalTrialUtilities.owensqo(7 ,2.0,1.0,1.0;a=0.0) ≈ 0.0018881756204369993 atol=1E-9
     @test ClinicalTrialUtilities.owensqo(3 ,2.0,1.0,Inf;a=0.0) ≈ 0.7436299   atol=1E-7
 end
 @testset "  owensq  function    " begin
