@@ -223,8 +223,8 @@ end
 """
 Return matrix of filtered data (datacol) by sortcol with sortval
 """
-@inline function getsortedmatrix(data; datacol::Array{Symbol,1}, sortcol::Array{Symbol,1}, sortval::Tuple{Vararg{Any}})::Matrix{Real}
-    result  = Array{Real, 1}(undef, 0)
+@inline function getsortedmatrix(data; datacol::Array{Symbol,1}, sortcol::Array{Symbol,1}, sortval::Tuple{Vararg{Any}})
+    result  = Array{promote_type(eltype.(data[!, c] for c in datacol)...), 1}(undef, 0)
     for c = 1:size(data, 1) #For each line in data
         if checksort(data, c, sortcol, sortval)
             for i = 1:length(datacol)
@@ -241,7 +241,7 @@ function notnan(x)
     return !(x === NaN || x === nothing || x === missing)
 end
 
-@inline function descriptive_(data::Vector{T}, stats::Union{Tuple{Vararg{Symbol}}, Array{Symbol,1}}, level) where T <: Real
+@inline function descriptive_(data::Vector{T}, stats::Union{Tuple{Vararg{Symbol}}, Array{Symbol,1}}, level) where T 
 
     #=
     dlist = findall(x -> x === NaN || x === nothing || x === missing, data)

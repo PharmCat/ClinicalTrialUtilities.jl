@@ -498,6 +498,12 @@ function nca!(data::PKSubject; adm = :ev, calcm = :lint, intp = :lint, verbose =
         #time             = data.time
         #obs              = data.obs
         time, obs        = dropbeforedosetime(data.time, data.obs, data.dosetime)
+        #dropnan
+        #nanlist  = findall(isnan, obs)
+        #if length(nanlist) > 0
+        #    deleteat!(time, nanlist)
+        #    deleteat!(obs, nanlist)
+        #end
         result[:Obsnum]  = length(obs)
         rmn = length(data.obs) - length(obs)
         if result[:Obsnum] < 2
@@ -554,6 +560,7 @@ function nca!(data::PKSubject; adm = :ev, calcm = :lint, intp = :lint, verbose =
                 logconc    = log.(obs)
                 cmask      = trues(result[:Obsnum])
                 kelexclrmn = data.kelrange.kelexcl .- rmn
+                filter!(x-> 0 < x <= result[:Obsnum], kelexclrmn)
                 view(cmask, kelexclrmn) .= false
                 kellast = findlast(x -> x, cmask)
                 if kellast - result[:Tmaxn] >= 3
