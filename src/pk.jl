@@ -400,7 +400,7 @@ end
         end
     end
 #---------------------------------------------------------------------------
-
+#=
     function aucpart(t₁, t₂, c₁, c₂, calcm, aftertmax)
         if calcm == :lint
             auc   =  linauc(t₁, t₂, c₁, c₂)    # (data[i - 1, conc] + data[i, conc]) * (data[i, time] - data[i - 1, time])/2
@@ -442,7 +442,26 @@ end
         end
         return auc, aumc
     end
-
+=#
+function aucpart(t₁, t₂, c₁::T, c₂::T, calcm, aftertmax) where T
+    if calcm == :lint
+        auc   =  linauc(t₁, t₂, c₁, c₂)
+        aumc  = linaumc(t₁, t₂, c₁, c₂)
+    elseif calcm == :logt && aftertmax && c₁ > zero(T) && c₂ > zero(T)
+        auc   =  logauc(t₁, t₂, c₁, c₂)
+        aumc  = logaumc(t₁, t₂, c₁, c₂)
+    elseif calcm == :luldt && aftertmax && c₁ > c₂ > zero(T)
+        auc   =  logauc(t₁, t₂, c₁, c₂)
+        aumc  = logaumc(t₁, t₂, c₁, c₂)
+    elseif calcm == :luld &&  c₁ > c₂ > zero(T)
+        auc   =  logauc(t₁, t₂, c₁, c₂)
+        aumc  = logaumc(t₁, t₂, c₁, c₂)
+    else
+        auc   =  linauc(t₁, t₂, c₁, c₂)
+        aumc  = linaumc(t₁, t₂, c₁, c₂)
+    end
+    return auc, aumc
+end
 #-------------------------------------------------------------------------------
 """
     nca!(data::PKSubject; adm = :ev, calcm = :lint, intp = :lint,
