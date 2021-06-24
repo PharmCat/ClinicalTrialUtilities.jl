@@ -659,13 +659,13 @@ function nca!(data::PKSubject; adm = :ev, calcm = :lint, intp = :lint, verbose =
         #-----------------------------------------------------------------------
 
         if  length(keldata) > 0
-            result[:Rsq], result[:Rsqn] = findmax(keldata.ar)
+            result[:ARsq], result[:Rsqn] = findmax(keldata.ar)
             data.kelrange.kelstart   = keldata.s[result[:Rsqn]]
             result[:Kelstart]        = data.kelrange.kelstart
             data.kelrange.kelend     = keldata.e[result[:Rsqn]]
             result[:Kelend]          = data.kelrange.kelend
             data.keldata             = keldata
-            result[:ARsq]            = keldata.ar[result[:Rsqn]]
+            result[:Rsq]             = keldata.r[result[:Rsqn]]
             result[:Kel]             = abs(keldata.a[result[:Rsqn]])
             result[:LZ]              = keldata.a[result[:Rsqn]]
             result[:LZint]           = keldata.b[result[:Rsqn]]
