@@ -4,6 +4,9 @@ v0.6.1
   - fix start kel value in output
   - dropbeforedosetime - drop NanN
   - nca!(data::DataSet{PKSubject}) - sort keyword
+  - pk optimization
+  - pkplots changes and fixes
+  - fix log-scale plots
   - other minor fixes
 
 v0.6.0
