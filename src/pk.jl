@@ -4,15 +4,15 @@
 struct KelData
     s::Array{Int, 1}
     e::Array{Int, 1}
-    a::Array{Number, 1}
-    b::Array{Number, 1}
-    r::Array{Number, 1}
-    ar::Array{Number, 1}
+    a::Array{Float64, 1}
+    b::Array{Float64, 1}
+    r::Array{Float64, 1}
+    ar::Array{Float64, 1}
     function KelData(s, e, a, b, r, ar)::KelData
         new(s, e, a, b, r, ar)::KelData
     end
     function KelData()::KelData
-        new(Int[], Int[], Real[], Real[], Real[], Real[])::KelData
+        new(Int[], Int[], Float64[], Float64[], Float64[], Float64[])::KelData
     end
 end
 function Base.push!(keldata::KelData, s, e, a, b, r, ar)
@@ -344,15 +344,19 @@ end
     end
 
     #---------------------------------------------------------------------------
-    function slope(x, y)
+    function slope(x::AbstractVector{T1}, y::AbstractVector{T2}) where T1 where T2
         if length(x) != length(y) throw(ArgumentError("Unequal vector length!")) end
         n   = length(x)
         if n < 2 throw(ArgumentError("n < 2!")) end
-        Σxy = sum(x .* y)
-        Σx  = sum(x)
-        Σy  = sum(y)
-        Σx2 = sum(x .* x)
-        Σy2 = sum(y .* y)
+        T = promote_type(T1, T2)
+        Σxy = Σx = Σy = Σx2 = Σy2 = zero(T)
+        @inbounds for i = 1:n
+            Σxy += x[i] * y[i]
+            Σx  += x[i]
+            Σy  += y[i]
+            Σx2 += x[i]^2
+            Σy2 += y[i]^2
+        end
         a   = (n * Σxy - Σx * Σy)/(n * Σx2 - Σx^2)
         b   = (Σy * Σx2 - Σx * Σxy)/(n * Σx2 - Σx^2)
         r2  = (n * Σxy - Σx * Σy)^2/((n * Σx2 - Σx^2)*(n * Σy2 - Σy^2))
@@ -443,17 +447,18 @@ end
         return auc, aumc
     end
 =#
-function aucpart(t₁, t₂, c₁::T, c₂::T, calcm, aftertmax) where T
+function aucpart(t₁, t₂, c₁::T1, c₂::T2, calcm, aftertmax) where T1 where T2
+
     if calcm == :lint
         auc   =  linauc(t₁, t₂, c₁, c₂)
         aumc  = linaumc(t₁, t₂, c₁, c₂)
-    elseif calcm == :logt && aftertmax && c₁ > zero(T) && c₂ > zero(T)
+    elseif calcm == :logt && aftertmax && c₁ > zero(T1) && c₂ > zero(T2)
         auc   =  logauc(t₁, t₂, c₁, c₂)
         aumc  = logaumc(t₁, t₂, c₁, c₂)
-    elseif calcm == :luldt && aftertmax && c₁ > c₂ > zero(T)
+    elseif calcm == :luldt && aftertmax && c₁ > c₂ > zero(T2)
         auc   =  logauc(t₁, t₂, c₁, c₂)
         aumc  = logaumc(t₁, t₂, c₁, c₂)
-    elseif calcm == :luld &&  c₁ > c₂ > zero(T)
+    elseif calcm == :luld &&  c₁ > c₂ > zero(T2)
         auc   =  logauc(t₁, t₂, c₁, c₂)
         aumc  = logaumc(t₁, t₂, c₁, c₂)
     else

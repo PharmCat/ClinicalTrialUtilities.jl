@@ -52,8 +52,8 @@ end
     legend            --> true
     grid              --> false
     #ticks       := [nothing :auto nothing]
-    xlims             --> (minimum(x), maximum(x)),
-    ylims             --> (0, maximum(y)*1.1)
+    xlims             --> (minimum(x), maximum(x)*1.2),
+    ylims             --> (0, maximum(y)*1.2)
     seriescolor       --> :blue
     markershape       --> :circle
     markersize        --> 3
@@ -130,8 +130,8 @@ function pkplot(subj::T; plotstyle::PKPlotStyle = PKPLOTSTYLE[1], ls = false, el
             rsq, rsqn = findmax(subj.keldata.ar)
             lz        = subj.keldata.a[rsqn]
             lzint     = subj.keldata.b[rsqn]
-            ts        = time[subj.kelrange.kelstart]
-            te        = time[subj.kelrange.kelend]
+            ts        = subj.time[subj.kelrange.kelstart]
+            te        = subj.time[subj.kelrange.kelend]
 
             if ls true
                 x = [ts,te]

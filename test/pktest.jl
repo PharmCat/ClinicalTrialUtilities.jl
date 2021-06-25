@@ -59,7 +59,7 @@ println(" ---------------------------------- ")
     # --------------------------------------------------------------------------
     # Linear Trapezoidal Linear Interpolation
     # calcm = :lint, intp = :lint
-
+    # DS1
     pkds = ClinicalTrialUtilities.pkimport(pkdata2, [:Subject, :Formulation]; conc = :Concentration, time = :Time)
     ClinicalTrialUtilities.setdosetime!(pkds, ClinicalTrialUtilities.DoseTime(dose = 100, time = 0))
     pk   = ClinicalTrialUtilities.nca!(pkds)
@@ -132,7 +132,7 @@ println(" ---------------------------------- ")
     74.437
     93.44
     42.191]
-    #Adjusted R sq
+    # Adjusted R sq
     @test round.(df[!, :ARsq], digits = 6) == round.([0.71476928
     0.99035145
     0.77630678
@@ -143,6 +143,18 @@ println(" ---------------------------------- ")
     0.92195356
     0.92130684
     0.86391165], digits = 6)
+
+    # R sq
+    @test round.(df[!, :Rsq], digits = 6) == round.([0.78607696
+    0.99276359
+    0.81358898
+    0.91885869
+    0.85335995
+    0.95011904
+    0.97031231
+    0.94796904
+    0.94753789
+    0.88092269], digits = 6)
     #Kel
     @test round.(df[!, :Kel], sigdigits = 6) == round.([0.0033847439
     0.014106315
@@ -200,26 +212,26 @@ println(" ---------------------------------- ")
     38.810857], sigdigits = 6)
 
     @test round.(df[!, :Clinf], sigdigits = 6) == round.([0.0023296437
-0.0061900608
-0.0038422846
-0.0045446122
-0.0038729255
-0.0062493127
-0.0085550864
-0.0064740799
-0.0040216775
-0.012383404], sigdigits = 6)
+    0.0061900608
+    0.0038422846
+    0.0045446122
+    0.0038729255
+    0.0062493127
+    0.0085550864
+    0.0064740799
+    0.0040216775
+    0.012383404], sigdigits = 6)
 
     @test round.(df[!, :Vzinf], sigdigits = 6) == round.([0.68827768
-0.43881487
-1.1673601
-0.59056646
-0.56843374
-0.8124135
-0.68666158
-0.72497447
-0.71232266
-0.72039519], sigdigits = 6)
+    0.43881487
+    1.1673601
+    0.59056646
+    0.56843374
+    0.8124135
+    0.68666158
+    0.72497447
+    0.71232266
+    0.72039519], sigdigits = 6)
 
 ClinicalTrialUtilities.setdosetime!(pkds, ClinicalTrialUtilities.DoseTime(dose = 120, time = 0, tau = 12))
 pk   = ClinicalTrialUtilities.nca!(pkds; adm = :iv)
