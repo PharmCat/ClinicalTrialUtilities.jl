@@ -140,23 +140,23 @@ STEP 1 (NaN step): replace all NaN values with nan reyword value (if nan !== NaN
 STEP 2 (LLOQ step): replace values below lloq with btmax value if this value befor Tmax or with atmax if this value after Tmax (if lloq !== NaN);
 STEP 3 (remove NaN): rm == true, then remove all NaN values;
 """
-struct LimitRule
-    lloq::Real
-    btmax::Real
-    atmax::Real
-    nan::Real
+struct LimitRule{T <: Real}
+    lloq::T
+    btmax::Float64
+    atmax::Float64
+    nan::Float64
     rm::Bool
-    function LimitRule(lloq::Real, btmax::Real, atmax::Real, nan::Real, rm::Bool)
-        new(lloq, btmax, atmax, nan, rm)::LimitRule
+    function LimitRule(lloq::T, btmax, atmax, nan, rm::Bool) where T <: Real
+        new{T}(lloq, btmax, atmax, nan, rm)::LimitRule
     end
     function LimitRule(lloq, btmax, atmax, nan)
-        new(lloq, btmax, atmax, nan, false)::LimitRule
+        LimitRule(lloq, btmax, atmax, nan, false)
     end
     function LimitRule(lloq, btmax, atmax)
-        new(lloq, btmax, atmax, NaN, true)::LimitRule
+        LimitRule(lloq, btmax, atmax, NaN, true)
     end
-    function LimitRule(;lloq::Real = NaN, btmax::Real = NaN, atmax::Real = NaN, nan::Real = NaN, rm::Bool = false)
-        new(lloq, btmax, atmax, nan, rm)::LimitRule
+    function LimitRule(;lloq = NaN, btmax = NaN, atmax = NaN, nan = NaN, rm::Bool = false)
+        LimitRule(lloq, btmax, atmax, nan, rm)
     end
 end
 
