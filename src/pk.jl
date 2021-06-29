@@ -447,23 +447,23 @@ end
         return auc, aumc
     end
 =#
-function aucpart(t₁, t₂, c₁::T1, c₂::T2, calcm, aftertmax) where T1 where T2
+function aucpart(t₁, t₂, c₁::T1, c₂::T2, calcm, aftertmax, dosetime) where T1 where T2
 
     if calcm == :lint
         auc   =  linauc(t₁, t₂, c₁, c₂)
-        aumc  = linaumc(t₁, t₂, c₁, c₂)
+        aumc  = linaumc(t₁ - dosetime, t₂ - dosetime, c₁, c₂)
     elseif calcm == :logt && aftertmax && c₁ > zero(T1) && c₂ > zero(T2)
         auc   =  logauc(t₁, t₂, c₁, c₂)
-        aumc  = logaumc(t₁, t₂, c₁, c₂)
+        aumc  = logaumc(t₁ - dosetime, t₂ - dosetime, c₁, c₂)
     elseif calcm == :luldt && aftertmax && c₁ > c₂ > zero(T2)
         auc   =  logauc(t₁, t₂, c₁, c₂)
-        aumc  = logaumc(t₁, t₂, c₁, c₂)
+        aumc  = logaumc(t₁ - dosetime, t₂ - dosetime, c₁, c₂)
     elseif calcm == :luld &&  c₁ > c₂ > zero(T2)
         auc   =  logauc(t₁, t₂, c₁, c₂)
-        aumc  = logaumc(t₁, t₂, c₁, c₂)
+        aumc  = logaumc(t₁ - dosetime, t₂ - dosetime, c₁, c₂)
     else
         auc   =  linauc(t₁, t₂, c₁, c₂)
-        aumc  = linaumc(t₁, t₂, c₁, c₂)
+        aumc  = linaumc(t₁ - dosetime, t₂ - dosetime, c₁, c₂)
     end
     return auc, aumc
 end
@@ -562,7 +562,7 @@ function nca!(data::PKSubject; adm = :ev, calcm = :lint, intp = :lint, verbose =
         aumcpartl = Array{Number, 1}(undef, result[:Obsnum] - 1)
         #Calculate all UAC part based on data
         for i = 1:(result[:Obsnum] - 1)
-            aucpartl[i], aumcpartl[i] = aucpart(time[i], time[i + 1], obs[i], obs[i + 1], calcm, i + 1 > result[:Tmaxn])
+            aucpartl[i], aumcpartl[i] = aucpart(time[i], time[i + 1], obs[i], obs[i + 1], calcm, i + 1 > result[:Tmaxn], data.dosetime.time)
         end
         #pmask   = Array{Bool, 1}(undef, result[:Obsnum] - 1)
         #pmask  .= true
@@ -634,7 +634,7 @@ function nca!(data::PKSubject; adm = :ev, calcm = :lint, intp = :lint, verbose =
                     result[:Cdose] = 0
                 end
             end
-            doseaucpart, doseaumcpart  = aucpart(data.dosetime.time, time[1], result[:Cdose], obs[1], :lint, false) #always :lint?
+            doseaucpart, doseaumcpart  = aucpart(data.dosetime.time, time[1], result[:Cdose], obs[1], :lint, false, data.dosetime.time) #always :lint?
         else
             error("Some concentration before dose time after filtering!!!")
         end
@@ -700,13 +700,13 @@ function nca!(data::PKSubject; adm = :ev, calcm = :lint, intp = :lint, verbose =
             if tautime < time[end]
                 if tautime > result[:Tmax] aftertmax = true else aftertmax = false end
                 result[:Ctau] = cpredict(time[ncae], time[ncae + 1], tautime, obs[ncae], obs[ncae + 1], intp)
-                eaucpartl, eaumcpartl = aucpart(time[ncae], tautime, obs[ncae], result[:Ctau], calcm, aftertmax)
+                eaucpartl, eaumcpartl = aucpart(time[ncae], tautime, obs[ncae], result[:Ctau], calcm, aftertmax, data.dosetime.time)
                 #remoove part after tau
                 if ncae < result[:Obsnum] - 1 pmask[ncae:end] .= false end
             elseif tautime > time[end] && result[:LZint] !== NaN
                 #extrapolation
                 result[:Ctau] = exp(result[:LZint] + result[:LZ] * tautime)
-                eaucpartl, eaumcpartl = aucpart(time[ncae], tautime, obs[ncae], result[:Ctau], calcm, true)
+                eaucpartl, eaumcpartl = aucpart(time[ncae], tautime, obs[ncae], result[:Ctau], calcm, true, data.dosetime.time)
             else
                 result[:Ctau] = obs[end]
             end
@@ -748,7 +748,12 @@ function nca!(data::PKSubject; adm = :ev, calcm = :lint, intp = :lint, verbose =
             for i = 1:length(pmask)
                 if pmask[i] astx[i+1] = "Yes" else astx[i+1] = "No" end
             end
-            mx = hcat(time, obs, round.(vcat([0], aucpartl), digits = 3),  round.(vcat([0], aucpartlsum), digits = 3), round.(vcat([0], aumcpartl), digits = 3),  round.(vcat([0], aumcpartlsum), digits = 3), astx)
+
+            aucpartlsum .+= doseaucpart
+
+            aumcpartlsum .+= doseaumcpart
+            if  doseaucpart > 0 || doseaumcpart > 0  astx[1] = "D" end
+            mx = hcat(time, obs, round.(vcat([doseaucpart], aucpartl), digits = 3),  round.(vcat([doseaucpart], aucpartlsum), digits = 3), round.(vcat([doseaumcpart], aumcpartl), digits = 3),  round.(vcat([doseaumcpart], aumcpartlsum), digits = 3), astx)
             mx = vcat(permutedims(["Time", "Concentrtion", "AUC", "AUC (cumulate)", "AUMC", "AUMC (cumulate)", "Include"]), mx)
             printmatrix(io, mx)
             println(io, "")
