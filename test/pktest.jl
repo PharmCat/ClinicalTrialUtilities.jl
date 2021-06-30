@@ -821,6 +821,18 @@ sort!(df, :Subject)
     df   = DataFrame(pk; unst = true)
     sort!(df, :Subject)
 
+    # Cmax
+    @test round.(df[!, :Cmax], sigdigits = 6) == round.([150.854
+    234.091
+    100.943
+    165.177
+    169.334
+    154.648
+    153.254
+    138.327
+    167.347
+    125.482], sigdigits = 6)
+
     #AUCtau
     @test round.(df[!, :AUCtau], sigdigits = 6) == round.([
     1367.7388
