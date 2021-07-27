@@ -1,6 +1,11 @@
 #Pharmacokinetics
 #Makoid C, Vuchetich J, Banakar V. 1996-1999. Basic Pharmacokinetics.
 #!!!
+
+isnanormissing(x::Number) = isnan(x)
+isnanormissing(x::Missing) = true
+
+
 struct KelData
     s::Array{Int, 1}
     e::Array{Int, 1}
@@ -1118,9 +1123,12 @@ function applyncarule!(data::PKSubject, rule::LimitRule)
     end
     #NaN Remove rule
     if rule.rm
-        filterv   = data.obs .!== NaN
-        data.time = data.time[filterv]
-        data.obs  = data.obs[filterv]
+        inds = findall(isnanormissing, data.obs)
+        deleteat!(data.time, inds)
+        deleteat!(data.obs, inds)
+        #filterv   = data.obs .!== NaN
+        #data.time = data.time[filterv]
+        #data.obs  = data.obs[filterv]
     end
 end
 

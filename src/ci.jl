@@ -187,8 +187,7 @@ Confidence interval for proportion difference.
   * ac - Agresti A, Caffo B., “Simple and effective confidence intervals for proportions and differences of proportions result from adding two successes and two failures”, American Statistician 54: 280–288 (2000)
   * mn - Miettinen, O. and Nurminen, M. (1985), Comparative analysis of two rates. Statist. Med., 4: 213-226. doi:10.1002/sim.4780040211
   * mee - Mee RW (1984) Confidence bounds for the difference between two probabilities, Biometrics40:1175-1176
-  * Brown, L.D., Cai, T.T., and DasGupta, A. Interval estimation for a binomial proportion.
-    Statistical Science, 16(2):101–117, 2001.
+  * Brown, L.D., Cai, T.T., and DasGupta, A. Interval estimation for a binomial proportion. Statistical Science, 16(2):101–117, 2001.
   * Farrington, C. P. and Manning, G. (1990), “Test Statistics and Sample Size Formulae for Comparative Binomial Trials with Null Hypothesis of Non-zero Risk Difference or Non-unity Relative Risk,” Statistics in Medicine, 9, 1447–1454
   * Li HQ, Tang ML, Wong WK. Confidence intervals for ratio of two Poisson rates using the methodof variance estimates recovery. Computational Statistics 2014; 29(3-4):869-889
   * Brown, L., Cai, T., & DasGupta, A. (2003). INTERVAL ESTIMATION IN EXPONENTIAL FAMILIES. Statistica Sinica, 13(1), 19-49.

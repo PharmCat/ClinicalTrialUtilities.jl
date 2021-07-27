@@ -19,7 +19,7 @@ include("ncatable.jl")
 AUC = \sum_{n=1}^N AUC_{n}
 ```
 
-Where AUCn - partial AUC.
+Where `AUCn` - partial AUC.
 
 Linear trapezoidal rule
 
@@ -49,7 +49,13 @@ Logarithmic interpolation rule
 C_x = exp\left(ln(C_1) + \frac{(t_x-t_1)\times(ln(C_2) - ln(C_1))}{t_2 - t_1}\right)
 ```
 
-#### \lambda_z - elimination constant
+#### MRTlast
+
+```math
+MRTlast    = AUMClast / AUClast
+```
+
+#### ```math \lambda_z ```- elimination constant
 
 #### HL
 
@@ -67,6 +73,12 @@ AUCinf = AUClast + \frac{Clast}{\lambda_z}
 
 ```math
 AUMCinf =  AUMClast + \frac{tlast\times Clast}{\lambda_z} + \frac{Clast}{\lambda_z^2}
+```
+
+#### AUCpct
+
+```math
+AUCpct = (AUCinf - AUClast) / AUCinf * 100.0%
 ```
 
 #### Accumulation index
