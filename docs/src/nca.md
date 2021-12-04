@@ -1,5 +1,7 @@
 # Non-compartment analysis
 
+*See [MetidaNCA.jl](https://github.com/PharmCat/MetidaNCA.jl). MetidaNCA.jl will replace CTU in plans.*
+
 NCA analysis based on following steps:
 
 1. Loadind data to DataFrame;
