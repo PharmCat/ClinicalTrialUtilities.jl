@@ -169,6 +169,7 @@ println(" ---------------------------------- ")
     @test ci.upper    ≈ Inf
     @test ci.estimate ≈ Inf
 
+
     #-- cli
 
     ci = ClinicalTrialUtilities.rrpropci(30, 100, 40, 90; alpha=0.05, method=:cli)

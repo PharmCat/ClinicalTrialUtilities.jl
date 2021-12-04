@@ -5,8 +5,8 @@
 Bioequivalence power simulation.
 
 """
-function besim(t::CTask{P, D, Bioequivalence, Power}; nsim::Int = 100, rsabe::Bool = false, rsabeconst = 0.760, seed = 0)  where P where D
-    if seed != 0  Random.seed!(seed) end
+function besim(t::CTask{P, D, Bioequivalence, Power}; nsim::Int = 100, rsabe::Bool = false, rsabeconst = 0.760, seed = 0, rng = MersenneTwister())  where P where D
+    if seed != 0  Random.seed!(rng, seed) end
     df      = t.design.df(t.objective.val)
     sef     = sediv(t.design, t.objective.val)
     CHSQ    = Chisq(df)
@@ -14,8 +14,8 @@ function besim(t::CTask{P, D, Bioequivalence, Power}; nsim::Int = 100, rsabe::Bo
     σ̵ₓ      = sef * t.param.a.sd
     pow     = 0
     for i = 1:nsim
-        smean   = rand(ZDIST) * σ̵ₓ + (t.param.a.m - t.param.b.m)
-        σ²      = rand(CHSQ)  * t.param.a.sd  ^ 2 / df
+        smean   = rand(rng, ZDIST) * σ̵ₓ + (t.param.a.m - t.param.b.m)
+        σ²      = rand(rng, CHSQ)  * t.param.a.sd  ^ 2 / df
         σ       = sqrt(σ²)
         hw      = tval * σ * sef
         θ₁      = smean - hw
@@ -41,16 +41,16 @@ end
 Proportion difference power simulation.
 
 """
-function ctsim(t::CTask{DiffProportion{P1, P2}, D, H, Power}; nsim = 100, seed=0, method = :default, dropout = 0.0)  where P1 <: Proportion where P2 <: Proportion where D where H <: AbstractHypothesis
-    if seed != 0  Random.seed!(seed) end
+function ctsim(t::CTask{DiffProportion{P1, P2}, D, H, Power}; nsim = 100, method = :default, dropout = 0.0, seed = 0, rng = MersenneTwister())  where P1 <: Proportion where P2 <: Proportion where D where H <: AbstractHypothesis
+    if seed != 0  Random.seed!(rng, seed) end
     n₁      = getval(t.objective)
     n₂      = Int(ceil(getval(t.objective) / t.k))
     pow     = 0
     D₁      = Binomial(n₁, getval(t.param.a))
     D₂      = Binomial(n₂, getval(t.param.b))
     for i = 1:nsim
-        xn₁      = rand(D₁)
-        xn₂      = rand(D₂)
+        xn₁      = rand(rng, D₁)
+        xn₂      = rand(rng, D₂)
         if  checkhyp(t.hyp, DiffProportion(Proportion(xn₁, n₁), Proportion(xn₂, n₂)); method = method) pow += 1 end
     end
     return pow/nsim
@@ -122,15 +122,15 @@ end
 Means power simulation.
 
 """
-function ctsim(t::CTask{P, D, H, Power}; nsim = 100, seed = 0, method = :default, dropout = 0.0)  where P <: DiffMean where D where H
-    if seed != 0  Random.seed!(seed) end
+function ctsim(t::CTask{P, D, H, Power}; nsim = 100, method = :default, dropout = 0.0, seed = 0, rng = MersenneTwister())  where P <: DiffMean where D where H
+    if seed != 0  Random.seed!(rng, seed) end
     n₁      = getval(t.objective)
     n₂      = Int(ceil(getval(t.objective) / t.k))
     pow     = 0
 
     for i = 1:nsim
-        n1      = rand(ZDIST, n₁) .* t.param.a.sd .+ getval(t.param.a)
-        n2      = rand(ZDIST, n₂) .* t.param.b.sd .+ getval(t.param.b)
+        n1      = rand(rng, ZDIST, n₁) .* t.param.a.sd .+ getval(t.param.a)
+        n2      = rand(rng, ZDIST, n₂) .* t.param.b.sd .+ getval(t.param.b)
         if  checkhyp(t.hyp, DiffMean(Mean(n1), Mean(n2)); method = method) pow += 1 end
     end
     return pow/nsim

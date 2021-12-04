@@ -2,13 +2,13 @@ println(" ---------------------------------- ")
 @testset "#14 Simulations         " begin
 
 t      = ClinicalTrialUtilities.bepower(cv=0.2, n=20).task
-result = ClinicalTrialUtilities.besim(t; nsim = 100, seed = 1234)
-@test result == 0.83
+result = ClinicalTrialUtilities.besim(t; nsim = 100, seed = 1234, rng = StableRNG(0))
+@test result == 0.82
 Base.show(io, t)
 
 t      = ClinicalTrialUtilities.ctask(param=:mean, hyp=:ns, group=:two, alpha=0.05, n = 108, sd=10, diff=5, a=7, b=0, k=1)
-result = ClinicalTrialUtilities.ctsim(t; nsim = 1000, seed = 1234)
-@test result == 0.431
+result = ClinicalTrialUtilities.ctsim(t; nsim = 1000, seed = 1234, rng = StableRNG(0))
+@test result == 0.439
 Base.show(io, t)
 #=
 julia> ClinicalTrialUtilities.ctpower(t)
@@ -28,8 +28,8 @@ Power: 0.431398
 =#
 
  t      = ClinicalTrialUtilities.ctask(param=:mean, hyp=:ea, group=:two, alpha=0.05, n = 108, sd=5, diff=0, a=5, b=6, k=1)
- result = ClinicalTrialUtilities.ctsim(t; nsim = 1000, seed = 1234)
- @test result == 0.315
+ result = ClinicalTrialUtilities.ctsim(t; nsim = 1000, seed = 1234, rng = StableRNG(0))
+ @test result == 0.323
  Base.show(io, t)
 
 #=
@@ -50,8 +50,8 @@ Power: 0.312274
 =#
 
 t      = ClinicalTrialUtilities.ctask(param=:mean, hyp=:ei, group=:two, alpha=0.05, n = 108, sd=10, diff=5, a=5, b=4, k=1)
-result = ClinicalTrialUtilities.ctsim(t; nsim = 1000, seed = 1234)
-@test result == 0.885
+result = ClinicalTrialUtilities.ctsim(t; nsim = 1000, seed = 1234, rng = StableRNG(0))
+@test result == 0.884
 Base.show(io, t)
 #=
 julia> ClinicalTrialUtilities.ctpower(t)
@@ -77,8 +77,8 @@ ClinicalTrialUtilities.DiffProportion(ClinicalTrialUtilities.Proportion(30, 100)
 ClinicalTrialUtilities.Parallel(),
 ClinicalTrialUtilities.Superiority(-0.15, -0.15, 0.05),
 ClinicalTrialUtilities.Power(100), 1.0)
-result = ClinicalTrialUtilities.ctsim(t; nsim = 1000, method = :nhs, seed = 1234)
-@test result == 0.169
+result = ClinicalTrialUtilities.ctsim(t; nsim = 1000, method = :nhs, seed = 1234, rng = StableRNG(0))
+@test result == 0.214
 Base.show(io, t)
 
 #=
@@ -103,8 +103,8 @@ ClinicalTrialUtilities.DiffProportion(ClinicalTrialUtilities.Proportion(75, 100)
 ClinicalTrialUtilities.Parallel(),
 ClinicalTrialUtilities.Equivalence(-0.2, 0.2, 0.05),
 ClinicalTrialUtilities.Power(132), 1.0)
-result = ClinicalTrialUtilities.ctsim(t; nsim = 1000, seed = 1234)
-@test result == 0.894
+result = ClinicalTrialUtilities.ctsim(t; nsim = 1000, seed = 1234, rng = StableRNG(0))
+@test result == 0.897
 Base.show(io, t)
 
 #=
@@ -129,8 +129,8 @@ ClinicalTrialUtilities.DiffProportion(ClinicalTrialUtilities.Proportion(30, 100)
 ClinicalTrialUtilities.Parallel(),
 ClinicalTrialUtilities.Equality(0, 0.05),
 ClinicalTrialUtilities.Power(100), 1.0)
-result = ClinicalTrialUtilities.ctsim(t; nsim = 1000, method = :mn, seed = 1234)
-@test result == 0.343
+result = ClinicalTrialUtilities.ctsim(t; nsim = 1000, method = :mn, seed = 1234, rng = StableRNG(0))
+@test result == 0.315
 Base.show(io, t)
 
 #=
