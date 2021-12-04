@@ -389,7 +389,7 @@ end
     end
     #Blaker CI
     #Blaker, H. (2000). Confidence curves and improved exact confidence intervals for discrete distributions,Canadian Journal of Statistics28 (4), 783–798
-    function propblakerci(x::Int, n::Int, alpha::Real)::ConfInt
+    function propblakerci(x::Int, n::Int, alpha)::ConfInt
         tol = 1E-5; lower = 0; upper = 1;
         if n != 0
             lower = quantile(Beta(x, n-x+1), alpha/2)
@@ -405,7 +405,7 @@ end
         end
         return ConfInt(lower,upper, x/n, alpha)
     end
-    @inline function acceptbin(x::Int, n::Int, p::Real)::AbstractFloat
+    @inline function acceptbin(x::Int, n::Int, p::Real)
         BIN = Binomial(n,p)
         p1 = 1-cdf(BIN,x-1)
         p2 =   cdf(BIN,x)
@@ -490,7 +490,7 @@ end
         return ci
     end #limit
 
-    @inline function mlemnor(φ::Real, x1::Int, n1::Int, x2::Int, n2::Int)::Tuple{Float64,Float64}
+    @inline function mlemnor(φ::Real, x1::Int, n1::Int, x2::Int, n2::Int)
         a  = n2*(φ-1)
         b  = φ*n1+n2-(x1+x2)*(φ-1)
         c  = -(x1 + x2)
@@ -603,7 +603,7 @@ end
                        estimate+z*sqrt(ci1.upper*(1-ci1.upper)/n1+ci2.lower*(1-ci2.lower)/n2), estimate, alpha)
     end
 
-    function propdiffnhsccci(x1::Int, n1::Int, x2::Int, n2::Int, alpha::Real)::ConfInt
+    function propdiffnhsccci(x1::Int, n1::Int, x2::Int, n2::Int, alpha)::ConfInt
         p1       = x1/n1
         p2       = x2/n2
         estimate = p1-p2
@@ -617,7 +617,7 @@ end
     #Agresti-Caffo interval for the difference of proportions
     #13
     #Agresti A, Caffo B., “Simple and effective confidence intervals for proportions and differences of proportions result from adding two successes and two failures”, American Statistician 54: 280–288 (2000)
-    function propdiffacci(x1::Int, n1::Int, x2::Int, n2::Int, alpha::Real)::ConfInt
+    function propdiffacci(x1::Int, n1::Int, x2::Int, n2::Int, alpha)::ConfInt
         p1       = x1/n1
         p2       = x2/n2
         estimate = p1-p2
@@ -633,7 +633,7 @@ end
     #Method of Mee 1984 with Miettinen and Nurminen modification n / (n - 1) Newcombe 1998
     #Score intervals for the difference of two binomial proportions
     #6
-    function propdiffmnci(x1::Int, n1::Int, x2::Int, n2::Int, alpha::Real; atol::Float64 = 1E-6)::ConfInt
+    function propdiffmnci(x1::Int, n1::Int, x2::Int, n2::Int, alpha; atol::Float64 = 1E-6)::ConfInt
         ci       = propdiffnhsccci(x1, n1, x2, n2, alpha) #approx zero bounds
         p1       = x1/n1
         p2       = x2/n2
@@ -656,10 +656,10 @@ end
         end
         return ConfInt(find_zero(fmnd, (ll, lu), atol = atol), find_zero(fmnd, (ul, uu), atol = atol), estimate, alpha)
     end
-    @inline function mndiffval(p1::Real, n1::Int, p2::Real, n2::Int, estimate::Real, Δ::Real)::AbstractFloat
+    @inline function mndiffval(p1::Real, n1::Int, p2::Real, n2::Int, estimate, Δ)
         return (estimate-Δ)^2/((n1+n2)/(n1+n2-1)*mlemndiff(p1, n1, p2, n2, Δ))
     end
-    @inline function mlemndiff(p1::Float64, n1::Int, p2::Float64, n2::Int, Δ::Float64)::AbstractFloat
+    @inline function mlemndiff(p1, n1::Int, p2, n2::Int, Δ)
         if p1-p2-Δ == 0 return 0.0 end
         theta = n2/n1
         a = 1 + theta
@@ -686,17 +686,17 @@ end
         return ConfInt(find_zero(f, (-1.0+1e-8, estimate-1e-8), atol=1E-6),
                        find_zero(f, (estimate+1e-8, 1.0-1e-8), atol=1E-6), estimate, alpha)
     end
-    @inline function fmpval(p1::Real, n1::Int, p2::Real, n2::Int, estimate::Real, Δ::Real)
+    @inline function fmpval(p1, n1::Int, p2, n2::Int, estimate, Δ)
         return abs((estimate-Δ)^2/mlemndiff(p1, n1, p2, n2, Δ))
     end
-    function propdiffmeeci(x1::Int, n1::Int, x2::Int, n2::Int, alpha::Real)::ConfInt
+    function propdiffmeeci(x1::Int, n1::Int, x2::Int, n2::Int, alpha)::ConfInt
         p1        = x1/n1
         p2        = x2/n2
         estimate  = p1 - p2
         f(x)      = fmpval2(p1, n1, p2, n2, estimate, x) - alpha
         return ConfInt(find_zero(f, (-1.0+1e-8, estimate-1e-8), atol=1E-6), find_zero(f, ( estimate+1e-6, 1.0-1e-6), atol=1E-6), estimate, alpha)
     end
-    @inline function fmpval2(p1, n1, p2, n2, estimate, delta)::AbstractFloat
+    @inline function fmpval2(p1, n1, p2, n2, estimate, delta)
         z = (estimate - delta)/sqrt(mlemndiff(p1, n1, p2, n2, delta))
         p = cdf(ZDIST, z)
         return 2*min(1 - p, p)
@@ -719,7 +719,7 @@ end
     #--------------------------------RR-----------------------------------------
     #Miettinen-Nurminen Score interval
     #Miettinen, O. and Nurminen, M. (1985), Comparative analysis of two rates. Statist. Med., 4: 213-226. doi:10.1002/sim.4780040211
-    @inline function mlemnrr(φ::Real, x1::Int, n1::Int, x2::Int, n2::Int)::Tuple{Float64,Float64}
+    @inline function mlemnrr(φ, x1::Int, n1::Int, x2::Int, n2::Int)
         a = (n1+n2)*φ
         b = -(φ*(x1+n2)+x2+n1)
         c = x1 + x2
@@ -727,24 +727,24 @@ end
         p1 = p2*φ
         return p1, p2
     end
-    @inline function mnrrval(φ::Real, x1::Int, n1::Int, x2::Int, n2::Int, z::Real)::AbstractFloat
+    @inline function mnrrval(φ, x1::Int, n1::Int, x2::Int, n2::Int, z)
         p1 = x1/n1
         p2 = x2/n2
         pmle1, pmle2 = mlemnrr(φ, x1, n1, x2, n2)
-        return (p1 - φ*p2)^2/((pmle1*(1-pmle1)/n1 + φ*φ*pmle2*(1-pmle2)/n2)*((n1+n2-1)/(n1+n2)))-z
+        return ((p1 - φ*p2)^2)/((pmle1*(1-pmle1)/n1 + φ*φ*pmle2*(1-pmle2)/n2)*((n1+n2-1)/(n1+n2)))-z
     end
-    function proprrmnci(x1::Int, n1::Int, x2::Int, n2::Int, alpha::Real)::ConfInt
+    function proprrmnci(x1::Int, n1::Int, x2::Int, n2::Int, alpha)
         z        = quantile(Chisq(1), 1 - alpha)
         fmnrr(x) = mnrrval(x, x1, n1, x2, n2, z)
         if (x1==0 && x2==0) || (x1==n1 && x2==n2)
             return ConfInt(0.0, Inf, NaN)
         elseif x1==0 || x2==n2
-            return ConfInt(0.0, find_zero(fmnrr, 1e-8, atol=1E-6), 0.0, alpha)
+            return ConfInt(0.0, find_zero(fmnrr, 1e-8, atol=1E-8), 0.0, alpha)
         elseif x1==n1 || x2 == 0
-            return ConfInt(find_zero(fmnrr, 1e-8, atol=1E-6), Inf, Inf, alpha)
+            return ConfInt(find_zero(fmnrr, 1e-8, atol=1E-8), Inf, Inf, alpha)
         else
             estimate = (x1/n1)/(x2/n2)
-            return ConfInt(find_zero(fmnrr, 1e-8, atol=1E-6), find_zero(fmnrr, estimate+1e-6, atol=1E-6), estimate, alpha)
+            return ConfInt(find_zero(fmnrr, 1e-8, atol=1E-8), find_zero(fmnrr, estimate+1e-8, atol=1E-8), estimate, alpha)
         end
     end #proprrmnci
 

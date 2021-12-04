@@ -1,3 +1,7 @@
+v0.6.2
+  - Minor fix
+  - Deps
+  
 v0.6.1
   - bugfix in AUMCtau when dosetime != 0
   - fix ⊆ for Dict
