@@ -749,7 +749,7 @@ end
     end #proprrmnci
 
     #Katz D, Baptista J, Azen SP and Pike MC. Obtaining confidence intervals for the risk ratio in cohort studies. Biometrics 1978; 34: 469–474
-    function proprrkatzci(x1::Int, n1::Int, x2::Int, n2::Int, alpha::Real)::ConfInt
+    function proprrkatzci(x1::Int, n1::Int, x2::Int, n2::Int, alpha)::ConfInt
         estimate  = (x1/n1)/(x2/n2)
         estI      = log(estimate)
         stderrlog = sqrt(1/x2+1/x1-1/n2-1/n1)
@@ -760,7 +760,7 @@ end
     #Crude log interval
     #walters
     #Gart, JJand Nam, J (1988): Approximate interval estimation of the ratio of binomial parameters: Areview and corrections for skewness. Biometrics 44, 323-338.
-    function proprrclici(x1::Int, n1::Int, x2::Int, n2::Int, alpha::Real)::ConfInt
+    function proprrclici(x1::Int, n1::Int, x2::Int, n2::Int, alpha)::ConfInt
         x1I       = x1+0.5
         x2I       = x2+0.5
         n1I       = n1+0.5
@@ -772,7 +772,7 @@ end
         return ConfInt(exp(estI-Z*stderrlog), exp(estI+Z*stderrlog), estimate, alpha)
     end
     #Method of variance estimates recovery (Donner, Zou, 2012)
-    function proprrmoverci(x1::Int, n1::Int, x2::Int, n2::Int, alpha::Real)::ConfInt
+    function proprrmoverci(x1::Int, n1::Int, x2::Int, n2::Int, alpha)::ConfInt
         p1       = (x1/n1)
         p2       = (x2/n2)
         estimate = (x1/n1)/(x2/n2)
@@ -786,17 +786,17 @@ end
     #-------------------------------MEANS---------------------------------------
 
     #Normal
-    function meannormci(m::Real, σ²::Real, n::Real, alpha::Real)::ConfInt
+    function meannormci(m, σ², n, alpha)::ConfInt
         e = quantile(ZDIST, 1-alpha/2)*sqrt(σ²/n)
         return ConfInt(m-e, m+e, float(m), alpha)
     end
     #T Distribution
-    function meantdistci(m::Real, σ²::Real, n::Real, alpha::Real)::ConfInt
+    function meantdistci(m, σ², n, alpha)::ConfInt
         e = quantile(TDist(n-1), 1-alpha/2)*sqrt(σ²/n)
         return ConfInt(m-e, m+e, float(m), alpha)
     end
     #mean diff equal var
-    function meandiffev(m1::Real, σ²1::Real, n1::Real, m2::Real, σ²2::Real, n2::Real, alpha::Real)::ConfInt
+    function meandiffev(m1, σ²1, n1, m2, σ²2, n2, alpha)::ConfInt
         diff   = float(m1 - m2)
         stddev = sqrt(((n1 - 1) * σ²1 + (n2 - 1) * σ²2) / (n1 + n2 - 2))
         stderr = stddev * sqrt(1 / n1 + 1 / n2)
@@ -809,7 +809,7 @@ end
     #mean diff unequal var
     #Two sample t-test (unequal variance)
     #Welch-Satterthwaite df
-    function meandiffuv(m1::Real, σ²1::Real, n1::Real, m2::Real, σ²2::Real, n2::Real, alpha::Real)::ConfInt
+    function meandiffuv(m1, σ²1, n1, m2, σ²2, n2, alpha)::ConfInt
         diff   = float(m1 - m2)
         v      = (σ²1 / n1 + σ²2 / n2)^2 /( σ²1^2 / n1^2 / (n1 - 1) + σ²2^2 / n2^2 / (n2 - 1))
         stderr = sqrt(σ²1 / n1 + σ²2 / n2)
@@ -821,7 +821,7 @@ end
     end
 
     #Not validated
-    function bartlettstest(s1::Real, n1::Real, s2::Real, n2::Real)
+    function bartlettstest(s1, n1, s2, n2)
         n = n1 + n2
         k = 2
         s = ((n1 - 1)*s1 + (n2 - 1)*s2)/(n - k)

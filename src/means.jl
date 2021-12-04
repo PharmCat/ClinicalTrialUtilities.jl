@@ -1,19 +1,19 @@
 struct Mean{Bool} <: AbstractMean
-    m::Real
-    sd::Real
+    m::Float64
+    sd::Float64
     n::Int
-    function Mean(m::Real, sd::Real, n::Int)
+    function Mean(m, sd, n::Int)
         if sd ≤ 0.0 throw(ArgumentError("SD can't be ≤ 0.0!")) end
         new{true}(m, sd, n)::Mean
     end
-    function Mean(m::Real, sd::Real)
+    function Mean(m, sd)
         if sd ≤ 0.0 throw(ArgumentError("SD can't be ≤ 0.0!")) end
         new{false}(m, sd, 0)
     end
     function Mean(m::Real)
         new{false}(m, NaN, 0)
     end
-    function Mean(v::Vector{T}) where T <: Real
+    function Mean(v::Vector{T}) where T
         new{true}(mean(v), sqrt(var(v)), length(v))
     end
 end

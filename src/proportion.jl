@@ -1,12 +1,12 @@
 struct Proportion{Bool} <: AbstractSimpleProportion
     x::Real
     n::Real
-    val::Real
+    val::Float64
     function Proportion(x::Int, n::Int)
         if x > n throw(ArgumentError("Error: X > N!")) end
         new{true}(x, n, x/n)::Proportion
     end
-    function Proportion(val::Real)
+    function Proportion(val::Float64)
         new{false}(NaN, NaN, val)::Proportion
     end
 end
@@ -61,7 +61,7 @@ end
 struct OddRatio{T1 <: AbstractSimpleProportion, T2 <: AbstractSimpleProportion} <: AbstractCompositeProportion
     a::T1
     b::T2
-    val::Real
+    val::Float64
     function OddRatio(a::T, b::T) where T <: AbstractSimpleProportion
         new{typeof(a), typeof(b)}(a, b, getval(a)/getval(b))
     end
@@ -78,7 +78,7 @@ struct OddRatio{T1 <: AbstractSimpleProportion, T2 <: AbstractSimpleProportion} 
         b = Proportion(b)
         new{typeof(a), typeof(b)}(a, b, getval(a)/getval(b))::OddRatio
     end
-    function OddRatio(val::T) where T <: Real
+    function OddRatio(val)
         a = Proportion(NaN)
         b = Proportion(NaN)
         new{typeof(a), typeof(b)}(NaN, NaN, val)
