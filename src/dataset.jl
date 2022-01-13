@@ -37,7 +37,6 @@ function Base.getindex(a::DataSet{T}, d::Tuple{Vararg{Pair}})::T where T
     return a[Dict(d)]
 end
 
-
 function Base.getindex(a::DataSet{T}, i::Int, s::Symbol)::Real where T
     return a.data[i].result[s]
 end

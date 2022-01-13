@@ -10,10 +10,10 @@
 # metafor by Wolfgang Viechtbauer https://cran.r-project.org/package=metafor
 
 struct ConfInt
-    lower::Real
-    upper::Real
-    estimate::Real
-    alpha::Real
+    lower::Float64
+    upper::Float64
+    estimate::Float64
+    alpha::Float64
     #method::Symbol
     function ConfInt(lower, upper, estimate)
         new(lower, upper, estimate, NaN)::ConfInt

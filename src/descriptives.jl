@@ -30,7 +30,7 @@ function Base.show(io::IO, obj::Descriptive)
 end
 
 
-function Base.getindex(a::Descriptive, s::Symbol)::Real
+function Base.getindex(a::Descriptive, s::Symbol)
     return a.result[s]
 end
 
@@ -117,7 +117,7 @@ end
     descriptive(data;
         sort::Union{Symbol, Array{T,1}} = Array{Symbol,1}(undef,0),
         vars = [],
-        stats::Union{Symbol, Array{T,1}, Tuple{Vararg{Symbol}}} = :default)::DataSet{Descriptive} where T <: Union{Symbol, String}
+        stats = :default)::DataSet{Descriptive} where T <: Union{Symbol, String}
 
 Descriptive statistics.
 
@@ -126,9 +126,9 @@ Descriptive statistics.
 - ``stats`` statistics
 """
 function descriptive(data;
-    sort::Union{Symbol, Array{T,1}} = Array{Symbol,1}(undef,0),
+    sort::Union{Symbol, Vector{T}} = Vector{Symbol}(undef,0),
     vars = [],
-    stats::Union{Symbol, Array{T,1}, Tuple{Vararg{Symbol}}} = :default, level = 0.95)::DataSet{Descriptive} where T <: Union{Symbol, String}
+    stats = :default, level = 0.95)::DataSet{Descriptive} where T <: Union{Symbol, String}
 
     stats = checkstats(stats)
     if isa(vars, UnitRange{Int64})
@@ -181,16 +181,15 @@ function descriptive(data;
     end
     return DataSet(d)
 end
-function descriptive(data::Array{T, 1}; stats::Union{Symbol, Vector, Tuple} = :default, var = nothing, varname = nothing, sort = Dict(), level = 0.95)::Descriptive where T <: Real
+function descriptive(data::Vector{T}; stats = :default, var = nothing, varname = nothing, sort = Dict(), level = 0.95) where T <: Real
     stats = checkstats(stats)
     return Descriptive(var, varname, sort, descriptive_(data, stats, level))
-
 end
 
 """
 Check if all statistics in allstat list. return stats tuple
 """
-@inline function checkstats(stats::Union{Symbol, Array{T,1}, Tuple{Vararg{Symbol}}})::Tuple{Vararg{Symbol}} where T <: Union{Symbol, String}
+@inline function checkstats(stats)
     allstat = (:n, :min, :max, :range, :mean, :var, :sd, :sem, :cv, :harmmean, :geomean, :geovar, :geosd, :geocv, :skew, :ses, :kurt, :sek, :uq, :median, :lq, :iqr, :mode, :meanci)
     if isa(stats, Symbol)
         if stats == :default stats = (:n, :mean, :sd, :sem, :uq, :median, :lq)
@@ -206,7 +205,7 @@ end
 """
 Push in d Descriptive obj in mx vardata
 """
-@inline function pushvardescriptive!(d::Array{Descriptive, 1}, vars::Array{Symbol, 1}, mx, sortval::Union{Tuple{Vararg{Any}}, Nothing}, stats::Tuple{Vararg{Symbol}}) where T<: Real
+@inline function pushvardescriptive!(d::Vector{Descriptive}, vars::Vector{Symbol}, mx, sortval, stats)
     for v  = 1:length(vars)  #For each variable in list
         push!(d, Descriptive(vars[v], nothing, sortval, descriptive_(mx[:, v], stats)))
     end
@@ -214,7 +213,7 @@ end
 """
 Check if data row sortcol equal sortval
 """
-@inline function checksort(data, row::Int, sortcol::Array{Symbol, 1}, sortval::Tuple{Vararg{Any}})::Bool
+@inline function checksort(data, row::Int, sortcol::Vector{Symbol}, sortval)
     for i = 1:length(sortcol)
         if data[row, sortcol[i]] != sortval[i] return false end
     end
@@ -223,7 +222,7 @@ end
 """
 Return matrix of filtered data (datacol) by sortcol with sortval
 """
-@inline function getsortedmatrix(data; datacol::Array{Symbol,1}, sortcol::Array{Symbol,1}, sortval::Tuple{Vararg{Any}})
+@inline function getsortedmatrix(data; datacol::Vector{Symbol}, sortcol::Vector{Symbol}, sortval)
     result  = Array{promote_type(eltype.(data[!, c] for c in datacol)...), 1}(undef, 0)
     for c = 1:size(data, 1) #For each line in data
         if checksort(data, c, sortcol, sortval)
@@ -241,7 +240,7 @@ function notnan(x)
     return !(x === NaN || x === nothing || x === missing)
 end
 
-@inline function descriptive_(data::Vector{T}, stats::Union{Tuple{Vararg{Symbol}}, Array{Symbol,1}}, level) where T 
+@inline function descriptive_(data::Vector{T}, stats, level) where T
 
     #=
     dlist = findall(x -> x === NaN || x === nothing || x === missing, data)
@@ -275,7 +274,7 @@ end
 
 
 
-    dict = Dict{Symbol, Real}()
+    dict = Dict{Symbol, Float64}()
 
 
     if length(data) == 0
@@ -419,10 +418,10 @@ end
     return sqrt(6 * n *(n - 1) / ((n - 2) * (n + 1) * (n + 3)))
 end
 
-@inline function sek(data::AbstractVector; ses::T = ses(data)) where T <: Real
+@inline function sek(data::AbstractVector; ses = ses(data))
     n = length(data)
     sek(n; ses = ses)
 end
-@inline  function sek(n::Int; ses::T = ses(n)) where T <: Real
+@inline  function sek(n::Int; ses = ses(n))
     return 2 * ses * sqrt((n * n - 1)/((n - 3) * (n + 5)))
 end
