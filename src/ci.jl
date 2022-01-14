@@ -481,7 +481,7 @@ end
             a = n2*(lim-1)
             b = n1*lim+n2-(x1+x2)*(lim-1)
             c = -(x1+x2)
-            p2d = (-b+sqrt(b^2-4*a*c))/(2*a)
+            p2d = (-b+sqrt(b^2-4*a*c))/2a
             p1d = p2d*lim/(1+p2d*(lim-1))
             score = ((n1*(px-p1d))^2)*(1/(n1*p1d*(1-p1d))+1/(n2*p2d*(1-p2d)))*(n1+n2-1)/(n1+n2)
             ci = lim
@@ -494,7 +494,7 @@ end
         a  = n2*(φ-1)
         b  = φ*n1+n2-(x1+x2)*(φ-1)
         c  = -(x1 + x2)
-        p2 = (-b+sqrt(b*b-4*a*c))/a/2
+        p2 = (-b+sqrt(b*b - 4a * c))/2a
         p1 = p2*φ/(1+p2*(φ-1))
         return p1, p2
     end
@@ -666,10 +666,10 @@ end
         b = -(1 + theta + p1 + theta * p2 + Δ*(theta + 2))
         c = Δ^2 + Δ*(2 * p1 + theta + 1) + p1 + theta * p2
         d = -p1*Δ*(1 + Δ)
-        v = (b/a/3)^3 - b*c/(6*a*a) + d/2/a
-        u = sign(v) * sqrt((b/3/a)^2 - c/3/a)
+        v = (b/3a)^3 - b*c/(6*a*a) + d/2a
+        u = sign(v) * sqrt((b/3a)^2 - c/3a)
         w = (pi + acos(v/u^3))/3
-        p1n = 2*u*cos(w) - b/3/a
+        p1n = 2u*cos(w) - b/3a
         p2n = p1n - Δ
         return p1n * (1-p1n)/n1 + p2n * (1 - p2n)/n2
     end
@@ -720,18 +720,18 @@ end
     #Miettinen-Nurminen Score interval
     #Miettinen, O. and Nurminen, M. (1985), Comparative analysis of two rates. Statist. Med., 4: 213-226. doi:10.1002/sim.4780040211
     @inline function mlemnrr(φ, x1::Int, n1::Int, x2::Int, n2::Int)
-        a = (n1+n2)*φ
-        b = -(φ*(x1+n2)+x2+n1)
+        a = (n1 + n2) * φ
+        b = -(φ *(x2 + n1) + x1 + n2)
         c = x1 + x2
-        p2 = (-b-sqrt(b*b-4*a*c))/2/a
-        p1 = p2*φ
+        p2 = (-b-sqrt(b*b-4a*c))/2a
+        p1 = p2 * φ
         return p1, p2
     end
     @inline function mnrrval(φ, x1::Int, n1::Int, x2::Int, n2::Int, z)
         p1 = x1/n1
         p2 = x2/n2
         pmle1, pmle2 = mlemnrr(φ, x1, n1, x2, n2)
-        return ((p1 - φ*p2)^2)/((pmle1*(1-pmle1)/n1 + φ*φ*pmle2*(1-pmle2)/n2)*((n1+n2-1)/(n1+n2)))-z
+        return ((p1 - φ*p2)^2)/((pmle1*(1-pmle1)/n1 + φ*φ*pmle2*(1-pmle2)/n2)*(n1+n2)/(n1+n2-1)) - z
     end
     function proprrmnci(x1::Int, n1::Int, x2::Int, n2::Int, alpha)
         z        = quantile(Chisq(1), 1 - alpha)
