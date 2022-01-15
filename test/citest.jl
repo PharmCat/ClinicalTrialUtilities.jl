@@ -148,8 +148,8 @@ println(" ---------------------------------- ")
     #-- mn
 
     ci = ClinicalTrialUtilities.rrpropci(30, 100, 40, 90; alpha=0.05, method=:mn)
-    @test ci.lower    ≈ 0.461480914884656 atol=1E-6
-    @test ci.upper    ≈ 0.9801801210729479 atol=1E-6
+    @test ci.lower    ≈ 0.46054929315119536 atol=1E-6
+    @test ci.upper    ≈ 0.9820955908214947 atol=1E-6
     @test ci.estimate ≈ 0.675 atol=1E-6
     @test ci.estimate ≈ StatsBase.confint(ClinicalTrialUtilities.RiskRatio(ClinicalTrialUtilities.Proportion(30, 100),
     ClinicalTrialUtilities.Proportion(40, 90)); level = 0.95, method = :mn).estimate
@@ -161,11 +161,11 @@ println(" ---------------------------------- ")
 
     ci = ClinicalTrialUtilities.rrpropci(0, 100, 90, 90; alpha=0.05, method=:mn)
     @test ci.lower    ≈ 0.0
-    @test ci.upper    ≈ 0.03680596180211699  atol=1E-6
+    @test ci.upper    ≈ 0.03718195327410316  atol=1E-6
     @test ci.estimate ≈ 0.0
 
     ci = ClinicalTrialUtilities.rrpropci(100, 100, 0, 70; alpha=0.05, method=:mn)
-    @test ci.lower    ≈ 19.32220093816104 atol=1E-2 #v 44.8498645475395
+    @test ci.lower    ≈ 19.10796471889421 atol=1E-2 #v 44.8498645475395
     @test ci.upper    ≈ Inf
     @test ci.estimate ≈ Inf
 
