@@ -113,8 +113,8 @@ end
 mutable struct PDSubject <: AbstractSubject
     time::Vector
     obs::Vector
-    bl::Real
-    th::Real
+    bl::Float64
+    th::Float64
     sort::Dict
     function PDSubject(time, resp, bl, th; sort = Dict())
         new(time, resp, bl, th, sort)::PDSubject
@@ -816,7 +816,7 @@ function nca!(data::PDSubject; verbose = false, io::IO = stdout)::PKPDProfile{PD
         result[:TH] = data.th
         result[:BL] = data.bl
         result[:RMAX] = maximum(data.obs)
-        result[:RMIN] = maximum(data.obs)
+        result[:RMIN] = minimum(data.obs)
         for i = 2:length(data) #BASELINE
             if data.obs[i - 1] <= result[:BL] && data.obs[i] <= result[:BL]
                 result[:TBBL]   += data.time[i,] - data.time[i - 1]
