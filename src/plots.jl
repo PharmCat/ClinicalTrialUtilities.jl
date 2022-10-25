@@ -216,6 +216,16 @@ function pkplot!(subj::T; plotstyle::PKPlotStyle = PKPLOTSTYLE[1], ls = false, e
         markercolor = plotstyle.markercolor,
         kwargs...
         )
+    if :blline in k
+        if kwargs[:blline] && isa(subj, PDSubject)
+            hline!(p, [subj.bl], color = :red, label = "bl")
+        end
+    end
+    if :thline in k
+        if kwargs[:thline] && isa(subj, PDSubject)
+            hline!(p, [subj.th], color = :blue, label = "th")
+        end
+    end
     return p
 end
 
@@ -281,6 +291,12 @@ function pageplot(pagedatatmp, styledict, typesort, utypes; xticksn = 6, yticksn
             end
         end
     end
+    if :vline in k
+        vline!(p, kwargs[:vline])
+    end
+    if :hline in k
+        hline!(p, kwargs[:hline])
+    end
     p
 end
 function pageplot(pagedatatmp; elim = false,  xticksn = 6, yticksn = 5,  kwargs...)
@@ -317,6 +333,12 @@ function pageplot(pagedatatmp; elim = false,  xticksn = 6, yticksn = 5,  kwargs.
             if ylm2 > ylm ylm = ylm2 end
             pkplot!(   d; plotstyle = PKPLOTSTYLE[1], xticksn = xticksn, yticksn = yticksn, ylims = (0, ylm*1.2), kwargs...)
         end
+    end
+    if :vline in k
+        vline!(p, kwargs[:vline])
+    end
+    if :hline in k
+        hline!(p, kwargs[:hline])
     end
     p
 end
