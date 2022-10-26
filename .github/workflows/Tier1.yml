@@ -23,15 +23,15 @@ jobs:
     runs-on: ${{ matrix.os }}
     strategy:
       matrix:
-        julia-version: [1.6, 1.7]
+        julia-version: [1.6, 1.7, 1.8]
         julia-arch: [x64]
-        os: [ubuntu-18.04, macos-10.15, windows-2019]
+        os: [ubuntu-latest, macOS-latest, windows-2019]
     steps:
       - uses: actions/checkout@v2
       - uses: julia-actions/setup-julia@v1
         with:
           version: ${{ matrix.julia-version }}
-      - uses: julia-actions/julia-buildpkg@v0.1
+      - uses: julia-actions/julia-buildpkg@master
       - uses: julia-actions/julia-runtest@v0.1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

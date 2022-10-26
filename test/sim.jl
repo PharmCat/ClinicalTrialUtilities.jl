@@ -3,7 +3,7 @@ println(" ---------------------------------- ")
 
 t      = ClinicalTrialUtilities.bepower(cv=0.2, n=20).task
 result = ClinicalTrialUtilities.besim(t; nsim = 100, seed = 1234, rng = StableRNG(0))
-@test result == 0.82
+@test result ≈ 0.8 atol=0.1
 Base.show(io, t)
 
 t      = ClinicalTrialUtilities.ctask(param=:mean, hyp=:ns, group=:two, alpha=0.05, n = 108, sd=10, diff=5, a=7, b=0, k=1)
