@@ -14,7 +14,7 @@
 __precompile__(true)
 module ClinicalTrialUtilities
 
-using Distributions, Random, Roots, QuadGK, RecipesBase
+using Distributions, Random, Roots, QuadGK
 
 using StatsBase
 
