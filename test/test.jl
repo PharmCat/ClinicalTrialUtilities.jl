@@ -229,51 +229,8 @@ println(" ---------------------------------- ")
     @test rdf[:Group] == [1, 2, 1, 2, 2, 1, 1, 2, 2, 1]
 end
 
-
-#PK
-include("pktest.jl")
-
-
 include("sim.jl")
 
-
-println(" ---------------------------------- ")
-@testset "  Scenario              " begin
-    #Pharmacokinetics statistics
-    pkds = ClinicalTrialUtilities.pkimport(pkdata2, [:Subject, :Formulation]; time = :Time, conc = :Concentration)
-    pk   = ClinicalTrialUtilities.nca!(pkds)
-    df   = ClinicalTrialUtilities.DataFrame(pk; unst = true)
-    ds   = ClinicalTrialUtilities.descriptive(df, stats = [:n, :mean, :sd], sort = [:Formulation])
-    df   = ClinicalTrialUtilities.DataFrame(ds; unst = true)
-    Base.show(io, pkds)
-    Base.show(io, pkds[1])
-    Base.show(io, pk)
-    Base.show(io, pk[1])
-    Base.show(io, ds)
-    Base.show(io, ds[1])
-
-
-    @test ds[Dict(:Variable=>:AUClast,:Formulation=>"R")][:mean] ≈ 7431.283916666667
-
-    pdds = ClinicalTrialUtilities.pdimport(pkdata2, [:Subject, :Formulation]; time = :Time, resp = :Concentration)
-    pd   = ClinicalTrialUtilities.nca!(pdds)
-    df   = ClinicalTrialUtilities.DataFrame(pd; unst = true)
-    ds   = ClinicalTrialUtilities.descriptive(df, stats = :default, sort = [:Formulation])
-
-    @test ds[Dict(:Variable=>:AUCBLNET,:Formulation=>"T")][:mean] ≈ 8607.09
-    @test ds[(:Variable=>:AUCBLNET,:Formulation=>"R")][:sd] ≈ 1919.7954123986283
-
-end
-
-println(" ---------------------------------- ")
-@testset "  HTML export           " begin
-
-    pkds = ClinicalTrialUtilities.pkimport(pkdata2, [:Subject, :Formulation]; time = :Time, conc = :Concentration)
-    pk   = ClinicalTrialUtilities.nca!(pkds)
-    df   = ClinicalTrialUtilities.DataFrame(pk; unst = true)
-    ClinicalTrialUtilities.htmlexport(df; io = io, sort = :Subject, rspan=:all, title = "PK Parameters", dict = :pk)
-    @test true
-end
 
 println(" ---------------------------------- ")
 @testset "  Errors                " begin
@@ -305,13 +262,6 @@ println(" ---------------------------------- ")
     @test_throws ArgumentError ci = ClinicalTrialUtilities.diffpropci(30, 100, 40, 90; alpha=0.05, method=:meee)
     @test_throws ArgumentError ci = ClinicalTrialUtilities.rrpropci(30, 100, 40, 90; alpha=0.05, method=:mnnn)
     @test_throws ArgumentError ci = ClinicalTrialUtilities.orpropci(30, 100, 40, 90; alpha=0.05,  method=:awoolfff)
-
-    #DS
-    pkds = ClinicalTrialUtilities.pkimport(pkdata, [:Subject, :Formulation]; conc = :Concentration, time = :Time)
-    @test_throws BoundsError pkds[20]
-    @test_throws ArgumentError pkds[:Subject => 20]
-    @test_throws ArgumentError pkds[Dict(:Subject => 20)]
-
 
     #Type check
     ClinicalTrialUtilities.besamplen(;theta0=0, theta1=-1, theta2=1, sd=2, logscale = false)
