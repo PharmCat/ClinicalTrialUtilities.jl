@@ -1,6 +1,6 @@
 # ClinicalTrialUtilities
 
- Clinical trial related calculation: descriptive statistics, power and sample size calculation, power simulations, confidence interval, pharmacokinetics/pharmacodynamics parameters calculation. This program comes with absolutely no warranty. No liability is accepted for any loss and risk to public health resulting from use of this software.
+ Clinical trial related calculation: descriptive statistics, power and sample size calculation, power simulations. This program comes with absolutely no warranty. No liability is accepted for any loss and risk to public health resulting from use of this software.
 
 ![Tier 1](https://github.com/PharmCat/ClinicalTrialUtilities.jl/workflows/Tier%201/badge.svg)
 
@@ -102,36 +102,20 @@ pooledcv([0.12, 0.2, 0.25], [14, 22, 32], [:d2x2, :d2x2, :d2x2])
 
 ```
 
-#### Confidence Intervals
-```
-using  ClinicalTrialUtilities
-ci = propci(38, 100, alpha=0.05, method=:cp)
-
-ci = orpropci(30, 100, 40, 90; alpha=0.05, method=:mn)
-
-ci = diffpropci(30, 100, 40, 90; alpha=0.05, method=:wald)
-
-ci = meanci(30, 10, 30, alpha = 0.05, method=:norm)
-```
-
-#### NCA
-```
-using CSV, DataFrames, ClinicalTrialUtilities
-pkdatapath = joinpath(dirname(pathof(ClinicalTrialUtilities)))*"\\..\\test\\csv\\pkdata2.csv"
-pkdata  = CSV.File(pkdatapath) |> DataFrame
-pkds    = pkimport(pkdata, [:Subject, :Formulation]; time = :Time, conc = :Concentration)
-pk      = nca!(pkds)
-ncadf   = DataFrame(pk; unst = true)
-ds      = ClinicalTrialUtilities.descriptive(ncadf, stats = [:n, :mean, :sd], sort = [:Formulation])
-dsdf    = ClinicalTrialUtilities.DataFrame(ds; unst = true)
-
-```
 #### Randomization
 ```
 using DataFrames, ClinicalTrialUtilities
 rt = ClinicalTrialUtilities.randomtable(;blocksize = 4, subject = 32, group = 2, ratio = [1,1], grseq = ["TR", "RT"], seed = 36434654652452)
 ```
 
+#### Confidence Intervals
+
+Proportion CI moved to [MetidaFreq.jl](https://github.com/PharmCat/MetidaFreq.jl)
+
+
+#### NCA
+
+NCA moved to [MetidaNCA.jl](https://github.com/PharmCat/MetidaNCA.jl)
 
 ### <a name="Copyrights">Copyrights</a>
 

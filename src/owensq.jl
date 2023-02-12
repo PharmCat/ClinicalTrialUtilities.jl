@@ -57,13 +57,13 @@ function owensqo(nu::Real, t::Real, delta::Real, b::Real; a::Real = 0.0)::Abstra
     #some code abs L vector H vector M vector
     av  = Array{Float64}(undef, nu)
     for i = 1:length(av)
-        if i==1||i==2 av[i] = 1 else av[i] = 1/((i-2)*av[i-1]) end
+        if i==1||i==2 av[i] = 1 else av[i] = 1 / ((i - 2) * av[i-1]) end
     end
     if (upr-1) > 0 ll = upr-1 else ll = 0 end
     L  = Array{Float64}(undef, ll)
     if isfinite(b)
          for i=1:length(L)
-             if i==1 L[1] = 0.5*A*B*b*pdf(ZDIST,b)*pdf(ZDIST,A*b-delta)
+             if i==1 L[1] = 0.5 * A * B * b * pdf(ZDIST, b) * pdf(ZDIST, A * b - delta)
              else L[i] = av[i+3]*b*L[i-1] end
          end
     end
@@ -71,29 +71,29 @@ function owensqo(nu::Real, t::Real, delta::Real, b::Real; a::Real = 0.0)::Abstra
     H = Array{Float64}(undef, ll)
     if isfinite(b)
         for i = 1:length(H)
-            if i==1 H[1] = -pdf(ZDIST,b)*cdf(ZDIST,A*b-delta)
-            else H[i] = av[i+1]*b*H[i-1] end
+            if i==1 H[1] = -pdf(ZDIST, b)*cdf(ZDIST, A * b - delta)
+            else H[i] = av[i+1] * b * H[i-1] end
         end
     end
     #pass1
     M   = Array{Float64}(undef, ll)
     sB  = sqrt(B)
     for i = 1:length(M)
-        if i==1 M[1] = A*sB*pdf(ZDIST,delta*sB)*(cdf(ZDIST,delta*A*sB)-cdf(ZDIST,(delta*A*B-b)/sB)) end
-        if i==2 M[2] = B*(delta*A*M[1]+A*pdf(ZDIST,delta*sB)*(pdf(ZDIST,delta*A*sB)-pdf(ZDIST,(delta*A*B-b)/sB))) end
-        if i>2 M[i] = ((i-2)/(i-1))*B*(av[i-1]*delta*A*M[i-1]+M[i-2]) - L[i-2] end
+        if i==1 M[1] = A * sB * pdf(ZDIST, delta * sB) * (cdf(ZDIST, delta * A * sB)-cdf(ZDIST, (delta * A * B - b) / sB)) end
+        if i==2 M[2] = B * (delta * A * M[1] + A * pdf(ZDIST, delta * sB) * (pdf(ZDIST, delta * A * sB)-pdf(ZDIST,(delta * A * B - b) / sB))) end
+        if i>2 M[i] = ((i - 2) / (i - 1)) * B * (av[i-1] * delta * A * M[i-1] + M[i-2]) - L[i-2] end
     end
     #pass
     sumt  = 0.0;
     if nu%2 > 0
         if upr>=1
             for i = 1:2:upr
-                sumt = sumt + M[i+1] + H[i+1]
+                sumt = sumt + M[i + 1] + H[i + 1]
             end
         end
-        qv = cdf(ZDIST, b) - 2*owenst(b,A-delta/b) -
-                        2*owenst(delta*sB, (delta*A*B-b)/B/delta) +
-                        2*owenst(delta*sB, A) - (delta>=0) + 2*sumt
+        qv = cdf(ZDIST, b) - 2 * owenst(b, A - delta / b) -
+                        2 * owenst(delta * sB, (delta * A * B - b) / B / delta) +
+                        2 * owenst(delta * sB, A) - (delta >= 0) + 2 * sumt
     else
         if upr>=0
             for i = 0:2:upr
@@ -116,7 +116,7 @@ end
     if x == 0 return 0 end
     return sign(x) ^ (nu - 1.0) * cdf(ZDIST, t * x / sqrt(nu) - delta) *
     exp((nu - 1.0) * log(abs(x)) - 0.5 * x ^ 2 -
-    ((nu / 2.0) - 1.0) * LOG2 - lgamma(nu / 2.0))
+    ((nu * 0.5) - 1.0) * LOG2 - lgamma(nu * 0.5))
 end
 #-------------------------------------------------------------------------------
 
@@ -137,9 +137,9 @@ function owenst(h::Real, a::Real)::AbstractFloat
         if abs(a)< epsilon return 0 end
         if !isfinite(h) return 0 end
         if abs(1-abs(a)) < epsilon return sign(a) * 0.5 * cdf(ZDIST, h) * (1 - cdf(ZDIST, h)) end
-        if abs(h) < epsilon return atan(a) / 2 / pi end
+        if abs(h) < epsilon return atan(a) * 0.5 / pi end
         if !isfinite(abs(a))
-            if h < 0 tha=cdf(ZDIST, h) / 2 else tha = (1 - cdf(ZDIST, h)) / 2 end
+            if h < 0 tha=cdf(ZDIST, h) * 0.5  else tha = (1 - cdf(ZDIST, h)) * 0.5 end
             return sign(a) * tha
         end
     end
@@ -150,7 +150,7 @@ function owenst(h::Real, a::Real)::AbstractFloat
         ah   = aa * h
         gh   = cdf(ZDIST, h)
         gah  = cdf(ZDIST, ah)
-        tha  = 0.5 * (gh + gah) - gh * gah - tfn(ah, 1.0/aa)
+        tha  = 0.5 * (gh + gah) - gh * gah - tfn(ah, 1.0 / aa)
     end
     if a < 0.0 return -tha else return tha end
 end #OwensT(h,a)
@@ -187,9 +187,9 @@ end #OwensT(h,a)
         end
     end
         #Vectorized:
-    r1 = 1.0 .+ fxs .* (0.5 .+ u) .^ 2
-    r2 = 1.0 .+ fxs .* (0.5 .- u) .^ 2
-    rt = r .* (exp.(xs .* r1) ./ r1 .+ exp.(xs .* r2) ./ r2)
+    r1 = @. 1.0 + fxs * (0.5 + u) ^ 2
+    r2 = @. 1.0 + fxs * (0.5 - u) ^ 2
+    rt = @. r * (exp(xs * r1) / r1 + exp(xs * r2) / r2)
 
     return sum(rt) * x2 * PI2INV
 end #tfn(x, fx)
