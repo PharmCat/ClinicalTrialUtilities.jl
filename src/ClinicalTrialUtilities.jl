@@ -14,7 +14,7 @@
 __precompile__(true)
 module ClinicalTrialUtilities
 
-using Distributions, Random, Roots, QuadGK, RecipesBase
+using Distributions, Random, Roots, QuadGK
 
 using StatsBase
 
@@ -63,8 +63,7 @@ include("info.jl")
 
 #Descriptive statistics
 include("descriptives.jl")
-#PK
-include("pk.jl")
+
 #Export
 include("export.jl")
 #Randomization
@@ -73,8 +72,6 @@ include("randomization.jl")
 include("utilities.jl")
 #Show
 include("show.jl")
-#Plots
-include("plots.jl")
 #Deprecated
 include("deprecated.jl")
 
