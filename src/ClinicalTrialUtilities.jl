@@ -77,7 +77,7 @@ include("deprecated.jl")
 
 const CTU = ClinicalTrialUtilities
 #Types
-export CTU, ConfInt,
+export 
 #Task
 CTask,
 #Sample size
@@ -91,54 +91,12 @@ cvfromci,
 cvfromvar,
 pooledcv,
 printdesigns,
-#Other
-descriptive,
-freque,
-contab,
-metaprop,
-htmlexport,
 #CI
-confint,
-propci,
-diffpropci,
-rrpropci,
-orpropci,
-meanci,
-diffmeanci,
-diffcmhci,
-orcmhci,
-rrcmhci,
-#Randomization
 randomtable,
 randomseq,
 #Pharmacokinetics
-nca!,
-pkimport,
-pdimport,
-DataFrame,
-ElimRange,
-DoseTime,
-LimitRule,
-applyncarule!,
-applyelimrange!,
-keldata,
-setkelauto!,
-getkelauto,
-auc_sparse,
-datatable,
-# Simulation
 ctsim,
-besim,
-#Plots
-pkplot,
-pkplot!
-
-
-
-#-------------------------------------------------------------------------------
-
-#-------------------------------------------------------------------------------
-
+besim
 
 
 end # module end

@@ -1,7 +1,7 @@
 #deprecated
 
 #DEPRECATED
-
+#=
 """
     DataFrames.DataFrame(data::DataSet{PKPDProfile}; unst = false, us = false)
 
@@ -39,6 +39,7 @@ function DataFrames.DataFrame(data::DataSet{T}; unst = false, us = false) where 
             return df
         end
 end
+=#
 #!!!
 #=
 function in(a::Dict, b::Dict)
