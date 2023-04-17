@@ -1,3 +1,4 @@
+#=
 """
     Descriptive statistics type
 """
@@ -425,3 +426,4 @@ end
 @inline  function sek(n::Int; ses = ses(n))
     return 2 * ses * sqrt((n * n - 1)/((n - 3) * (n + 5)))
 end
+=#

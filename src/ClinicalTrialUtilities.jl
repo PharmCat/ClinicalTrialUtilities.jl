@@ -21,7 +21,6 @@ using StatsBase
 import SpecialFunctions
 import Base: show, findfirst, getproperty, showerror, getindex, length, in, iterate, eltype, deleteat!, findall
 import StatsBase.confint
-import DataFrames: DataFrame, DataFrames, unstack
 
 
 lgamma(x) = SpecialFunctions.logabsgamma(x)[1]

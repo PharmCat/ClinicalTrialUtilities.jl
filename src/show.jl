@@ -243,13 +243,15 @@ function Base.show(io::IO, e::TaskEstimate)
         end
 end
 
+#=
 #-------------------------------------------------------------------------------
 # Confidence intervals
 function Base.show(io::IO, obj::ConfInt)
         print(io, "Estimate: $(obj.estimate) ($(obj.lower) - $(obj.upper))")
 end
-
+=#
 #-------------------------------------------------------------------------------
+#=
 # Frequences
 function Base.show(io::IO, ct::ConTab{2, 2})
         mx = Matrix{Any}(undef, 3, 3)
@@ -265,7 +267,7 @@ function Base.show(io::IO, ct::ConTab{2, 2})
                 println(io, ct.sort)
         end
 end
-
+=#
 
 #-------------------------------------------------------------------------------
 # OUTPUT

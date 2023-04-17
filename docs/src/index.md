@@ -17,6 +17,17 @@ The package is designed to perform calculations related to the planning and anal
 using Pkg; Pkg.add("ClinicalTrialUtilities");
 ```
 
+### Pharmacodynamics
+
+Further development of NCA PK/PD will be based on [MetidaNCA.jl](https://github.com/PharmCat/MetidaNCA.jl) package.
+
+All NCA PK/PD functions moved to [MetidaNCA](https://github.com/PharmCat/MetidaNCA.jl).
+
+Descriptive statistics moved to  [MetidaStats](https://github.com/PharmCat/MetidaStats.jl).
+
+Confidence intervals moved to  [MetidaFreq](https://github.com/PharmCat/MetidaFreq.jl).
+
+
 ## Note
 
 **NB! Hypothesis types:**
@@ -38,11 +49,6 @@ Pages = [
 
         "samplesize.md",
         "power.md",
-        "ci.md",
-        "ds.md",
-        "nca.md",
-        "pk.md",
-        "pd.md",
         "random.md",
         "sim.md",
         "utils.md",
