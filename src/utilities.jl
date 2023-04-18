@@ -110,7 +110,7 @@ Pooled CV from multiple sources.
 - false - return var
 
 """
-function pooledcv(data; cv = :cv, df = :df, alpha::Real = 0.05, returncv::Bool = true)::ConfInt
+function pooledcv(data; cv = :cv, df = :df, alpha::Real = 0.05, returncv::Bool = true)
     if isa(cv, String)  cv = Symbol(cv) end
     if isa(df, String)  df = Symbol(df) end
     return pooledcv(data[!, cv], data[!, df]; alpha = alpha, returncv = returncv)
@@ -132,12 +132,13 @@ Pooled CV from multiple sources.
 - false - return var
 
 """
-function pooledcv(cv::Vector, df::Vector; alpha = 0.05, returncv = true)::ConfInt
+function pooledcv(cv::Vector, df::Vector; alpha = 0.05, returncv = true)
     tdf    = sum(df)
     result = sum(varfromcv.(cv) .* df)/tdf
     CHSQ   = Chisq(tdf)
-    if returncv return ConfInt(cvfromvar(result*tdf/quantile(CHSQ, 1-alpha/2)), cvfromvar(result*tdf/quantile(CHSQ, alpha/2)), cvfromvar(result))
-    else ConfInt(result*tdf/quantile(CHSQ, 1-alpha/2), result*tdf/quantile(CHSQ, alpha/2), result)
+    if returncv return (cvfromvar(result*tdf/quantile(CHSQ, 1-alpha/2)), cvfromvar(result*tdf/quantile(CHSQ, alpha/2)), cvfromvar(result))
+    else 
+        return (result*tdf/quantile(CHSQ, 1-alpha/2), result*tdf/quantile(CHSQ, alpha/2), result)
     end
 end
 """
@@ -159,7 +160,7 @@ Pooled CV from multiple sources.
 - false - return var
 
 """
-function pooledcv(cv::Vector, n::Vector, design::Vector; alpha = 0.05, returncv = true)::ConfInt
+function pooledcv(cv::Vector, n::Vector, design::Vector; alpha = 0.05, returncv = true)
     d  = Design.(design)
     df = Array{Int, 1}(undef, length(d))
     for i = 1:length(d)
