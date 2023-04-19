@@ -1,4 +1,4 @@
-
+#=
 """
     besim(t::CTask{T, D, Bioequivalence, Power}; nsim = 100, seed=0)  where T where D
 
@@ -135,3 +135,4 @@ function ctsim(t::CTask{P, D, H, Power}; nsim = 100, method = :default, dropout 
     end
     return pow/nsim
 end
+=#

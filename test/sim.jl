@@ -1,3 +1,4 @@
+#=
 println(" ---------------------------------- ")
 @testset "#14 Simulations         " begin
 
@@ -154,3 +155,5 @@ Power: 0.319724
 
 t      = ClinicalTrialUtilities.ctask(param=:prop, hyp=:ei, group=:two, alpha=0.05, n = 135, diff = 0.15,  a=0.45, b=0.4, k=1)
 end
+
+=#

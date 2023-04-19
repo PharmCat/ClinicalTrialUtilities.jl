@@ -1,6 +1,6 @@
 # ClinicalTrialUtilities
 
- Clinical trial related calculation: descriptive statistics, power and sample size calculation, power simulations. This program comes with absolutely no warranty. No liability is accepted for any loss and risk to public health resulting from use of this software.
+ Clinical trial related calculation:  power and sample size calculation, randomization. This program comes with absolutely no warranty. No liability is accepted for any loss and risk to public health resulting from use of this software.
 
 ![Tier 1](https://github.com/PharmCat/ClinicalTrialUtilities.jl/workflows/Tier%201/badge.svg)
 
@@ -8,9 +8,6 @@
 
 [![Latest docs](https://img.shields.io/badge/docs-latest-blue.svg)](https://pharmcat.github.io/ClinicalTrialUtilities.jl/dev/)
 
-## Description
-
-The package is designed to perform calculations related to the planning and analysis of the results of clinical trials. The package includes the basic functions described below, as well as a few modules to perform specific calculations.
 
 ### <a name="Installation">Installation</a>
 ```

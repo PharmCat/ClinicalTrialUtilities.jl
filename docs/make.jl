@@ -11,7 +11,6 @@ makedocs(
         "Sample size" => "samplesize.md",
         "Power" => "power.md",
         "Randomization" => "random.md",
-        "Simulations" => "sim.md",
         "Utilities" => "utils.md",
         "Examples" => "examples.md",
         "Validation" => "validation.md",

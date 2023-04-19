@@ -1,6 +1,6 @@
 # ClinicalTrialUtilities
 
- Clinical trial related calculation: descriptive statistics, power and sample size calculation, power simulations, confidence interval, pharmacokinetics/pharmacodynamics parameters calculation.
+ Clinical trial related calculation: power and sample size calculation, randomization.
 
 [![Build Status](https://travis-ci.com/PharmCat/ClinicalTrialUtilities.jl.svg?branch=master)](https://travis-ci.com/PharmCat/ClinicalTrialUtilities.jl)
 [![Build status](https://ci.appveyor.com/api/projects/status/35f8b5vq259sbssg?svg=true)](https://ci.appveyor.com/project/PharmCat/clinicaltrialutilities-jl)
@@ -27,6 +27,8 @@ Descriptive statistics moved to  [MetidaStats](https://github.com/PharmCat/Metid
 
 Confidence intervals moved to  [MetidaFreq](https://github.com/PharmCat/MetidaFreq.jl).
 
+Simulations removed.
+
 
 ## Note
 
@@ -50,7 +52,6 @@ Pages = [
         "samplesize.md",
         "power.md",
         "random.md",
-        "sim.md",
         "utils.md",
         "examples.md",
         "export.md",
