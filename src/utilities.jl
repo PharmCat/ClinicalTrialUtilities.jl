@@ -92,7 +92,7 @@ function cvfromci(theta1, theta2, n; alpha = 0.05, design=:d2x2, mso=false, cvms
 end
 
 """
-    pooledcv(data; cv=:cv, df=:df, alpha=0.05, returncv=true)::ConfInt
+    pooledcv(data; cv=:cv, df=:df, alpha=0.05, returncv=true)
 
 Pooled CV from multiple sources.
 
@@ -109,6 +109,27 @@ Pooled CV from multiple sources.
 - true  - return cv
 - false - return var
 
+Return tuple: (lower, upper, estimate).
+
+Example:
+
+```
+data = DataFrame(cv = Float64[], df = Int[])
+push!(data, (0.12, 12))
+push!(data, (0.2, 20))
+push!(data, (0.25, 30))
+ci = ClinicalTrialUtilities.pooledcv(data; cv="cv", df="df")
+println("Lower: ", ci[1])
+println("Upper: ", ci[2])
+println("Estimate: ", ci[3])
+```
+
+```
+Lower: 0.18145259424967664
+Upper: 0.2609307413637307
+Estimate: 0.21393949168210136
+```
+
 """
 function pooledcv(data; cv = :cv, df = :df, alpha::Real = 0.05, returncv::Bool = true)
     if isa(cv, String)  cv = Symbol(cv) end
@@ -116,7 +137,7 @@ function pooledcv(data; cv = :cv, df = :df, alpha::Real = 0.05, returncv::Bool =
     return pooledcv(data[!, cv], data[!, df]; alpha = alpha, returncv = returncv)
 end
 """
-    pooledcv(cv::Vector, df::Vector; alpha = 0.05, returncv = true)::ConfInt
+    pooledcv(cv::Vector, df::Vector; alpha = 0.05, returncv = true)
 
 Pooled CV from multiple sources.
 
@@ -142,7 +163,7 @@ function pooledcv(cv::Vector, df::Vector; alpha = 0.05, returncv = true)
     end
 end
 """
-    pooledcv(cv::Vector, n::Vector, design::Vector; alpha = 0.05, returncv = true)::ConfInt
+    pooledcv(cv::Vector, n::Vector, design::Vector; alpha = 0.05, returncv = true)
 
 Pooled CV from multiple sources.
 
