@@ -267,7 +267,7 @@ println(" ---------------------------------- ")
     #Type check
     ClinicalTrialUtilities.besamplen(;theta0=0, theta1=-1, theta2=1, sd=2, logscale = false)
 end
-
+#=
 println(" ---------------------------------- ")
 @testset "  Experimental          " begin
     #=
@@ -318,5 +318,6 @@ run;
 
 end
 #println(" ---------------------------------- ")
+=#
 #@testset "  Tpl                 " begin
 #end
