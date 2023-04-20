@@ -92,10 +92,10 @@ pooledcv,
 printdesigns,
 #CI
 randomtable,
-randomseq,
+randomseq#=,
 #Pharmacokinetics
 ctsim,
 besim
-
+=#
 
 end # module end
