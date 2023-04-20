@@ -1,3 +1,7 @@
+V0.7.0
+  - Stay only sample size, power and randomization. Other functions moved to another packages.
+  - Change licance.
+
 v0.6.2
   - Minor fix
   - Deps

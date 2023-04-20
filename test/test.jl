@@ -255,6 +255,7 @@ println(" ---------------------------------- ")
 
     @test_throws ArgumentError ClinicalTrialUtilities.besamplen(;cv=-0.35)
     #CI
+    #=
     ci = ClinicalTrialUtilities.ConfInt(1, 3, 2, 0.05)
     @test_throws ArgumentError ci[5]
     @test_throws ArgumentError ci = ClinicalTrialUtilities.propci(38, 100, alpha=0.05, method=:waldd)
@@ -262,7 +263,7 @@ println(" ---------------------------------- ")
     @test_throws ArgumentError ci = ClinicalTrialUtilities.diffpropci(30, 100, 40, 90; alpha=0.05, method=:meee)
     @test_throws ArgumentError ci = ClinicalTrialUtilities.rrpropci(30, 100, 40, 90; alpha=0.05, method=:mnnn)
     @test_throws ArgumentError ci = ClinicalTrialUtilities.orpropci(30, 100, 40, 90; alpha=0.05,  method=:awoolfff)
-
+    =#
     #Type check
     ClinicalTrialUtilities.besamplen(;theta0=0, theta1=-1, theta2=1, sd=2, logscale = false)
 end
