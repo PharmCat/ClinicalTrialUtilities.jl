@@ -10,8 +10,7 @@
 
 ## Description
 
-The package is designed to perform calculations related to the planning and analysis of the results of clinical trials. The package includes the basic functions described below, as well as a few modules to perform specific calculations.
-
+The package is designed to perform calculations related to the planning of clinical trials.
 ## Installation
 ```
 using Pkg; Pkg.add("ClinicalTrialUtilities");
@@ -55,7 +54,6 @@ Pages = [
         "utils.md",
         "examples.md",
         "export.md",
-        "validation.md",
         "ref.md"]
 Depth = 4
 ```

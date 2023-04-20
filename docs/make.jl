@@ -13,7 +13,6 @@ makedocs(
         "Randomization" => "random.md",
         "Utilities" => "utils.md",
         "Examples" => "examples.md",
-        "Validation" => "validation.md",
         "References" => "ref.md",
     ],
 )

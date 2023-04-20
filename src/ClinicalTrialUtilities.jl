@@ -27,7 +27,7 @@ lgamma(x) = SpecialFunctions.logabsgamma(x)[1]
 
 const ZDIST  = Normal()
 const LOG2   = log(2)
-const PI2    = π * 2.0
+const PI2    = 2π
 const PI2INV = 0.5 / π
 #Exceptions
 
@@ -43,9 +43,9 @@ include("hypothesis.jl")
 #DataSET
 include("dataset.jl")
 #Frequency
-include("freque.jl")
+#include("freque.jl")
 #Confidence interval calculation
-include("ci.jl")
+#include("ci.jl")
 
 #Owen function calc: owensQ, owensQo, ifun1, owensTint2, owensT, tfn
 include("owensq.jl")
@@ -56,15 +56,15 @@ include("powersamplesize.jl")
 #Main sample size and power functions: sampleSize, ctpower, besamplen
 include("samplesize.jl")
 #Simulations
-include("sim.jl")
+#include("sim.jl")
 #info function
 include("info.jl")
 
 #Descriptive statistics
-include("descriptives.jl")
+#include("descriptives.jl")
 
 #Export
-include("export.jl")
+#include("export.jl")
 #Randomization
 include("randomization.jl")
 #Utilities
@@ -72,13 +72,13 @@ include("utilities.jl")
 #Show
 include("show.jl")
 #Deprecated
-include("deprecated.jl")
+#include("deprecated.jl")
 
 const CTU = ClinicalTrialUtilities
 #Types
 export 
 #Task
-CTask,
+#CTask,
 #Sample size
 ctsamplen,
 besamplen,

@@ -103,15 +103,3 @@ push!(data, (0.2, 20))
 push!(data, (0.25, 30))
 pooledcv(data; cv=:cv, df=:df, alpha=0.05, returncv=true)
 ```
-
-## Simulations
-
-```julia
-using ClinicalTrialUtilities
-
-#Make power task
-t = bepower(cv=0.2, n=20).task
-
-#Run simulation
-result = ctsim(t; nsim = 100, seed=0)
-```
