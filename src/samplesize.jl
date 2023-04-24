@@ -50,15 +50,6 @@ mutable struct CTask{T <: AbstractParameter, D <: AbstractDesign, H <: AbstractH
     objective::O        #Objective (result)
     k::Real             #Group coefficient
     function CTask(param::T, design::D, hyp::H, objective::O, k::Real) where T <: AbstractParameter where D <: AbstractDesign where H <: AbstractHypothesis where O <: AbstractObjective
-        #=
-        if isa(hyp, Equality) && llim != ulim
-            @warn "For Equality hypothesis llim and ulim can't be different! ulim set as llim!"
-            ulim = llim
-        end
-        if k ≤ 0.0 throw(ArgumentError("Constant k can't be ≤ 0.0!")) end
-        if alpha ≥ 1.0 || alpha ≤ 0.0 throw(ArgumentError("Alpha ≥ 1.0 or ≤ 0.0!")) end
-        if isa(hyp, Equivalence) && diff ≤ 0 throw(ArgumentError("Diiference can't be ≤ 0.0 with Equivalence hypothesis!")) end
-        =#
         new{T,D,H,O}(param, design, hyp, objective, k)::CTask{T,D,H,O}
     end
     function CTask(param::T, design::D, hyp::H, objective::O) where T <: AbstractParameter where D <: AbstractDesign where H <: AbstractHypothesis where O <: AbstractObjective
@@ -563,7 +554,7 @@ function bepower(;alpha::Real=0.05, theta1::Real=0.8, theta2::Real=1.25, theta0:
         theta1 = log(theta1)
         theta2 = log(theta2)
         theta0 = log(theta0)
-        sd     = sdfromcv(cv)    # sqrt(ms)
+        sd     = sdfromcv(cv)
     end
 
     task = CTask(DiffMean(Mean(theta0, sd), Mean(0, sd)), Crossover(design), Bioequivalence(theta1, theta2, alpha), Power(n))
@@ -572,10 +563,9 @@ function bepower(;alpha::Real=0.05, theta1::Real=0.8, theta2::Real=1.25, theta0:
     σ̵ₓ         = task.param.a.sd*sediv(task.design, task.objective.val)
     powertostf = powertostintf(method)
     pow        = powertostf(task.hyp.alpha, task.hyp.llim, task.hyp.ulim, task.param.a.m, σ̵ₓ, df)
-    #pow =  powertostint(alpha,  theta1, theta2, theta0, sd, n, design, method)
 
     return TaskResult(task, method, pow)
-end #bepower
+end 
 
 function bepower(t::CTask; method::Symbol = :owenq)
     df         = t.design.df(t.objective.val)

@@ -1,6 +1,6 @@
 # ClinicalTrialUtilities
 
- Clinical trial related calculation: descriptive statistics, power and sample size calculation, power simulations, confidence interval, pharmacokinetics/pharmacodynamics parameters calculation.
+ Clinical trial related calculation: power and sample size calculation, randomization.
 
 [![Build Status](https://travis-ci.com/PharmCat/ClinicalTrialUtilities.jl.svg?branch=master)](https://travis-ci.com/PharmCat/ClinicalTrialUtilities.jl)
 [![Build status](https://ci.appveyor.com/api/projects/status/35f8b5vq259sbssg?svg=true)](https://ci.appveyor.com/project/PharmCat/clinicaltrialutilities-jl)
@@ -10,12 +10,24 @@
 
 ## Description
 
-The package is designed to perform calculations related to the planning and analysis of the results of clinical trials. The package includes the basic functions described below, as well as a few modules to perform specific calculations.
-
+The package is designed to perform calculations related to the planning of clinical trials.
 ## Installation
 ```
 using Pkg; Pkg.add("ClinicalTrialUtilities");
 ```
+
+### Pharmacodynamics
+
+Further development of NCA PK/PD will be based on [MetidaNCA.jl](https://github.com/PharmCat/MetidaNCA.jl) package.
+
+All NCA PK/PD functions moved to [MetidaNCA](https://github.com/PharmCat/MetidaNCA.jl).
+
+Descriptive statistics moved to  [MetidaStats](https://github.com/PharmCat/MetidaStats.jl).
+
+Confidence intervals moved to  [MetidaFreq](https://github.com/PharmCat/MetidaFreq.jl).
+
+Simulations removed.
+
 
 ## Note
 
@@ -38,17 +50,10 @@ Pages = [
 
         "samplesize.md",
         "power.md",
-        "ci.md",
-        "ds.md",
-        "nca.md",
-        "pk.md",
-        "pd.md",
         "random.md",
-        "sim.md",
         "utils.md",
         "examples.md",
         "export.md",
-        "validation.md",
         "ref.md"]
 Depth = 4
 ```

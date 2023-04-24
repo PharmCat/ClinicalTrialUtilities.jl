@@ -1,3 +1,4 @@
+#=
 println(" ---------------------------------- ")
 @testset "#6  CI Test             " begin
     # ONE PROPORTION
@@ -311,3 +312,4 @@ println(" ---------------------------------- ")
 
     Base.show(io, ci)
 end
+=#

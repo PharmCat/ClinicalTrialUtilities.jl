@@ -55,7 +55,7 @@ function refval(h::Superiority)
     h.llim - h.diff
 end
 
-
+#=
 function checkhyp(h::Superiority, param; method::Symbol = :default)
     ci = confint(param; level = 1.0 - h.alpha * 2, method = method)
     ci.lower > h.diff
@@ -68,7 +68,7 @@ function checkhyp(h::Equality, param; method::Symbol = :default)
     ci = confint(param; level = 1.0 - h.alpha, method = method)
     ci.lower > h.val || ci.upper < h.val
 end
-
+=#
 
 struct McNemars <: AbstractHypothesis
     alpha::Real

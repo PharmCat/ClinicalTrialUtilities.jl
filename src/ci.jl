@@ -8,7 +8,7 @@
 # binom by Sundar Dorai-Raj https://CRAN.R-project.org/package=binom
 # DescTools https://CRAN.R-project.org/package=DescTools
 # metafor by Wolfgang Viechtbauer https://cran.r-project.org/package=metafor
-
+#=
 struct ConfInt
     lower::Float64
     upper::Float64
@@ -72,6 +72,7 @@ end
 function StatsBase.confint(param::DiffMean{true}; level = 0.95, method = :default)::ConfInt
     diffmeanci(param.a.m, param.a.sd^2, param.a.n, param.b.m, param.b.sd^2, param.b.n; alpha = 1 - level, method = method)
 end
+
 function StatsBase.confint(param::MetaProp; level = 0.95, method = :default)::ConfInt
     error()
 end
@@ -1017,4 +1018,5 @@ function diffmcnmci(a::Int, b::Int, c::Int, d::Int; alpha = 0.05)
     z        = quantile(ZDIST, 1 - alpha / 2)
     ConfInt(estimate  - z * se, estimate  + z * se, estimate , alpha)
 end
+=#
 =#

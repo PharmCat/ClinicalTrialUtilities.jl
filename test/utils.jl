@@ -18,24 +18,24 @@ end
     push!(data, (0.2, 20))
     push!(data, (0.25, 30))
     ci = ClinicalTrialUtilities.pooledcv(data; cv="cv", df="df")
-    @test ci.lower    ≈ 0.18145259424967664 atol=1E-15
-    @test ci.upper    ≈ 0.2609307413637307 atol=1E-15
-    @test ci.estimate ≈ 0.21393949168210136 atol=1E-15
+    @test ci[1]    ≈ 0.18145259424967664 atol=1E-15
+    @test ci[2]    ≈ 0.2609307413637307 atol=1E-15
+    @test ci[3] ≈ 0.21393949168210136 atol=1E-15
 
     ci = ClinicalTrialUtilities.pooledcv(data; cv="cv", df="df", returncv=false)
-    @test ci.lower    ≈ 0.032394625994562894 atol=1E-15
-    @test ci.upper    ≈ 0.06586718662236608 atol=1E-15
-    @test ci.estimate ≈ 0.04475355764465427 atol=1E-15
+    @test ci[1]    ≈ 0.032394625994562894 atol=1E-15
+    @test ci[2]    ≈ 0.06586718662236608 atol=1E-15
+    @test ci[3] ≈ 0.04475355764465427 atol=1E-15
 
     ci = ClinicalTrialUtilities.pooledcv([0.12, 0.2, 0.25], [12, 20, 30])
-    @test ci.lower    ≈ 0.18145259424967664 atol=1E-15
-    @test ci.upper    ≈ 0.2609307413637307 atol=1E-15
-    @test ci.estimate ≈ 0.21393949168210136 atol=1E-15
+    @test ci[1]    ≈ 0.18145259424967664 atol=1E-15
+    @test ci[2]    ≈ 0.2609307413637307 atol=1E-15
+    @test ci[3] ≈ 0.21393949168210136 atol=1E-15
 
     ci = ClinicalTrialUtilities.pooledcv([0.12, 0.2, 0.25], [14, 22, 32], [:d2x2, :d2x2, :d2x2])
-    @test ci.lower    ≈ 0.18145259424967664 atol=1E-15
-    @test ci.upper    ≈ 0.2609307413637307 atol=1E-15
-    @test ci.estimate ≈ 0.21393949168210136 atol=1E-15
+    @test ci[1]    ≈ 0.18145259424967664 atol=1E-15
+    @test ci[2]    ≈ 0.2609307413637307 atol=1E-15
+    @test ci[3] ≈ 0.21393949168210136 atol=1E-15
 end
 
 @test ClinicalTrialUtilities.cvfromsd(ClinicalTrialUtilities.sdfromcv(0.2)) ≈ 0.2

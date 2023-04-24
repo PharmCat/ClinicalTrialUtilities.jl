@@ -1,3 +1,4 @@
+#=
 println(" ---------------------------------- ")
 @testset "#7  Descriptives        " begin
     df = descriptivedat
@@ -53,3 +54,4 @@ println(" ---------------------------------- ")
     @test ds[1,:geosd]    === NaN
     @test ds[1,:geocv]    === NaN
 end
+=#

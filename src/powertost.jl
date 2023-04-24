@@ -7,26 +7,14 @@
 # CI bounds = Diff +- t(df, alpha)*se
 
 
-#powertostint
-#powerTOSTOwenQ
-#approxPowerTOST
-#power1TOST
-#approx2PowerTOST
-#cv2sd
-#cv2ms
-#ms2cv
-#sd2cv
-#designProp
-#ci2cv
-
 function samplentostint(α::T, θ₁::T, θ₂::T, δ::T, σ::T, β::T, design::Symbol, method::Symbol)::Tuple{Float64, Float64} where T <: AbstractFloat
-    #values for approximate n
-    td = (θ₁ + θ₂)/2.0
-    rd = abs(θ₁ - θ₂)/2.0
+     #values for approximate n
+    td = (θ₁ + θ₂) / 2
+    rd = abs(θ₁ - θ₂) / 2
 
     d0 = δ - td
-    #approximate n
-    n₀::Int = convert(Int, ceil(two_mean_equivalence(zero(T), d0, sqrt(σ^2 * 2.0), rd, α, β, one(T))) * 2.0)
+    # approximate n
+    n₀::Int = convert(Int, ceil(two_mean_equivalence(zero(T), d0, sqrt(σ^2 * 2), rd, α, β, one(T))) * 2)
     tp = one(typeof(β)) - β   #target power
     if n₀ < 4 n₀ = 4 end
     if n₀ > 5000 n₀ = 5000 end
@@ -48,7 +36,7 @@ function samplentostint(α::T, θ₁::T, θ₂::T, δ::T, σ::T, β::T, design::
             n₀   = n₀ - 2
             if n₀ < 4 break end #n0, pow end
             df    = d.df(n₀)
-            σ̵ₓ    = σ*sediv(d, n₀)
+            σ̵ₓ    = σ * sediv(d, n₀)
             pow  = powertostf(α, θ₁, θ₂, δ, σ̵ₓ, df)
         end
         estpower = powp
@@ -59,7 +47,7 @@ function samplentostint(α::T, θ₁::T, θ₂::T, δ::T, σ::T, β::T, design::
             powp = pow
             n₀   = n₀ + 2
             df    = d.df(n₀)
-            σ̵ₓ    = σ*sediv(d, n₀)
+            σ̵ₓ    = σ * sediv(d, n₀)
             pow = powertostf(α, θ₁, θ₂, δ, σ̵ₓ, df)
             if n₀ > 10000  break end # n0, pow end
         end
@@ -78,26 +66,23 @@ end
 #  α  - alpha
 #  θ₁ - theta1
 #  θ₂ - theta2
-#powerTOST
+
 function powertostintf(method::Symbol)::Function
     if method     == :owenq
         return   powertost_owenq
     elseif method == :nct
         return     powertost_nct
-    elseif method == :mvt
-        return     powertost_mvt
     elseif method == :shifted
         return powertost_shifted
     else
          throw(ArgumentError("method not known!"))
     end
-end #powerTOST
+end 
 
-#.power.TOST
 function powertost_owenq(α::T, θ₁::T, θ₂::T, δ::T, σ̵ₓ::T, df::Real)::T where T <: AbstractFloat
     tval            = quantile(TDist(df), one(T) - α)
-    delta1          = (δ - θ₁)/σ̵ₓ
-    delta2          = (δ - θ₂)/σ̵ₓ
+    delta1          = (δ - θ₁) / σ̵ₓ
+    delta2          = (δ - θ₂) / σ̵ₓ
     R               = (delta1 - delta2) * sqrt(df) / (tval + tval)
     if isnan(R) R   = zero(eltype(R)) end
     if R <= zero(T) R   = Inf end
@@ -115,11 +100,10 @@ function powertost_owenq(α::T, θ₁::T, θ₂::T, δ::T, σ̵ₓ::T, df::Real)
     else
         return max(zero(T), (owensq(df, -tval, delta2, zero(T), R) - owensq(df, tval, delta1, zero(T), R)))
     end
-end #powerTOSTOwenQ
+end 
 
 #------------------------------------------------------------------------------
 # approximation based on non-central t
-# .approx.power.TOST - PowerTOST
 function powertost_nct(α::T, θ₁::T, θ₂::T, δ::T, σ̵ₓ::T, df::Real)::T where T <: AbstractFloat
     tdist           = TDist(df)
     tval            = quantile(tdist, one(T) - α)
@@ -127,28 +111,15 @@ function powertost_nct(α::T, θ₁::T, θ₂::T, δ::T, σ̵ₓ::T, df::Real)::
     delta2          = (δ - θ₂)/σ̵ₓ
     pow             = cdf(NoncentralT(df, delta2), -tval) - cdf(NoncentralT(df, delta1), tval)
     return max(zero(T), pow)
-end #approxPowerTOST
+end 
 
-#.power.1TOST
-function powertost_mvt(alpha::Real, ltheta1::Real, ltheta2::Real, diffm::Real, se::Real, df::Real)::Float64
-    throw(ArgumentError("Method not implemented!"))
-    #Method ON MULTIVARIATE t AND GAUSS PROBABILITIES IN R not implemented
-    # Distributions.MvNormal - in plan
-    # see  Distributions.jl/src/multivariate/mvtdist.jl
-    # Multivariate t-distribution
-    # Generic multivariate t-distribution class
-    # mvt = MvTDist()
-end
-
-#.approx2.power.TOST
 function powertost_shifted(α::T, θ₁::T, θ₂::T, δ::T, σ̵ₓ::T, df::Real)::T where T <: AbstractFloat
     tdist           = TDist(df)
     tval            = quantile(tdist, one(T) - α)
-    delta1          = (δ - θ₁)/σ̵ₓ
-    delta2          = (δ - θ₂)/σ̵ₓ
+    delta1          = (δ - θ₁) / σ̵ₓ
+    delta2          = (δ - θ₂) / σ̵ₓ
     if isnan(delta1) delta1 = zero(T) end
     if isnan(delta2) delta2 = zero(T) end
-    pow = cdf(tdist,-tval-delta2) - cdf(tdist, tval-delta1)
+    pow = cdf(tdist,-tval - delta2) - cdf(tdist, tval - delta1)
     return max(zero(T), pow)
-    #if pow > 0 return pow else return 0 end
-end #approx2PowerTOST
+end 

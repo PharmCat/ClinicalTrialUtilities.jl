@@ -1,7 +1,8 @@
+
 struct DataSet{T <: AbstractData}
     data::Vector{T}
 end
-
+#=
 #length
 function Base.length(a::DataSet)::Int
     return length(a.data)
@@ -68,7 +69,7 @@ function Base.sort!(a::DataSet; by)
     sort!(a.data; by = by)
     a
 end
-
+=#
 ################################################################################
 #=
 function Tables.istable(table::DataSet)

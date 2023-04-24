@@ -82,23 +82,6 @@ bepower(cv=0.4, n=35, design=:d2x4x4)
 bepower(cv=0.14, n=21)
 ```
 
-## Confidence intervals
-
-```julia
-using ClinicalTrialUtilities
-
-propci(81, 263, alpha=0.05, method=:wilson)
-
-diffpropci(7, 34, 1, 34; alpha=0.05, method=:nhs)
-
-orpropci(2, 14, 1, 11; alpha=0.05, method=:woolf)
-
-rrpropci(2, 14, 1, 11; alpha=0.05)
-
-diffmeanci(30, 10, 30, 40, 12, 35, alpha=0.05, method=:ev)
-
-```
-
 ## Utilities
 
 ### CV from CI
@@ -119,16 +102,4 @@ push!(data, (0.12, 12))
 push!(data, (0.2, 20))
 push!(data, (0.25, 30))
 pooledcv(data; cv=:cv, df=:df, alpha=0.05, returncv=true)
-```
-
-## Simulations
-
-```julia
-using ClinicalTrialUtilities
-
-#Make power task
-t = bepower(cv=0.2, n=20).task
-
-#Run simulation
-result = ctsim(t; nsim = 100, seed=0)
 ```

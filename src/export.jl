@@ -1,3 +1,4 @@
+#=
 """
     htmlexport(data; io::IO = stdout, sort = NaN,
         rspan=:all, title="Title", dict::Union{Symbol, Dict} = :undef)
@@ -259,3 +260,4 @@ HTLM export.
             return val
         end
     end
+=#

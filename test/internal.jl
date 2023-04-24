@@ -75,7 +75,7 @@ end
     m3 = ClinicalTrialUtilities.Mean(10)
     @test ClinicalTrialUtilities.getval(m1) == ClinicalTrialUtilities.getval(m2) == ClinicalTrialUtilities.getval(m3)
 end
-
+#=
 @testset "  ConfInt         " begin
     ci = ClinicalTrialUtilities.ConfInt(1, 3, 2, 0.05)
     @test ci[1] == 1
@@ -83,4 +83,5 @@ end
     @test ci[3] == 2
     @test ci[4] == 0.05
 end
+=#
 end
