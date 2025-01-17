@@ -21,11 +21,13 @@ end
 function getval(m::Mean)
     return m.m
 end
+#=
 """
     Mean comparison hypothesis testing
     a - Test group value
     b - Reference group value {Mean} type, or reference value for one group test {Real}
 """
+=#
 struct DiffMean{Bool} <: AbstractCompositeMean
     a::Mean
     b::Mean
