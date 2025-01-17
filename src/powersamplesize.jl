@@ -40,7 +40,7 @@ end
 function two_mean_superiority(μ₀::Real, μ₁::Real, σ::Real, δ::Real, α::Real, β::Real, k::Real)::Float64 #Non-inferiority / Superiority
     return (1 + 1 / k)*(σ*(quantile(ZDIST, 1 - α) + quantile(ZDIST, 1 - β))/(μ₀ - μ₁ - δ))^2
 end
-#Compare Proportion
+#Compare Proportion Difference
 #One Sample
 function one_proportion_equality(p₀::Real, p₁::Real, α::Real, β::Real)::Float64
     return p₀*(1 - p₀)*((quantile(ZDIST, 1 - α / 2)+quantile(ZDIST, 1 - β))/(p₀ - p₁))^2
@@ -51,7 +51,7 @@ end
 function one_proportion_superiority(p₀::Real, p₁::Real, δ::Real, α::Real, β::Real)::Float64
     return p₀*(1 - p₀)*((quantile(ZDIST, 1 - α)+quantile(ZDIST, 1 - β))/(p₀ - p₁ - δ))^2
 end
-#Two Sample
+#Two Sample Difference
 function two_proportion_equality(p₀::Real, p₁::Real, α::Real, β::Real, k::Real)::Float64
     return (p₀ * (1 - p₀) / k + p₁ * (1 - p₁)) * ((quantile(ZDIST, 1 - α / 2) + quantile(ZDIST, 1 - β))/(p₀-p₁))^2
 end
@@ -75,15 +75,15 @@ end
 #Odd ratio Chow S, Shao J, Wang H. 2008. Sample Size Calculations in Clinical Research. 2nd Ed. Chapman & Hall/CRC Biostatistics Series.
 function or_equality(p₀::Real, p₁::Real, α::Real, β::Real, k::Real)::Float64
     OR = p₀ * (1 - p₁) / p₁ /(1 - p₀)
-    return (1 / k / p₀ / (1 - p₀) + 1 / p₁ / (1 - p₁)) * ((quantile(ZDIST, 1-α/2)+quantile(ZDIST, 1 - β))/log(OR))^2
+    return (1 / k / p₀ / (1 - p₀) + 1 / p₁ / (1 - p₁)) * ((quantile(ZDIST, 1-α/2) + quantile(ZDIST, 1 - β))/log(OR))^2
 end
 function or_equivalence(p₀::Real, p₁::Real, δ::Real, α::Real, β::Real, k::Real)::Float64
     OR = p₀ * (1 - p₁) / p₁ / (1 - p₀)
-    return (1 / k / p₀ / (1 - p₀) + 1 / p₁ / (1 - p₁)) * ((quantile(ZDIST, 1 - α)+quantile(ZDIST, 1 - β / 2))/(log(OR) - δ))^2
+    return (1 / k / p₀ / (1 - p₀) + 1 / p₁ / (1 - p₁)) * ((quantile(ZDIST, 1 - α) + quantile(ZDIST, 1 - β / 2))/(log(OR) - δ))^2
 end
 function or_superiority(p₀::Real, p₁::Real, δ::Real, α::Real, β::Real, k::Real)::Float64
     OR = p₀ *(1 - p₁) / p₁ / (1 - p₀)
-    return (1 / k / p₀ / (1 - p₀) + 1 / p₁ / (1 - p₁)) * ((quantile(ZDIST, 1 - α)+quantile(ZDIST, 1 - β))/(log(OR)-δ))^2
+    return (1 / k / p₀ / (1 - p₀) + 1 / p₁ / (1 - p₁)) * ((quantile(ZDIST, 1 - α) + quantile(ZDIST, 1 - β))/(log(OR) - δ))^2
 end
 
 #Connor R. J. 1987. Sample size for testing differences in proportions for the paired-sample design. Biometrics 43(1):207-211. page 209.
@@ -103,13 +103,22 @@ end
 
 #COX
 function cox_equality(θ, p, α::Float64, β::Float64, k)
-    1.0/p/(1.0/(1+k)*(1.0-1.0/(1.0+k)))*(quantile(ZDIST, 1 - α / 2) + quantile(ZDIST, 1 - β))/(log(θ))^2
+    k = abs(k)
+    k = ifelse(k > 1, inv(k), k)
+    k = 1 / (k + 1)
+    inv(p * k * (1 - k))*(quantile(ZDIST, 1 - α / 2) + quantile(ZDIST, 1 - β))/(log(θ))^2
 end
-function cox_equivalence(θ, δ, p, α::Float64, β::Float64, k)
-    1.0/p/(1.0/(1+k)*(1.0-1.0/(1.0+k)))*((quantile(ZDIST, 1 - α) + quantile(ZDIST, 1 - β / 2))/(log(δ) - abs(log(θ))))^2
+function cox_equivalence(θ, θ₀, p, α::Float64, β::Float64, k)
+    k = abs(k)
+    k = ifelse(k > 1, inv(k), k)
+    k = 1 / (k + 1)
+    inv(p * k * (1 - k))*((quantile(ZDIST, 1 - α) + quantile(ZDIST, 1 - β / 2))/(log(θ) - abs(log(θ₀))))^2
 end
-function cox_superiority(θ, δ, p, α::Float64, β::Float64, k)
-    1.0/p/(1.0/(1+k)*(1.0-1.0/(1.0+k)))*((quantile(ZDIST, 1 - α) + quantile(ZDIST, 1 - β))/(log(δ)-log(θ₀)))^2
+function cox_superiority(θ, θ₀, p, α::Float64, β::Float64, k)
+    k = abs(k)
+    k = ifelse(k > 1, inv(k), k)
+    k = 1 / (k + 1)
+    inv(p * k * (1 - k))*((quantile(ZDIST, 1 - α) + quantile(ZDIST, 1 - β))/(log(θ)-log(θ₀)))^2
 end
 #-------------------------------------------------------------------------------
 # Power Section

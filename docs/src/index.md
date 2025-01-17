@@ -10,13 +10,14 @@
 
 ## Description
 
-The package is designed to perform calculations related to the planning of clinical trials.
+The package is designed to perform sample size calculations for clinical trials.
+
 ## Installation
 ```
 using Pkg; Pkg.add("ClinicalTrialUtilities");
 ```
 
-### Pharmacodynamics
+### Note
 
 Further development of NCA PK/PD will be based on [MetidaNCA.jl](https://github.com/PharmCat/MetidaNCA.jl) package.
 
@@ -38,10 +39,6 @@ When ctpower/ctsamplen used:
 - :ea - Equality: two-sided hypothesis;
 - :ei - Equivalencens: two one-sided hypothesis;
 - :ns - Non-Inferiority / Superiority: one-sided hypothesis, for some cases you should use two-sided hypothesis for  Non-Inferiority/Superiority, you can use alpha/2 for this;
-
-## Invalidated version v0.3.0 (removed from release page)
-
-  Wrong Equivalence Hypothesis alpha level! Use 0.2.7, 0.3.1 version or higher.
 
 ## Contents
 

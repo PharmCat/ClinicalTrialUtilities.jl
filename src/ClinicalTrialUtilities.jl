@@ -41,7 +41,7 @@ include("means.jl")
 
 include("hypothesis.jl")
 #DataSET
-include("dataset.jl")
+#include("dataset.jl")
 #Frequency
 #include("freque.jl")
 #Confidence interval calculation

@@ -55,3 +55,9 @@ ClinicalTrialUtilities.ctsamplen
 ```@docs
 ClinicalTrialUtilities.besamplen
 ```
+## See also 
+
+### ctask 
+```@docs
+ClinicalTrialUtilities.ctask 
+```

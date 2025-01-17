@@ -5,7 +5,7 @@ using Distributions, Random, DataFrames, CSV, Test, Plots, StatsBase, StableRNGs
 path    = dirname(@__FILE__)
 io      = IOBuffer();
 
-include("testdata.jl")
+#include("testdata.jl")
 
 @testset "  Info:                 " begin
     ClinicalTrialUtilities.info()
@@ -212,14 +212,6 @@ println(" ---------------------------------- ")
     #@test ClinicalTrialUtilities.ctpower(t.task).result ≈ 0.0001785665  atol=1E-10
 end
 
-include("utils.jl")
-
-include("citest.jl")
-
-include("dstest.jl")
-
-include("freque.jl")
-
 
 println(" ---------------------------------- ")
 @testset "#9  Random              " begin
@@ -228,9 +220,6 @@ println(" ---------------------------------- ")
     rdf   = ClinicalTrialUtilities.randomtable(seed = 1234, rng = rng)
     @test rdf[:Group] == [1, 2, 1, 2, 2, 1, 1, 2, 2, 1]
 end
-
-include("sim.jl")
-
 
 println(" ---------------------------------- ")
 @testset "  Errors                " begin
