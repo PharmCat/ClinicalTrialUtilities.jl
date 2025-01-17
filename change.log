@@ -1,6 +1,9 @@
+V0.7.1
+  - Clean.
+
 V0.7.0
   - Stay only sample size, power and randomization. Other functions moved to another packages.
-  - Change licance.
+  - Change licence.
 
 v0.6.2
   - Minor fix

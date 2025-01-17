@@ -149,13 +149,13 @@ function ctask(;param::Symbol, hyp::Symbol, group::Symbol = :notdef, alpha::Real
         else throw(ArgumentError("Keyword group unknown!")) end
     elseif param == :cox
         if hyp == :ea
-            task = CTask(CoxHazardRatio(kw[:a], kw[:p]), Parallel(),  Equality(alpha), objf(objv), k)
+            task = CTask(CoxHazardRatio(kw[:a], kw[:b], kw[:p]), Parallel(),  Equality(alpha), objf(objv), k)
         elseif hyp == :ei
             if !logscale diff = log(diff) end
-            task = CTask(CoxHazardRatio(kw[:a], kw[:p]), Parallel(),  Equivalence(-diff, diff, alpha), objf(objv), k)
+            task = CTask(CoxHazardRatio(kw[:a], kw[:b], kw[:p]), Parallel(),  Equivalence(-diff, diff, alpha), objf(objv), k)
         elseif hyp == :ns
             if !logscale diff = log(diff) end
-            task = CTask(CoxHazardRatio(kw[:a], kw[:p]), Parallel(),  Superiority(diff,  diff, alpha), objf(objv), k)
+            task = CTask(CoxHazardRatio(kw[:a], kw[:b], kw[:p]), Parallel(),  Superiority(diff,  diff, alpha), objf(objv), k)
         else throw(ArgumentError("Keyword hyp unknown!")) end
     else throw(ArgumentError("Keyword param unknown!")) end
     return task
@@ -191,7 +191,7 @@ Clinical trial sample size estimation.
 
 **beta** - Beta (o < β < 1) (default = 0.2); power = 1 - β;
 
-**diff** - difference/equivalence margin/non-inferiority/superiority margin;
+**diff** - difference/equivalence margin/non-inferiority/superiority margin (already log-transformed for OR by default);
 
 **sd** - Standard deviation (σ, for Means only);
 
@@ -205,7 +205,7 @@ Clinical trial sample size estimation.
 - true  - diff is already in log-scale, no transformation required (default);
 - false - diff is not in log-scale, will be transformed;
 """
-function ctsamplen(;param::Symbol, type::Symbol, group::Symbol = :notdef, alpha::Real = 0.05, beta::Real = 0.2, diff::Real = 0, sd::Real = 0, a::Real = 0, b::Real = 0, k::Real = 1, logscale::Bool = true)::TaskResult
+function ctsamplen(;param::Symbol, type::Symbol, group::Symbol = :notdef, alpha::Real = 0.05, beta::Real = 0.2, diff::Real = 0, sd::Real = 0, a::Real = 0, b::Real = 0, k::Real = 1, logscale::Bool = true, p = 0.0)::TaskResult
     if alpha >= 1 || alpha <= 0 || beta >= 1 || beta <= 0  throw(ArgumentError("ctsamplen: alpha and beta sould be > 0 and < 1.")) end
     if param == :prop && !(group == :one || group == :two || type == :mcnm)  throw(ArgumentError("ctsamplen: group should be defined or mcnm type.")) end
     if sd ≤ 0 && param == :mean throw(ArgumentError("SD can't be ≤ 0.0!")) end
@@ -215,7 +215,7 @@ function ctsamplen(;param::Symbol, type::Symbol, group::Symbol = :notdef, alpha:
         group = :co
     end
 
-    kwd  = Dict(:beta => beta, :diff => diff, :sd => sd, :a => a, :b => b, :logscale => logscale)
+    kwd  = Dict(:beta => beta, :diff => diff, :sd => sd, :a => a, :b => b, :logscale => logscale, :p => p)
 
     task = ctask(;param = param, hyp = type, group = group, alpha = alpha, k = k, kwd...)
 
@@ -277,15 +277,20 @@ function ctsamplen(t::CTask{T, D, H, O}) where T <: OddRatio  where D <: Abstrac
     return TaskResult(t, :chow, or_superiority(getval(t.param.a), getval(t.param.b), t.hyp.diff, t.hyp.alpha, t.objective.val, t.k))
 end
 #------
+#=
 function ctsamplen(t::CTask{CoxHazardRatio, D, H, O}) where D <: AbstractDesign where H <: Equality where O <: AbstractSampleSize
-    return TaskResult(t, :chow, cox_equality(getval(t.param.a), t.param.b.p, t.hyp.alpha, t.objective.val,t.k))
+    θ = t.param.a / t.param.b
+    return TaskResult(t, :chow, cox_equality(θ, 1.0, t.hyp.alpha, t.objective.val, t.k))
 end
 function ctsamplen(t::CTask{CoxHazardRatio, D, H, O}) where D <: AbstractDesign where H <: Equivalence where O <: AbstractSampleSize
-    return TaskResult(t, :chow, cox_equivalence(getval(t.param.a), t.hyp.diff, t.param.b.p, t.hyp.alpha, t.objective.val,t.k))
+    θ = t.param.a / t.param.b
+    return TaskResult(t, :chow, cox_equivalence(θ, t.hyp.diff, t.param.p, t.hyp.alpha, t.objective.val,t.k))
 end
 function ctsamplen(t::CTask{CoxHazardRatio, D, H, O}) where D <: AbstractDesign where H <: Superiority where O <: AbstractSampleSize
-    return TaskResult(t, :chow, cox_superiority(getval(t.param.a), t.hyp.diff, t.param.b.p, t.hyp.alpha, t.objective.val,t.k))
+    θ = t.param.a / t.param.b
+    return TaskResult(t, :chow, cox_superiority(θ, t.hyp.diff, t.param.p, t.hyp.alpha, t.objective.val, t.k))
 end
+=#
 #------------
 function ctsamplen(t::CTask{T, D, H, O}) where T <: DiffProportion{P, P} where P <: AbstractProportion  where D <: AbstractDesign where H <: McNemars where O <: AbstractSampleSize
     return TaskResult(t, :chow, mcnm(getval(t.param.a), getval(t.param.b), t.hyp.alpha, t.objective.val))
@@ -341,7 +346,7 @@ Clinical trial power estimation.
 - true  - diff is already in log-scale, no transformation required (default);
 - false - diff is not in log-scale, will be transformed;
 """
-function ctpower(;param::Symbol, type::Symbol, group::Symbol = :notdef, alpha::Real = 0.05, n::Real = 0, diff::Real = 0, sd::Real = 0, a::Real = 0, b::Real = 0,  k::Real = 1, logscale::Bool = true)::TaskResult
+function ctpower(;param::Symbol, type::Symbol, group::Symbol = :notdef, alpha::Real = 0.05, n::Real = 0, diff::Real = 0, sd::Real = 0, a::Real = 0, b::Real = 0,  k::Real = 1, logscale::Bool = true, p = 0.0)::TaskResult
     if alpha >= 1 || alpha <= 0  throw(ArgumentError("Keyword alpha out of the range!")) end
     if param == :prop && !(group == :one || group == :two || type == :mcnm)  throw(ArgumentError("Keyword group or type defined incorrectly!")) end
     if sd == 0 && param == :mean throw(ArgumentError("Keyword sd = 0!")) end
@@ -352,7 +357,7 @@ function ctpower(;param::Symbol, type::Symbol, group::Symbol = :notdef, alpha::R
         group = :co
     end
 
-    kwd  = Dict(:n => n, :diff => diff, :sd => sd, :a => a, :b => b, :logscale => logscale)
+    kwd  = Dict(:n => n, :diff => diff, :sd => sd, :a => a, :b => b, :logscale => logscale, :p => p)
 
     task = ctask(;param = param, hyp = type, group = group, alpha = alpha, k = k, kwd...)
 

@@ -1,7 +1,6 @@
-abstract type AbstractData end
-abstract type AbstractDataSet end
-
-abstract type AbstractSubject <: AbstractData end
+#abstract type AbstractData end
+#abstract type AbstractDataSet end
+#abstract type AbstractSubject <: AbstractData end
 
 
 abstract type AbstractTask end

@@ -87,6 +87,8 @@ function Base.show(io::IO, obj::TaskResult{CT}) where CT <:  CTask{T, D, Bioequi
         showresult(io, obj)
 end
 
+
+
 function objectivename(o::O)::String where O <: AbstractObjective
         if isa(o, SampleSize) return "         Sample Size Estimation         "
         elseif isa(o, Power)  return "            Power Estimation            "

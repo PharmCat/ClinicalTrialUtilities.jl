@@ -94,11 +94,10 @@ end
 
 struct CoxHazardRatio <: AbstractParameter
     a::Float64
+    b::Float64
     p::Float64
 end
-function getval(p::CoxHazardRatio)
-    return p.a
-end
+
 struct DiffCoxHazardRatio <: AbstractCompositeProportion
     a::CoxHazardRatio
     b::CoxHazardRatio

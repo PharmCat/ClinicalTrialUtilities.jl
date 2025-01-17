@@ -1,4 +1,4 @@
-using Documenter, ClinicalTrialUtilities, DataFrames, CSV, Plots
+using Documenter, ClinicalTrialUtilities, DataFrames
 
 makedocs(
     modules = [ClinicalTrialUtilities],
@@ -17,4 +17,4 @@ makedocs(
     ],
 )
 
-deploydocs(repo = "github.com/PharmCat/ClinicalTrialUtilities.jl.git")
+deploydocs(repo = "github.com/PharmCat/ClinicalTrialUtilities.jl.git", push_preview = true)
